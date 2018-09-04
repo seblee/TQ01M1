@@ -69,8 +69,8 @@
 //	//======================时钟初始化=======================================
 //	RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOA ,	ENABLE);
 //	RCC_APB1PeriphClockCmd(	RCC_APB1Periph_UART4,ENABLE);
-//	
-//	//======================IO初始化=========================================	
+//
+//	//======================IO初始化=========================================
 //	//UART4_TX
 //	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 //	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -110,7 +110,7 @@
 //	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 //	USART_InitStructure.USART_HardwareFlowControl =	USART_HardwareFlowControl_None;
 //	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-//	
+//
 
 //	ENTER_CRITICAL_SECTION(); //关全局中断
 
@@ -144,11 +144,11 @@
 //	return TRUE;
 //}
 
-///* 
+///*
 // * Create an interrupt handler for the transmit buffer empty interrupt
 // * (or an equivalent) for your target processor. This function should then
 // * call pxMBFrameCBTransmitterEmpty( ) which tells the protocol stack that
-// * a new character can be sent. The protocol stack will then call 
+// * a new character can be sent. The protocol stack will then call
 // * xMBPortSerialPutByte( ) to send the character.
 // */
 //static void prvvUARTTxReadyISR(void)
@@ -156,7 +156,7 @@
 //	pxMBFrameCBTransmitterEmpty();
 //}
 
-///* 
+///*
 // * Create an interrupt handler for the receive interrupt for your target
 // * processor. This function should then call pxMBFrameCBByteReceived( ). The
 // * protocol stack will then call xMBPortSerialGetByte( ) to retrieve the
@@ -196,7 +196,6 @@
 //	rt_interrupt_leave();
 //}
 
-
 /*
  * FreeModbus Libary: STM32 Port
  * Copyright (C) 2013 Armink <armink.ztl@gmail.com>
@@ -235,7 +234,8 @@ void vMBPortSerialEnable(BOOL xRxEnable, BOOL xTxEnable)
 	if (xRxEnable)
 	{
 		/* 485通信时，等待串口移位寄存器中的数据发送完成后，再去使能485的接收、失能485的发送*/
-		while (!USART_GetFlagStatus(USART3,USART_FLAG_TC));
+		while (!USART_GetFlagStatus(USART3, USART_FLAG_TC))
+			;
 		SLAVE_RS485_RECEIVE_MODE;
 		USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
 	}
@@ -261,18 +261,18 @@ void vMBPortClose(void)
 }
 //默认一个从机 串口3 波特率可设置  奇偶检验可设置
 BOOL xMBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
-		eMBParity eParity)
+					   eMBParity eParity)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 	//======================时钟初始化=======================================
-	RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOE ,	ENABLE);
-	RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOD | RCC_APB2Periph_AFIO ,	ENABLE);
-	RCC_APB1PeriphClockCmd(	RCC_APB1Periph_USART3,ENABLE);
-  GPIO_PinRemapConfig(GPIO_FullRemap_USART3,ENABLE);
-	
-	//======================IO初始化=========================================	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD | RCC_APB2Periph_AFIO, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+	GPIO_PinRemapConfig(GPIO_FullRemap_USART3, ENABLE);
+
+	//======================IO初始化=========================================
 	//UART3_TX
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -308,9 +308,8 @@ BOOL xMBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
 	}
 
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_HardwareFlowControl =	USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-
 
 	ENTER_CRITICAL_SECTION(); //关全局中断
 
@@ -320,7 +319,7 @@ BOOL xMBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
 
 	//=====================中断初始化======================================
 	//设置NVIC优先级分组为Group2：0-3抢占式优先级，0-3的响应式优先级
-//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+	//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
@@ -338,7 +337,7 @@ BOOL xMBPortSerialPutByte(CHAR ucByte)
 	return TRUE;
 }
 
-BOOL xMBPortSerialGetByte(CHAR * pucByte)
+BOOL xMBPortSerialGetByte(CHAR *pucByte)
 {
 	*pucByte = USART_ReceiveData(USART3);
 	return TRUE;
@@ -366,6 +365,7 @@ static void prvvUARTRxISR(void)
 {
 	pxMBFrameCBByteReceived();
 }
+#ifndef RT_USING_UART3
 /*******************************************************************************
  * Function Name  : USART3_IRQHandler
  * Description    : This function handles USART3 global interrupt request.
@@ -385,7 +385,7 @@ void USART3_IRQHandler(void)
 	//接收中断
 	if (USART_GetITStatus(USART3, USART_IT_RXNE) == SET)
 	{
-		USART_ClearITPendingBit( USART3, USART_IT_RXNE);
+		USART_ClearITPendingBit(USART3, USART_IT_RXNE);
 		prvvUARTRxISR();
 	}
 	//发送中断
@@ -396,3 +396,4 @@ void USART3_IRQHandler(void)
 	rt_interrupt_leave();
 }
 
+#endif

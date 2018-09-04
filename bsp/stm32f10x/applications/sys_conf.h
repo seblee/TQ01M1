@@ -1,220 +1,215 @@
 #ifndef __SYS_CONF
-#define	__SYS_CONF
+#define __SYS_CONF
 
 #include "sys_def.h"
 #include "alarms.h"
 #include "string.h"
 //#include "user_mb_app.h"
 
-#define ENVIRONMENTAL_MONITOR  1//¶¯»·¼à¿Ø
+#define TRUE 1
+#define FALSE 0
 
-//IPM·ÖÀà
-#define IPM_DDS3366D   1
-//#define IPM_YD2010     1
-
-#define TRUE   1
-#define FALSE  0
-
-//Êı×ÖÊä³öÓ³Éä
+//æ•°å­—è¾“å‡ºæ˜ å°„
 enum
 {
-		DO_COMP1_BPOS=0,		//Ñ¹»ú1Æô¶¯
-    DO_COMP2_BPOS,			//Ñ¹»ú2	
-    DO_RH1_BPOS,				//µç¼ÓÈÈ1
-		DO_FAN_BPOS,				//ÄÚ·ç»ú
-		DO_UV1_BPOS,				//×ÏÍâµÆ1,¶¨Ê±É±¾ú
-		DO_WV_BPOS,					//ÀäÃºÖÆË®·§(Ñ¹»úÖÆÀä)
-		DO_CV_BPOS,					//ÀäÃºÖÆ±ùË®·§
-		DO_RSV1_BPOS,				//±£Áô
-		DO_WP_BPOS,				  //³öË®±Ã
-		DO_HWP_BPOS,				//ÈÈË®³öË®±Ã
-		DO_PWP_BPOS,				//¾»»¯±Ã
-		DO_DWP_BPOS,				//É±¾ú±Ã
-		DO_DV_BPOS,					//³öË®·§
-		DO_FV_BPOS,					//Íâ½Ó½øË®·§
-		DO_RSV2_BPOS,				//±£Áô
-		DO_EL1_BPOS,			  //µç×ÓËø1
-	
-		DO_EL2_BPOS,			  //µç×ÓËø2
-		DO_RSV3_BPOS,			  //Ô¤Áô
-		DO_LED_LOCK_BPOS,		//Í¯ËøLED DC5V
-		DO_PWR_CTRL_BPOS,		//12VµçÔ´¿ØÖÆ,µÍµçÆ½ÓĞĞ§
-		DO_RSV_BPOS_0,			//Ô¤Áô	
-		DO_RSV_BPOS_1,			//Ô¤Áô			
-		DO_RSV_BPOS_2,			//Ô¤Áô	
-		DO_RSV_BPOS_3,			//Ô¤Áô	
-		
-		DO_FILLTER_DUMMY_BPOS,//ÂËÍø
-		DO_FILLTER_ELEMENT_DUMMY_BPOS_0,//ÂËĞ¾  0
-		DO_FILLTER_ELEMENT_DUMMY_BPOS_1,//ÂËĞ¾  1
-		DO_FILLTER_ELEMENT_DUMMY_BPOS_2,//ÂËĞ¾  2
-		DO_FILLTER_ELEMENT_DUMMY_BPOS_3,//ÂËĞ¾  3
-		DO_FILLTER_ELEMENT_DUMMY_BPOS_4,//ÂËĞ¾  4
-		DO_FILLTER_ELEMENT_DUMMY_BPOS_5,//ÂËĞ¾  5
-		DO_MAX_CNT,
+	DO_COMP1_BPOS = 0, //å‹æœº1å¯åŠ¨
+	DO_COMP2_BPOS,	 //å‹æœº2
+	DO_RH1_BPOS,	   //ç”µåŠ çƒ­1
+	DO_FAN_BPOS,	   //å†…é£æœº
+	DO_UV1_BPOS,	   //ç´«å¤–ç¯1,å®šæ—¶æ€èŒ
+	DO_WV_BPOS,		   //å†·ç…¤åˆ¶æ°´é˜€(å‹æœºåˆ¶å†·)
+	DO_CV_BPOS,		   //å†·ç…¤åˆ¶å†°æ°´é˜€
+	DO_RSV1_BPOS,	  //ä¿ç•™
+	DO_WP_BPOS,		   //å‡ºæ°´æ³µ
+	DO_HWP_BPOS,	   //çƒ­æ°´å‡ºæ°´æ³µ
+	DO_PWP_BPOS,	   //å‡€åŒ–æ³µ
+	DO_DWP_BPOS,	   //æ€èŒæ³µ
+	DO_DV_BPOS,		   //å‡ºæ°´é˜€
+	DO_FV_BPOS,		   //å¤–æ¥è¿›æ°´é˜€
+	DO_RSV2_BPOS,	  //ä¿ç•™
+	DO_EL1_BPOS,	   //ç”µå­é”1
+
+	DO_EL2_BPOS,	  //ç”µå­é”2
+	DO_RSV3_BPOS,	 //é¢„ç•™
+	DO_LED_LOCK_BPOS, //ç«¥é”LED DC5V
+	DO_PWR_CTRL_BPOS, //12Vç”µæºæ§åˆ¶,ä½ç”µå¹³æœ‰æ•ˆ
+	DO_RSV_BPOS_0,	//é¢„ç•™
+	DO_RSV_BPOS_1,	//é¢„ç•™
+	DO_RSV_BPOS_2,	//é¢„ç•™
+	DO_RSV_BPOS_3,	//é¢„ç•™
+
+	DO_FILLTER_DUMMY_BPOS,			 //æ»¤ç½‘
+	DO_FILLTER_ELEMENT_DUMMY_BPOS_0, //æ»¤èŠ¯  0
+	DO_FILLTER_ELEMENT_DUMMY_BPOS_1, //æ»¤èŠ¯  1
+	DO_FILLTER_ELEMENT_DUMMY_BPOS_2, //æ»¤èŠ¯  2
+	DO_FILLTER_ELEMENT_DUMMY_BPOS_3, //æ»¤èŠ¯  3
+	DO_FILLTER_ELEMENT_DUMMY_BPOS_4, //æ»¤èŠ¯  4
+	DO_FILLTER_ELEMENT_DUMMY_BPOS_5, //æ»¤èŠ¯  5
+	DO_MAX_CNT,
 };
-#define   DO_FAN_LOW_BPOS 	DO_FAN_BPOS	//·ç»úµÍµµ
-#define   DO_UV2_BPOS   		DO_RSV1_BPOS		//×ÏÍâµÆ2
-#define   DO_ALARM_BPOS   	DO_RSV2_BPOS		//¹«¹²¸æ¾¯
+#define DO_FAN_LOW_BPOS DO_FAN_BPOS //é£æœºä½æ¡£
+#define DO_UV2_BPOS DO_RSV1_BPOS	//ç´«å¤–ç¯2
+#define DO_WP2_BPOS DO_RSV2_BPOS	//å‡ºæ°´æ³µ2
+#define DO_DV2_BPOS DO_RSV3_BPOS	//å‡ºæ°´é˜€2
 
 //application delay
-#define		MODBUS_MASTER_THREAD_DELAY  500
-#define		MODBUS_MASTER_THREAD_DELAY_01  800
-#define		MODBUS_SLAVE_THREAD_DELAY   2000
+#define MODBUS_MASTER_THREAD_DELAY 500
+#define MODBUS_MASTER_THREAD_DELAY_01 800
+#define MODBUS_SLAVE_THREAD_DELAY 2000
+#define SIM7600_THREAD_DELAY 2000
 //#define		TCOM_THREAD_DELAY	          1150
 //#define		TEAM_THREAD_DELAY           1200
-#define		MBM_FSM_THREAD_DELAY				1150	
-#define		MBM_FSM_THREAD_DELAY_01				1250	
-#define		DI_THREAD_DELAY							1300
-#define		DAQ_THREAD_DELAY						1350	
-#define		CORE_THREAD_DELAY						3000
-#define		SURV_THREAD_DELAY						1400
-#define		CPAD_THREAD_DELAY					  1600
-#define		BKG_THREAD_DELAY            2200
-#define		TESTCASE_THREAD_DELAY		    1650
-
+#define MBM_FSM_THREAD_DELAY 1150
+#define MBM_FSM_THREAD_DELAY_01 1250
+#define DI_THREAD_DELAY 1300
+#define DAQ_THREAD_DELAY 1350
+#define CORE_THREAD_DELAY 3000
+#define SURV_THREAD_DELAY 1400
+#define CPAD_THREAD_DELAY 1600
+#define BKG_THREAD_DELAY 2200
+#define TESTCASE_THREAD_DELAY 1650
 
 ///////////////////////////////////////////////////////////////
-//AI configuration 
+//AI configuration
 ///////////////////////////////////////////////////////////////
 enum
 {
-		AI_SENSOR1 = 0,
-		AI_NTC1,
-		AI_NTC2,
-		AI_NTC3,
-		AI_NTC4,
-		AI_MAX_CNT
+	AI_SENSOR1 = 0,
+	AI_NTC1,
+	AI_NTC2,
+	AI_NTC3,
+	AI_NTC4,
+	AI_MAX_CNT
 };
 
-#define AI_SENSOR_NUM   	1		//´«¸ĞÆ÷ÊıÁ¿
-#define AI_NTC_NUM   			4		//NTCÊıÁ¿
-
-
+#define AI_SENSOR_NUM 1 //ä¼ æ„Ÿå™¨æ•°é‡
+#define AI_NTC_NUM 4	//NTCæ•°é‡
 
 enum
 {
-		AO_EC_FAN = 0,//EC·ç»ú
-		AO_PREV_1,
-		AO_WATER_VALVE,
-    AO_EC_COMPRESSOR,//±äÆµÑ¹»ú
-    AO_PREV_2,
-		AO_MAX_CNT,	
-		AO_INV_FAN, //ĞéÄâÊä³ö ±äÆµ
+	AO_EC_FAN = 0, //ECé£æœº
+	AO_PREV_1,
+	AO_WATER_VALVE,
+	AO_EC_COMPRESSOR, //å˜é¢‘å‹æœº
+	AO_PREV_2,
+	AO_MAX_CNT,
+	AO_INV_FAN, //è™šæ‹Ÿè¾“å‡º å˜é¢‘
 };
 
-#define AO_REAL_CNT    1
-#define ABNORMAL_VALUE    0x7FFF//Òì³£Öµ
-#define OVER_VALUE    1000//ÎÂÊª¶È³¬ÏŞÖµ
+#define AO_REAL_CNT 1
+#define ABNORMAL_VALUE 0x7FFF //å¼‚å¸¸å€¼
+#define OVER_VALUE 1000		  //æ¸©æ¹¿åº¦è¶…é™å€¼
 
-//²âÊÔÄ£Ê½
+//æµ‹è¯•æ¨¡å¼
 enum
 {
-		TEST_UNABLE = 0,//ÍË³ö²âÊÔÄ£Ê½
-		TEST_PRPDUCE_WATER=0x01,//ÖÆË®
-		TEST_PURIFICATION=0x02, //¾»»¯
-    TEST_NORMAL_WATER=0x03,   //³ö³£ÎÂË®
-    TEST_HEAT_WATER=0x04,    //³öÈÈË®
-    TEST_PRPDUCE_COLDWATER=0x05,  //ÖÆ±ùË®
-    TEST_ALL_OUT=0x5A,      //È«¿ª
+	TEST_UNABLE = 0,			   //é€€å‡ºæµ‹è¯•æ¨¡å¼
+	TEST_PRPDUCE_WATER = 0x01,	 //åˆ¶æ°´
+	TEST_PURIFICATION = 0x02,	  //å‡€åŒ–
+	TEST_NORMAL_WATER = 0x03,	  //å‡ºå¸¸æ¸©æ°´
+	TEST_HEAT_WATER = 0x04,		   //å‡ºçƒ­æ°´
+	TEST_PRPDUCE_COLDWATER = 0x05, //åˆ¶å†°æ°´
+	TEST_Relay = 0x3C,			   //ç»§ç”µå™¨æµ‹è¯•
+	TEST_ALL_OUT = 0x5A,		   //å…¨å¼€
 };
 
-//ÊÖ¶¯²âÊÔÄ£Ê½
+#define TEST_TIME 1   //æµ‹è¯•æ—¶é—´1s
+#define TEST_CICLE 15 //å¼€å…³å‘¨æœŸ
+
+//æ‰‹åŠ¨æµ‹è¯•æ¨¡å¼
 enum
 {
-		MANUAL_TEST_UNABLE = 0,//ÍË³ö²âÊÔÄ£Ê½
-		MANUAL_MODE_ENABLE=0x01,//ÊÖ¶¯Ä£Ê½
-		TEST_MODE_ENABLE=0x02, //²âÊÔÄ£Ê½
+	MANUAL_TEST_UNABLE = 0,	//é€€å‡ºæµ‹è¯•æ¨¡å¼
+	MANUAL_MODE_ENABLE = 0x01, //æ‰‹åŠ¨æ¨¡å¼
+	TEST_MODE_ENABLE = 0x02,   //æµ‹è¯•æ¨¡å¼
 };
 
 ///////////////////////////////////////////////////////////////
-//system configuration 
+//system configuration
 ///////////////////////////////////////////////////////////////
 
-typedef struct 
+typedef struct
 {
-	  uint8_t      Err_Master0[10];//Òì³£¼ÆÊı
-	  uint8_t      Err_Master1[2];//Òì³£¼ÆÊı	
-	  uint8_t      Err_Master2[4];//Òì³£¼ÆÊı
-	  uint16_t      Err_Master_Cnt[3];//Í¨ĞÅÒì³£
-	  uint8_t      Err_Enable;//Í¨ĞÅ¸æ¾¯Ê¹ÄÜ
-}mbm_Error_St;
+	uint8_t Err_Master0[10];	//å¼‚å¸¸è®¡æ•°
+	uint8_t Err_Master1[2];		//å¼‚å¸¸è®¡æ•°
+	uint8_t Err_Master2[4];		//å¼‚å¸¸è®¡æ•°
+	uint16_t Err_Master_Cnt[3]; //é€šä¿¡å¼‚å¸¸
+	uint8_t Err_Enable;			//é€šä¿¡å‘Šè­¦ä½¿èƒ½
+} mbm_Error_St;
 
-typedef struct 
+typedef struct
 {
-		uint16_t 	id;
-		uint16_t*	reg_ptr;
-		int16_t	min;
-		uint16_t	max;
-		uint16_t	dft;	
-		uint8_t		permission;
-		uint8_t		rw;
-		uint8_t (*chk_ptr)(uint16_t pram);
-}conf_reg_map_st;
+	uint16_t id;
+	uint16_t *reg_ptr;
+	int16_t min;
+	uint16_t max;
+	uint16_t dft;
+	uint8_t permission;
+	uint8_t rw;
+	uint8_t (*chk_ptr)(uint16_t pram);
+} conf_reg_map_st;
 
-typedef struct 
+typedef struct
 {
-		uint16_t 	id;
-		uint16_t*	reg_ptr;
-		uint16_t	dft;
-		//uint8_t		rw;
-}sts_reg_map_st;
+	uint16_t id;
+	uint16_t *reg_ptr;
+	uint16_t dft;
+	//uint8_t		rw;
+} sts_reg_map_st;
 
 //system component mask, if set 1 measn exist, otherwise absent
-typedef struct 
+typedef struct
 {
-		uint16_t 	power_switch;
-		uint16_t	set_voltage;
-		uint16_t	set_current;
-		//uint8_t		rw;
-}pwr_dev_set_st;
+	uint16_t power_switch;
+	uint16_t set_voltage;
+	uint16_t set_current;
+	//uint8_t		rw;
+} pwr_dev_set_st;
 
-typedef struct 
+typedef struct
 {
-		uint16_t 	ain;
-		uint16_t	din[2];
-		uint16_t  din_pusl;
-		uint16_t 	aout;
-		uint16_t	dout[2];
-		uint16_t	mb_comp;
-		uint16_t  mb_discrete_mask;
-		uint16_t  return_temp_mask;
-		uint16_t  supply_temp_mask;
-		uint16_t  cab_temp_mask;
-		uint16_t  din_bitmap_polarity[2];
-//    uint16_t  pwm_out;
-//		pwr_dev_set_st mbm_pwr_cfg[2];
-		
-}dev_mask_st;
+	uint16_t ain;
+	uint16_t din[2];
+	uint16_t din_pusl;
+	uint16_t aout;
+	uint16_t dout[2];
+	uint16_t mb_comp;
+	uint16_t mb_discrete_mask;
+	uint16_t return_temp_mask;
+	uint16_t supply_temp_mask;
+	uint16_t cab_temp_mask;
+	uint16_t din_bitmap_polarity[2];
+	//    uint16_t  pwm_out;
+	//		pwr_dev_set_st mbm_pwr_cfg[2];
 
+} dev_mask_st;
 
 #define ALARM_TOTAL_WORD 2
 typedef struct
 {
-		uint16_t temp;
-		uint16_t hum;
-}temp_sensor_cali_st;
+	uint16_t temp;
+	uint16_t hum;
+} temp_sensor_cali_st;
 typedef struct
-{	
-	uint16_t 		power_mode;					//power-off or power-on
-	uint16_t 		standalone_timer;		//automatic, manual 	
-	uint16_t 		cool_type;					//cooling type
-	uint16_t 		cpad_baudrate;			//control pad communication baudrate
-	uint16_t 		surv_baudrate;			//surveillance communication baudrate
-	uint16_t 		surv_addr;					//surveillance communication address
-	uint16_t 		diagnose_mode_en;		//diagnose mode enalbe 
-	uint16_t 		alarm_bypass_en;		//diagnose mode enalbe 
-	uint16_t 		testing_mode_en;		//test mode enalbe 
-	uint16_t    power_mode_mb_en;   // modbuss power mode control enable
-	uint16_t    cancel_alarm_mb_en; // cancel all alarm enable
-	uint16_t    alarm_remove_bitmap[ALARM_TOTAL_WORD]; //reless alarm
-	uint16_t    ntc_cali[AI_NTC_NUM];            // NTC cali
-	uint16_t    ai_cali[AI_SENSOR_NUM];             //ai_ cali
-	uint16_t    LED_Num;                   //LEDÊıÁ¿
-	uint16_t    Alarm_Beep;                //ÑÏÖØ¸æ¾¯£¬ÏìÀ®°È
-	temp_sensor_cali_st temp_sensor_cali[TEMP_HUM_SENSOR_NUM];     
-}conf_general_st;
-
+{
+	uint16_t power_mode;							//power-off or power-on
+	uint16_t standalone_timer;						//automatic, manual
+	uint16_t cool_type;								//cooling type
+	uint16_t cpad_baudrate;							//control pad communication baudrate
+	uint16_t surv_baudrate;							//surveillance communication baudrate
+	uint16_t surv_addr;								//surveillance communication address
+	uint16_t diagnose_mode_en;						//diagnose mode enalbe
+	uint16_t alarm_bypass_en;						//diagnose mode enalbe
+	uint16_t testing_mode_en;						//test mode enalbe
+	uint16_t power_mode_mb_en;						// modbuss power mode control enable
+	uint16_t cancel_alarm_mb_en;					// cancel all alarm enable
+	uint16_t alarm_remove_bitmap[ALARM_TOTAL_WORD]; //reless alarm
+	uint16_t ntc_cali[AI_NTC_NUM];					// NTC cali
+	uint16_t ai_cali[AI_SENSOR_NUM];				//ai_ cali
+	uint16_t LED_Num;								//LEDæ•°é‡
+	uint16_t Alarm_Beep;							//ä¸¥é‡å‘Šè­¦ï¼Œå“å–‡å­
+	temp_sensor_cali_st temp_sensor_cali[TEMP_HUM_SENSOR_NUM];
+} conf_general_st;
 
 //status_set
 /*
@@ -237,71 +232,71 @@ typedef struct
 */
 enum
 {
-		SYS_ERR_INIT=0,
-		SYS_ERR_TEAM,
-		SYS_ERR_MBM,
-		SYS_ERR_MBS,
-		SYS_ERR_CAN,
-		SYS_ERR_CPAD,
+	SYS_ERR_INIT = 0,
+	SYS_ERR_TEAM,
+	SYS_ERR_MBM,
+	SYS_ERR_MBS,
+	SYS_ERR_CAN,
+	SYS_ERR_CPAD,
 };
 
 enum
 {
-		WORK_MODE_STS_REG_NO= 0,//»ú×é¹¤×÷×´Ì¬
-		GEN_STS_REG_NO ,
-		MBM_COM_STS_REG_NO,
-		SENSOR_STS_REG_NO
+	WORK_MODE_STS_REG_NO = 0, //æœºç»„å·¥ä½œçŠ¶æ€
+	GEN_STS_REG_NO,
+	MBM_COM_STS_REG_NO,
+	SENSOR_STS_REG_NO
 };
 
 enum
 {
-		ALARM_COM = 0,
-		ALARM_NTC,
+	ALARM_COM = 0,
+	ALARM_NTC,
 };
 
 enum
-{		
-		PWR_STS_BPOS = 0,//¿ª»ú
-		COOLING_STS_BPOS,//ÖÆË®
-		OUTWATER_STS_BPOS,//³öË®
-		STERILIZE_STS_BPOS,//É±¾ú
-		DEFROST1_STS_BPOS,//³ıËª1
-		DEFROST2_STS_BPOS,//³ıËª2
-		FAN_STS_BPOS,
-		HEATING_STS_BPOS,
-		ALARM_STUSE_BPOS =14,
-		ALARM_BEEP_BPOS =15,
+{
+	PWR_STS_BPOS = 0,   //å¼€æœº
+	COOLING_STS_BPOS,   //åˆ¶æ°´
+	OUTWATER_STS_BPOS,  //å‡ºæ°´
+	STERILIZE_STS_BPOS, //æ€èŒ
+	DEFROST1_STS_BPOS,  //é™¤éœœ1
+	DEFROST2_STS_BPOS,  //é™¤éœœ2
+	FAN_STS_BPOS,
+	HEATING_STS_BPOS,
+	ALARM_STUSE_BPOS = 14,
+	ALARM_BEEP_BPOS = 15,
 };
 
 typedef struct
 {
-	uint16_t 		permission_level;		//user authentication level
-	uint16_t 		running_mode;				//automatic, manual or testing
-	uint16_t 		sys_error_bitmap;		//system error status 
-	uint16_t 		Alarm_AC_CNT[3];		//AC¸æ¾¯ÊıÁ¿
+	uint16_t permission_level; //user authentication level
+	uint16_t running_mode;	 //automatic, manual or testing
+	uint16_t sys_error_bitmap; //system error status
+	uint16_t Alarm_AC_CNT[3];  //ACå‘Šè­¦æ•°é‡
 
-}status_general_st;
+} status_general_st;
 
 enum
 {
-		P_ALOGORITHM=0,
-		PID_ALOGORITHM,
-		FUZZY_ALOGORITHM
+	P_ALOGORITHM = 0,
+	PID_ALOGORITHM,
+	FUZZY_ALOGORITHM
 };
 
 enum
 {
-		HUM_RELATIVE=0,
-		HUM_ABSOLUTE		
+	HUM_RELATIVE = 0,
+	HUM_ABSOLUTE
 };
 enum
 {
-		WATER_LEVEL_NO=0,//Ë®ÉÙ
-		WATER_LEVEL_LOW,//µÍË®Î»
-		WATER_LEVEL_REPLENISHMENT,//²¹Ë®Ë®Î»	
-		WATER_LEVEL_HIGH,	//¸ßË®Î»	
-		WATER_LEVEL_OVERFLOW,	//ÒçË®
-		WATER_LEVEL_OTHER,	//Òì³£
+	WATER_LEVEL_NO = 0,		   //æ°´å°‘
+	WATER_LEVEL_LOW,		   //ä½æ°´ä½
+	WATER_LEVEL_REPLENISHMENT, //è¡¥æ°´æ°´ä½
+	WATER_LEVEL_HIGH,		   //é«˜æ°´ä½
+	WATER_LEVEL_OVERFLOW,	  //æº¢æ°´
+	WATER_LEVEL_OTHER,		   //å¼‚å¸¸
 };
 // meter tem_hum
 typedef struct
@@ -316,7 +311,7 @@ typedef struct
 	uint16_t return_air_hum;
 	uint16_t remote_air_hum;
 	uint16_t supply_air_min_temp;
-}sys_tem_hum_st;
+} sys_tem_hum_st;
 //algorithm
 typedef struct
 {
@@ -339,7 +334,7 @@ typedef struct
 	uint16_t temp_diff;
 	uint16_t pid_action_max;
 	uint16_t temp_req_out_max;
-}algorithm_st;
+} algorithm_st;
 
 //compressor
 typedef struct
@@ -354,20 +349,19 @@ typedef struct
 	uint16_t start_interval;
 	uint16_t ev_ahead_start_time;
 	uint16_t ev_ahead_shut_time;
-	uint16_t speed_upper_lim;	
-	uint16_t speed_lower_lim;		
-	uint16_t ec_comp_start_req;	
-  uint16_t startup_freq;	
-  uint16_t high_press_threshold;
-  uint16_t high_press_hyst;
-  uint16_t ret_oil_period;
-  uint16_t ret_oil_freq;
-  uint16_t low_freq_switch_period;
-  uint16_t low_freq_threshold;
-  uint16_t step;
-  uint16_t step_period;
-}compressor_st;
-
+	uint16_t speed_upper_lim;
+	uint16_t speed_lower_lim;
+	uint16_t ec_comp_start_req;
+	uint16_t startup_freq;
+	uint16_t high_press_threshold;
+	uint16_t high_press_hyst;
+	uint16_t ret_oil_period;
+	uint16_t ret_oil_freq;
+	uint16_t low_freq_switch_period;
+	uint16_t low_freq_threshold;
+	uint16_t step;
+	uint16_t step_period;
+} compressor_st;
 
 //fan
 typedef struct
@@ -375,7 +369,7 @@ typedef struct
 	uint16_t type;
 	uint16_t mode;
 	uint16_t num;
-  uint16_t adjust_step;
+	uint16_t adjust_step;
 	uint16_t startup_delay;
 	uint16_t cold_start_delay;
 	uint16_t stop_delay;
@@ -392,68 +386,67 @@ typedef struct
 	uint16_t suc_temp_deadzone;
 	uint16_t suc_temp_step;
 	uint16_t suc_temp_delay;
-	uint16_t noload_down;//ÎŞ¸ºÔØ·ç»ú½µËÙÊ¹ÄÜ
+	uint16_t noload_down; //æ— è´Ÿè½½é£æœºé™é€Ÿä½¿èƒ½
 	uint16_t target_temp;
 	uint16_t temp_dead_band;
 	uint16_t temp_precision;
 	uint16_t temp_add_fan_en;
 	uint16_t tem_add_fan_delay;
 	uint16_t fan_k;
-	uint16_t CFM_Enable;//·çÁ¿ÏÔÊ¾Ê¹ÄÜ
-	uint16_t CFM_Para_A;//·çÁ¿²ÎÊıA
+	uint16_t CFM_Enable; //é£é‡æ˜¾ç¤ºä½¿èƒ½
+	uint16_t CFM_Para_A; //é£é‡å‚æ•°A
 	uint16_t CFM_Para_B;
 	uint16_t CFM_Para_C;
-}fan_st;
+} fan_st;
 
 //team set
 typedef struct
 {
-	uint16_t		team_en;					//team enable
-	uint16_t		mode;							//team mode 0,1,2,3
-	uint16_t		addr;							//team id
-	uint16_t 		baudrate;					//team communication baudrate
-	uint16_t		total_num;				//units number in the team
-	uint16_t		backup_num;				//backup units
-	uint16_t		rotate_period;		//upper byte:0:no rotate;1:daily;2:weekly;lower byte:week day(0:sunday,1:monday...)
-	uint16_t		rotate_time;			//upper byte:hour;lower byte:minite;
-	uint16_t		rotate_num;
-	uint16_t		rotate_manual;	
-	uint16_t		cascade_enable;
-	uint16_t		team_fan_mode;
-	uint16_t    fault_power_en;
-}team_st;
-
+	uint16_t team_en;		//team enable
+	uint16_t mode;			//team mode 0,1,2,3
+	uint16_t addr;			//team id
+	uint16_t baudrate;		//team communication baudrate
+	uint16_t total_num;		//units number in the team
+	uint16_t backup_num;	//backup units
+	uint16_t rotate_period; //upper byte:0:no rotate;1:daily;2:weekly;lower byte:week day(0:sunday,1:monday...)
+	uint16_t rotate_time;   //upper byte:hour;lower byte:minite;
+	uint16_t rotate_num;
+	uint16_t rotate_manual;
+	uint16_t cascade_enable;
+	uint16_t team_fan_mode;
+	uint16_t fault_power_en;
+} team_st;
 
 //analog_in
 typedef struct
 {
-	uint16_t	ai_data[AI_MAX_CNT];//
-	uint64_t	ai_mask;
-}ain_st;
+	uint16_t ai_data[AI_MAX_CNT]; //
+	uint64_t ai_mask;
+} ain_st;
 
-#define DI_COMP_1_HI_TEMP_POS			((uint32_t)0x00000001<<0)
-#define DI_COMP_2_HI_TEMP_POS			((uint32_t)0x00000001<<1)
-#define DI_COMP_1_LOW_TEMP_POS		((uint32_t)0x00000001<<2)
-#define DI_COMP_2_LOW_TEMP_POS		((uint32_t)0x00000001<<3)
-#define DI_COMP_1_DISC_TEMP_POS		((uint32_t)0x00000001<<4)
-#define DI_COMP_2_DISC_TEMP_POS		((uint32_t)0x00000001<<5)
-#define DI_FAN_1_OVF_POS					((uint32_t)0x00000001<<6)
-#define DI_FAN_2_OVF_POS					((uint32_t)0x00000001<<7)
-#define DI_FAN_3_OVF_POS					((uint32_t)0x00000001<<8)
-#define DI_AIR_LOSS_POS						((uint32_t)0x00000001<<9)
-#define DI_FILTER_CLOG_POS				((uint32_t)0x00000001<<10)
-#define DI_WATER_OVER_FLOW_POS		((uint32_t)0x00000001<<11)
-#define DI_RMT_SHUT_POS						((uint32_t)0x00000001<<12)
-#define DI_HUM_WATER_LV						((uint32_t)0x00000001<<13)
-#define DI_RESERVE_2_POS					((uint32_t)0x00000001<<14)
-#define DI_RESERVE_3_POS					((uint32_t)0x00000001<<15)
+#define DI_COMP_1_HI_TEMP_POS ((uint32_t)0x00000001 << 0)
+#define DI_COMP_2_HI_TEMP_POS ((uint32_t)0x00000001 << 1)
+#define DI_COMP_1_LOW_TEMP_POS ((uint32_t)0x00000001 << 2)
+#define DI_COMP_2_LOW_TEMP_POS ((uint32_t)0x00000001 << 3)
+#define DI_COMP_1_DISC_TEMP_POS ((uint32_t)0x00000001 << 4)
+#define DI_COMP_2_DISC_TEMP_POS ((uint32_t)0x00000001 << 5)
+#define DI_FAN_1_OVF_POS ((uint32_t)0x00000001 << 6)
+#define DI_FAN_2_OVF_POS ((uint32_t)0x00000001 << 7)
+#define DI_FAN_3_OVF_POS ((uint32_t)0x00000001 << 8)
+#define DI_AIR_LOSS_POS ((uint32_t)0x00000001 << 9)
+#define DI_FILTER_CLOG_POS ((uint32_t)0x00000001 << 10)
+#define DI_WATER_OVER_FLOW_POS ((uint32_t)0x00000001 << 11)
+#define DI_RMT_SHUT_POS ((uint32_t)0x00000001 << 12)
+#define DI_HUM_WATER_LV ((uint32_t)0x00000001 << 13)
+#define DI_RESERVE_2_POS ((uint32_t)0x00000001 << 14)
+#define DI_RESERVE_3_POS ((uint32_t)0x00000001 << 15)
 
-#define ST_PWR_PA_AB_POS					((uint32_t)0x00000001<<16)
-#define ST_PWR_PB_AB_POS					((uint32_t)0x00000001<<17)
-#define ST_PWR_PC_AB_POS					((uint32_t)0x00000001<<18)
-#define ST_HUM_WL_H_POS						((uint32_t)0x00000001<<19)
-#define ST_HUM_HC_H_POS						((uint32_t)0x00000001<<20)
-#define ST_HUM_WQ_L_POS						((uint32_t)0x00000001<<21)
+#define ST_PWR_PA_AB_POS ((uint32_t)0x00000001 << 16)
+#define ST_PWR_PB_AB_POS ((uint32_t)0x00000001 << 17)
+#define ST_PWR_PC_AB_POS ((uint32_t)0x00000001 << 18)
+#define ST_HUM_WL_H_POS ((uint32_t)0x00000001 << 19)
+#define ST_HUM_HC_H_POS ((uint32_t)0x00000001 << 20)
+#define ST_HUM_WQ_L_POS ((uint32_t)0x00000001 << 21)
 
 //Digtal input status
 /*
@@ -485,39 +478,38 @@ bit21:	humidifier conductivity low
 
 typedef struct
 {
-	uint32_t	din_data;
-	uint32_t	din_mask;
-}din_st;
-
+	uint32_t din_data;
+	uint32_t din_mask;
+} din_st;
 
 ///////////////////////////////////////////////////////////////
-//system output status 
+//system output status
 ///////////////////////////////////////////////////////////////
 
 //analog_out
 //this feature is not yet determined, reserve interface for future application
 typedef struct
 {
-	int16_t	ec_fan[3];
-	int16_t	vf_compressor[2];
-	int16_t	reserve_aout[2];
-}aout_st;
+	int16_t ec_fan[3];
+	int16_t vf_compressor[2];
+	int16_t reserve_aout[2];
+} aout_st;
 
 //Digital output definition
 typedef struct
 {
-	int16_t	fan_out[MAX_FAN_NUM];
-	int16_t	compressor_out[MAX_COMPRESSOR_NUM];
-	int16_t	heater_out[MAX_HEATER_NUM];
-	int16_t	liq_val_bypass_out[MAX_COMPRESSOR_NUM];
-	int16_t	hot_gas_bypass_out[MAX_COMPRESSOR_NUM];
-	int16_t	humidifier_out;
-	int16_t	dehumidification_out;
-	int16_t	water_injection_out;
-	int16_t	common_alarm_out;
-	int16_t	scr_out;
-	int16_t	usr_out[DO_MAX_CNT];
-}dout_st;
+	int16_t fan_out[MAX_FAN_NUM];
+	int16_t compressor_out[MAX_COMPRESSOR_NUM];
+	int16_t heater_out[MAX_HEATER_NUM];
+	int16_t liq_val_bypass_out[MAX_COMPRESSOR_NUM];
+	int16_t hot_gas_bypass_out[MAX_COMPRESSOR_NUM];
+	int16_t humidifier_out;
+	int16_t dehumidification_out;
+	int16_t water_injection_out;
+	int16_t common_alarm_out;
+	int16_t scr_out;
+	int16_t usr_out[DO_MAX_CNT];
+} dout_st;
 
 ///////////////////////////////////////////////////////////////
 //system log
@@ -525,17 +517,17 @@ typedef struct
 //alarm status
 typedef struct
 {
-	int16_t 	alarm_id;
-	time_t		trigger_time;
-}alarm_status_st;
+	int16_t alarm_id;
+	time_t trigger_time;
+} alarm_status_st;
 
 //alarm history
 typedef struct
 {
 	int16_t alarm_id;
-	time_t		trigger_time;
-	time_t		clear_time;	
-}alarm_history_st;
+	time_t trigger_time;
+	time_t clear_time;
+} alarm_history_st;
 
 //alarm system runtime log, record components accumulative running time
 /*
@@ -571,11 +563,11 @@ typedef struct
 	int16_t heater1_runtime_min;
 	int16_t heater2_runtime_day;
 	int16_t heater2_runtime_min;
-	int16_t humidifier_runtime_day;	
+	int16_t humidifier_runtime_day;
 	int16_t humidifier_runtime_min;
-}sys_runtime_log_st;
+} sys_runtime_log_st;
 
-//alarm system runtime log, record components change of output states 
+//alarm system runtime log, record components change of output states
 /*
 @comp_id:
 	0:	compressor 1
@@ -596,10 +588,9 @@ typedef struct
 {
 	uint16_t comp_id;
 	uint16_t action;
-	time_t		trigger_time;
-	time_t		clear_time;
-}sys_status_log_st;
-
+	time_t trigger_time;
+	time_t clear_time;
+} sys_status_log_st;
 
 ///////////////////////////////////////////////////////////////
 //alarms definition
@@ -626,293 +617,289 @@ typedef struct
 
 typedef struct
 {
-	uint16_t 					id;
-	uint16_t					delay;
-	uint16_t					enable_mode;
-	uint16_t 					alarm_param;
-}alarm_acl_conf_st;
-
+	uint16_t id;
+	uint16_t delay;
+	uint16_t enable_mode;
+	uint16_t alarm_param;
+} alarm_acl_conf_st;
 
 //system memory configuration map
 typedef struct sys_conf_map
 {
-	int16_t 					id;
-	void*						str_ptr;
-	int16_t						length;
-}sys_conf_map_st;
-
+	int16_t id;
+	void *str_ptr;
+	int16_t length;
+} sys_conf_map_st;
 
 typedef struct sys_status_map
 {
-	int16_t 					id;
-	int16_t	*					addr;
-	int16_t						length;
-}sys_status_map_st;
+	int16_t id;
+	int16_t *addr;
+	int16_t length;
+} sys_status_map_st;
 
-
-//¿ÕÆøÖÆË®»ú²ÎÊı
+//ç©ºæ°”åˆ¶æ°´æœºå‚æ•°
 typedef struct
 {
-		uint16_t      u16SN_Code[4];//SNÂë
-		uint16_t      u16M_Type;//Éè±¸ÀàĞÍ
-		uint16_t      u16Power_Mode;//¿ª¹Ø»ú
-		uint16_t      u16Start_Temp;//ÖÆË®Æô¶¯ÎÂ¶È
-		uint16_t      u16Start_Humidity;//ÖÆË®Æô¶¯Êª¶È
-		uint16_t      u16Stop_Temp;//ÖÆË®Í£Ö¹ÎÂ¶È
-		uint16_t      u16Stop_Humidity;//ÖÆË®Í£Ö¹Êª¶È
-		uint16_t      u16Start_Defrost_Temp;//³ıËªÆô¶¯ÎÂ¶È
-		uint16_t      u16Stop_Defrost_Temp;//³ıËªÍ£Ö¹ÎÂ¶È
-		uint16_t      u16Sterilize_Mode;//É±¾úÄ£Ê½:BIT0-220V,BIT1-24V
-		uint16_t      u16Sterilize_Time[2];//É±¾úÊ±¼ä
-		uint16_t      u16Sterilize_Interval[2];//É±¾ú¼ä¸ô
-		uint16_t      u16Water_Ctrl;//Ë®Â·¿ØÖÆ·½°¸
-		uint16_t      u16Water_Mode;//³öË®Ä£Ê½
-		uint16_t      u16Water_Flow;//³öË®Á÷Á¿
-		uint16_t      u16NormalWater_Temp;//³£ÎÂË®ÎÂ¶È
-		uint16_t      u16HotWater_Temp;//ÈÈË®ÎÂ¶È
-		uint16_t      u16WaterSource_Mode;//Íâ½ÓË®Ô´Ä£Ê½
-		uint16_t      u16Change_WaterTank;//¸ü»»Ô´Ë®Ïä
-		uint16_t      u16Rsv0[4];//
-		uint16_t      u16Reset;//»Ö¸´³ö³§
-		uint16_t      u16Test_Mode_Type;//²âÊÔÄ£Ê½Ñ¡Ôñ
-		uint16_t      u16Manual_Test_En;//ÊÖ¶¯²âÊÔÄ£Ê½Ê¹ÄÜ
-		uint16_t      u16BITMAP_MANUAL;//ÊÖ¶¯Êä³ö
-		uint16_t      u16TPower_En;//¶¨Ê±¿ª¹Ø»ú
-		uint16_t      u16TPower_On;//¶¨Ê±¿ª»úÊ±¼ä
-		uint16_t      u16TPower_Off;//¶¨Ê±¹Ø»úÊ±¼ä
-		uint16_t      u16Rsv1[3];//
-		uint16_t      u16FILTER_ELEMENT_Type;//ÂËÍø¸æ¾¯ÀàĞÍ
-		uint16_t      u16Clear_RT;//Çå³ı²¿¼şÊ±¼ä
-		uint16_t      u16Clear_ALARM;//Çå³ı¸æ¾¯
-		uint16_t      u16Set_Time[2];//ÉèÖÃÏµÍ³Ê±¼ä
-		uint16_t      u16Fan_Start_Delay;//·ç»ú¿ªÆôÑÓÊ±
-		uint16_t      u16Fan_Stop_Delay;//·ç»ú¹Ø±ÕÑÓÊ±
-		uint16_t      u16Comp_Interval;//Ñ¹»ú¼ä¸ô
-		uint16_t      u16ColdWater_Mode;//±ùË®Ä£Ê½
-		uint16_t      u16ColdWater_StartTemp;//ÖÆ±ùË®ÎÂ¶È
-		uint16_t      u16ColdWater_StopTemp;//ÖÆ±ùË®Í£Ö¹ÎÂ¶È		
-}ComPara_Conf_st;
-
-
-typedef struct
-{
-	uint16_t    eevproType;				//µç×ÓÅòÕÍ·§ÀàĞÍ
-	uint16_t    excSpeed;			    //Àø´ÅËÙ¶È pps
-	
-	uint16_t    excAllOpenSteps;		//È«¿ªÂö³å
-	uint16_t    excOpenValveMinSteps;   //·§¿ªÂö³å--×îĞ¡²½Êı      //@2017-08-21
-	uint16_t    excOpenValveMinDegree;  //¹Ø·§Ê±·§¿ª¶ÈµÄ×îĞ¡¼«ÏŞÖµ
-	uint16_t    eevHoldTime;				//unit 100ms      
-	uint16_t    restore_factory_setting;
-}Moter_st;
-
-//Æ½Ì¨Í¨ĞÅ²ÎÊı
-typedef struct
-{
-	uint16_t    Fixed_Report;		  //¶¨Ê±ÉÏ±¨¼ä¸ô
-	uint16_t    Real_Report;			//ÊµÊ±ÉÏ±¨¼ä¸ô
-}Platform_st;
+	uint16_t u16SN_Code[4];			   //SNç 
+	uint16_t u16M_Type;				   //è®¾å¤‡ç±»å‹
+	uint16_t u16Power_Mode;			   //å¼€å…³æœº
+	uint16_t u16Start_Temp;			   //åˆ¶æ°´å¯åŠ¨æ¸©åº¦
+	uint16_t u16Start_Humidity;		   //åˆ¶æ°´å¯åŠ¨æ¹¿åº¦
+	uint16_t u16Stop_Temp;			   //åˆ¶æ°´åœæ­¢æ¸©åº¦
+	uint16_t u16Stop_Humidity;		   //åˆ¶æ°´åœæ­¢æ¹¿åº¦
+	uint16_t u16Start_Defrost_Temp;	//é™¤éœœå¯åŠ¨æ¸©åº¦
+	uint16_t u16Stop_Defrost_Temp;	 //é™¤éœœåœæ­¢æ¸©åº¦
+	uint16_t u16Sterilize_Mode;		   //æ€èŒæ¨¡å¼:BIT0-220V,BIT1-24V
+	uint16_t u16Sterilize_Time[2];	 //æ€èŒæ—¶é—´
+	uint16_t u16Sterilize_Interval[2]; //æ€èŒé—´éš”
+	uint16_t u16Water_Ctrl;			   //æ°´è·¯æ§åˆ¶æ–¹æ¡ˆ
+	uint16_t u16Water_Mode;			   //å‡ºæ°´æ¨¡å¼
+	uint16_t u16Water_Flow;			   //å‡ºæ°´æµé‡
+	uint16_t u16NormalWater_Temp;	  //å¸¸æ¸©æ°´æ¸©åº¦
+	uint16_t u16HotWater_Temp;		   //çƒ­æ°´æ¸©åº¦
+	uint16_t u16WaterSource_Mode;	  //å¤–æ¥æ°´æºæ¨¡å¼
+	uint16_t u16Change_WaterTank;	  //æ›´æ¢æºæ°´ç®±
+	uint16_t u16Rsv0[4];			   //
+	uint16_t u16Reset;				   //æ¢å¤å‡ºå‚
+	uint16_t u16Test_Mode_Type;		   //æµ‹è¯•æ¨¡å¼é€‰æ‹©
+	uint16_t u16Manual_Test_En;		   //æ‰‹åŠ¨æµ‹è¯•æ¨¡å¼ä½¿èƒ½
+	uint16_t u16BITMAP_MANUAL;		   //æ‰‹åŠ¨è¾“å‡º
+	uint16_t u16TPower_En;			   //å®šæ—¶å¼€å…³æœº
+	uint16_t u16TPower_On;			   //å®šæ—¶å¼€æœºæ—¶é—´
+	uint16_t u16TPower_Off;			   //å®šæ—¶å…³æœºæ—¶é—´
+	uint16_t u16Rsv1[3];			   //
+	uint16_t u16FILTER_ELEMENT_Type;   //æ»¤ç½‘å‘Šè­¦ç±»å‹
+	uint16_t u16Clear_RT;			   //æ¸…é™¤éƒ¨ä»¶æ—¶é—´
+	uint16_t u16Clear_ALARM;		   //æ¸…é™¤å‘Šè­¦
+	uint16_t u16Set_Time[2];		   //è®¾ç½®ç³»ç»Ÿæ—¶é—´
+	uint16_t u16Fan_Start_Delay;	   //é£æœºå¼€å¯å»¶æ—¶
+	uint16_t u16Fan_Stop_Delay;		   //é£æœºå…³é—­å»¶æ—¶
+	uint16_t u16Comp_Interval;		   //å‹æœºé—´éš”
+	uint16_t u16ColdWater_Mode;		   //å†°æ°´æ¨¡å¼
+	uint16_t u16ColdWater_StartTemp;   //åˆ¶å†°æ°´æ¸©åº¦
+	uint16_t u16ColdWater_StopTemp;	//åˆ¶å†°æ°´åœæ­¢æ¸©åº¦
+} ComPara_Conf_st;
 
 typedef struct
 {
-	conf_general_st 			general;
-	dev_mask_st						dev_mask;
-//	power_supply_st       ac_power_supply;
-	algorithm_st					algorithm;
-	alarm_acl_conf_st			alarm[ACL_TOTAL_NUM];
-//	mbm_Conf_st           mbm_Conf;
-	ComPara_Conf_st				ComPara;
-	fan_st								fan;
-	compressor_st					compressor;	
-	Moter_st 							Moter;
-	Platform_st           Platform;
-}config_st;
+	uint16_t eevproType; //ç”µå­è†¨èƒ€é˜€ç±»å‹
+	uint16_t excSpeed;   //åŠ±ç£é€Ÿåº¦ pps
+
+	uint16_t excAllOpenSteps;		//å…¨å¼€è„‰å†²
+	uint16_t excOpenValveMinSteps;  //é˜€å¼€è„‰å†²--æœ€å°æ­¥æ•°      //@2017-08-21
+	uint16_t excOpenValveMinDegree; //å…³é˜€æ—¶é˜€å¼€åº¦çš„æœ€å°æé™å€¼
+	uint16_t eevHoldTime;			//unit 100ms
+	uint16_t restore_factory_setting;
+} Moter_st;
+
+//å¹³å°é€šä¿¡å‚æ•°
+typedef struct
+{
+	uint16_t Fixed_Report; //å®šæ—¶ä¸ŠæŠ¥é—´éš”
+	uint16_t Real_Report;  //å®æ—¶ä¸ŠæŠ¥é—´éš”
+} Platform_st;
 
 typedef struct
 {
-		uint16_t 			dev_sts;
-		uint16_t 			conductivity;
-		uint16_t 			hum_current;
-		uint16_t 			water_level;
-}mbm_hum_st;
+	conf_general_st general;
+	dev_mask_st dev_mask;
+	//	power_supply_st       ac_power_supply;
+	algorithm_st algorithm;
+	alarm_acl_conf_st alarm[ACL_TOTAL_NUM];
+	//	mbm_Conf_st           mbm_Conf;
+	ComPara_Conf_st ComPara;
+	fan_st fan;
+	compressor_st compressor;
+	Moter_st Moter;
+	Platform_st Platform;
+} config_st;
+
+typedef struct
+{
+	uint16_t dev_sts;
+	uint16_t conductivity;
+	uint16_t hum_current;
+	uint16_t water_level;
+} mbm_hum_st;
 
 //pwr
-typedef struct{
-	 uint16_t  status;           
-	 uint16_t  output_voltage;
-	 uint16_t  output_current;
-	 uint16_t  pwr_on;
-	 uint16_t  set_voltage;
-	 uint16_t  set_current;
-}pwr_imf_st;
+typedef struct
+{
+	uint16_t status;
+	uint16_t output_voltage;
+	uint16_t output_current;
+	uint16_t pwr_on;
+	uint16_t set_voltage;
+	uint16_t set_current;
+} pwr_imf_st;
 
 typedef struct
 {
-		uint16_t 			dev_sts;
-		uint16_t 			temp;
-		uint16_t 			hum;
-}mbm_tnh_st;
+	uint16_t dev_sts;
+	uint16_t temp;
+	uint16_t hum;
+} mbm_tnh_st;
 
 typedef struct
 {
-		uint16_t 			Temp;
-		uint16_t 			Hum;
-}Com_tnh_st;
+	uint16_t Temp;
+	uint16_t Hum;
+} Com_tnh_st;
 
 //system information
 typedef struct
 {
-	uint16_t	 			status_reg_num;													
-	uint16_t	 			config_reg_num;
-	uint16_t	 			software_ver;
-	uint16_t	 			hardware_ver;
-	uint16_t	 			serial_no[4];
-	uint16_t	 			man_date[2];
-}sys_info_st;
+	uint16_t status_reg_num;
+	uint16_t config_reg_num;
+	uint16_t software_ver;
+	uint16_t hardware_ver;
+	uint16_t serial_no[4];
+	uint16_t man_date[2];
+} sys_info_st;
 
 //modbus master data structure
 typedef struct
 {
-	mbm_tnh_st 			tnh[TEMP_HUM_SENSOR_NUM];			//ÎÂÊª¶È
-//	mbm_IPM_St      IPM;//IPMµç±í
-//	mbm_PDU_St      PDU[4];//PDU
-//	mbm_AC_St       AC;//¿Õµ÷
-////	mbm_UPS_APC_St			UPS;
-////#if (UPS_TYPE==UPS_EMERSON_ITA2)
-////	mbm_UPS_ITA2_St 		UPS;
-////#elif (UPS_TYPE==UPS_JYD_SIN)
-////	mbm_UPS_JYD_SIN_St	UPS;
-////#endif
-//	mbm_UPS_HW_St		UPS;
-	mbm_Error_St    Err_M;
-}mbm_sts_st;
+	mbm_tnh_st tnh[TEMP_HUM_SENSOR_NUM]; //æ¸©æ¹¿åº¦
+										 //	mbm_IPM_St      IPM;//IPMç”µè¡¨
+										 //	mbm_PDU_St      PDU[4];//PDU
+										 //	mbm_AC_St       AC;//ç©ºè°ƒ
+										 ////	mbm_UPS_APC_St			UPS;
+										 ////#if (UPS_TYPE==UPS_EMERSON_ITA2)
+										 ////	mbm_UPS_ITA2_St 		UPS;
+										 ////#elif (UPS_TYPE==UPS_JYD_SIN)
+										 ////	mbm_UPS_JYD_SIN_St	UPS;
+										 ////#endif
+										 //	mbm_UPS_HW_St		UPS;
+	mbm_Error_St Err_M;
+} mbm_sts_st;
 
 typedef struct
 {
-		uint16_t low;
-		uint16_t high;
-}run_time_st;
+	uint16_t low;
+	uint16_t high;
+} run_time_st;
 
 typedef struct
 {
-		uint16_t pwr_off_alarm;
-		uint16_t critical_cnt;
-		uint16_t major_cnt;
-		uint16_t mioor_cnt;
-		uint16_t total_cnt;
-}alarm_state_cnt_st;
+	uint16_t pwr_off_alarm;
+	uint16_t critical_cnt;
+	uint16_t major_cnt;
+	uint16_t mioor_cnt;
+	uint16_t total_cnt;
+} alarm_state_cnt_st;
 
-typedef struct{
+typedef struct
+{
 	uint16_t work_mode;
 	uint16_t limit_day;
 	uint16_t runing_day;
 	uint16_t runing_hour;
 	uint16_t runing_sec;
 	uint16_t runing_State;
-	uint8_t pass_word[4];	
-}work_mode_st;
+	uint8_t pass_word[4];
+} work_mode_st;
 
 typedef struct
 {
-		uint16_t Grade_Manage;//¹Ü¿Ø½×¶Î
-		uint16_t Password_Poweron;//¿ª»ú¹Ü¿ØÃÜÂë
-		uint16_t Password_Grade[4][2];//1-4¼¶¹Ü¿ØÌìÊı¼°ÃÜÂë
-		uint16_t Remain_day;//µ±Ç°½×¶ÎÊ£ÓàÌìÊı
-		uint16_t Run_day;//µ±Ç°½×¶ÎÔËĞĞÌìÊı
-		uint16_t Run_hour;//µ±Ç°½×¶ÎÔËĞĞĞ¡Ê±
-		uint16_t Run_second;//µ±Ç°½×¶ÎÔËĞĞÃë
-	  uint16_t Run_State;//ÔËĞĞ×´Ì¬
-}ControlPassword_st;
+	uint16_t Grade_Manage;		   //ç®¡æ§é˜¶æ®µ
+	uint16_t Password_Poweron;	 //å¼€æœºç®¡æ§å¯†ç 
+	uint16_t Password_Grade[4][2]; //1-4çº§ç®¡æ§å¤©æ•°åŠå¯†ç 
+	uint16_t Remain_day;		   //å½“å‰é˜¶æ®µå‰©ä½™å¤©æ•°
+	uint16_t Run_day;			   //å½“å‰é˜¶æ®µè¿è¡Œå¤©æ•°
+	uint16_t Run_hour;			   //å½“å‰é˜¶æ®µè¿è¡Œå°æ—¶
+	uint16_t Run_second;		   //å½“å‰é˜¶æ®µè¿è¡Œç§’
+	uint16_t Run_State;			   //è¿è¡ŒçŠ¶æ€
+} ControlPassword_st;
 
-typedef enum{
+typedef enum
+{
 	RETURN_AIR_PLUSS_MODE = 0,
 	SET_FAN_SPEED_MODE,
-}return_air_mode_st;
+} return_air_mode_st;
 typedef struct
 {
-	 uint16_t           timer;
-	 return_air_mode_st  return_air_work_mode;
-}return_air_sta_st;
-
-typedef struct
-{
-		uint16_t 			Sec;
-		uint16_t 			Min;
-		uint16_t 			Hour;
-		uint16_t 			Day;
-		uint16_t 			Mon;
-		uint16_t 			Year;
-		uint16_t 			Weekday;
-	  time_t 		    u32Systime;
-}System_Time_st;
+	uint16_t timer;
+	return_air_mode_st return_air_work_mode;
+} return_air_sta_st;
 
 typedef struct
 {
-	 uint16_t       u16Hardware_ver;
-	 uint16_t       u16Software_ver;
-	 uint16_t       u16Status_remap[4];
-	 uint16_t       u16Din_bitmap[2];
-	 uint16_t       u16Dout_bitmap[2];
-	 uint16_t       u16Alarm_bitmap[ALARM_TOTAL_WORD];
-	 uint16_t       u16Ain[AI_MAX_CNT];//
-	 uint16_t       u16AO[AO_MAX_CNT];
-	 Com_tnh_st     u16TH[2];//ÎÂÊª¶È
-	 uint16_t       u16Pluse_CNT;
-	 uint16_t       u16Cur_Water;
-	 uint16_t       u16Last_Water;
-	 uint16_t       u16Cumulative_Water[2];//ÀÛ¼ÆÈ¡Ë®
-	 uint16_t       u16PM25;
-	 uint16_t       u16Rev1[3];
-	 uint16_t       u16Runtime[2][DO_MAX_CNT];//Ê¹ÓÃÊ±¼ä
-	 uint16_t       u16WL;//Ë®Î»
-	System_Time_st  Sys_Time;//ÏµÍ³Ê±¼ä
-		uint16_t    TEST; 
-		uint16_t    TEST2; 
-		uint16_t    TEST3; 
-		uint16_t    TEST4; 
-			uint16_t    TEST5; 
-			uint16_t    TEST6; 
-			uint16_t    REQ_TEST[3]; 
-}ComSta_st;
-
+	uint16_t Sec;
+	uint16_t Min;
+	uint16_t Hour;
+	uint16_t Day;
+	uint16_t Mon;
+	uint16_t Year;
+	uint16_t Weekday;
+	time_t u32Systime;
+} System_Time_st;
 
 typedef struct
 {
-		sys_info_st						sys_info;
-		status_general_st			general;												//3
-		mbm_sts_st						mbm;														//25
-		uint16_t 							ain[AI_MAX_CNT];//
-		uint16_t							aout[AO_MAX_CNT];								//6
-//		uint16_t							CFM;														//×Ü·çÁ¿
-//    uint16_t							pwmout[PWM_MAX_CNT];						//2
-		uint16_t							din_bitmap[2];									//2
-		uint16_t							dout_bitmap[2];										//2
-		uint16_t							status_remap[4];								//4
-		uint16_t							alarm_bitmap[7];								//6	
-		uint16_t							Alarm_COM_NTC_BIT[2];						//2	
-//		uint16_t							flash_program_flag;							//1
-//		run_time_st						run_time[DO_MAX_CNT];	
-		alarm_state_cnt_st    alarm_status_cnt;
-		sys_tem_hum_st        sys_tem_hum;
-//		work_mode_st          sys_work_mode;
-//		uint16_t              flow_diff_timer;
-//		return_air_sta_st     return_air_status;
-//		uint16_t							Hum_Water_Level;								//1
-//		ControlPassword_st			ControlPassword;//5¼¶ÃÜÂë¹Ü¿Ø
-		ComSta_st             ComSta;
-}status_st;
+	uint16_t u16Hardware_ver;
+	uint16_t u16Software_ver;
+	uint16_t u16Status_remap[4];
+	uint16_t u16Din_bitmap[2];
+	uint16_t u16Dout_bitmap[2];
+	uint16_t u16Alarm_bitmap[ALARM_TOTAL_WORD];
+	uint16_t u16Ain[AI_MAX_CNT]; //
+	uint16_t u16AO[AO_MAX_CNT];
+	Com_tnh_st u16TH[2]; //æ¸©æ¹¿åº¦
+	uint16_t u16Pluse_CNT;
+	uint16_t u16Cur_Water;
+	uint16_t u16Last_Water;
+	uint16_t u16Cumulative_Water[2]; //ç´¯è®¡å–æ°´
+	uint16_t u16PM25;
+	uint16_t u16Rev1[3];
+	uint16_t u16Runtime[2][DO_MAX_CNT]; //ä½¿ç”¨æ—¶é—´
+	uint16_t u16WL;						//æ°´ä½
+	System_Time_st Sys_Time;			//ç³»ç»Ÿæ—¶é—´
+	uint16_t TEST;
+	uint16_t TEST2;
+	uint16_t TEST3;
+	uint16_t TEST4;
+	uint16_t TEST5;
+	uint16_t TEST6;
+	uint16_t REQ_TEST[3];
+} ComSta_st;
 
+typedef struct
+{
+	sys_info_st sys_info;
+	status_general_st general;	 //3
+	mbm_sts_st mbm;				   //25
+	uint16_t ain[AI_MAX_CNT];	  //
+	uint16_t aout[AO_MAX_CNT];	 //6
+								   //		uint16_t							CFM;														//æ€»é£é‡
+								   //    uint16_t							pwmout[PWM_MAX_CNT];						//2
+	uint16_t din_bitmap[2];		   //2
+	uint16_t dout_bitmap[2];	   //2
+	uint16_t status_remap[4];	  //4
+	uint16_t alarm_bitmap[7];	  //6
+	uint16_t Alarm_COM_NTC_BIT[2]; //2
+								   //		uint16_t							flash_program_flag;							//1
+								   //		run_time_st						run_time[DO_MAX_CNT];
+	alarm_state_cnt_st alarm_status_cnt;
+	sys_tem_hum_st sys_tem_hum;
+	//		work_mode_st          sys_work_mode;
+	//		uint16_t              flow_diff_timer;
+	//		return_air_sta_st     return_air_status;
+	//		uint16_t							Hum_Water_Level;								//1
+	//		ControlPassword_st			ControlPassword;//5çº§å¯†ç ç®¡æ§
+	ComSta_st ComSta;
+} status_st;
 
 typedef struct
 {
 	config_st config;
-	status_st status;	
-}sys_reg_st;
-
+	status_st status;
+} sys_reg_st;
 
 typedef enum
 {
-	TEM_HUM_SENSOR1_BPOS=0,
+	TEM_HUM_SENSOR1_BPOS = 0,
 	TEM_HUM_SENSOR2_BPOS,
 	TEM_HUM_SENSOR3_BPOS,
 	TEM_HUM_SENSOR4_BPOS,
@@ -929,9 +916,6 @@ typedef enum
 	PDU_01_MODULE_BPOS,
 	PDU_02_MODULE_BPOS,
 	PDU_03_MODULE_BPOS,
-}DEV_MASK_MB_BPOS;
-
+} DEV_MASK_MB_BPOS;
 
 #endif //	__SYS_CONF
-
-

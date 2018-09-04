@@ -53,6 +53,7 @@ enum
     WATER_NO = 0x00,
     WATER_NORMAL_ICE = 0x01,
     WATER_HEAT = 0x02,
+    WATER_NORMAL_ICE_2 = 0x04,
 };
 
 //水路控制方案

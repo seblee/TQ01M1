@@ -106,6 +106,7 @@ static void test_mode_init_data(void)
 		extern local_reg_st 				l_sys;	
 		uint8_t u8Temp=0;
 		uint16_t u16W_Flow=1000;
+		static uint8_t u8Test[2]={0};
 	
 		static uint32_t u32Sterilize_Interval=0;
 		static uint16_t u16Sterilize_Time=0;
@@ -143,6 +144,7 @@ static void test_mode_init_data(void)
         g_sys.config.dev_mask.mb_comp = 0x01;
         g_sys.config.dev_mask.dout[0] = DO_MASK1;
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
+				l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
 				l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
 				l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001<<DO_COMP1_BPOS)|(0x0001<<DO_COMP2_BPOS)|(0x0001<<DO_FAN_BPOS);			
@@ -181,7 +183,8 @@ static void test_mode_init_data(void)
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
 				l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
 
-				l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001<<DO_WP_BPOS)|(0x0001<<DO_UV1_BPOS)|(0x0001<<DO_UV2_BPOS)|(0x0001<<DO_DV_BPOS);					
+				l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001<<DO_UV1_BPOS)|(0x0001<<DO_UV2_BPOS)|(0x0001<<DO_WP_BPOS)|(0x0001<<DO_DV_BPOS)|(0x0001<<DO_WP2_BPOS);		
+				l_sys.bitmap[1][BITMAP_MANUAL] = (0x0001<<(DO_DV2_BPOS>>16));			
 				break;
 			case TEST_HEAT_WATER://出热水
 				g_sys.config.dev_mask.ain =0xffff;
@@ -214,8 +217,74 @@ static void test_mode_init_data(void)
 				l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001<<DO_COMP1_BPOS)|(0x0001<<DO_COMP2_BPOS)|(0x0001<<DO_FAN_BPOS)|(0x0001<<DO_WV_BPOS)|(0x0001<<DO_CV_BPOS);			
 			  l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 80;  				
 				break;
+			case TEST_Relay://测试继电器
+				u8Test[0]++;
+				if(u8Test[0]>TEST_TIME)
+				{
+					if(u8Test[0]>TEST_TIME*2)
+					{
+						u8Test[0]=0;
+					}		
+					g_sys.config.dev_mask.ain =0xffff;
+					g_sys.config.dev_mask.din[0] = 0x7fff;
+					g_sys.config.dev_mask.din[1] = 0xffff;
+					g_sys.config.dev_mask.aout = 0xffff;
+					g_sys.config.dev_mask.mb_comp = 0x01;
+					g_sys.config.dev_mask.dout[0] = DO_MASK1;
+					g_sys.config.dev_mask.dout[1] = DO_MASK2;
 				
+					l_sys.bitmap[0][BITMAP_MANUAL] = DO_MASK1;
+					u8Test[1]++;
+					if(u8Test[1]>TEST_CICLE*2)
+					{
+						u8Test[1]=0;	
+					}
+					if(u8Test[1]>TEST_CICLE)
+					{
+							l_sys.bitmap[0][BITMAP_MANUAL] &= ~(0x0001<<DO_FAN_BPOS);						
+					}
+					l_sys.bitmap[1][BITMAP_MANUAL] = DO_MASK2;			
+					l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 50;  
+					l_sys.ao_list[AO_EC_COMPRESSOR][BITMAP_MANUAL] = 50;
+					l_sys.ao_list[AO_WATER_VALVE][BITMAP_MANUAL] = 50;
+					l_sys.ao_list[AO_PREV_1][BITMAP_MANUAL] = 50;
+					l_sys.ao_list[AO_PREV_2][BITMAP_MANUAL] = 50;						
+				}
+				else
+				{
+						g_sys.config.dev_mask.ain =0x00;
+						g_sys.config.dev_mask.din[0] = 0x00;
+						g_sys.config.dev_mask.din[1] = 0x00;
+						g_sys.config.dev_mask.aout = 0x00;
+						g_sys.config.dev_mask.mb_comp = 0x00;
+						g_sys.config.dev_mask.dout[0] = DO_MASK1;
+						g_sys.config.dev_mask.dout[1] = DO_MASK2;
+						l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
+
+						l_sys.bitmap[0][BITMAP_MANUAL] = 0x00;					
+						if(u8Test[1]<=TEST_CICLE)
+						{
+								l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001<<DO_FAN_BPOS);						
+						}					
+						l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 0x00;  
+						l_sys.ao_list[AO_EC_COMPRESSOR][BITMAP_MANUAL] = 0x00;
+						l_sys.ao_list[AO_WATER_VALVE][BITMAP_MANUAL] = 0x00;
+						l_sys.ao_list[AO_PREV_1][BITMAP_MANUAL] = 0x00;
+						l_sys.ao_list[AO_PREV_2][BITMAP_MANUAL] = 0x00;		
+					
+						u8Temp=g_sys.config.ComPara.u16NormalWater_Temp/10;			
+						if(Heat_Send(HEAT_WRITEPARA,CLOSE_HEAT,u8Temp,g_sys.config.ComPara.u16Water_Flow))//退出
+						{
+							
+						}		
+						u32Sterilize_Interval=0;
+						u16Sterilize_Time=0;
+				}	
+					
+				break;			
 			default:
+				u8Test[0]=0;
+				u8Test[1]=0;
 				g_sys.config.ComPara.u16Test_Mode_Type=TEST_UNABLE;
 				g_sys.config.dev_mask.ain =0x00;
 				g_sys.config.dev_mask.din[0] = 0x00;
@@ -656,7 +725,7 @@ static void sys_comp_cooldown(void)
 		}	
 		
 				//童锁
-		if((sys_get_di_sts(DI_K3_BPOS)==1))
+		if((sys_get_di_sts(DI_Child_BPOS)==1))
 		{
 				l_sys.ChildLock_Cnt[0]++;				
 		}

@@ -14,11 +14,11 @@ enum
 		DI_DRINK_MD_BPOS,				
 		DI_HI_PRESS1_BPOS,							
 		DI_HI_PRESS2_BPOS,				
-		DI_K1_BPOS,					
-		DI_K2_BPOS,	
-		DI_K3_BPOS,					
+		DI_Cold_1_BPOS,					
+		DI_Heat_BPOS,	
+		DI_Child_BPOS,					
 		DI_OPEN_BPOS,		
-		DI_K5_BPOS,
+		DI_Cold_2_BPOS,
 		DI_FAN01_OD_BPOS,						
 		DI_RESERVE_01,
 		DI_RESERVE_02,
@@ -38,7 +38,11 @@ enum
 #define SLE1_READ     GPIO_ReadInputDataBit( SLE_GPIO, SLE1_PIN)
 #define SLE2_READ     GPIO_ReadInputDataBit( SLE_GPIO, SLE2_PIN)
 
-#define 	Com_Pad  	0x01
+enum
+{
+		Com_Pad  	 =0x01,
+		Start_Init =0x02,//上电初始化
+};
 
 #define DIN_WORD2  16	//2个字节
 #define DO_WORD2   16	//2个字节

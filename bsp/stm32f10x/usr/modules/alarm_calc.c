@@ -740,45 +740,41 @@ static void alarm_arbiration(void)
 			alarm_bitmap_mask_op(DO_FAN_BPOS,0);
 		}	
 		
-//		if((g_sys.config.ComPara.u16Manual_Mode_En)||(g_sys.config.ComPara.u16Test_Mode_En))//测试模式,限制告警输出
+//		 //关闭公共告警
+//		alarm_bitmap_op(DO_ALARM_BPOS,0);	
+//		alarm_bitmap_mask_op(DO_ALARM_BPOS,1);
+//		
+//		if(g_sys.config.general.Alarm_Beep)
 //		{
-//				return;
+//				if((get_alarm_bitmap(ACL_HI_PRESS1))||(get_alarm_bitmap(ACL_HI_PRESS1)))
+//				{
+//						//开启公共报警
+//						alarm_bitmap_op(DO_ALARM_BPOS,1);
+//						alarm_bitmap_mask_op(DO_ALARM_BPOS,1);
+//									
+//				}
 //		}
-		 //关闭公共告警
-		alarm_bitmap_op(DO_ALARM_BPOS,0);	
-		alarm_bitmap_mask_op(DO_ALARM_BPOS,1);
-		
-		if(g_sys.config.general.Alarm_Beep)
-		{
-				if((get_alarm_bitmap(ACL_HI_PRESS1))||(get_alarm_bitmap(ACL_HI_PRESS1)))
-				{
-						//开启公共报警
-						alarm_bitmap_op(DO_ALARM_BPOS,1);
-						alarm_bitmap_mask_op(DO_ALARM_BPOS,1);
-									
-				}
-		}
-		else
-		{
-					//开启 公共报警开关
-				for(index=0;index<ACL_TOTAL_NUM;index++)
-				{
-					
-						if((g_sys.config.alarm[index].enable_mode & alarm_inst.alarm_sts[index].enable_mask) == ACL_ENMODE_ENABLE)
-						{
-							if(get_alarm_bitmap(index))//报警存在	
-							{
-								//开启公共报警
-								
-								alarm_bitmap_op(DO_ALARM_BPOS,1);
-								alarm_bitmap_mask_op(DO_ALARM_BPOS,1);
-														
-								break;
-							}
-						}
-				}
-					
-		}		
+//		else
+//		{
+//					//开启 公共报警开关
+//				for(index=0;index<ACL_TOTAL_NUM;index++)
+//				{
+//					
+//						if((g_sys.config.alarm[index].enable_mode & alarm_inst.alarm_sts[index].enable_mask) == ACL_ENMODE_ENABLE)
+//						{
+//							if(get_alarm_bitmap(index))//报警存在	
+//							{
+//								//开启公共报警
+//								
+//								alarm_bitmap_op(DO_ALARM_BPOS,1);
+//								alarm_bitmap_mask_op(DO_ALARM_BPOS,1);
+//														
+//								break;
+//							}
+//						}
+//				}
+//					
+//		}		
 }
 
 ////运行时间计算 

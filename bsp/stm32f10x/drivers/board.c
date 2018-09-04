@@ -97,21 +97,21 @@ void rt_hw_board_init(void)
 
 void hw_drivers_init(void)
 {
-	drv_adc_dma_init();//Ä£ÄâÊäÈë³õÊ¼»¯
+	drv_adc_dma_init();//æ¨¡æ‹Ÿè¾“å…¥åˆå§‹åŒ–
 		
- 	drv_dio_init();		//Êı×ÖÊäÈëÊä³ö³õÊ¼»¯
+ 	drv_dio_init();		//æ•°å­—è¾“å…¥è¾“å‡ºåˆå§‹åŒ–
 	
-	drv_pwm_init();		//Ä£ÄâÊä³ö³õÊ¼»¯
+	drv_pwm_init();		//æ¨¡æ‹Ÿè¾“å‡ºåˆå§‹åŒ–
 	
-	drv_i2c_init();		//IIC³õÊ¼»¯
+	drv_i2c_init();		//IICåˆå§‹åŒ–
 	
 	AM_Init();				//AM Sensor init
 	
-	drv_rtc_init();		//RTC³õÊ¼»¯
+	drv_rtc_init();		//RTCåˆå§‹åŒ–
 	
-	Drv_CNT_Pluse_Init();//Âö³å¼ÆÊı
+	Drv_CNT_Pluse_Init();//è„‰å†²è®¡æ•°
 	
-//	xPort_Usart_Init(UART_HEAT);//¼ÓÈÈÆ÷	
+//	xPort_Usart_Init(UART_HEAT);//åŠ çƒ­å™¨	
 //	drv_led_init();
 }
 /*@}*/

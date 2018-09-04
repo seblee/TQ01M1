@@ -51,7 +51,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM]=
 		{				5,			&g_sys.config.general.alarm_bypass_en,									 0,				  	1,					0,						3,					1,      NULL   	},
 		{				6,			&g_sys.config.general.testing_mode_en,									 0,				  	1,					0,						4,					1,      NULL   	},
 		{				7,			&g_sys.config.general.power_mode_mb_en,									 0,					  1,					1,						3,					1,      NULL   	},
-		{				8,      &g_sys.config.dev_mask.din_bitmap_polarity[0],					 0,				  	0xffff,			0xE5B,				3,					1,      NULL   	},// DI极性
+		{				8,      &g_sys.config.dev_mask.din_bitmap_polarity[0],					 0,				  	0xFFFF,			0x3E5B,				3,					1,      NULL   	},// DI极性
 //		{				8,      &g_sys.config.dev_mask.din_bitmap_polarity[0],					 0,				  	0xffff,			0xE24,				3,					1,      NULL   	},// DI极性
 		{				9,			&g_sys.config.dev_mask.din_bitmap_polarity[1],					 0,				  	0xffff,			0x00,					3,					1,      NULL   	},
 		{				10,			&g_sys.config.dev_mask.ain,													     0,				  	0xffff,			0x001F,				3,					1,      NULL   	},
@@ -97,8 +97,8 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM]=
 		{				50,			&g_sys.config.ComPara.u16WaterSource_Mode,							 0,				  	1,				  0,					  2,					1,      NULL   	},
 		{				51,			&g_sys.config.ComPara.u16Change_WaterTank,							 0,				  	1,				  0,					  2,					1,      NULL   	},
 		{				52,			&g_sys.config.ComPara.u16Sterilize_Mode,							   0x01,			 0x03,			  0x03,					  2,					1,      NULL   	},
-		{				53,			&g_sys.config.ComPara.u16Sterilize_Time[1],							 1,				   60,				  10,					  2,					1,      NULL   	},
-		{				54,			&g_sys.config.ComPara.u16Sterilize_Interval[1],					 1,				   10000,				120,					2,					1,      NULL   	},
+		{				53,			&g_sys.config.ComPara.u16Sterilize_Time[1],							 1,				   60,				  6,					  2,					1,      NULL   	},
+		{				54,			&g_sys.config.ComPara.u16Sterilize_Interval[1],					 1,				   10000,				30,					2,					1,      NULL   	},
 		{				55,			NULL,																										 0,				  3600,					0,						0,					1,      NULL   	},
 		{				56,			&g_sys.config.ComPara.u16Reset,									         0,				  0xFF,				  0,					  2,					1,      NULL   	},
 		{				57,		  &g_sys.config.ComPara.u16Test_Mode_Type,								 0,				  0xFF,				  0,					  2,					1,      NULL   	},//121
@@ -230,8 +230,14 @@ static init_state_em get_ee_status(void)
 		uint8_t ee_pflag;
 		rt_thread_delay(10);											//wait for eeprom power on
 		I2C_EE_BufRead(&ee_pflag,STS_EE_ADDR,1);//启动区
+	
+		l_sys.SEL_Jump=GetSEL();
 //		//TEST
-//		ee_pflag=EE_FLAG_LOAD_DEBUT;	
+		if(l_sys.SEL_Jump&Start_Init)//上电初始化
+		{
+			reset_runtime(0xFF);//清零所有运行时间	
+			ee_pflag=EE_FLAG_LOAD_DEBUT;			
+		}	
 		switch(ee_pflag)
 		{
 				case(EE_FLAG_LOAD_USR):

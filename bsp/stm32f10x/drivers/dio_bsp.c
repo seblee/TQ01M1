@@ -8,7 +8,7 @@
 
 #define	DI_MAX_CNT						15
 //#define DIN_MASK_MASK         0x003f
-//#define DIN_MASK_MASK1        0xffff //ÆÁ±Î
+//#define DIN_MASK_MASK1        0xffff //å±è”½
 #define DIN_POLARITY_MASK     0xffc0
 #define DI_BUF_DEPTH 					600
 #define	DI_UPDATE_PERIOD			1000
@@ -43,7 +43,7 @@ typedef struct
 
 static uint16_t do_set(int16_t pin_id, BitAction value);
 #define Pin_Map_In  DI_MAX_CNT
-const pin_map_st in_pin_map_inst[Pin_Map_In]=//Êı×ÖÊäÈëPin_Map
+const pin_map_st in_pin_map_inst[Pin_Map_In]=//æ•°å­—è¾“å…¥Pin_Map
 {
 		{GPIO_Pin_7, 	  GPIOC},		//DI1
 		{GPIO_Pin_8, 	  GPIOC},		//DI2
@@ -53,7 +53,7 @@ const pin_map_st in_pin_map_inst[Pin_Map_In]=//Êı×ÖÊäÈëPin_Map
 		{GPIO_Pin_6, 		GPIOC},		//DI4
 		{GPIO_Pin_12, 	GPIOD},		//DI6
 		{GPIO_Pin_11, 	GPIOD},		//DI7
-		{GPIO_Pin_13, 	GPIOD},		//DI5//ÖĞÏÂË®Î»
+		{GPIO_Pin_13, 	GPIOD},		//DI5//ä¸­ä¸‹æ°´ä½
 		{GPIO_Pin_14, 	GPIOD},		//DI8		
 		{GPIO_Pin_15, 	GPIOD},		//DI9
 		{GPIO_Pin_10, 	GPIOD},		//DI10
@@ -65,7 +65,7 @@ const pin_map_st in_pin_map_inst[Pin_Map_In]=//Êı×ÖÊäÈëPin_Map
 //		{GPIO_Pin_12, 	GPIOA},		//DI16
 };
 #define Pin_Map_Out  21
-const pin_map_st out_pin_map_inst[Pin_Map_Out]=//Êı×ÖÊä³öPin_Map
+const pin_map_st out_pin_map_inst[Pin_Map_Out]=//æ•°å­—è¾“å‡ºPin_Map
 {
 //		{GPIO_Pin_7, 	  GPIOE},		//DO1
 //		{GPIO_Pin_1, 	  GPIOB},		//DO2
@@ -145,9 +145,10 @@ void di_thread_entry(void* parameter)
   * @param  none
   * @retval none
   */
-//Êı×ÖÊäÈëÊä³ö³õÊ¼»¯º¯Êı
+//æ•°å­—è¾“å…¥è¾“å‡ºåˆå§‹åŒ–å‡½æ•°
 static void drv_dio_bsp_init(void)
 {
+		extern local_reg_st l_sys;
 		GPIO_InitTypeDef GPIO_InitStructure;
 		uint16_t i; 
 			
@@ -156,7 +157,7 @@ static void drv_dio_bsp_init(void)
 		
 		GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 
-		//Êı×ÖÊäÈëPIN³õÊ¼»¯
+		//æ•°å­—è¾“å…¥PINåˆå§‹åŒ–
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 		for(i=0;i<Pin_Map_In;i++)
@@ -165,7 +166,7 @@ static void drv_dio_bsp_init(void)
 				GPIO_Init(in_pin_map_inst[i].pin_base, &GPIO_InitStructure);	
 		}
 
-		//Êı×ÖÊä³öPIN³õÊ¼»¯
+		//æ•°å­—è¾“å‡ºPINåˆå§‹åŒ–
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;		
 		for(i=0;i<Pin_Map_Out;i++)
@@ -174,17 +175,18 @@ static void drv_dio_bsp_init(void)
 				GPIO_Init(out_pin_map_inst[i].pin_base, &GPIO_InitStructure);	
 		}			
 //			Led_Gpio_Init();
-		//¸´Î»
+		//å¤ä½
 		for(i=1;i<Pin_Map_Out;i++)
 		{
 				do_set(i,Bit_RESET);	
 		}		
 		
-		//ÌøÏßÑ¡Ôñ³õÊ¼»¯
+		//è·³çº¿é€‰æ‹©åˆå§‹åŒ–
 		GPIO_InitStructure.GPIO_Pin =  SLE1_PIN|SLE2_PIN;
 		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU ;
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;//50M
 		GPIO_Init(SLE_GPIO, &GPIO_InitStructure);	
+
 		
 		return;
 }
@@ -195,7 +197,7 @@ static void drv_dio_bsp_init(void)
   * @param  none
   * @retval none
   */
-//Êı×ÖÊäÈë³õÊ¼»¯º¯Êı£
+//æ•°å­—è¾“å…¥åˆå§‹åŒ–å‡½æ•°?
 static void dio_reg_init(void)
 {
 		uint16_t i;
@@ -214,7 +216,7 @@ static void dio_reg_init(void)
   * @param  none
   * @retval none
   */
-//Êı×ÖÊäÈëOOK½âµ÷
+//æ•°å­—è¾“å…¥OOKè§£è°ƒ
 static void di_reg_update(void)
 {
 		uint16_t	di_data[2],i,j,pusl_mask;
@@ -248,7 +250,7 @@ static void di_reg_update(void)
 		{
 				if(i<DIN_WORD2)
 				{			
-						if(pusl_mask & (0x01<<i))//Âö³å²É¼¯
+						if(pusl_mask & (0x01<<i))//è„‰å†²é‡‡é›†
 						{
 //								if(di_reg[i] > (DI_BUF_DEPTH - 15))
 //								{
@@ -258,7 +260,7 @@ static void di_reg_update(void)
 //								{
 //										di_data[0] |= (0x0001<<i);
 //								}		
-								//20170223,Ì¨´ï·ç»úĞŞ¸Ä
+								//20170223,å°è¾¾é£æœºä¿®æ”¹
 //								if((di_reg[i] > (DI_BUF_DEPTH - 15))||(di_reg[i] < g_sys.config.alarm[ACL_FAN_OVERLOAD2].alarm_param))
 //								{
 //										di_data[0] &= ~(0x0001<<i);			
@@ -305,7 +307,7 @@ static void di_reg_update(void)
   * @param  none
   * @retval 18 channels data, each bit stands for one channel
   */
-//Êı×ÖÊäÈëº¯Êı£¬¶ÔËùÓĞÊı×ÖÊäÈë×´Ì¬½øĞĞ¸üĞÂ
+//æ•°å­—è¾“å…¥å‡½æ•°ï¼Œå¯¹æ‰€æœ‰æ•°å­—è¾“å…¥çŠ¶æ€è¿›è¡Œæ›´æ–°
 static uint32_t di_read(void)
 {
 		uint32_t read_bitmap;
@@ -322,7 +324,7 @@ static uint32_t di_read(void)
 		return read_bitmap;
 }
 
-//Êı×ÖÊä³ö¿ØÖÆº¯Êı£»
+//æ•°å­—è¾“å‡ºæ§åˆ¶å‡½æ•°ï¼›
 static uint16_t do_set(int16_t pin_id, BitAction value)
 {
 		if((pin_id <= Pin_Map_Out)&&(pin_id > 0))
@@ -336,7 +338,7 @@ static uint16_t do_set(int16_t pin_id, BitAction value)
 		}
 }
 
-//ÖÃÎ»ËùÓĞÊı×ÖÊä³ö
+//ç½®ä½æ‰€æœ‰æ•°å­—è¾“å‡º
 static void do_set_all(void)
 {
 		uint16_t i;
@@ -346,7 +348,7 @@ static void do_set_all(void)
 		}
 }
 
-//¸´Î»ËùÓĞÊı×ÖÊä³ö
+//å¤ä½æ‰€æœ‰æ•°å­—è¾“å‡º
 static void do_reset_all(void)
 {
 		uint16_t i;
@@ -362,7 +364,7 @@ static void do_reset_all(void)
   * @param  none
   * @retval none
   */
-//Êı×ÖÊäÈë¶¨Ê±Æ÷»Øµ÷º¯Êı£¬¶ÔÊı×ÖÊäÈëµçÆ½½øĞĞ²ÉÑùºó·ÅÈë»º³å¶ÓÁĞ£»
+//æ•°å­—è¾“å…¥å®šæ—¶å™¨å›è°ƒå‡½æ•°ï¼Œå¯¹æ•°å­—è¾“å…¥ç”µå¹³è¿›è¡Œé‡‡æ ·åæ”¾å…¥ç¼“å†²é˜Ÿåˆ—ï¼›
 static void stimer_di_timeout(void* parameter)
 {	
 
@@ -385,7 +387,7 @@ static void stimer_di_timeout(void* parameter)
   * @param  none
   * @retval none
   */
-//Êı×ÖÊäÈë¶¨Ê±Æ÷£¬Ã¿6msÖÜÆÚ¶ÔÊı×ÖÊäÈë½øĞĞ²ÉÑù
+//æ•°å­—è¾“å…¥å®šæ—¶å™¨ï¼Œæ¯6mså‘¨æœŸå¯¹æ•°å­—è¾“å…¥è¿›è¡Œé‡‡æ ·
 static uint16_t	drv_di_timer_init(void)
 {
 		rt_timer_t stimer_dio;
@@ -423,10 +425,10 @@ void di_sts_update(sys_reg_st*	gds_sys_ptr)
 //				rt_kprintf("din_mask_bitmap = %X\n",din_mask_bitmap);
 //	  din_bitmap_polarity = gds_sys_ptr->config.dev_mask.din_bitmap_polarity[0]&(DIN_POLARITY_MASK);
 //					rt_kprintf("din_bitmap_polarity = %X\n",din_bitmap_polarity);
-//	  //mask±¨¾¯ÑÚÂë
+//	  //maskæŠ¥è­¦æ©ç 
 //		dio_dev_inst.din.bitmap[0] = (~(dio_dev_inst.din.bitmap[0]^din_bitmap_polarity));
 //				rt_kprintf("dio_dev_inst.din.bitmap[0]1 = %X\n",dio_dev_inst.din.bitmap[0]);
-//		// Êı×ÖÊäÈëÑÚÂë
+//		// æ•°å­—è¾“å…¥æ©ç 
 //		gds_sys_ptr->status.din_bitmap[0] = din_mask_bitmap & dio_dev_inst.din.bitmap[0];
 //					rt_kprintf("gds_sys_ptr->status.din_bitmap[0] = %X\n",gds_sys_ptr->status.din_bitmap[0]);
 	
@@ -438,17 +440,17 @@ void di_sts_update(sys_reg_st*	gds_sys_ptr)
 
 		din_bitmap_polarity[0] = gds_sys_ptr->config.dev_mask.din_bitmap_polarity[0];	
 //		din_bitmap_polarity[0]=0x5B;
-	  //mask±¨¾¯ÑÚÂë
+	  //maskæŠ¥è­¦æ©ç 
 		dio_dev_inst.din.bitmap[0] = (~(dio_dev_inst.din.bitmap[0]^din_bitmap_polarity[0]));
 		dio_dev_inst.din.bitmap[1] = (~(dio_dev_inst.din.bitmap[1]^din_bitmap_polarity[1]));
-		// Êı×ÖÊäÈëÑÚÂë
+		// æ•°å­—è¾“å…¥æ©ç 
 		gds_sys_ptr->status.din_bitmap[0] = din_mask_bitmap[0] & dio_dev_inst.din.bitmap[0];
 		gds_sys_ptr->status.din_bitmap[1] &=0xFF;	
-		gds_sys_ptr->status.din_bitmap[1] |= ((din_mask_bitmap[1] & dio_dev_inst.din.bitmap[1])<<8);//·Åµ½¸ß16Î»
+		gds_sys_ptr->status.din_bitmap[1] |= ((din_mask_bitmap[1] & dio_dev_inst.din.bitmap[1])<<8);//æ”¾åˆ°é«˜16ä½
 		
 //		rt_kprintf("bitmap[0] = %X,din_bitmap[0] = %X\n",dio_dev_inst.din.bitmap[0],gds_sys_ptr->status.din_bitmap[0]);		
 
-		// Êı×ÖÊäÈëÑÚÂë
+		// æ•°å­—è¾“å…¥æ©ç 
 		gds_sys_ptr->status.ComSta.u16Din_bitmap[0] = din_mask_bitmap[0] & dio_dev_inst.din.bitmap[0];	
 //		rt_kprintf("bitmap[0] = %X,din_bitmap[0] = %X\n",dio_dev_inst.din.bitmap[0],gds_sys_ptr->status.ComSta.u16Din_bitmap[0]);		
 }
@@ -458,7 +460,7 @@ void dio_set_do(uint16_t channel_id, BitAction data)
 		do_set(channel_id,data);
 }
 
-//LEDÉÁË¸
+//LEDé—ªçƒ
 void led_toggle(void)
 {
 		extern sys_reg_st		g_sys;
@@ -476,7 +478,7 @@ void led_toggle(void)
     }
 }
 
-//»ñÈ¡ÌøÏßÖµ
+//è·å–è·³çº¿å€¼
 uint8_t GetSEL(void)
 {  
 		extern local_reg_st l_sys;

@@ -52,12 +52,8 @@ void cpad_modbus_slave_thread_entry(void* parameter)
 		extern local_reg_st l_sys;
 	
 		rt_thread_delay(MODBUS_SLAVE_THREAD_DELAY);
-
-//	  cpad_MBRTUInit(1 , UPORT_CPAD, 9600,  MB_PAR_NONE);
 	  cpad_MBRTUInit(1 , UPORT_CPAD, 19200,  MB_PAR_NONE);
-//		l_sys.SEL_Jump=GetSEL();
 		rt_kprintf("cpad_modbus_slave_thread_entry\n");	
-//		rt_kprintf("SEL_Jump = %d\n",l_sys.SEL_Jump);		
 		while(1)
 		{
 //				if(l_sys.SEL_Jump&Com_Pad)//´®¿ÚÆÁ

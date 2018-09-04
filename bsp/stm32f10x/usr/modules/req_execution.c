@@ -1072,8 +1072,8 @@ void WaterOut_Key(void)
 		extern sys_reg_st		g_sys;
 		extern local_reg_st l_sys;	
 		
-		//冷水
-		if((sys_get_di_sts(DI_K1_BPOS)==1))
+		//冷水 1
+		if((sys_get_di_sts(DI_Cold_1_BPOS)==1))
 		{
 				l_sys.OutWater_Key |=WATER_NORMAL_ICE;		
 				l_sys.OutWater_Delay[0] =	WATER_MAXTIME;		
@@ -1082,6 +1082,18 @@ void WaterOut_Key(void)
 		{
 				l_sys.OutWater_Key &=~WATER_NORMAL_ICE;		
 				l_sys.OutWater_Delay[0] =	0;				
+		}		
+
+		//冷水 2
+		if((sys_get_di_sts(DI_Cold_2_BPOS)==1))
+		{
+				l_sys.OutWater_Key |=WATER_NORMAL_ICE_2;		
+				l_sys.OutWater_Delay[2] =	WATER_MAXTIME;		
+		}
+		else
+		{
+				l_sys.OutWater_Key &=~WATER_NORMAL_ICE_2;		
+				l_sys.OutWater_Delay[2] =	0;				
 		}			
 		
 //		//童锁
@@ -1105,7 +1117,7 @@ void WaterOut_Key(void)
 		if(l_sys.ChildLock_Key)
 		{
 				//热水
-				if((sys_get_di_sts(DI_K2_BPOS)==1))
+				if((sys_get_di_sts(DI_Heat_BPOS)==1))
 				{
 						l_sys.OutWater_Key |=WATER_HEAT;		
 						l_sys.OutWater_Delay[1] =	WATER_MAXTIME;						
@@ -1118,7 +1130,7 @@ void WaterOut_Key(void)
 		}
 		else
 		{
-				if((sys_get_di_sts(DI_K2_BPOS)==1))//无效
+				if((sys_get_di_sts(DI_Heat_BPOS)==1))//无效
 				{
 		
 				}
@@ -1175,11 +1187,13 @@ void WaterOut_Close(uint8_t u8Type,uint8_t u8Water)
 				if(u8Water==WATER_NORMAL_ICE)
 				{
 						//常温水相关
+						req_bitmap_op(DO_UV2_BPOS,0);//紫外灯			
+					
 						req_bitmap_op(DO_WP_BPOS,0);//出水泵
-
-						req_bitmap_op(DO_UV2_BPOS,0);//紫外灯						
-
 						req_bitmap_op(DO_DV_BPOS,0);//出水阀	
+					
+						req_bitmap_op(DO_WP2_BPOS,0);//出水泵2
+						req_bitmap_op(DO_DV2_BPOS,0);//出水阀2	
 				}
 				else
 				if(u8Water==WATER_HEAT)
@@ -1488,10 +1502,10 @@ void WaterOut_req_exe(void)
 					
 				}			
 		}
-		else if(((g_sys.config.ComPara.u16Water_Mode==WATER_NORMAL_ICE)&&(g_sys.config.ComPara.u16Water_Flow))||(l_sys.OutWater_Key&WATER_NORMAL_ICE))//常温水/冰水
+		else if(((g_sys.config.ComPara.u16Water_Mode==WATER_NORMAL_ICE)&&(g_sys.config.ComPara.u16Water_Flow))||(l_sys.OutWater_Key&WATER_NORMAL_ICE)||(l_sys.OutWater_Key&WATER_NORMAL_ICE_2))//常温水/冰水
 		{
 				//外壳打开时，//关闭出水
-				if(sys_get_di_sts(DI_OPEN_BPOS)==1)
+				if(sys_get_di_sts(DI_OPEN_BPOS)==0)
 				{
 						WaterOut_Close(1,WATER_NORMAL_ICE);
 						WaterOut_Close(1,WATER_HEAT);
@@ -1528,12 +1542,21 @@ void WaterOut_req_exe(void)
 				}
 				else
 				{
-						l_sys.OutWater_OK=WATER_READ;		
-						req_bitmap_op(DO_WP_BPOS,1);//出水泵
-
-						req_bitmap_op(DO_UV2_BPOS,1);//紫外灯						
+						//出水1
+						if(((g_sys.config.ComPara.u16Water_Mode==WATER_NORMAL_ICE)&&(g_sys.config.ComPara.u16Water_Flow))||(l_sys.OutWater_Key&WATER_NORMAL_ICE))
+						{
+								req_bitmap_op(DO_WP_BPOS,1);//出水泵							
+								req_bitmap_op(DO_DV_BPOS,1);//出水阀								
+						}
+												
+						if(l_sys.OutWater_Key&WATER_NORMAL_ICE_2)
+						{
+								req_bitmap_op(DO_WP2_BPOS,1);//出水泵2							
+								req_bitmap_op(DO_DV2_BPOS,1);//出水阀2	
+						}
 						
-						req_bitmap_op(DO_DV_BPOS,1);//出水阀			
+						l_sys.OutWater_OK=WATER_READ;		
+						req_bitmap_op(DO_UV2_BPOS,1);//紫外灯								
 						l_sys.comp_timeout[DO_RH1_BPOS]=RH_DEALY;		
 						l_sys.OutWater_Flag=TRUE;//出水中						
 				}			
@@ -1564,7 +1587,7 @@ void Sterilize_req_exe(void)
 		static 	uint8_t  u8CNT=0;
 
 		//外壳打开时，关闭紫外灯
-		if(sys_get_di_sts(DI_OPEN_BPOS)==1)
+		if(sys_get_di_sts(DI_OPEN_BPOS)==0)
 		{
 				req_bitmap_op(DO_UV1_BPOS,0);//紫外灯
 				req_bitmap_op(DO_DWP_BPOS,0);//杀菌泵		

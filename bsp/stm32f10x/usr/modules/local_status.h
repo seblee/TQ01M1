@@ -152,7 +152,7 @@ typedef struct
 		uint8_t 	Set_Systime_Flag;//设置系统时间标识
 		uint8_t 	Set_Systime_Delay;//设置系统等待延时
 		uint8_t   OutWater_Key;//按键出水
-		uint16_t  OutWater_Delay[2];//按键出水延时
+		uint16_t  OutWater_Delay[3];//按键出水延时
 		uint8_t   ChildLock_Key;//童锁
 		uint8_t   ChildLock_Cnt[2];//童锁计数器
 }local_reg_st;

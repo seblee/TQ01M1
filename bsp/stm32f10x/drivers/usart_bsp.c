@@ -443,7 +443,7 @@ static void NVIC_Configuration(struct stm32_uart *uart)
 void drv_usart_init(void)
 {
     struct stm32_uart *uart;
-    //    struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT;
+    struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT;
     struct serial_configure config_fc = RT_SERIAL_CONFIG_DEFAULT;
     config_fc.reserved = 1;
 
@@ -481,10 +481,10 @@ void drv_usart_init(void)
 
 #ifdef RT_USING_UART3
     uart = &uart3;
-    config_fc.baud_rate = BAUD_RATE_115200;
+    config.baud_rate = BAUD_RATE_115200;
 
     serial3.ops = &stm32_uart_ops;
-    serial3.config = config_fc;
+    serial3.config = config;
 
     NVIC_Configuration(&uart3);
 
