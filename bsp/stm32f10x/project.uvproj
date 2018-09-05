@@ -1119,6 +1119,16 @@
             </File>
           </Files>
         </Group>
+        <Group>
+          <GroupName>sim_7600</GroupName>
+          <Files>
+            <File>
+              <FileName>sim7600.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\sim7600\sim7600.c</FilePath>
+            </File>
+          </Files>
+        </Group>
       </Groups>
     </Target>
   </Targets>

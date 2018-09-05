@@ -23,12 +23,12 @@
 
 /*@{*/
 
-extern int  rt_application_init(void);
+extern int rt_application_init(void);
 
 #ifdef __CC_ARM
 extern int Image$$RW_IRAM1$$ZI$$Limit;
 #elif __ICCARM__
-#pragma section="HEAP"
+#pragma section = "HEAP"
 #else
 extern int __bss_end;
 #endif
@@ -42,15 +42,14 @@ extern int __bss_end;
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void assert_failed(u8* file, u32 line)
+void assert_failed(u8 *file, u32 line)
 {
     rt_kprintf("\n\r Wrong parameter value detected on\r\n");
     rt_kprintf("       file  %s\r\n", file);
     rt_kprintf("       line  %d\r\n", line);
 
     //while (1) ;
-}
-
+} 
 /**
  * This function will startup RT-Thread RTOS.
  */
@@ -64,17 +63,17 @@ void rtthread_startup(void)
 
 #ifdef RT_USING_HEAP
 #if STM32_EXT_SRAM
-    rt_system_heap_init((void*)STM32_EXT_SRAM_BEGIN, (void*)STM32_EXT_SRAM_END);
+    rt_system_heap_init((void *)STM32_EXT_SRAM_BEGIN, (void *)STM32_EXT_SRAM_END);
 #else
 #ifdef __CC_ARM
-    rt_system_heap_init((void*)&Image$$RW_IRAM1$$ZI$$Limit, (void*)STM32_SRAM_END);
+    rt_system_heap_init((void *)&Image$$RW_IRAM1$$ZI$$Limit, (void *)STM32_SRAM_END);
 #elif __ICCARM__
-    rt_system_heap_init(__segment_end("HEAP"), (void*)STM32_SRAM_END);
+    rt_system_heap_init(__segment_end("HEAP"), (void *)STM32_SRAM_END);
 #else
     /* init memory system */
-    rt_system_heap_init((void*)&__bss_end, (void*)STM32_SRAM_END);
+    rt_system_heap_init((void *)&__bss_end, (void *)STM32_SRAM_END);
 #endif
-#endif  /* STM32_EXT_SRAM */
+#endif /* STM32_EXT_SRAM */
 #endif /* RT_USING_HEAP */
 
     /* init scheduler system */
@@ -96,14 +95,13 @@ void rtthread_startup(void)
     rt_system_scheduler_start();
 
     /* never reach here */
-    return ;
+    return;
 }
 
 int main(void)
 {
     /* disable interrupt first */
     rt_hw_interrupt_disable();
-	
 
     /* startup RT-Thread RTOS */
     rtthread_startup();

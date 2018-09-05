@@ -4,28 +4,27 @@
 #include "string.h"
 #include "user_mb_app.h"
 
-
 void AM_BUS_Config(void)
 {
-		GPIO_InitTypeDef  GPIO_InitStructure; 
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	
-	
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-		GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable , ENABLE);
-	 //Configure BUS pins: SDA_00 
-		GPIO_InitStructure.GPIO_Pin =  II_AM_SDA_00_Pin;
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-		GPIO_Init(II_AM_SDA_00_GPIO, &GPIO_InitStructure);
-		
-		GPIO_SetBits(II_AM_SDA_00_GPIO,II_AM_SDA_00_Pin); 
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
-		GPIO_InitStructure.GPIO_Pin =  II_AM_SDA_01_Pin;
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-		GPIO_Init(II_AM_SDA_01_GPIO, &GPIO_InitStructure);
-		
-		GPIO_SetBits(II_AM_SDA_01_GPIO,II_AM_SDA_01_Pin); 
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
+	//Configure BUS pins: SDA_00
+	GPIO_InitStructure.GPIO_Pin = II_AM_SDA_00_Pin;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_Init(II_AM_SDA_00_GPIO, &GPIO_InitStructure);
+
+	GPIO_SetBits(II_AM_SDA_00_GPIO, II_AM_SDA_00_Pin);
+
+	GPIO_InitStructure.GPIO_Pin = II_AM_SDA_01_Pin;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_Init(II_AM_SDA_01_GPIO, &GPIO_InitStructure);
+
+	GPIO_SetBits(II_AM_SDA_01_GPIO, II_AM_SDA_01_Pin);
 }
 
 void AM_Init(void)
@@ -33,431 +32,425 @@ void AM_Init(void)
 	AM_BUS_Config();
 }
 
-static void AM_SDA_H(uint8_t u8SN)   
-{	
-	switch(u8SN)
+static void AM_SDA_H(uint8_t u8SN)
+{
+	switch (u8SN)
 	{
-		case 0x00:
-			{
-					GPIO_SetBits(II_AM_SDA_00_GPIO,II_AM_SDA_00_Pin);
-			}
-			break;
-		case 0x01:
-			{
-					GPIO_SetBits(II_AM_SDA_01_GPIO,II_AM_SDA_01_Pin);
-			}
-			break;
-		default:
-			break;			
-	}	
+	case 0x00:
+	{
+		GPIO_SetBits(II_AM_SDA_00_GPIO, II_AM_SDA_00_Pin);
+	}
+	break;
+	case 0x01:
+	{
+		GPIO_SetBits(II_AM_SDA_01_GPIO, II_AM_SDA_01_Pin);
+	}
+	break;
+	default:
+		break;
+	}
 }
 
-static void AM_SDA_L(uint8_t u8SN)   
-{	
-	switch(u8SN)
+static void AM_SDA_L(uint8_t u8SN)
+{
+	switch (u8SN)
 	{
-		case 0x00:
-			{
-					GPIO_ResetBits(II_AM_SDA_00_GPIO,II_AM_SDA_00_Pin);
-			}
-			break;
-		case 0x01:
-			{
-					GPIO_ResetBits(II_AM_SDA_01_GPIO,II_AM_SDA_01_Pin);
-			}
-			break;
-		default:
-			break;			
-	} 
+	case 0x00:
+	{
+		GPIO_ResetBits(II_AM_SDA_00_GPIO, II_AM_SDA_00_Pin);
+	}
+	break;
+	case 0x01:
+	{
+		GPIO_ResetBits(II_AM_SDA_01_GPIO, II_AM_SDA_01_Pin);
+	}
+	break;
+	default:
+		break;
+	}
 }
 
 static uint8_t AM_SDA_READ(uint8_t u8SN)
 {
-	uint8_t u8Read_SDA=0;
-	switch(u8SN)
+	uint8_t u8Read_SDA = 0;
+	switch (u8SN)
 	{
-		case 0x00:
-			{
-					u8Read_SDA=GPIO_ReadInputDataBit(II_AM_SDA_00_GPIO,II_AM_SDA_00_Pin);
-			}
-			break;
-		case 0x01:
-			{
-					u8Read_SDA=GPIO_ReadInputDataBit(II_AM_SDA_01_GPIO,II_AM_SDA_01_Pin);
-			}
-			break;
-		default:
-			break;			
-	}	
+	case 0x00:
+	{
+		u8Read_SDA = GPIO_ReadInputDataBit(II_AM_SDA_00_GPIO, II_AM_SDA_00_Pin);
+	}
+	break;
+	case 0x01:
+	{
+		u8Read_SDA = GPIO_ReadInputDataBit(II_AM_SDA_01_GPIO, II_AM_SDA_01_Pin);
+	}
+	break;
+	default:
+		break;
+	}
 	return u8Read_SDA;
 }
 static void AM_SDA_OUT(uint8_t u8SN)
 {
-	GPIO_InitTypeDef  GPIO_InitStructure; 
-	switch(u8SN)
+	GPIO_InitTypeDef GPIO_InitStructure;
+	switch (u8SN)
 	{
-		case 0x00:
-			{
-				GPIO_InitStructure.GPIO_Pin =  II_AM_SDA_00_Pin;
-				GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-				GPIO_Init(II_AM_SDA_00_GPIO, &GPIO_InitStructure);		
-			}
-			break;
-		case 0x01:
-			{
-				GPIO_InitStructure.GPIO_Pin =  II_AM_SDA_01_Pin;
-				GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-				GPIO_Init(II_AM_SDA_01_GPIO, &GPIO_InitStructure);		
-			}
-			break;
-		default:
-			break;			
+	case 0x00:
+	{
+		GPIO_InitStructure.GPIO_Pin = II_AM_SDA_00_Pin;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_Init(II_AM_SDA_00_GPIO, &GPIO_InitStructure);
+	}
+	break;
+	case 0x01:
+	{
+		GPIO_InitStructure.GPIO_Pin = II_AM_SDA_01_Pin;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_Init(II_AM_SDA_01_GPIO, &GPIO_InitStructure);
+	}
+	break;
+	default:
+		break;
 	}
 }
-
 
 static void AM_SDA_IN(uint8_t u8SN)
 {
-	GPIO_InitTypeDef  GPIO_InitStructure; 
+	GPIO_InitTypeDef GPIO_InitStructure;
 
-	switch(u8SN)
+	switch (u8SN)
 	{
-		case 0x00:
-			{
-				GPIO_InitStructure.GPIO_Pin =  II_AM_SDA_00_Pin;
-//				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU ;
-				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING ;
-				GPIO_Init(II_AM_SDA_00_GPIO, &GPIO_InitStructure);	
-			}
-			break;
-		case 0x01:
-			{
-				GPIO_InitStructure.GPIO_Pin =  II_AM_SDA_01_Pin;
-//				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU ;
-				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING ;
-				GPIO_Init(II_AM_SDA_01_GPIO, &GPIO_InitStructure);	
-			}
-			break;
-		default:
-			break;			
+	case 0x00:
+	{
+		GPIO_InitStructure.GPIO_Pin = II_AM_SDA_00_Pin;
+		//				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU ;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+		GPIO_Init(II_AM_SDA_00_GPIO, &GPIO_InitStructure);
+	}
+	break;
+	case 0x01:
+	{
+		GPIO_InitStructure.GPIO_Pin = II_AM_SDA_01_Pin;
+		//				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU ;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+		GPIO_Init(II_AM_SDA_01_GPIO, &GPIO_InitStructure);
+	}
+	break;
+	default:
+		break;
 	}
 }
 
 /********************************************\
-|* ¹¦ÄÜ£º ÆğÊ¼ĞÅºÅ       *|
+|* åŠŸèƒ½ï¼š èµ·å§‹ä¿¡å·       *|
 \********************************************/
 void AM23XX_start(uint8_t u8SN)
 {
-	//Ö÷»ú·¢ËÍÆğÊ¼ĞÅºÅ
-	AM_SDA_OUT(u8SN);//ÉèÎªÊä³öÄ£Ê½
-  AM_SDA_L(u8SN);	//Ö÷»ú°ÑÊı¾İ×ÜÏß£¨SDA£©À­µÍ
-	Delay_us(1500);  //ÑÓÊ±1.5Ms//À­µÍÒ»¶ÎÊ±¼ä£¨ÖÁÉÙ800us£©£¬Í¨Öª´«¸ĞÆ÷×¼±¸Êı¾İ
-  AM_SDA_H(u8SN);	//ÊÍ·Å×ÜÏß
-  AM_SDA_IN(u8SN); ;	//ÉèÎªÊäÈëÄ£Ê½£¬ÅĞ¶Ï´«¸ĞÆ÷ÏìÓ¦ĞÅºÅ
-	Delay_us(30);//ÑÓÊ±30us
+	//ä¸»æœºå‘é€èµ·å§‹ä¿¡å·
+	AM_SDA_OUT(u8SN); //è®¾ä¸ºè¾“å‡ºæ¨¡å¼
+	AM_SDA_L(u8SN);   //ä¸»æœºæŠŠæ•°æ®æ€»çº¿ï¼ˆSDAï¼‰æ‹‰ä½
+	Delay_us(1500);   //å»¶æ—¶1.5Ms//æ‹‰ä½ä¸€æ®µæ—¶é—´ï¼ˆè‡³å°‘800usï¼‰ï¼Œé€šçŸ¥ä¼ æ„Ÿå™¨å‡†å¤‡æ•°æ®
+	AM_SDA_H(u8SN);   //é‡Šæ”¾æ€»çº¿
+	AM_SDA_IN(u8SN);
+	;			  //è®¾ä¸ºè¾“å…¥æ¨¡å¼ï¼Œåˆ¤æ–­ä¼ æ„Ÿå™¨å“åº”ä¿¡å·
+	Delay_us(30); //å»¶æ—¶30us
 }
 
 /********************************************\
-|* ¹¦ÄÜ£º ¶Á´«¸ĞÆ÷·¢ËÍµÄµ¥¸ö×Ö½Ú	        *|
+|* åŠŸèƒ½ï¼š è¯»ä¼ æ„Ÿå™¨å‘é€çš„å•ä¸ªå­—èŠ‚	        *|
 \********************************************/
 unsigned char Read_SensorData(uint8_t u8SN)
 {
-//	unsigned char i;
-//	unsigned char buffer,tmp;
-//	unsigned short cnt;
-//	buffer = 0;
-//	for(i=0;i<8;i++)
-//	{
-//		cnt=0;
-//		while(!AM_SDA_READ(u8SN))	//¼ì²âÉÏ´ÎµÍµçÆ½ÊÇ·ñ½áÊø
-//		{
-////		  if(++cnt >= 300)
-//		  if(++cnt >= 900)
-//		   {
-//					break;
-//		   }
-//		}
-//		//ÑÓÊ±Min=26us Max50us Ìø¹ıÊı¾İ"0" µÄ¸ßµçÆ½
-//		Delay_us(30);//ÑÓÊ±30us 
-//		
-//		//ÅĞ¶Ï´«¸ĞÆ÷·¢ËÍÊı¾İÎ»
-//		tmp =0;
-//		if(AM_SDA_READ(u8SN))	 
-//		{
-//		  tmp = 1;
-//		}  
-//		cnt =0;
-//		while(AM_SDA_READ(u8SN))		//µÈ´ı¸ßµçÆ½ ½áÊø
-//		{
-////		   	if(++cnt >= 200)
-//		   	if(++cnt >= 600)
-//			{
-//			  break;
-//			}
-//		}
-//		buffer <<=1;
-//		buffer |= tmp;	
-//	}
-//	return buffer;
+	//	unsigned char i;
+	//	unsigned char buffer,tmp;
+	//	unsigned short cnt;
+	//	buffer = 0;
+	//	for(i=0;i<8;i++)
+	//	{
+	//		cnt=0;
+	//		while(!AM_SDA_READ(u8SN))	//æ£€æµ‹ä¸Šæ¬¡ä½ç”µå¹³æ˜¯å¦ç»“æŸ
+	//		{
+	////		  if(++cnt >= 300)
+	//		  if(++cnt >= 900)
+	//		   {
+	//					break;
+	//		   }
+	//		}
+	//		//å»¶æ—¶Min=26us Max50us è·³è¿‡æ•°æ®"0" çš„é«˜ç”µå¹³
+	//		Delay_us(30);//å»¶æ—¶30us
+	//
+	//		//åˆ¤æ–­ä¼ æ„Ÿå™¨å‘é€æ•°æ®ä½
+	//		tmp =0;
+	//		if(AM_SDA_READ(u8SN))
+	//		{
+	//		  tmp = 1;
+	//		}
+	//		cnt =0;
+	//		while(AM_SDA_READ(u8SN))		//ç­‰å¾…é«˜ç”µå¹³ ç»“æŸ
+	//		{
+	////		   	if(++cnt >= 200)
+	//		   	if(++cnt >= 600)
+	//			{
+	//			  break;
+	//			}
+	//		}
+	//		buffer <<=1;
+	//		buffer |= tmp;
+	//	}
+	//	return buffer;
 
 	uint8_t i;
 	uint16_t j;
-	uint8_t data=0,bit=0;
-	
-	for(i=0;i<8;i++)
+	uint8_t data = 0, bit = 0;
+
+	for (i = 0; i < 8; i++)
 	{
-		while(!AM_SDA_READ(u8SN))	//¼ì²âÉÏ´ÎµÍµçÆ½ÊÇ·ñ½áÊø
+		while (!AM_SDA_READ(u8SN)) //æ£€æµ‹ä¸Šæ¬¡ä½ç”µå¹³æ˜¯å¦ç»“æŸ
 		{
-			if(++j>=5000) //·ÀÖ¹½øÈëËÀÑ­»·
+			if (++j >= 5000) //é˜²æ­¢è¿›å…¥æ­»å¾ªç¯
 			{
 				break;
 			}
 		}
-		//ÑÓÊ±Min=26us Max70us Ìø¹ıÊı¾İ"0" µÄ¸ßµçÆ½		 
-		Delay_us(30);//ÑÓÊ±30us
+		//å»¶æ—¶Min=26us Max70us è·³è¿‡æ•°æ®"0" çš„é«˜ç”µå¹³
+		Delay_us(30); //å»¶æ—¶30us
 
-		//ÅĞ¶Ï´«¸ĞÆ÷·¢ËÍÊı¾İÎ»
-		bit=0;
-		if(AM_SDA_READ(u8SN))
+		//åˆ¤æ–­ä¼ æ„Ÿå™¨å‘é€æ•°æ®ä½
+		bit = 0;
+		if (AM_SDA_READ(u8SN))
 		{
-			bit=1;
+			bit = 1;
 		}
-		j=0;
-		while(AM_SDA_READ(u8SN))		//µÈ´ı¸ßµçÆ½ ½áÊø
+		j = 0;
+		while (AM_SDA_READ(u8SN)) //ç­‰å¾…é«˜ç”µå¹³ ç»“æŸ
 		{
-			if(++j>=5000) //·ÀÖ¹½øÈëËÀÑ­»·
+			if (++j >= 5000) //é˜²æ­¢è¿›å…¥æ­»å¾ªç¯
 			{
 				break;
-			}		
+			}
 		}
-		data<<=1;
-		data|=bit;
+		data <<= 1;
+		data |= bit;
 	}
 	return data;
 }
 
-
-
 /********************************************\
-|* ¹¦ÄÜ£ºAM2320¶ÁÈ¡ÎÂÊª¶Èº¯Êı       *|
+|* åŠŸèƒ½ï¼šAM2320è¯»å–æ¸©æ¹¿åº¦å‡½æ•°       *|
 \********************************************/
-//±äÁ¿£ºHumi_H£ºÊª¶È¸ßÎ»£»Humi_L£ºÊª¶ÈµÍÎ»£»Temp_H£ºÎÂ¶È¸ßÎ»£»Temp_L£ºÎÂ¶ÈµÍÎ»£»Temp_CAL£ºĞ£ÑéÎ»
-//Êı¾İ¸ñÊ½Îª£ºÊª¶È¸ßÎ»£¨Êª¶ÈÕûÊı£©+Êª¶ÈµÍÎ»£¨Êª¶ÈĞ¡Êı£©+ÎÂ¶È¸ßÎ»£¨ÎÂ¶ÈÕûÊı£©+ÎÂ¶ÈµÍÎ»£¨ÎÂ¶ÈĞ¡Êı£©+ Ğ£ÑéÎ»
-//Ğ£Ñé£ºĞ£ÑéÎ»=Êª¶È¸ßÎ»+Êª¶ÈµÍÎ»+ÎÂ¶È¸ßÎ»+ÎÂ¶ÈµÍÎ»
-uint8_t Read_Sensor(uint16_t *u16TH_Buff,uint8_t u8SN)
+//å˜é‡ï¼šHumi_Hï¼šæ¹¿åº¦é«˜ä½ï¼›Humi_Lï¼šæ¹¿åº¦ä½ä½ï¼›Temp_Hï¼šæ¸©åº¦é«˜ä½ï¼›Temp_Lï¼šæ¸©åº¦ä½ä½ï¼›Temp_CALï¼šæ ¡éªŒä½
+//æ•°æ®æ ¼å¼ä¸ºï¼šæ¹¿åº¦é«˜ä½ï¼ˆæ¹¿åº¦æ•´æ•°ï¼‰+æ¹¿åº¦ä½ä½ï¼ˆæ¹¿åº¦å°æ•°ï¼‰+æ¸©åº¦é«˜ä½ï¼ˆæ¸©åº¦æ•´æ•°ï¼‰+æ¸©åº¦ä½ä½ï¼ˆæ¸©åº¦å°æ•°ï¼‰+ æ ¡éªŒä½
+//æ ¡éªŒï¼šæ ¡éªŒä½=æ¹¿åº¦é«˜ä½+æ¹¿åº¦ä½ä½+æ¸©åº¦é«˜ä½+æ¸©åº¦ä½ä½
+uint8_t Read_Sensor(uint16_t *u16TH_Buff, uint8_t u8SN)
 {
 	uint16_t j;
-	uint8_t Humi_H,Humi_L,Temp_H,Temp_L,Temp_CAL,temp;
-//	float Temprature,Humi;//¶¨ÒåÎÂÊª¶È±äÁ¿ £¬´Ë±äÁ¿ÎªÈ«¾Ö±äÁ¿
-	uint8_t Sensor_AnswerFlag;  //ÊÕµ½ÆğÊ¼±êÖ¾Î»
-	uint8_t Sensor_ErrorFlag;   //¶ÁÈ¡´«¸ĞÆ÷´íÎó±êÖ¾
-	int16_t i16Temprature;//¶¨ÒåÎÂÊª¶È±äÁ¿
-	uint16_t u16Humi;//¶¨ÒåÎÂÊª¶È±äÁ¿ 
-	
-	AM23XX_start(u8SN);//´Ó»ú·¢ËÍÆğÊ¼ĞÅºÅ
+	uint8_t Humi_H, Humi_L, Temp_H, Temp_L, Temp_CAL, temp;
+	//	float Temprature,Humi;//å®šä¹‰æ¸©æ¹¿åº¦å˜é‡ ï¼Œæ­¤å˜é‡ä¸ºå…¨å±€å˜é‡
+	uint8_t Sensor_AnswerFlag; //æ”¶åˆ°èµ·å§‹æ ‡å¿—ä½
+	uint8_t Sensor_ErrorFlag;  //è¯»å–ä¼ æ„Ÿå™¨é”™è¯¯æ ‡å¿—
+	int16_t i16Temprature;	 //å®šä¹‰æ¸©æ¹¿åº¦å˜é‡
+	uint16_t u16Humi;		   //å®šä¹‰æ¸©æ¹¿åº¦å˜é‡
 
-	Sensor_AnswerFlag=0;	//´«¸ĞÆ÷ÏìÓ¦±êÖ¾
-	//ÅĞ¶Ï´Ó»úÊÇ·ñÓĞµÍµçÆ½ÏìÓ¦ĞÅºÅ Èç²»ÏìÓ¦ÔòÌø³ö£¬ÏìÓ¦ÔòÏòÏÂÔËĞĞ	  
-	if(AM_SDA_READ(u8SN)==0)
+	AM23XX_start(u8SN); //ä»æœºå‘é€èµ·å§‹ä¿¡å·
+
+	Sensor_AnswerFlag = 0; //ä¼ æ„Ÿå™¨å“åº”æ ‡å¿—
+	//åˆ¤æ–­ä»æœºæ˜¯å¦æœ‰ä½ç”µå¹³å“åº”ä¿¡å· å¦‚ä¸å“åº”åˆ™è·³å‡ºï¼Œå“åº”åˆ™å‘ä¸‹è¿è¡Œ
+	if (AM_SDA_READ(u8SN) == 0)
 	{
-		Sensor_AnswerFlag=1;	//ÊÕµ½ÆğÊ¼ĞÅºÅ
-		j=0;
-		while((!AM_SDA_READ(u8SN))) //ÅĞ¶Ï´Ó»ú·¢³ö 80us µÄµÍµçÆ½ÏìÓ¦ĞÅºÅÊÇ·ñ½áÊø	
+		Sensor_AnswerFlag = 1; //æ”¶åˆ°èµ·å§‹ä¿¡å·
+		j = 0;
+		while ((!AM_SDA_READ(u8SN))) //åˆ¤æ–­ä»æœºå‘å‡º 80us çš„ä½ç”µå¹³å“åº”ä¿¡å·æ˜¯å¦ç»“æŸ
 		{
-			if(++j>=500) //·ÀÖ¹½øÈëËÀÑ­»·
+			if (++j >= 500) //é˜²æ­¢è¿›å…¥æ­»å¾ªç¯
 			{
-				Sensor_ErrorFlag=1;
+				Sensor_ErrorFlag = 1;
 				break;
 			}
 		}
-		Sensor_AnswerFlag|=0x02;
-		j=0;
-		while(AM_SDA_READ(u8SN))//ÅĞ¶Ï´Ó»úÊÇ·ñ·¢³ö 80us µÄ¸ßµçÆ½£¬Èç·¢³öÔò½øÈëÊı¾İ½ÓÊÕ×´Ì¬
+		Sensor_AnswerFlag |= 0x02;
+		j = 0;
+		while (AM_SDA_READ(u8SN)) //åˆ¤æ–­ä»æœºæ˜¯å¦å‘å‡º 80us çš„é«˜ç”µå¹³ï¼Œå¦‚å‘å‡ºåˆ™è¿›å…¥æ•°æ®æ¥æ”¶çŠ¶æ€
 		{
-			if(++j>=800) //·ÀÖ¹½øÈëËÀÑ­»·
+			if (++j >= 800) //é˜²æ­¢è¿›å…¥æ­»å¾ªç¯
 			{
-				Sensor_ErrorFlag=1;
+				Sensor_ErrorFlag = 1;
 				break;
-			}		
+			}
 		}
-		Sensor_AnswerFlag|=0x04;
-		//½ÓÊÕÊı¾İ
-		Humi_H=Read_SensorData(u8SN);
-		Humi_L=Read_SensorData(u8SN);
-		Temp_H=Read_SensorData(u8SN);	
-		Temp_L=Read_SensorData(u8SN);
-		Temp_CAL=Read_SensorData(u8SN);
+		Sensor_AnswerFlag |= 0x04;
+		//æ¥æ”¶æ•°æ®
+		Humi_H = Read_SensorData(u8SN);
+		Humi_L = Read_SensorData(u8SN);
+		Temp_H = Read_SensorData(u8SN);
+		Temp_L = Read_SensorData(u8SN);
+		Temp_CAL = Read_SensorData(u8SN);
 
-		temp=(uint8_t)(Humi_H+Humi_L+Temp_H+Temp_L);//Ö»È¡µÍ8Î»
-//			rt_kprintf("Humi_H=%d,Humi_L=%d,Temp_H=%d,Temp_L=%d,Temp_CAL=%d,temp=%d,\n",Humi_H,Humi_L,Temp_H,Temp_L,Temp_CAL,temp);
-		if(Temp_CAL==temp)//Èç¹ûĞ£Ñé³É¹¦£¬ÍùÏÂÔËĞĞ
+		temp = (uint8_t)(Humi_H + Humi_L + Temp_H + Temp_L); //åªå–ä½8ä½
+															 //			rt_kprintf("Humi_H=%d,Humi_L=%d,Temp_H=%d,Temp_L=%d,Temp_CAL=%d,temp=%d,\n",Humi_H,Humi_L,Temp_H,Temp_L,Temp_CAL,temp);
+		if (Temp_CAL == temp)								 //å¦‚æœæ ¡éªŒæˆåŠŸï¼Œå¾€ä¸‹è¿è¡Œ
 		{
-					Sensor_AnswerFlag|=0x08;
+			Sensor_AnswerFlag |= 0x08;
 
-			u16Humi=Humi_L|((uint16_t)Humi_H<<8);//Êª¶È
-			
-			if(Temp_H&0X80)	//Îª¸ºÎÂ¶È
+			u16Humi = Humi_L | ((uint16_t)Humi_H << 8); //æ¹¿åº¦
+
+			if (Temp_H & 0X80) //ä¸ºè´Ÿæ¸©åº¦
 			{
-				i16Temprature =0-((Temp_L&0x7F)|((uint16_t)Temp_H<<8));
+				i16Temprature = 0 - ((Temp_L & 0x7F) | ((uint16_t)Temp_H << 8));
 			}
-			else   //ÎªÕıÎÂ¶È
+			else //ä¸ºæ­£æ¸©åº¦
 			{
-				i16Temprature=Temp_L|((uint16_t)Temp_H<<8);//ÎÂ¶È
+				i16Temprature = Temp_L | ((uint16_t)Temp_H << 8); //æ¸©åº¦
 			}
-			//ÅĞ¶ÏÊı¾İÊÇ·ñ³¬¹ıÁ¿³Ì£¨ÎÂ¶È£º-40¡æ~80¡æ£¬Êª¶È0£¥RH~99£¥RH£©
-			if(u16Humi>999) 
+			//åˆ¤æ–­æ•°æ®æ˜¯å¦è¶…è¿‡é‡ç¨‹ï¼ˆæ¸©åº¦ï¼š-40â„ƒ~80â„ƒï¼Œæ¹¿åº¦0ï¼…RH~99ï¼…RHï¼‰
+			if (u16Humi > 999)
 			{
-			  u16Humi=999;
+				u16Humi = 999;
 			}
 
-			if(i16Temprature>800)
+			if (i16Temprature > 800)
 			{
-			  i16Temprature=800;
+				i16Temprature = 800;
 			}
-			if(i16Temprature<-400)
+			if (i16Temprature < -400)
 			{
 				i16Temprature = -400;
-			}			
-			u16TH_Buff[0]=(uint16_t)i16Temprature;//ÎÂ¶È
-			u16TH_Buff[1]=(uint16_t)u16Humi;//Êª¶È			
-//			rt_kprintf("\r\nTemprature:  %.1f  ¡æ\r\n",i16Temprature); //ÏÔÊ¾ÎÂ¶È
-//			rt_kprintf("Humi:  %.1f  %%RH\r\n",u16Humi);//ÏÔÊ¾Êª¶È
-		}	
+			}
+			u16TH_Buff[0] = (uint16_t)i16Temprature; //æ¸©åº¦
+			u16TH_Buff[1] = (uint16_t)u16Humi;		 //æ¹¿åº¦
+													 //			rt_kprintf("\r\nTemprature:  %.1f  â„ƒ\r\n",i16Temprature); //æ˜¾ç¤ºæ¸©åº¦
+													 //			rt_kprintf("Humi:  %.1f  %%RH\r\n",u16Humi);//æ˜¾ç¤ºæ¹¿åº¦
+		}
 		else
 		{
-			Sensor_AnswerFlag|=0x10;	
-//			rt_kprintf("Humi_H=%d,Humi_L=%d,Temp_H=%d,Temp_L=%d,Temp_CAL=%d,temp=%d,\n",Humi_H,Humi_L,Temp_H,Temp_L,Temp_CAL,temp);
+			Sensor_AnswerFlag |= 0x10;
+			//			rt_kprintf("Humi_H=%d,Humi_L=%d,Temp_H=%d,Temp_L=%d,Temp_CAL=%d,temp=%d,\n",Humi_H,Humi_L,Temp_H,Temp_L,Temp_CAL,temp);
 		}
-//		rt_kprintf("Sensor_AnswerFlag =%x\r\n",Sensor_AnswerFlag);//
+		//		rt_kprintf("Sensor_AnswerFlag =%x\r\n",Sensor_AnswerFlag);//
 	}
 	else
 	{
-		Sensor_ErrorFlag=0;  //Î´ÊÕµ½´«¸ĞÆ÷ÏìÓ¦
+		Sensor_ErrorFlag = 0; //æœªæ”¶åˆ°ä¼ æ„Ÿå™¨å“åº”
 		rt_kprintf("Sensor Error!!\r\n");
 	}
 
 	return Sensor_AnswerFlag;
-}   
+}
 
-#define AM_SENSOR_NUM  2
-uint16_t u16TH_Sensor[AM_SENSOR_NUM]={0};
-#define TH_AVE_NUM  5
+#define AM_SENSOR_NUM 2
+uint16_t u16TH_Sensor[AM_SENSOR_NUM] = {0};
+#define TH_AVE_NUM 5
 /********************************************\
-|* ¹¦ÄÜ£º ÎÂÊª¶È¸üĞÂ             	        *|
+|* åŠŸèƒ½ï¼š æ¸©æ¹¿åº¦æ›´æ–°             	        *|
 \********************************************/
-uint8_t AM_Sensor_update(sys_reg_st* gds_ptr)
+uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
 {
-		extern sys_reg_st		g_sys;	
-	
-		static 	uint8_t  u8CNT=0;
-		static 	uint8_t  u8TH_CNT[AM_SENSOR_NUM]={0};
-		static 	uint8_t  u8Err_CNT[AM_SENSOR_NUM]={0};
-		static 	uint16_t u16TH_Ave[AM_SENSOR_NUM][2][TH_AVE_NUM]={0};
-		
-		uint8_t i=0,j=0,k=0;  //ÊÕµ½ÆğÊ¼±êÖ¾Î»
-		uint8_t u8SenFlag[AM_SENSOR_NUM]={0};  //ÊÕµ½ÆğÊ¼±êÖ¾Î»
-		Com_tnh_st u16TH_Buff={0};
-		uint16_t u16TH_Sum[AM_SENSOR_NUM][2]={0};
-		uint8_t u8TH_Cnt[AM_SENSOR_NUM][2]={0};
-		
-		u8CNT++;
-		if(u8CNT>=0xFF)
-		{
-			u8CNT=0x00;	
-		}
-//		i=u8CNT%AM_SENSOR_NUM;
-		i=u8CNT%5;
-//		//Á½´Î¶ÁÈ¡¼ä¸ôÖÁÉÙ2S
-//		Delay_ms(1500);//ÑÓÊ±1500ms
-		if(i!=0)
-		{
-//			AM23XX_start(i);//´Ó»ú·¢ËÍÆğÊ¼ĞÅºÅ
-			return 0;
-		}
-		memset(&u16TH_Sensor[0],0x00,4);
+	extern sys_reg_st g_sys;
 
-//		//Ó³Éä»Ø·çÎÂÊª¶È
-//		if((i==MBM_DEV_A1_ADDR)&&((gds_ptr->config.dev_mask.mb_comp&(0X01<<MBM_DEV_A1_ADDR))==0))
-//		{
-//				return u8SenFlag[i];			
-//		}
-//		else if((i==MBM_DEV_A2_ADDR)&&((gds_ptr->config.dev_mask.mb_comp&(0X01<<MBM_DEV_A2_ADDR))==0))
-//		{
-//				return u8SenFlag[i];				
-//		}
-		u8SenFlag[i]=Read_Sensor(&u16TH_Sensor[0],i);
-		if(u8SenFlag[i])
+	static uint8_t u8CNT = 0;
+	static uint8_t u8TH_CNT[AM_SENSOR_NUM] = {0};
+	static uint8_t u8Err_CNT[AM_SENSOR_NUM] = {0};
+	static uint16_t u16TH_Ave[AM_SENSOR_NUM][2][TH_AVE_NUM] = {0};
+
+	uint8_t i = 0, j = 0, k = 0;			//æ”¶åˆ°èµ·å§‹æ ‡å¿—ä½
+	uint8_t u8SenFlag[AM_SENSOR_NUM] = {0}; //æ”¶åˆ°èµ·å§‹æ ‡å¿—ä½
+	Com_tnh_st u16TH_Buff = {0};
+	uint16_t u16TH_Sum[AM_SENSOR_NUM][2] = {0};
+	uint8_t u8TH_Cnt[AM_SENSOR_NUM][2] = {0};
+
+	u8CNT++;
+	if (u8CNT >= 0xFF)
+	{
+		u8CNT = 0x00;
+	}
+	//		i=u8CNT%AM_SENSOR_NUM;
+	i = u8CNT % 5;
+	//		//ä¸¤æ¬¡è¯»å–é—´éš”è‡³å°‘2S
+	//		Delay_ms(1500);//å»¶æ—¶1500ms
+	if (i != 0)
+	{
+		//			AM23XX_start(i);//ä»æœºå‘é€èµ·å§‹ä¿¡å·
+		return 0;
+	}
+	memset(&u16TH_Sensor[0], 0x00, 4);
+
+	//		//æ˜ å°„å›é£æ¸©æ¹¿åº¦
+	//		if((i==MBM_DEV_A1_ADDR)&&((gds_ptr->config.dev_mask.mb_comp&(0X01<<MBM_DEV_A1_ADDR))==0))
+	//		{
+	//				return u8SenFlag[i];
+	//		}
+	//		else if((i==MBM_DEV_A2_ADDR)&&((gds_ptr->config.dev_mask.mb_comp&(0X01<<MBM_DEV_A2_ADDR))==0))
+	//		{
+	//				return u8SenFlag[i];
+	//		}
+	u8SenFlag[i] = Read_Sensor(&u16TH_Sensor[0], i);
+	if (u8SenFlag[i])
+	{
+		if ((u16TH_Sensor[0] == 0) && (u16TH_Sensor[0] == 0))
 		{
-				if((u16TH_Sensor[0]==0)&&(u16TH_Sensor[0]==0))
-				{
-					u8Err_CNT[i]++;						
-				}
-				else
-				{
-					u8Err_CNT[i]=0;
-					u16TH_Buff.Temp = u16TH_Sensor[0]+(int16_t)(gds_ptr->config.general.temp_sensor_cali[i].temp);
-					u16TH_Buff.Hum = u16TH_Sensor[1]+(int16_t)(gds_ptr->config.general.temp_sensor_cali[i].hum);	
-					//¸üĞÂ×´Ì¬MBM_COM_STS_REG_NO
-					gds_ptr->status.status_remap[MBM_COM_STS_REG_NO] |= (0x0001<<i);	
-				}					
+			u8Err_CNT[i]++;
 		}
 		else
 		{
-				u8Err_CNT[i]++;			
+			u8Err_CNT[i] = 0;
+			u16TH_Buff.Temp = u16TH_Sensor[0] + (int16_t)(gds_ptr->config.general.temp_sensor_cali[i].temp);
+			u16TH_Buff.Hum = u16TH_Sensor[1] + (int16_t)(gds_ptr->config.general.temp_sensor_cali[i].hum);
+			//æ›´æ–°çŠ¶æ€MBM_COM_STS_REG_NO
+			gds_ptr->status.status_remap[MBM_COM_STS_REG_NO] |= (0x0001 << i);
 		}
-		
-		if(u8Err_CNT[i]>ERROR_CNT_MAX)
-		{
-//			u8Err_CNT[i]=0;
-			g_sys.status.ComSta.u16TH[i].Temp = 0;
-			g_sys.status.ComSta.u16TH[i].Hum = 0;		
-			//¸üĞÂ×´Ì¬MBM_COM_STS_REG_NO
-			gds_ptr->status.status_remap[MBM_COM_STS_REG_NO] &= ~(0x0001<<i);						
-		}
-		else if(u8Err_CNT[i]==0)
-//		else
-		{
-			u8TH_CNT[i]++;
-			if(u8TH_CNT[i]>=0xFF)
-			{
-				u8TH_CNT[i]=0x00;	
-			}
-			j=u8TH_CNT[i]%TH_AVE_NUM;
-			if((u16TH_Buff.Temp<=1000)&&((u16TH_Buff.Temp!=0)&&(u16TH_Buff.Hum!=0)))
-			{
-				u16TH_Ave[i][0][j]=u16TH_Buff.Temp;
-			}
-			if((u16TH_Buff.Hum<=1000)&&((u16TH_Buff.Temp!=0)&&(u16TH_Buff.Hum!=0)))
-			{
-				u16TH_Ave[i][1][j]=u16TH_Buff.Hum;
-			}	
-//		rt_kprintf("Temp=%x,1= %x,1= %x,3 = %x,4=%x\n",u16TH_Ave[0][0][0],u16TH_Ave[0][0][1],u16TH_Ave[0][0][2],u16TH_Ave[0][0][3],u16TH_Ave[0][0][4]);			
-			
-			for(k=0;k<TH_AVE_NUM;k++)
-			{
-				if(u16TH_Ave[i][0][k]!=0)
-				{
-					u16TH_Sum[i][0] +=u16TH_Ave[i][0][k];	
-					u8TH_Cnt[i][0]++;
-				}
-				if(u16TH_Ave[i][1][k]!=0)
-				{
-					u16TH_Sum[i][1] +=u16TH_Ave[i][1][k];	
-					u8TH_Cnt[i][1]++;
-				}
-			}
-			g_sys.status.ComSta.u16TH[i].Temp=u16TH_Sum[i][0]/u8TH_Cnt[i][0];
-			g_sys.status.ComSta.u16TH[i].Hum=u16TH_Sum[i][1]/u8TH_Cnt[i][1];			
-		}	
-//		g_sys.status.ComSta.u16TH[0].Temp=285;
-//		g_sys.status.ComSta.u16TH[0].Temp=567;
-//		rt_kprintf("u8CNT=%x,i=%x,u8SenFlag[0]= %x,u16TH_Sensor[0]= %x,[1] = %x,u8Err_CNT[0]=%x,Temp=%x,Hum=%x\n",u8CNT,i,u8SenFlag[0],u16TH_Sensor[0],u16TH_Sensor[1],u8Err_CNT[0],g_sys.status.ComSta.u16TH[0].Temp,g_sys.status.ComSta.u16TH[0].Hum);			
+	}
+	else
+	{
+		u8Err_CNT[i]++;
+	}
 
-		
-		return u8SenFlag[i];
+	if (u8Err_CNT[i] > ERROR_CNT_MAX)
+	{
+		//			u8Err_CNT[i]=0;
+		g_sys.status.ComSta.u16TH[i].Temp = 0;
+		g_sys.status.ComSta.u16TH[i].Hum = 0;
+		//æ›´æ–°çŠ¶æ€MBM_COM_STS_REG_NO
+		gds_ptr->status.status_remap[MBM_COM_STS_REG_NO] &= ~(0x0001 << i);
+	}
+	else if (u8Err_CNT[i] == 0)
+	//		else
+	{
+		u8TH_CNT[i]++;
+		if (u8TH_CNT[i] >= 0xFF)
+		{
+			u8TH_CNT[i] = 0x00;
+		}
+		j = u8TH_CNT[i] % TH_AVE_NUM;
+		if ((u16TH_Buff.Temp <= 1000) && ((u16TH_Buff.Temp != 0) && (u16TH_Buff.Hum != 0)))
+		{
+			u16TH_Ave[i][0][j] = u16TH_Buff.Temp;
+		}
+		if ((u16TH_Buff.Hum <= 1000) && ((u16TH_Buff.Temp != 0) && (u16TH_Buff.Hum != 0)))
+		{
+			u16TH_Ave[i][1][j] = u16TH_Buff.Hum;
+		}
+		//		rt_kprintf("Temp=%x,1= %x,1= %x,3 = %x,4=%x\n",u16TH_Ave[0][0][0],u16TH_Ave[0][0][1],u16TH_Ave[0][0][2],u16TH_Ave[0][0][3],u16TH_Ave[0][0][4]);
+
+		for (k = 0; k < TH_AVE_NUM; k++)
+		{
+			if (u16TH_Ave[i][0][k] != 0)
+			{
+				u16TH_Sum[i][0] += u16TH_Ave[i][0][k];
+				u8TH_Cnt[i][0]++;
+			}
+			if (u16TH_Ave[i][1][k] != 0)
+			{
+				u16TH_Sum[i][1] += u16TH_Ave[i][1][k];
+				u8TH_Cnt[i][1]++;
+			}
+		}
+		g_sys.status.ComSta.u16TH[i].Temp = u16TH_Sum[i][0] / u8TH_Cnt[i][0];
+		g_sys.status.ComSta.u16TH[i].Hum = u16TH_Sum[i][1] / u8TH_Cnt[i][1];
+	}
+	//		g_sys.status.ComSta.u16TH[0].Temp=285;
+	//		g_sys.status.ComSta.u16TH[0].Temp=567;
+	//		rt_kprintf("u8CNT=%x,i=%x,u8SenFlag[0]= %x,u16TH_Sensor[0]= %x,[1] = %x,u8Err_CNT[0]=%x,Temp=%x,Hum=%x\n",u8CNT,i,u8SenFlag[0],u16TH_Sensor[0],u16TH_Sensor[1],u8Err_CNT[0],g_sys.status.ComSta.u16TH[0].Temp,g_sys.status.ComSta.u16TH[0].Hum);
+
+	return u8SenFlag[i];
 }
-
-
-

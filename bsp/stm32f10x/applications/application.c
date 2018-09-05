@@ -63,7 +63,7 @@ enum
 
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t modbus_master_stack[512];
-static rt_uint8_t modbus_slave_stack[512];
+//static rt_uint8_t modbus_slave_stack[512];
 static rt_uint8_t monitor_slave_stack[512];
 //static rt_uint8_t team_stack[ 512 ];
 static rt_uint8_t mbm_fsm_stack[512];
@@ -77,7 +77,7 @@ static rt_uint8_t testcase_stack[1024];
 static rt_uint8_t sim7600_stack[512];
 
 static struct rt_thread modbus_master_thread;
-static struct rt_thread modbus_slave_thread;
+//static struct rt_thread modbus_slave_thread;
 static struct rt_thread CPAD_slave_thread;
 //static struct rt_thread tcom_thread;
 //static struct rt_thread team_thread;
