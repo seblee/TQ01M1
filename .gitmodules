@@ -1,0 +1,3 @@
+[submodule "bsp/stm32f10x/paho.mqtt.embedded-c"]
+	path = bsp/stm32f10x/paho.mqtt.embedded-c
+	url = git@github.com:seblee/paho.mqtt.embedded-c.git

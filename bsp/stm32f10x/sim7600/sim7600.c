@@ -28,6 +28,7 @@ char out_test[] = "test uart3 device out start*******\r\n";
 
 void sim7600_thread_entry(void *parameter)
 {
+    rt_uint8_t receive_flag = 1;
     struct rx_msg msg;
     int count = 0;
     rt_device_t device, write_device;
@@ -62,8 +63,24 @@ void sim7600_thread_entry(void *parameter)
     while (1)
     {
         /* 从消息队列中读取消息*/
-
         result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), 50);
+        // if (result == -RT_ETIMEOUT)
+        // {
+        //     if (receive_flag == 1)
+        //     {
+        //         /**received something**/
+        //     }
+        //     /* 接收超时*/
+        //     // rt_kprintf("timeout count:%d\n", ++count);
+        //     // rt_device_write(write_device, 0, "time out",
+        //     //                 strlen("time out"));
+        // }
+        // if (result == RT_EOK)
+        // {
+        //     receive_flag = 1;
+
+        // }
+
         if (result == -RT_ETIMEOUT)
         {
             /* 接收超时*/
@@ -78,13 +95,24 @@ void sim7600_thread_entry(void *parameter)
             rt_uint32_t rx_length;
             rx_length = (sizeof(uart_rx_buffer) - 1) > msg.size ? msg.size : sizeof(uart_rx_buffer) - 1;
             /* 读取消息*/
-            rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[0],
-                                       rx_length);
-            uart_rx_buffer[rx_length] = '\0';
-            /* 写到写设备中*/
-            if (write_device != RT_NULL)
-                rt_device_write(write_device, 0, &uart_rx_buffer[0],
-                                rx_length);
+            // rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[0],
+            //                            rx_length);
+
+            rt_memset(uart_rx_buffer, 0, sizeof(uart_rx_buffer));
+            if (rx_length >= 23)
+            {
+                rt_sprintf(uart_rx_buffer, "rx_length:%ld\r\n", rx_length);
+                if (write_device != RT_NULL)
+                    rt_device_write(write_device, 0, &uart_rx_buffer[0],
+                                    strlen(uart_rx_buffer));
+                rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[0],
+                                           rx_length);
+                rt_sprintf(&uart_rx_buffer[rx_length], "\r\n");
+                /* 写到写设备中*/
+                if (write_device != RT_NULL)
+                    rt_device_write(write_device, 0, &uart_rx_buffer[0],
+                                    strlen(uart_rx_buffer));
+            }
         }
     }
 }
