@@ -1,16 +1,41 @@
+/**
+ ****************************************************************************
+ * @Warning :Without permission from the author,Not for commercial use
+ * @File    :
+ * @Author  :Seblee
+ * @date    :2018-09-06 17:14:15
+ * @version :V 1.0.0
+ *************************************************
+ * @brief   :
+ ****************************************************************************
+ * @Last Modified by: Seblee
+ * @Last Modified time: 2018-09-06 17:15:18
+ ****************************************************************************
+**/
+/* Private include -----------------------------------------------------------*/
 #include "sys_conf.h"
 #include <rtthread.h>
+#include "transport.h"
+/* Private typedef -----------------------------------------------------------*/
 /* UART接收消息结构*/
 struct rx_msg
 {
     rt_device_t dev;
     rt_size_t size;
 };
+/* Private define ------------------------------------------------------------*/
 
+/* Private macro -------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
 /* 用于接收消息的消息队列*/
 static rt_mq_t rx_mq;
 /* 接收线程的接收缓冲区*/
 static char uart_rx_buffer[64];
+char out_test[] = "test uart3 device out start*******\r\n";
+/* Private function prototypes -----------------------------------------------*/
+
+/* Private functions ---------------------------------------------------------*/
 
 /* 数据到达回调函数*/
 rt_err_t uart_input(rt_device_t dev, rt_size_t size)
@@ -22,9 +47,6 @@ rt_err_t uart_input(rt_device_t dev, rt_size_t size)
     rt_mq_send(rx_mq, &msg, sizeof(struct rx_msg));
     return RT_EOK;
 }
-
-//rt_device_t sim7600_device;
-char out_test[] = "test uart3 device out start*******\r\n";
 
 void sim7600_thread_entry(void *parameter)
 {

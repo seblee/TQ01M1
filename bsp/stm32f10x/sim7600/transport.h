@@ -1,22 +1,41 @@
-/*******************************************************************************
- * Copyright (c) 2014 IBM Corp.
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution.
- *
- * The Eclipse Public License is available at
- *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
- *
- * Contributors:
- *    Ian Craggs - initial API and implementation and/or initial documentation
- *    Sergio R. Caprile - "commonalization" from prior samples and/or documentation extension
- *******************************************************************************/
+/**
+ ****************************************************************************
+ * @Warning :Without permission from the author,Not for commercial use
+ * @File    :
+ * @Author  :Seblee
+ * @date    :2018-09-06 17:22:33
+ * @version :V1.0.0
+ *************************************************
+ * @brief   :
+ ****************************************************************************
+ * @Last Modified by: Seblee
+ * @Last Modified time: 2018-09-06 17:23:51
+ ****************************************************************************
+**/
+#ifndef __TRANSPORT_H_
+#define __TRANSPORT_H_
+/* Private include -----------------------------------------------------------*/
+#include <rtthread.h>
 
-int transport_sendPacketBuffer(int sock, unsigned char* buf, int buflen);
-int transport_getdata(unsigned char* buf, int count);
-int transport_getdatanb(void *sck, unsigned char* buf, int count);
-int transport_open(char* host, int port);
-int transport_close(int sock);
+/* Private typedef -----------------------------------------------------------*/
+
+/* Private define ------------------------------------------------------------*/
+
+/* Private macro -------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
+/* Private function prototypes -----------------------------------------------*/
+
+/* Private functions ---------------------------------------------------------*/
+rt_size_t transport_sendPacketBuffer(rt_device_t dev, unsigned char *buf, int buflen);
+
+int transport_getdata(unsigned char *buf, int count);
+
+int transport_open(char *addr, int port);
+
+int transport_close(void);
+
+/*----------------------------------------------------------------------------*/
+
+#endif
