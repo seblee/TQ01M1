@@ -35,8 +35,9 @@ void vMBMasterPortSerialEnable(BOOL xRxEnable, BOOL xTxEnable)
 {
 	if (xRxEnable)
 	{
-		/* 485Í¨ĞÅÊ±£¬µÈ´ı´®¿ÚÒÆÎ»¼Ä´æÆ÷ÖĞµÄÊı¾İ·¢ËÍÍê³Éºó£¬ÔÙÈ¥Ê¹ÄÜ485µÄ½ÓÊÕ¡¢Ê§ÄÜ485µÄ·¢ËÍ*/
-		while (!USART_GetFlagStatus(USART1,USART_FLAG_TC));
+		/* 485é€šä¿¡æ—¶ï¼Œç­‰å¾…ä¸²å£ç§»ä½å¯„å­˜å™¨ä¸­çš„æ•°æ®å‘é€å®Œæˆåï¼Œå†å»ä½¿èƒ½485çš„æ¥æ”¶ã€å¤±èƒ½485çš„å‘é€*/
+		while (!USART_GetFlagStatus(USART1, USART_FLAG_TC))
+			;
 		MASTER_RS485_RECEIVE_MODE;
 		USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 	}
@@ -60,19 +61,19 @@ void vMBMasterPortClose(void)
 	USART_ITConfig(USART1, USART_IT_TXE | USART_IT_RXNE, DISABLE);
 	USART_Cmd(USART1, DISABLE);
 }
-//Ä¬ÈÏÒ»¸öÖ÷»ú ´®¿Ú1 ²¨ÌØÂÊ¿ÉÉèÖÃ  ÆæÅ¼¼ìÑé¿ÉÉèÖÃ
+//é»˜è®¤ä¸€ä¸ªä¸»æœº ä¸²å£1 æ³¢ç‰¹ç‡å¯è®¾ç½®  å¥‡å¶æ£€éªŒå¯è®¾ç½®
 BOOL xMBMasterPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
-		eMBParity eParity)
+							 eMBParity eParity)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
-	//======================Ê±ÖÓ³õÊ¼»¯=======================================
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB , ENABLE);
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+	//======================æ—¶é’Ÿåˆå§‹åŒ–=======================================
+	//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB , ENABLE);
+	//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	//======================IO³õÊ¼»¯=======================================	
+	//======================IOåˆå§‹åŒ–=======================================
 	//USART1_TX
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -82,54 +83,54 @@ BOOL xMBMasterPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	//ÅäÖÃ485·¢ËÍºÍ½ÓÊÕÄ£Ê½
-//    TODO   ÔİÊ±ÏÈĞ´A0 µÈÖ®ºó×éÍø²âÊÔÊ±ÔÙĞŞ¸Ä
+	//é…ç½®485å‘é€å’Œæ¥æ”¶æ¨¡å¼
+	//    TODO   æš‚æ—¶å…ˆå†™A0 ç­‰ä¹‹åç»„ç½‘æµ‹è¯•æ—¶å†ä¿®æ”¹
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	//======================´®¿Ú³õÊ¼»¯=======================================
+	//======================ä¸²å£åˆå§‹åŒ–=======================================
 	USART_InitStructure.USART_BaudRate = ulBaudRate;
-	//ÉèÖÃĞ£ÑéÄ£Ê½
+	//è®¾ç½®æ ¡éªŒæ¨¡å¼
 	switch (eParity)
 	{
-		case MB_PAR_NONE: //ÎŞĞ£Ñé
-			USART_InitStructure.USART_Parity = USART_Parity_No;
-			USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-			break;
-		case MB_PAR_ODD: //ÆæĞ£Ñé
-			USART_InitStructure.USART_Parity = USART_Parity_Odd;
-			USART_InitStructure.USART_WordLength = USART_WordLength_9b;
-			break;
-		case MB_PAR_EVEN: //Å¼Ğ£Ñé
-			USART_InitStructure.USART_Parity = USART_Parity_Even;
-			USART_InitStructure.USART_WordLength = USART_WordLength_9b;
-			break;
-		default:
-			return FALSE;
+	case MB_PAR_NONE: //æ— æ ¡éªŒ
+		USART_InitStructure.USART_Parity = USART_Parity_No;
+		USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+		break;
+	case MB_PAR_ODD: //å¥‡æ ¡éªŒ
+		USART_InitStructure.USART_Parity = USART_Parity_Odd;
+		USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+		break;
+	case MB_PAR_EVEN: //å¶æ ¡éªŒ
+		USART_InitStructure.USART_Parity = USART_Parity_Even;
+		USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+		break;
+	default:
+		return FALSE;
 	}
 
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_HardwareFlowControl =	USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	if (ucPORT != UPORT_MBMASTER)
 		return FALSE;
 
-	ENTER_CRITICAL_SECTION(); //¹ØÈ«¾ÖÖĞ¶Ï
+	ENTER_CRITICAL_SECTION(); //å…³å…¨å±€ä¸­æ–­
 
 	USART_Init(USART1, &USART_InitStructure);
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 	USART_Cmd(USART1, ENABLE);
 
-	//=====================ÖĞ¶Ï³õÊ¼»¯======================================
-	//ÉèÖÃNVICÓÅÏÈ¼¶·Ö×éÎªGroup2£º0-3ÇÀÕ¼Ê½ÓÅÏÈ¼¶£¬0-3µÄÏìÓ¦Ê½ÓÅÏÈ¼¶
-//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+	//=====================ä¸­æ–­åˆå§‹åŒ–======================================
+	//è®¾ç½®NVICä¼˜å…ˆçº§åˆ†ç»„ä¸ºGroup2ï¼š0-3æŠ¢å å¼ä¼˜å…ˆçº§ï¼Œ0-3çš„å“åº”å¼ä¼˜å…ˆçº§
+	//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
-	EXIT_CRITICAL_SECTION(); //¿ªÈ«¾ÖÖĞ¶Ï
+	EXIT_CRITICAL_SECTION(); //å¼€å…¨å±€ä¸­æ–­
 
 	return TRUE;
 }
@@ -140,17 +141,17 @@ BOOL xMBMasterPortSerialPutByte(CHAR ucByte)
 	return TRUE;
 }
 
-BOOL xMBMasterPortSerialGetByte(CHAR * pucByte)
+BOOL xMBMasterPortSerialGetByte(CHAR *pucByte)
 {
 	*pucByte = USART_ReceiveData(USART1);
 	return TRUE;
 }
 
-///* 
+///*
 // * Create an interrupt handler for the transmit buffer empty interrupt
 // * (or an equivalent) for your target processor. This function should then
 // * call pxMBFrameCBTransmitterEmpty( ) which tells the protocol stack that
-// * a new character can be sent. The protocol stack will then call 
+// * a new character can be sent. The protocol stack will then call
 // * xMBPortSerialPutByte( ) to send the character.
 // */
 //static void prvvUARTTxReadyISR(void)
@@ -158,7 +159,7 @@ BOOL xMBMasterPortSerialGetByte(CHAR * pucByte)
 //	pxMBMasterFrameCBTransmitterEmpty();
 //}
 
-///* 
+///*
 // * Create an interrupt handler for the receive interrupt for your target
 // * processor. This function should then call pxMBFrameCBByteReceived( ). The
 // * protocol stack will then call xMBPortSerialGetByte( ) to retrieve the
@@ -178,18 +179,18 @@ BOOL xMBMasterPortSerialGetByte(CHAR * pucByte)
 //void USART1_IRQHandler(void)
 //{
 //	rt_interrupt_enter();
-//	//Òç³ö´íÎó
+//	//æº¢å‡ºé”™è¯¯
 //	if (USART_GetFlagStatus(USART1, USART_FLAG_ORE) == SET)
 //	{
 //		prvvUARTRxISR();
 //	}
-//	//½ÓÊÕÖĞ¶Ï
+//	//æ¥æ”¶ä¸­æ–­
 //	if (USART_GetITStatus(USART1, USART_IT_RXNE) == SET)
 //	{
 //		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
 //		prvvUARTRxISR();
 //	}
-//	//·¢ËÍÖĞ¶Ï
+//	//å‘é€ä¸­æ–­
 //	if (USART_GetITStatus(USART1, USART_IT_TXE) == SET)
 //	{
 //		prvvUARTTxReadyISR();
