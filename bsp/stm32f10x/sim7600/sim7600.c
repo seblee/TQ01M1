@@ -9,13 +9,13 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-10 17:54:26
+ * @Last Modified time: 2018-09-11 18:18:29
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
 #include "sim7600.h"
 #include "transport.h"
-
+#include "mqtt_client.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -34,15 +34,17 @@ rt_mq_t rx_mq;
 static char uart_rx_buffer[64];
 const char out_test[] = "test uart3 device out start*******\r\n";
 
+const char iot_deviceid[] = {"cdtest0041"};
 const char iot_devicename[] = {"cdtest004"};
 const char iot_productKey[] = {"a1JOOi3mNEf"};
 const char iot_secret[] = {"WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"};
 /* Private function prototypes -----------------------------------------------*/
-
+iotx_device_info_t device_info;
+iotx_conn_info_t device_connect;
+MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
 /* Private functions ---------------------------------------------------------*/
 
 /* 数据到达回调函数*/
-
 void SIM7600_DIR_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -65,7 +67,6 @@ void sim7600_thread_entry(void *parameter)
     struct rx_msg msg;
     rt_device_t write_device;
     rt_err_t result = RT_EOK;
-    char IOT_domain_str[100] = {0};
 
     rx_mq = rt_mq_create("7600_rx_mq",
                          sizeof(struct rx_msg), /* 每个消息的大小是 128 - void* */
@@ -73,18 +74,20 @@ void sim7600_thread_entry(void *parameter)
                          RT_IPC_FLAG_FIFO);     /* 如果有多个线程等待，按照FIFO的方法分配消息 */
     SIM7600_DIR_WIFI;
     SIM7600_DIR_Init();
-    /* 查找系统中的串口1设备 */
     rt_thread_delay(SIM7600_THREAD_DELAY);
     write_device = rt_device_find("uart3");
     if (write_device != RT_NULL)
     {
-        /* 设置回调函数及打开设备*/
         rt_device_set_rx_indicate(write_device, uart_input);
         rt_device_open(write_device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);
     }
     rt_device_write(write_device, 0, out_test, strlen(out_test));
-    rt_sprintf(IOT_domain_str, aliyun_domain, iot_productKey);
-    transport_open(write_device, IOT_domain_str, aliyun_iot_port);
+
+    result = at_wifi_init(write_device);
+
+    mqtt_client_init(write_device);
+    transport_open(write_device);
+
     while (1)
     {
         /* 从消息队列中读取消息*/

@@ -9,7 +9,7 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-10 18:16:53
+ * @Last Modified time: 2018-09-11 18:13:38
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
@@ -168,4 +168,20 @@ rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
         rt_free(message);
     }
     return err;
+}
+rt_err_t at_wifi_init(rt_device_t dev)
+{
+    rt_err_t rc;
+    /*******wifi mode*********/
+    //DIR_WIFI_MODE:
+    SIM7600_DIR_WIFI;
+    /****SYNC AT************/
+    if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SYNC) != RT_EOK)
+        return RT_ERROR;
+    /*****check wifi state****************/
+    if (at_wifi_get_cipstatus(dev) != 2)
+    {
+        /**add wifi connect code**/
+    }
+    return RT_EOK;
 }

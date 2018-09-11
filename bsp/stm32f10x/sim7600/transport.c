@@ -9,7 +9,7 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-10 18:20:36
+ * @Last Modified time: 2018-09-11 18:09:06
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
@@ -48,24 +48,9 @@ return >=0 for a socket descriptor, <0 for an error code
 @todo Basically moved from the sample without changes, should accomodate same usage for 'sock' for clarity,
 removing indirections
 */
-int transport_open(rt_device_t dev, char *addr, int port)
+int transport_open(rt_device_t dev)
 {
 	int rc = 0;
-	/*******wifi mode*********/
-	//DIR_WIFI_MODE:
-	SIM7600_DIR_WIFI;
-	/****test AT************/
-	if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SYNC) == RT_EOK)
-		goto DIR_4G_MODE;
-	/*****check wifi state****************/
-	if (at_wifi_get_cipstatus(dev) != 2)
-	{ /**add wifi connect code**/
-	}
-	goto connect_tcp;
-/******4G MODE***************/
-DIR_4G_MODE:
-	SIM7600_DIR_4G;
-connect_tcp:
 	/*******connect tcp/ssl************/
 	if (at_wifi_connect_ssl(dev, addr, port) == RT_EOK)
 		rc = RT_EOK;
