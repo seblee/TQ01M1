@@ -23,6 +23,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 /***********at command for wifi*************************/
+const char AT_COMMAND[][] = {
+    {"CIPMODE"}, /*{"CIPMODE"}*/
+    {},
+};
+
 const char AT_WIFI_SYNC[] = {"AT\r\n"};
 const char AT_WIFI_STATUS[] = {"AT+CIPSTATUS\r\n"};
 const char AT_WIFI_SET_SSL_BUFF_SIZE[] = {"AT+CIPSSLSIZE=4096"};
@@ -169,6 +174,52 @@ rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
     }
     return err;
 }
+
+/**
+ ****************************************************************************
+* @Function : rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev)
+ * @File     : at_transfer.c
+ * @Program  : none
+ * @Created  : 2018-09-12 by seblee
+ * @Brief    : CIPMODE=1
+ * @Version  : V1.0
+**/
+rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev)
+{
+    rt_err_t err;
+    char sendbuf[20] = {0};
+    /*AT+CIPMODE=1*/
+    rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CIPMODE][0], 1);
+    return at_wifi_send_message_ack_ok(dev, sendbuf);
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_err_t at_wifi_send_start(void)
+ * @File     : at_transfer.c
+ * @Program  : none
+ * @Created  : 2018-09-12 by seblee
+ * @Brief    : none
+ * @Version  : V1.0
+**/
+rt_err_t at_wifi_send_start(void)
+{
+    /*AT+CIPSEND*/
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_err_t at_wifi_set_mode(void)
+ * @File     : at_transfer.c
+ * @Program  : none
+ * @Created  : 2018-09-12 by seblee
+ * @Brief    : set CIPMODE
+ * @Version  : V1.0
+**/
+rt_err_t at_wifi_set_mode(void)
+{
+}
+
 rt_err_t at_wifi_init(rt_device_t dev)
 {
     rt_err_t rc;

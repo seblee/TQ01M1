@@ -76,3 +76,11 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
                 "|",
                 device_info->device_id, SECURE_TLS, MD5_METHOD);
 }
+
+int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn)
+{
+    rt_int16_t len;
+    len = MQTTSerialize_connect(write_buffer, MSG_LEN_MAX, conn);
+    if (len <= 0)
+        return RT_ERROR;
+}

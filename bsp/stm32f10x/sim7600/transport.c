@@ -29,18 +29,15 @@
 
 /* Private functions ---------------------------------------------------------*/
 
-rt_size_t transport_sendPacketBuffer(rt_device_t dev, unsigned char *buf, int buflen)
+int transport_sendPacketBuffer(int sock, unsigned char *buf, int buflen)
 {
-	rt_size_t rc;
-	rc = rt_device_write(dev, 0, buf, buflen);
-	return rc;
+	return rt_device_write(write_device, 0, buf, buflen);
 }
 
 int transport_getdata(unsigned char *buf, int count)
 {
-	//	memcpy(buf, (void *)&uart_rx_buffer[read_buf_len], count);
-	//	read_buf_len += count;
-	return count;
+	/**1 second timeout**/
+	return sim7600_read_message(write_device, buf, count, 1000);
 }
 
 /**
@@ -48,13 +45,15 @@ return >=0 for a socket descriptor, <0 for an error code
 @todo Basically moved from the sample without changes, should accomodate same usage for 'sock' for clarity,
 removing indirections
 */
-int transport_open(rt_device_t dev)
+int transport_open(rt_device_t dev, char *addr, int port)
 {
-	int rc = 0;
+	rt_err_t err = RT_EOK;
 	/*******connect tcp/ssl************/
-	if (at_wifi_connect_ssl(dev, addr, port) == RT_EOK)
-		rc = RT_EOK;
-	return rc;
+	err = at_wifi_connect_ssl(dev, addr, port);
+	if (err == RT_EOK)
+		err = at_wifi_set_CIPMODE_mode(dev);
+	if (err == RT_EOK)
+		err = at_wifi_set_CIPMODE_mode(dev);
 }
 
 int transport_close(rt_device_t dev)

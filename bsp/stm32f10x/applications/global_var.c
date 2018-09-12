@@ -35,7 +35,11 @@ typedef enum
 alarm_acl_conf_st g_alarm_acl_inst[MAX_ALARM_ACL_NUM]; //alarm check list declairation
 sys_reg_st g_sys;									   //global parameter declairation
 local_reg_st l_sys;									   //local status declairation
-
+/**
+ * 	 序号	指针	最小值	 最大值   默认值  权限		
+ * 	{0, 	NULL,	0, 		3600,	0, 		0, 	 1, NULL}, 
+ *
+ ***/
 const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] =
 	{
 		// 			id			mapped registers																			 min					max					dft				    permission	r/w     chk_prt
@@ -130,7 +134,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] =
 		{87, &g_sys.config.ComPara.u16ColdWater_StartTemp, 50, 400, 150, 2, 1, NULL},
 		{88, &g_sys.config.ComPara.u16ColdWater_StopTemp, 10, 300, 50, 2, 1, NULL},
 		{89, NULL, 0, 3600, 0, 2, 1, NULL},
-		{90, NULL, 0, 3600, 0, 2, 1, NULL},
+		{90, &g_sys.config.ComPara.u16NetworkPrioty, 0, 1, 0, 2, 1, NULL},
 		{91, &g_sys.config.ComPara.u16FILTER_ELEMENT_Type, 0, 1, 0, 2, 1, NULL},
 		{92, &g_sys.config.alarm[ACL_FILTER_ELEMENT_1_OT].alarm_param, 100, 65535, 22000, 2, 1, NULL},
 		{93, &g_sys.config.alarm[ACL_FILTER_ELEMENT_2_OT].alarm_param, 100, 65535, 22000, 2, 1, NULL},

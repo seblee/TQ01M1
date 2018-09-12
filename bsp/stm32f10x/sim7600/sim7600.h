@@ -38,6 +38,8 @@
 
 #define GUIDER_SIGN_LEN (256)
 
+#define MSG_LEN_MAX 1024
+
 #define SIM7600_DIR_PORT UART3_DIR_GPIO
 #define SIM7600_DIR_PIN UART3_DIR_GPIO_PIN
 
@@ -79,6 +81,9 @@ typedef struct
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+extern rt_device_t write_device;
+extern rt_uint8_t write_buffer[1024];
+
 extern const char iot_deviceid[];
 extern const char iot_devicename[];
 extern const char iot_productKey[];
@@ -92,6 +97,7 @@ extern MQTTPacket_connectData client_con;
 
 /* Private functions ---------------------------------------------------------*/
 rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data);
+rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout);
 /*----------------------------------------------------------------------------*/
 
 #endif

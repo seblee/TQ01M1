@@ -18,9 +18,14 @@
 #include "sys_conf.h"
 #include <rtthread.h>
 /* Private typedef -----------------------------------------------------------*/
-
+typedef enum
+{
+    CIPMODE = 0,
+} __at_command_t;
 /* Private define ------------------------------------------------------------*/
-
+#ifndef AT_HEADER
+#define AT_HEADER "AT"
+#endif /* AT_HEADER */
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -31,5 +36,6 @@ extern const char AT_WIFI_SYNC[];
 rt_err_t at_wifi_send_message_ack_ok(rt_device_t dev, const char *AT_command);
 rt_err_t at_wifi_get_cipstatus(rt_device_t dev);
 rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port);
+rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev);
 /*----------------------------------------------------------------------------*/
 #endif

@@ -17,21 +17,23 @@
 #include "transport.h"
 #include "mqtt_client.h"
 /* Private typedef -----------------------------------------------------------*/
+struct rx_msg
+{
+    rt_device_t dev;
+    rt_size_t size;
+};
 
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-struct rx_msg
-{
-    rt_device_t dev;
-    rt_size_t size;
-};
+rt_device_t write_device;
 /* 用于接收消息的消息队列*/
 rt_mq_t rx_mq;
 /* 接收线程的接收缓冲区*/
 static char uart_rx_buffer[64];
+rt_uint8_t write_buffer[MSG_LEN_MAX];
 const char out_test[] = "test uart3 device out start*******\r\n";
 
 const char iot_deviceid[] = {"cdtest0041"};
@@ -65,7 +67,7 @@ rt_err_t uart_input(rt_device_t dev, rt_size_t size)
 void sim7600_thread_entry(void *parameter)
 {
     struct rx_msg msg;
-    rt_device_t write_device;
+
     rt_err_t result = RT_EOK;
 
     rx_mq = rt_mq_create("7600_rx_mq",
@@ -92,21 +94,6 @@ void sim7600_thread_entry(void *parameter)
     {
         /* 从消息队列中读取消息*/
         result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), 50);
-        // if (result == -RT_ETIMEOUT)
-        // {
-        //     if (receive_flag == 1)
-        //     {
-        //         /**received something**/
-        //     }
-        //     /* 接收超时*/
-        //     // rt_kprintf("timeout count:%d\n", ++count);
-        //     // rt_device_write(write_device, 0, "time out",
-        //     //                 strlen("time out"));
-        // }
-        // if (result == RT_EOK)
-        // {
-        //     receive_flag = 1;
-        // }
 
         if (result == -RT_ETIMEOUT)
         {
@@ -185,4 +172,42 @@ exit:
         *data = RT_NULL;
     }
     return 0;
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout)
+ * @File     : sim7600.c
+ * @Program  : dev:serial device
+ *             *data:the buff read
+ *             len:the length read
+ * @Created  : 2017/12/12 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout)
+{
+    struct rx_msg msg;
+    rt_err_t result = RT_EOK;
+    rt_uint32_t rx_length, count = 0;
+
+    if (data == RT_NULL)
+        return -RT_ENOMEM;
+    while (1)
+    {
+        result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), timeout);
+        if (result == RT_EOK)
+        {
+            timeout = 50;
+            rx_length = msg.size;
+            // rx_length = rx_length > (len - count) ? (len - count) : rx_length;
+            rx_length = rt_device_read(msg.dev, 0, data, len);
+            count += rx_length;
+            if (count == len) //complate data count
+                break;
+        }
+        if (result == -RT_ETIMEOUT) //超时50ms 判断完成一次 数据传输
+            break;
+    }
+    return count;
 }

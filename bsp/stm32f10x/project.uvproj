@@ -1142,6 +1142,21 @@
               <FileType>1</FileType>
               <FilePath>.\sim7600\at_transfer.c</FilePath>
             </File>
+            <File>
+              <FileName>mqtt_client.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\sim7600\mqtt_client.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils_hmac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\sim7600\utils_hmac.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils_md5.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\sim7600\utils_md5.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
