@@ -34,7 +34,7 @@ int transport_getdata(unsigned char *buf, int count);
 
 int transport_open(rt_device_t dev, char *addr, int port);
 
-int transport_close(void);
+int transport_close(rt_device_t dev);
 
 /*----------------------------------------------------------------------------*/
 

@@ -32,6 +32,7 @@ typedef enum
 
 /* Private variables ---------------------------------------------------------*/
 extern const char AT_WIFI_SYNC[];
+extern const char AT_WIFI_CIPSEND[];
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/

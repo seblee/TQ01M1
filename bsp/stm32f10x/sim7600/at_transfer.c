@@ -36,9 +36,11 @@ const char AT_WIFI_STATUS[] = {"AT+CIPSTATUS\r\n"};
 const char AT_WIFI_SET_SSL_BUFF_SIZE[] = {"AT+CIPSSLSIZE=4096\r\n"};
 const char AT_WIFI_CONNECT_SSL[] = {"AT+CIPSTART"};
 const char AT_WIFI_CWJAP_DEF[] = {"AT+CWJAP_DEF=\"Cloudwater2\",\"tqcd2018\"\r\n"};
+const char AT_WIFI_CIPSEND[] = {"AT+CIPSEND\r\n"};
 /***********at result for wifi*************************/
 const char AT_WIFI_ACK_OK[] = {"OK"};
-const char AT_WIFI_ACK_STATUS[] = {"STATUS"};
+const char AT_WIFI_ACK_ERROR[] = {"ERROR"};
+const char AT_WIFI_ACK_STATUS[] = {"STATUS:"};
 /***********at command for 4G*************************/
 #define AT_4G_SYNC AT_WIFI_SYNC
 const char AT_CBC[] = {"AT+CBC\r\n"};         //检查充电状态，以及电池电量占容量的百分比+CBC: 0,97,4164
@@ -139,6 +141,12 @@ rt_err_t at_wifi_send_message_ack_ok(rt_device_t dev, const char *AT_command)
         char *wifi_status = rt_strstr(message, AT_WIFI_ACK_OK);
         if (wifi_status != RT_NULL)
             err = RT_EOK;
+        else
+        {
+            wifi_status = rt_strstr(message, AT_WIFI_ACK_ERROR);
+            if (wifi_status != RT_NULL)
+                err = -RT_ERROR;
+        }
         rt_free(message);
     }
     else
@@ -156,9 +164,8 @@ rt_err_t at_wifi_get_cipstatus(rt_device_t dev)
     if (message)
     {
         char *wifi_status = rt_strstr(message, AT_WIFI_ACK_STATUS);
-        wifi_status = rt_strstr(wifi_status + rt_strlen(AT_WIFI_ACK_STATUS), AT_WIFI_ACK_STATUS);
         if (wifi_status != RT_NULL)
-            err = *(wifi_status + rt_strlen(AT_WIFI_ACK_STATUS) + 1) - '0'; // STATUS:
+            err = *(wifi_status + rt_strlen(AT_WIFI_ACK_STATUS)) - '0'; // STATUS:
         at_log("wifi_status %s", wifi_status);
         if (message)
             rt_free(message);
@@ -169,28 +176,14 @@ rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
 {
     rt_err_t err = RT_ERROR;
     char send_buffer[100] = {0};
-    char *message = RT_NULL;
     rt_sprintf(send_buffer, "%s=\"SSL\",\"%s\",%d,10\r\n", AT_WIFI_CONNECT_SSL, host, port);
     err = at_wifi_send_message_ack_ok(dev, send_buffer);
     at_log("receive ok err:%ld", err);
     if (err == RT_EOK)
         return err;
-    rt_memset(write_buffer, 0, sizeof(write_buffer));
+    err = at_wifi_send_message_ack_ok(dev, RT_NULL);
+    // err = sim7600_read_message(dev, write_buffer, sizeof(write_buffer), 9000);
 
-    err = sim7600_send_message(dev, RT_NULL, (rt_uint8_t **)&message);
-
-    // err = sim7600_read_message(dev, (rt_uint8_t *)write_buffer, sizeof(write_buffer), 9000);
-
-    at_log("write_buffer:%s,count:%d", message, err);
-    if (err > 0)
-    {
-        char *p = rt_strstr((char *)message, AT_WIFI_ACK_OK);
-        if (p != RT_NULL)
-            err = RT_EOK;
-        else
-            err = RT_ERROR;
-    }
-    rt_free(message);
     return err;
 }
 

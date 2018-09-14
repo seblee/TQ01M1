@@ -20,7 +20,11 @@
 #include "sys_conf.h"
 #include <rtthread.h>
 /* Private typedef -----------------------------------------------------------*/
-
+typedef enum
+{
+    TQ_PLATFORM_INIT = 0,
+    TQ_WATER_NOTICE,
+} __mqtt_topic_t;
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
@@ -32,6 +36,8 @@
 /* Private functions ---------------------------------------------------------*/
 int mqtt_client_init(rt_device_t dev);
 void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info);
+int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn);
+rt_err_t mqtt_client_subscription(__mqtt_topic_t topic, iotx_device_info_pt iotx_dev_info);
 /*----------------------------------------------------------------------------*/
 
 #endif

@@ -15,6 +15,7 @@
 /* Private include -----------------------------------------------------------*/
 #include "mqtt_client.h"
 #include "utils_hmac.h"
+#include "transport.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -24,6 +25,11 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+/******topics**********/
+const char *const topics[] = {
+    "pay/client2Cloud/init", /*{"TQ_PLATFORM_INIT"}*/
+    "pay/service2Cloud/get", /*{"TQ_WATER_NOTICE"}*/
+};
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -90,8 +96,86 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
 int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn)
 {
     rt_int16_t len;
+
     len = MQTTSerialize_connect(write_buffer, MSG_LEN_MAX, conn);
     if (len <= 0)
-        return RT_ERROR;
+    {
+        mqtt_log("Serialize connect packet failed,len = %d", len);
+        return -RT_ERROR;
+    }
+
+    mqtt_log("mqtt_client_init done");
+
+    if (transport_sendPacketBuffer(0, write_buffer, len) == len)
+    {
+        mqtt_log("send mqtt connect packet done");
+    }
+    else
+        goto exit;
+    /* wait for connack */
+    rt_memset(write_buffer, 0, sizeof(write_buffer));
+    if (MQTTPacket_read(write_buffer, sizeof(write_buffer), transport_getdata) == CONNACK)
+    {
+        unsigned char sessionPresent, connack_rc;
+        mqtt_log("get CONNACK packet");
+        if (MQTTDeserialize_connack(&sessionPresent, &connack_rc, write_buffer, sizeof(write_buffer)) != 1 || connack_rc != 0)
+        {
+            mqtt_log("Unable to connect, return code %d\n", connack_rc);
+            goto exit;
+        }
+    }
+    else
+        goto exit;
+    mqtt_log("MQTT connect sucess!!!");
     return RT_EOK;
+exit:
+    return -RT_ERROR;
+}
+/**
+ ****************************************************************************
+ * @Function : rt_err_t mqtt_client_subscription(__mqtt_topic_t topic, iotx_device_info_pt iotx_dev_info)
+ * @File     : mqtt_client.c
+ * @Program  : topic:swith topic
+ * @Created  : 2018-09-14 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+rt_err_t mqtt_client_subscription(__mqtt_topic_t subsc, iotx_device_info_pt iotx_dev_info)
+{
+    int req_qos = 0, rc;
+    char cache[100];
+
+    rt_snprintf((char *)cache, 100, "/%s/%s/%s\0",
+                iotx_dev_info->product_key,
+                iotx_dev_info->device_name,
+                topics[subsc]);
+    MQTTString topicString;
+    topicString.cstring = (char *)cache;
+    rc = MQTTSerialize_subscribe(write_buffer, MSG_LEN_MAX, 0, 3, 1, &topicString, &req_qos);
+
+    mqtt_log("len:%d，write_buffer:%s", rc, write_buffer + 6);
+    transport_sendPacketBuffer(0, write_buffer, rc);
+    mqtt_log("send mqtt subscription packet done");
+
+    //     rt_memset(write_buffer, 0, rc);
+    //     if (MQTTPacket_read(write_buffer, MSG_LEN_MAX, transport_getdata) == SUBACK) /* wait for suback */
+    //     {
+    //         mqtt_log("get SUBACK");
+    //         //         unsigned short submsgid;
+    //         //         int subcount;
+    //         //         int granted_qos;
+
+    //         //         rc = MQTTDeserialize_suback(&submsgid, 1, &subcount, &granted_qos, write_buffer, sizeof(write_buffer));
+    //         //         if (granted_qos != 0)
+    //         //         {
+    //         //             printf("granted qos != 0, %d\n", granted_qos);
+    //         //             goto exit;
+    //         //         }
+    //     }
+    //     else
+    //         goto exit;
+    //     //     return RT_EOK;
+    // exit:
+    //     mqtt_log("RT_ERROR");
+    return -RT_ERROR;
 }
