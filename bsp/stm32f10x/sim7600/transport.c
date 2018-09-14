@@ -20,7 +20,9 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
-
+#ifndef transport_log
+#define transport_log(N, ...) rt_kprintf("####[transport %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__);
+#endif /* transport_log(...) */
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -50,10 +52,12 @@ int transport_open(rt_device_t dev, char *addr, int port)
 	rt_err_t err = RT_EOK;
 	/*******connect tcp/ssl************/
 	err = at_wifi_connect_ssl(dev, addr, port);
-	if (err == RT_EOK)
-		err = at_wifi_set_CIPMODE_mode(dev);
-	if (err == RT_EOK)
-		err = at_wifi_set_CIPMODE_mode(dev);
+	// if (err == RT_EOK)
+	// 	err = at_wifi_set_CIPMODE_mode(dev);
+	// if (err == RT_EOK)
+	// 	err = at_wifi_set_CIPMODE_mode(dev);
+	transport_log("err:%d", err);
+	return err;
 }
 
 int transport_close(rt_device_t dev)

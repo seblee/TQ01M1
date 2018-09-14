@@ -18,22 +18,26 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
-
+#ifndef at_log
+#define at_log(N, ...) rt_kprintf("####[at %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__);
+#endif /* at_log(...) */
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 /***********at command for wifi*************************/
-const char AT_COMMAND[][] = {
-    {"CIPMODE"}, /*{"CIPMODE"}*/
-    {},
+const char *const AT_COMMAND[] = {
+    "CIPMODE", /*{"CIPMODE"}*/
+    "CWMODE_DEF",
+    "CWAUTOCONN",
 };
 
 const char AT_WIFI_SYNC[] = {"AT\r\n"};
 const char AT_WIFI_STATUS[] = {"AT+CIPSTATUS\r\n"};
-const char AT_WIFI_SET_SSL_BUFF_SIZE[] = {"AT+CIPSSLSIZE=4096"};
+const char AT_WIFI_SET_SSL_BUFF_SIZE[] = {"AT+CIPSSLSIZE=4096\r\n"};
 const char AT_WIFI_CONNECT_SSL[] = {"AT+CIPSTART"};
+const char AT_WIFI_CWJAP_DEF[] = {"AT+CWJAP_DEF=\"Cloudwater2\",\"tqcd2018\"\r\n"};
 /***********at result for wifi*************************/
-const char AT_WIFI_ACK_OK[] = {"OK\r\n"};
+const char AT_WIFI_ACK_OK[] = {"OK"};
 const char AT_WIFI_ACK_STATUS[] = {"STATUS"};
 /***********at command for 4G*************************/
 #define AT_4G_SYNC AT_WIFI_SYNC
@@ -127,16 +131,18 @@ rt_err_t at_wifi_send_message_ack_ok(rt_device_t dev, const char *AT_command)
 {
     rt_err_t err = RT_ERROR;
     char *message = RT_NULL;
-
-    sim7600_send_message(dev, AT_command, (rt_uint8_t **)&message);
-
+    err = sim7600_send_message(dev, AT_command, (rt_uint8_t **)(&message));
+    at_log("count:%d", err);
     if (message)
     {
+        at_log("message:%s", message);
         char *wifi_status = rt_strstr(message, AT_WIFI_ACK_OK);
         if (wifi_status != RT_NULL)
-            err = RT_EOK; // STATUS:
+            err = RT_EOK;
         rt_free(message);
     }
+    else
+        err = -RT_EEMPTY;
     return err;
 }
 
@@ -146,32 +152,45 @@ rt_err_t at_wifi_get_cipstatus(rt_device_t dev)
     char *message = RT_NULL;
 
     sim7600_send_message(dev, AT_WIFI_STATUS, (rt_uint8_t **)&message);
-
+    at_log("message %s", message);
     if (message)
     {
         char *wifi_status = rt_strstr(message, AT_WIFI_ACK_STATUS);
+        wifi_status = rt_strstr(wifi_status + rt_strlen(AT_WIFI_ACK_STATUS), AT_WIFI_ACK_STATUS);
         if (wifi_status != RT_NULL)
-            err = *(wifi_status + rt_strlen(AT_WIFI_ACK_STATUS) + 1); // STATUS:
-        rt_free(message);
+            err = *(wifi_status + rt_strlen(AT_WIFI_ACK_STATUS) + 1) - '0'; // STATUS:
+        at_log("wifi_status %s", wifi_status);
+        if (message)
+            rt_free(message);
     }
     return err;
 }
 rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
 {
     rt_err_t err = RT_ERROR;
-    char *message = RT_NULL;
     char send_buffer[100] = {0};
-    rt_sprintf(send_buffer, "%s=\"SSL\",\"%s\",%d,1", AT_WIFI_CONNECT_SSL, host, port);
+    char *message = RT_NULL;
+    rt_sprintf(send_buffer, "%s=\"SSL\",\"%s\",%d,10\r\n", AT_WIFI_CONNECT_SSL, host, port);
+    err = at_wifi_send_message_ack_ok(dev, send_buffer);
+    at_log("receive ok err:%ld", err);
+    if (err == RT_EOK)
+        return err;
+    rt_memset(write_buffer, 0, sizeof(write_buffer));
 
-    sim7600_send_message(dev, AT_WIFI_STATUS, (rt_uint8_t **)&message);
+    err = sim7600_send_message(dev, RT_NULL, (rt_uint8_t **)&message);
 
-    if (message)
+    // err = sim7600_read_message(dev, (rt_uint8_t *)write_buffer, sizeof(write_buffer), 9000);
+
+    at_log("write_buffer:%s,count:%d", message, err);
+    if (err > 0)
     {
-        char *wifi_status = rt_strstr(message, AT_WIFI_ACK_STATUS);
-        if (wifi_status != RT_NULL)
-            err = *(wifi_status + rt_strlen(AT_WIFI_ACK_STATUS) + 1); // STATUS:
-        rt_free(message);
+        char *p = rt_strstr((char *)message, AT_WIFI_ACK_OK);
+        if (p != RT_NULL)
+            err = RT_EOK;
+        else
+            err = RT_ERROR;
     }
+    rt_free(message);
     return err;
 }
 
@@ -186,7 +205,6 @@ rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
 **/
 rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev)
 {
-    rt_err_t err;
     char sendbuf[20] = {0};
     /*AT+CIPMODE=1*/
     rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CIPMODE][0], 1);
@@ -205,6 +223,7 @@ rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev)
 rt_err_t at_wifi_send_start(void)
 {
     /*AT+CIPSEND*/
+    return RT_EOK;
 }
 
 /**
@@ -218,19 +237,50 @@ rt_err_t at_wifi_send_start(void)
 **/
 rt_err_t at_wifi_set_mode(void)
 {
+    return RT_EOK;
 }
 
 rt_err_t at_wifi_init(rt_device_t dev)
 {
-    rt_err_t rc;
+    rt_uint8_t count = 0;
+    rt_err_t err;
     /*******wifi mode*********/
     //DIR_WIFI_MODE:
     SIM7600_DIR_WIFI;
     /****SYNC AT************/
+SYNC_AT:
     if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SYNC) != RT_EOK)
+    {
+        at_log("SYNC AT err");
+        rt_thread_delay(2000);
+        if (count++ < 10)
+            goto SYNC_AT;
+    }
+    /****Set wifi ssl buff************/
+    if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SET_SSL_BUFF_SIZE) != RT_EOK)
+    {
+        at_log("AT_WIFI_SET_SSL_BUFF_SIZE err");
         return RT_ERROR;
+    }
     /*****check wifi state****************/
-    if (at_wifi_get_cipstatus(dev) != 2)
+    err = at_wifi_get_cipstatus(dev);
+    at_log("err:%d", err);
+    if (err == 5)
+    {
+        char sendbuf[20] = {0};
+        rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CWMODE_DEF][0], 1);
+        err = at_wifi_send_message_ack_ok(dev, sendbuf);
+        at_log("CWMODE_DEF=1 err:%d", err);
+
+        rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CWAUTOCONN][0], 1);
+        err = at_wifi_send_message_ack_ok(dev, sendbuf);
+        at_log("CWAUTOCONN=1 err:%d", err);
+
+        err = at_wifi_send_message_ack_ok(dev, AT_WIFI_CWJAP_DEF);
+        at_log("CWAUTOCONN=1 err:%d", err);
+        at_wifi_send_message_ack_ok(dev, RT_NULL);
+    }
+    if (err != 2)
     {
         /**add wifi connect code**/
     }

@@ -18,7 +18,7 @@
 #include "sys_conf.h"
 #include <rtthread.h>
 #include "board.h"
-
+#include "MQTTPacket.h"
 /* Private define ------------------------------------------------------------*/
 /* From device.h */
 #define PRODUCT_KEY_LEN (20)
@@ -82,7 +82,7 @@ typedef struct
 
 /* Private variables ---------------------------------------------------------*/
 extern rt_device_t write_device;
-extern rt_uint8_t write_buffer[1024];
+extern rt_uint8_t write_buffer[MSG_LEN_MAX];
 
 extern const char iot_deviceid[];
 extern const char iot_devicename[];

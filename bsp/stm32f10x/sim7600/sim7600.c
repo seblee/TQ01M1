@@ -16,6 +16,7 @@
 #include "sim7600.h"
 #include "transport.h"
 #include "mqtt_client.h"
+#include "at_transfer.h"
 /* Private typedef -----------------------------------------------------------*/
 struct rx_msg
 {
@@ -24,7 +25,9 @@ struct rx_msg
 };
 
 /* Private define ------------------------------------------------------------*/
-
+#ifndef sim7600_log
+#define sim7600_log(N, ...) rt_kprintf("####[sim7600 %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__);
+#endif /* at_log(...) */
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -34,7 +37,6 @@ rt_mq_t rx_mq;
 /* 接收线程的接收缓冲区*/
 static char uart_rx_buffer[64];
 rt_uint8_t write_buffer[MSG_LEN_MAX];
-const char out_test[] = "test uart3 device out start*******\r\n";
 
 const char iot_deviceid[] = {"cdtest0041"};
 const char iot_devicename[] = {"cdtest004"};
@@ -83,18 +85,16 @@ void sim7600_thread_entry(void *parameter)
         rt_device_set_rx_indicate(write_device, uart_input);
         rt_device_open(write_device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);
     }
-    rt_device_write(write_device, 0, out_test, strlen(out_test));
-
     result = at_wifi_init(write_device);
-
     mqtt_client_init(write_device);
-    transport_open(write_device);
+    sim7600_log("mqtt_client_init done");
+
+    transport_open(write_device, device_connect.host_name, device_connect.port);
 
     while (1)
     {
         /* 从消息队列中读取消息*/
         result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), 50);
-
         if (result == -RT_ETIMEOUT)
         {
             /* 接收超时*/
@@ -103,7 +103,6 @@ void sim7600_thread_entry(void *parameter)
             //                 strlen("time out"));
         }
         /* 成功收到消息*/
-
         if (result == RT_EOK)
         {
             rt_uint32_t rx_length;
@@ -132,16 +131,17 @@ void sim7600_thread_entry(void *parameter)
 }
 rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data)
 {
-    rt_uint16_t timeout = 500;
+    rt_uint16_t timeout = 9000;
     rt_uint32_t count = 0;
     struct rx_msg msg;
     rt_err_t result = RT_EOK;
     rt_uint32_t rx_length;
-
-    rt_device_write(dev, 0, senddata, strlen(senddata));
+    if (senddata)
+        rt_device_write(dev, 0, senddata, strlen(senddata));
 
     if (*data != RT_NULL)
     {
+        rt_kprintf("*data != RT_NULL\r\n");
         rt_free(*data);
         *data = RT_NULL;
     }
@@ -150,15 +150,15 @@ rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8
         result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), timeout);
         if (result == RT_EOK)
         {
-            timeout = 50;
+            timeout = 100;
             rx_length = (sizeof(uart_rx_buffer) - 1) > msg.size ? msg.size : sizeof(uart_rx_buffer) - 1;
             if (*data == RT_NULL)
-                *data = (rt_uint8_t *)rt_malloc(rx_length);
+                *data = (rt_uint8_t *)rt_calloc(rx_length + 1, sizeof(rt_uint8_t));
             else
-                *data = (rt_uint8_t *)rt_malloc(rx_length + count);
+                *data = (rt_uint8_t *)rt_realloc(*data, rx_length + count + 1);
             if (*data == RT_NULL)
                 goto exit;
-            rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[count], rx_length);
+            rx_length = rt_device_read(msg.dev, 0, (*data + count), rx_length);
             count += rx_length;
         }
         if (result == -RT_ETIMEOUT)
@@ -166,6 +166,7 @@ rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8
     }
     return count;
 exit:
+    rt_kprintf("err count:%d\r\n", count);
     if (*data != RT_NULL)
     {
         rt_free(*data);
@@ -190,18 +191,19 @@ rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t le
     struct rx_msg msg;
     rt_err_t result = RT_EOK;
     rt_uint32_t rx_length, count = 0;
+    rt_int32_t timer = timeout;
 
     if (data == RT_NULL)
         return -RT_ENOMEM;
     while (1)
     {
-        result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), timeout);
+        result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), timer);
         if (result == RT_EOK)
         {
-            timeout = 50;
+            timer = 100;
             rx_length = msg.size;
-            // rx_length = rx_length > (len - count) ? (len - count) : rx_length;
-            rx_length = rt_device_read(msg.dev, 0, data, len);
+            rx_length = rx_length > (len - count) ? (len - count) : rx_length;
+            rx_length = rt_device_read(msg.dev, 0, data, rx_length);
             count += rx_length;
             if (count == len) //complate data count
                 break;
@@ -209,5 +211,6 @@ rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t le
         if (result == -RT_ETIMEOUT) //超时50ms 判断完成一次 数据传输
             break;
     }
+    sim7600_log("data:%s,count:%d", data, count);
     return count;
 }

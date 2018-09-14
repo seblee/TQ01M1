@@ -32,7 +32,7 @@ rt_size_t transport_sendPacketBuffer(rt_device_t dev, unsigned char *buf, int bu
 
 int transport_getdata(unsigned char *buf, int count);
 
-int transport_open(rt_device_t dev);
+int transport_open(rt_device_t dev, char *addr, int port);
 
 int transport_close(void);
 

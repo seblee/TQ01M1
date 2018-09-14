@@ -21,6 +21,8 @@
 typedef enum
 {
     CIPMODE = 0,
+    CWMODE_DEF,
+    CWAUTOCONN,
 } __at_command_t;
 /* Private define ------------------------------------------------------------*/
 #ifndef AT_HEADER
@@ -33,6 +35,7 @@ extern const char AT_WIFI_SYNC[];
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+rt_err_t at_wifi_init(rt_device_t dev);
 rt_err_t at_wifi_send_message_ack_ok(rt_device_t dev, const char *AT_command);
 rt_err_t at_wifi_get_cipstatus(rt_device_t dev);
 rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port);
