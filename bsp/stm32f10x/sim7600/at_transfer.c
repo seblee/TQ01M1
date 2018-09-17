@@ -35,7 +35,7 @@ const char AT_WIFI_SYNC[] = {"AT\r\n"};
 const char AT_WIFI_STATUS[] = {"AT+CIPSTATUS\r\n"};
 const char AT_WIFI_SET_SSL_BUFF_SIZE[] = {"AT+CIPSSLSIZE=4096\r\n"};
 const char AT_WIFI_CONNECT_SSL[] = {"AT+CIPSTART"};
-const char AT_WIFI_CWJAP_DEF[] = {"AT+CWJAP_DEF=\"Cloudwater2\",\"tqcd2018\"\r\n"};
+const char AT_WIFI_CWJAP_DEF[] = {"AT+CWJAP_DEF=\"Cloudwater\",\"tqcd2018\"\r\n"};
 const char AT_WIFI_CIPSEND[] = {"AT+CIPSEND\r\n"};
 /***********at result for wifi*************************/
 const char AT_WIFI_ACK_OK[] = {"OK"};
@@ -176,7 +176,7 @@ rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
 {
     rt_err_t err = RT_ERROR;
     char send_buffer[100] = {0};
-    rt_sprintf(send_buffer, "%s=\"SSL\",\"%s\",%d,10\r\n", AT_WIFI_CONNECT_SSL, host, port);
+    rt_sprintf(send_buffer, "%s=\"TCP\",\"%s\",%d,10\r\n", AT_WIFI_CONNECT_SSL, host, port);
     err = at_wifi_send_message_ack_ok(dev, send_buffer);
     at_log("receive ok err:%ld", err);
     if (err == RT_EOK)

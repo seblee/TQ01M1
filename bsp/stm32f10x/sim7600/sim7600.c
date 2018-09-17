@@ -38,13 +38,10 @@ rt_mq_t rx_mq;
 static char uart_rx_buffer[64];
 rt_uint8_t write_buffer[MSG_LEN_MAX];
 
-const char iot_deviceid[] = {"cdtest004"};
-const char iot_devicename[] = {"HelloWorld"};
-const char iot_productKey[] = {"rl0bGtKFCYA"};
-const char iot_secret[] = {"gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"};
-//const char iot_devicename[] = {"cdtest004"};
-// const char iot_productKey[] = {"a1JOOi3mNEf"};
-// const char iot_secret[] = {"WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"};
+const char iot_deviceid[] = {DEVICE_ID};
+const char iot_devicename[] = {DEVICE_NAME};
+const char iot_productKey[] = {PRODUCT_KEY};
+const char iot_secret[] = {DEVICE_SECRET};
 /* Private function prototypes -----------------------------------------------*/
 iotx_device_info_t device_info;
 iotx_conn_info_t device_connect;
@@ -94,11 +91,11 @@ void sim7600_thread_entry(void *parameter)
 
     transport_open(write_device, device_connect.host_name, device_connect.port);
     mqtt_client_connect(write_device, &client_con);
-    mqtt_client_connect(write_device, &client_con);
-    mqtt_client_subscription(TQ_WATER_NOTICE, &device_info);
-    transport_close(write_device);
+    result = mqtt_client_subscribe_topics();
+    // transport_close(write_device);
     while (1)
     {
+
         /* 从消息队列中读取消息*/
         result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), 50);
         if (result == -RT_ETIMEOUT)
@@ -114,23 +111,23 @@ void sim7600_thread_entry(void *parameter)
             rt_uint32_t rx_length;
             rx_length = (sizeof(uart_rx_buffer) - 1) > msg.size ? msg.size : sizeof(uart_rx_buffer) - 1;
             /* 读取消息*/
-            // rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[0],
-            //                            rx_length);
+            rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[0],
+                                       rx_length);
 
             rt_memset(uart_rx_buffer, 0, sizeof(uart_rx_buffer));
             if (rx_length >= 23)
             {
                 rt_sprintf(uart_rx_buffer, "rx_length:%ld\r\n", rx_length);
-                if (write_device != RT_NULL)
-                    rt_device_write(write_device, 0, &uart_rx_buffer[0],
-                                    strlen(uart_rx_buffer));
-                rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[0],
-                                           rx_length);
-                rt_sprintf(&uart_rx_buffer[rx_length], "\r\n");
-                /* 写到写设备中*/
-                if (write_device != RT_NULL)
-                    rt_device_write(write_device, 0, &uart_rx_buffer[0],
-                                    strlen(uart_rx_buffer));
+                // if (write_device != RT_NULL)
+                //     rt_device_write(write_device, 0, &uart_rx_buffer[0],
+                //                     strlen(uart_rx_buffer));
+                // rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[0],
+                //                            rx_length);
+                // rt_sprintf(&uart_rx_buffer[rx_length], "\r\n");
+                // /* 写到写设备中*/
+                // if (write_device != RT_NULL)
+                //     rt_device_write(write_device, 0, &uart_rx_buffer[0],
+                //                     strlen(uart_rx_buffer));
             }
         }
     }
