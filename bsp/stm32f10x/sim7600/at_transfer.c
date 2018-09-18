@@ -19,7 +19,7 @@
 
 /* Private define ------------------------------------------------------------*/
 #ifndef at_log
-#define at_log(N, ...) rt_kprintf("####[at %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__);
+#define at_log(N, ...) rt_kprintf("####[at %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif /* at_log(...) */
 /* Private macro -------------------------------------------------------------*/
 

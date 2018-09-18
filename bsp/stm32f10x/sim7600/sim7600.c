@@ -26,7 +26,7 @@ struct rx_msg
 
 /* Private define ------------------------------------------------------------*/
 #ifndef sim7600_log
-#define sim7600_log(N, ...) rt_kprintf("####[sim7600 %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__);
+#define sim7600_log(N, ...) rt_kprintf("####[sim7600 %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif /* at_log(...) */
 /* Private macro -------------------------------------------------------------*/
 
@@ -35,7 +35,7 @@ rt_device_t write_device;
 /* 用于接收消息的消息队列*/
 rt_mq_t rx_mq;
 /* 接收线程的接收缓冲区*/
-static char uart_rx_buffer[64];
+//static char uart_rx_buffer[64];
 rt_uint8_t write_buffer[MSG_LEN_MAX];
 
 const char iot_deviceid[] = {DEVICE_ID};
@@ -68,9 +68,8 @@ rt_err_t uart_input(rt_device_t dev, rt_size_t size)
 
 void sim7600_thread_entry(void *parameter)
 {
-    struct rx_msg msg;
-
     rt_err_t result = RT_EOK;
+    rt_uint8_t count = 0;
 
     rx_mq = rt_mq_create("7600_rx_mq",
                          sizeof(struct rx_msg), /* 每个消息的大小是 128 - void* */
@@ -92,48 +91,22 @@ void sim7600_thread_entry(void *parameter)
     transport_open(write_device, device_connect.host_name, device_connect.port);
     mqtt_client_connect(write_device, &client_con);
     result = mqtt_client_subscribe_topics();
+
+    //    mqtt_client_init_publish();
     // transport_close(write_device);
     while (1)
     {
-
-        /* 从消息队列中读取消息*/
-        result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), 50);
-        if (result == -RT_ETIMEOUT)
+        result = mqtt_packet_read_operation();
+        if (count++ >= 10)
         {
-            /* 接收超时*/
-            // rt_kprintf("timeout count:%d\n", ++count);
-            // rt_device_write(write_device, 0, "time out",
-            //                 strlen("time out"));
-        }
-        /* 成功收到消息*/
-        if (result == RT_EOK)
-        {
-            rt_uint32_t rx_length;
-            rx_length = (sizeof(uart_rx_buffer) - 1) > msg.size ? msg.size : sizeof(uart_rx_buffer) - 1;
-            /* 读取消息*/
-            rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[0],
-                                       rx_length);
-
-            rt_memset(uart_rx_buffer, 0, sizeof(uart_rx_buffer));
-            if (rx_length >= 23)
-            {
-                rt_sprintf(uart_rx_buffer, "rx_length:%ld\r\n", rx_length);
-                // if (write_device != RT_NULL)
-                //     rt_device_write(write_device, 0, &uart_rx_buffer[0],
-                //                     strlen(uart_rx_buffer));
-                // rx_length = rt_device_read(msg.dev, 0, &uart_rx_buffer[0],
-                //                            rx_length);
-                // rt_sprintf(&uart_rx_buffer[rx_length], "\r\n");
-                // /* 写到写设备中*/
-                // if (write_device != RT_NULL)
-                //     rt_device_write(write_device, 0, &uart_rx_buffer[0],
-                //                     strlen(uart_rx_buffer));
-            }
+            count = 0;
+            result = mqtt_client_ping();
+            /**add ping code**/
         }
     }
 }
 rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data)
-{
+{ 
     rt_uint16_t timeout = 9000;
     rt_uint32_t count = 0;
     struct rx_msg msg;
@@ -154,7 +127,7 @@ rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8
         if (result == RT_EOK)
         {
             timeout = 100;
-            rx_length = (sizeof(uart_rx_buffer) - 1) > msg.size ? msg.size : sizeof(uart_rx_buffer) - 1;
+            rx_length = msg.size;
             if (*data == RT_NULL)
                 *data = (rt_uint8_t *)rt_calloc(rx_length + 1, sizeof(rt_uint8_t));
             else

@@ -20,7 +20,7 @@
 
 /* Private define ------------------------------------------------------------*/
 #ifndef mqtt_log
-#define mqtt_log(N, ...) rt_kprintf("####[MQTT %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__);
+#define mqtt_log(N, ...) rt_kprintf("####[MQTT %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif /* at_log(...) */
 /* Private macro -------------------------------------------------------------*/
 
@@ -138,12 +138,13 @@ exit:
 rt_err_t mqtt_client_subscribe(const char *subsc, iotx_device_info_pt iotx_dev_info)
 {
     int req_qos = 0, rc;
-
+    unsigned short msgid1;
     MQTTString topicString;
     topicString.cstring = (char *)subsc;
-    rc = MQTTSerialize_subscribe(write_buffer, MSG_LEN_MAX, 0, 3, 1, &topicString, &req_qos);
+    msgid1 = mqtt_client_packet_id();
+    rc = MQTTSerialize_subscribe(write_buffer, MSG_LEN_MAX, 0, msgid1, 1, &topicString, &req_qos);
 
-    mqtt_log("len:%d，write_buffer:%s", rc, write_buffer + 5);
+    mqtt_log("len:%d,write_buffer:%s", rc, write_buffer + 5);
     transport_sendPacketBuffer(0, write_buffer, rc);
     mqtt_log("send mqtt subscription packet done");
 
@@ -158,7 +159,7 @@ rt_err_t mqtt_client_subscribe(const char *subsc, iotx_device_info_pt iotx_dev_i
         rc = MQTTDeserialize_suback(&submsgid, 1, &subcount, &granted_qos, write_buffer, sizeof(write_buffer));
         if (granted_qos != 0)
         {
-            mqtt_log("granted qos != 0, %d\n", granted_qos);
+            mqtt_log("granted qos != 0, %d", granted_qos);
             if (granted_qos == 0x80)
                 goto exit;
         }
@@ -183,8 +184,17 @@ exit:
 rt_err_t mqtt_client_subscribe_topics(void)
 {
     rt_err_t rc;
-    /*******TQ_WATER_NOTICE********/
     rt_thread_delay(1000);
+    rc = mqtt_client_subscribe(TOPIC_SUB_INIT, &device_info);
+    if (rc != RT_EOK)
+    {
+        mqtt_log("TOPIC_WATER_NOTICE,RT_ERROR:%d", rc);
+        goto exit;
+    }
+    mqtt_log("%s,RT_ERROR:%d", TOPIC_SUB_INIT, rc);
+    return rc;
+    rt_thread_delay(1000);
+    /*******TQ_WATER_NOTICE********/
     rc = mqtt_client_subscribe(TOPIC_WATER_NOTICE, &device_info);
     if (rc != RT_EOK)
     {
@@ -192,13 +202,15 @@ rt_err_t mqtt_client_subscribe_topics(void)
         goto exit;
     }
     rt_thread_delay(1000);
-    rc = mqtt_client_subscribe(TOPIC_WATER_STATUS, &device_info);
+    /*******TOPIC_PARAMETER_SETUP********/
+    rc = mqtt_client_subscribe(TOPIC_PARAMETER_SETUP, &device_info);
     if (rc != RT_EOK)
     {
-        mqtt_log("TOPIC_WATER_STATUS,RT_ERROR:%d", rc);
+        mqtt_log("TOPIC_PARAMETER_SETUP,RT_ERROR:%d", rc);
         goto exit;
     }
     rt_thread_delay(1000);
+    /*******TOPIC_PARAMETER_GET********/
     rc = mqtt_client_subscribe(TOPIC_PARAMETER_GET, &device_info);
     if (rc != RT_EOK)
     {
@@ -206,6 +218,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
         goto exit;
     }
     rt_thread_delay(1000);
+    /*******TQ_WATER_NOTICE********/
     rc = mqtt_client_subscribe(TOPIC_DEVICE_UPGRADE, &device_info);
     if (rc != RT_EOK)
     {
@@ -213,6 +226,15 @@ rt_err_t mqtt_client_subscribe_topics(void)
         goto exit;
     }
     rt_thread_delay(1000);
+    /*******TOPIC_DEVICE_UPGRADE********/
+    rc = mqtt_client_subscribe(TOPIC_DEVICE_UPGRADE, &device_info);
+    if (rc != RT_EOK)
+    {
+        mqtt_log("TOPIC_DEVICE_UPGRADE,RT_ERROR:%d", rc);
+        goto exit;
+    }
+    rt_thread_delay(1000);
+    /*******TOPIC_DEVICE_MOVE********/
     rc = mqtt_client_subscribe(TOPIC_DEVICE_MOVE, &device_info);
     if (rc != RT_EOK)
     {
@@ -220,6 +242,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
         goto exit;
     }
     rt_thread_delay(1000);
+    /*******TOPIC_DEVICE_GET********/
     rc = mqtt_client_subscribe(TOPIC_DEVICE_GET, &device_info);
     if (rc != RT_EOK)
     {
@@ -246,36 +269,91 @@ rt_err_t mqtt_packet_read_operation(void)
     {
         switch (rc)
         {
-        case CONNECT:
-            break;
+        // case CONNECT:
+        //     break;
         case CONNACK:
+            mqtt_log("packet type:CONNACK");
             break;
         case PUBLISH:
+            mqtt_log("packet type:PUBLISH");
             break;
+
         case PUBACK:
-            break;
+        {
+            unsigned short mypacketid;
+            unsigned char dup, type;
+            if (MQTTDeserialize_ack(&type, &dup, &mypacketid, write_buffer, MSG_LEN_MAX) == 1)
+                mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
+            else
+                mqtt_log("PUBACK Deserialize err");
+        }
+        break;
         case PUBREC:
+            mqtt_log("packet type:PUBREC");
             break;
         case PUBREL:
+            mqtt_log("packet type:PUBREL");
             break;
         case PUBCOMP:
+            mqtt_log("packet type:PUBCOMP");
             break;
-        case SUBSCRIBE:
-            break;
+        // case SUBSCRIBE:
+        //     break;
         case SUBACK:
+            mqtt_log("packet type:SUBACK");
             break;
-        case UNSUBSCRIBE:
-            break;
+        // case UNSUBSCRIBE:
+        //     break;
         case UNSUBACK:
+            mqtt_log("packet type:UNSUBACK");
             break;
-        case PINGREQ:
-            break;
+        // case PINGREQ:
+        //     break;
         case PINGRESP:
+            mqtt_log("packet type:PINGRESP");
             break;
         case DISCONNECT:
+            mqtt_log("packet type:DISCONNECT");
             break;
         default:
             break;
         }
     }
+    return rc;
+}
+/**
+ ****************************************************************************
+ * @Function : int mqtt_client_packet_id(void)
+ * @File     : mqtt_client.c
+ * @Program  : none
+ * @Created  : 2018-09-18 by seblee
+ * @Brief    : get packet_id
+ * @Version  : V1.0
+**/
+unsigned short mqtt_client_packet_id(void)
+{
+    static unsigned short id = 1;
+    if (id < 1)
+        id = 1;
+    return id++;
+}
+/**
+ ****************************************************************************
+ * @Function : rt_err_t mqtt_client_ping(void)
+ * @File     : mqtt_client.c
+ * @Program  : none
+ * @Created  : 2018-09-18 by seblee
+ * @Brief    : ping server keep alive
+ * @Version  : V1.0
+**/
+rt_err_t mqtt_client_ping(void)
+{
+    rt_err_t rc, len;
+    len = MQTTSerialize_pingreq(write_buffer, MSG_LEN_MAX);
+    rc = transport_sendPacketBuffer(0, write_buffer, len);
+    mqtt_log("mqtt_client_ping packet:%d,send:%d", len, rc);
+    if (rc == len)
+        return RT_EOK;
+    else
+        return -RT_ERROR;
 }
