@@ -227,13 +227,13 @@ rt_err_t mqtt_client_subscribe_topics(void)
     }
     rt_thread_delay(1000);
     /*******TOPIC_DEVICE_UPGRADE********/
-    rc = mqtt_client_subscribe(TOPIC_DEVICE_UPGRADE, &device_info);
-    if (rc != RT_EOK)
-    {
-        mqtt_log("TOPIC_DEVICE_UPGRADE,RT_ERROR:%d", rc);
-        goto exit;
-    }
-    rt_thread_delay(1000);
+    // rc = mqtt_client_subscribe(TOPIC_DEVICE_UPGRADE, &device_info);
+    // if (rc != RT_EOK)
+    // {
+    //     mqtt_log("TOPIC_DEVICE_UPGRADE,RT_ERROR:%d", rc);
+    //     goto exit;
+    // }
+    // rt_thread_delay(1000);
     /*******TOPIC_DEVICE_MOVE********/
     rc = mqtt_client_subscribe(TOPIC_DEVICE_MOVE, &device_info);
     if (rc != RT_EOK)
@@ -408,14 +408,11 @@ rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t re
 rt_err_t mqtt_client_publish_topics(void)
 {
     rt_err_t rc;
-    char *msg_playload = {"I am a test publish message"};
+    char *msg_playload; //need free
+    sim7600_Serialize_init_json(&msg_playload);
+
     /*****publish TOPIC_PLATFORM_INIT************/
-    rc = mqtt_client_publish(TOPIC_PLATFORM_INIT,
-                             0,
-                             1,
-                             0,
-                             (rt_uint8_t *)msg_playload,
-                             strlen(msg_playload));
+    rc = mqtt_client_publish(TOPIC_PLATFORM_INIT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
     if (rc == RT_EOK)
     {
         rc = MQTTPacket_read(write_buffer, MSG_LEN_MAX, transport_getdata);
@@ -437,6 +434,9 @@ rt_err_t mqtt_client_publish_topics(void)
     }
     else
         goto exit;
+
+    /*************************************/
+
 exit:
     return rc;
 }

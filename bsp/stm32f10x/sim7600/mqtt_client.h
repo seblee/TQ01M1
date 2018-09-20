@@ -28,13 +28,13 @@
 // #define PRODUCT_KEY "a1YfNlQgDq0"
 // #define DEVICE_SECRET "afbL7kf8MvUBFQN2"
 /*****seblee *********/
-#define DEVICE_NAME "HelloWorld"
-#define PRODUCT_KEY "rl0bGtKFCYA"
-#define DEVICE_SECRET "gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"
+// #define DEVICE_NAME "HelloWorld"
+// #define PRODUCT_KEY "rl0bGtKFCYA"
+// #define DEVICE_SECRET "gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"
 /***********TQ************/
-// #define DEVICENAME "cdtest004"
-// #define PRODUCTKEY "a1JOOi3mNEf"
-// #define SECRET  "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
+#define DEVICE_NAME "cdtest004"
+#define PRODUCT_KEY "a1JOOi3mNEf"
+#define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
 /***highLevel***/
 // #define DEVICE_NAME "device11111"
 // #define PRODUCT_KEY "a1dZFsDxBvp"

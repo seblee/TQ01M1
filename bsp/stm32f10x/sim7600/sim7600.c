@@ -17,6 +17,8 @@
 #include "transport.h"
 #include "mqtt_client.h"
 #include "at_transfer.h"
+#include "cJSON.h"
+#include "utils_md5.h"
 /* Private typedef -----------------------------------------------------------*/
 struct rx_msg
 {
@@ -42,6 +44,7 @@ const char iot_deviceid[] = {DEVICE_ID};
 const char iot_devicename[] = {DEVICE_NAME};
 const char iot_productKey[] = {PRODUCT_KEY};
 const char iot_secret[] = {DEVICE_SECRET};
+
 /* Private function prototypes -----------------------------------------------*/
 iotx_device_info_t device_info;
 iotx_conn_info_t device_connect;
@@ -90,7 +93,7 @@ void sim7600_thread_entry(void *parameter)
 
     transport_open(write_device, device_connect.host_name, device_connect.port);
     mqtt_client_connect(write_device, &client_con);
-    // result = mqtt_client_subscribe_topics();
+    result = mqtt_client_subscribe_topics();
     result = mqtt_client_publish_topics();
     // transport_close(write_device);
     while (1)
@@ -187,4 +190,55 @@ rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t le
             break;
     }
     return count;
+}
+/**
+ ****************************************************************************
+ * @Function : void sim7600_Serialize_init_json(char **datapoint)
+ * @File     : sim7600.c
+ * @Program  : databuf:point of databuffer
+ *             len:sizeof databuf
+ * @Created  : 2018-09-20 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+void sim7600_Serialize_init_json(char **datapoint)
+{
+    char sign_hex[128] = {0};
+    unsigned char sign[16];
+
+    char RequestNoStr[10] = {0};
+    unsigned short msgid;
+    int i;
+
+    /* declare a few. */
+    cJSON *root = NULL, *result;
+    msgid = mqtt_client_packet_id();
+    /* Our "Video" datatype: */
+    root = cJSON_CreateObject();
+
+    result = cJSON_AddStringToObject(root, "MCode", "001");
+    if (result == NULL)
+        sim7600_log("JSON add err");
+
+    rt_snprintf(RequestNoStr, sizeof(RequestNoStr), "%d", msgid);
+    result = cJSON_AddStringToObject(root, "RequestNo", RequestNoStr);
+    result = cJSON_AddStringToObject(root, "ProductKey", PRODUCT_KEY);
+    result = cJSON_AddStringToObject(root, "DeviceName", DEVICE_NAME);
+    result = cJSON_AddStringToObject(root, "Timestamp", "20180720115800");
+
+    rt_snprintf(sign_hex, sizeof(sign_hex), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%s&Timestamp=20180720115800&Key=123456", DEVICE_NAME, PRODUCT_KEY, RequestNoStr);
+    utils_md5((const unsigned char *)sign_hex, strlen(sign_hex), sign);
+    sim7600_log("MD5(%s)", sign_hex);
+    rt_memset(sign_hex, 0, sizeof(sign_hex));
+    for (i = 0; i < 16; ++i)
+    {
+        sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
+        sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
+    }
+    sim7600_log("MD5=%s", sign_hex);
+    cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
+    *datapoint = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    if (*datapoint)
+        sim7600_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
 }

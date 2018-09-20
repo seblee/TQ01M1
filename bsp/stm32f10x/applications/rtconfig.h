@@ -70,7 +70,7 @@
 /* SECTION: Console options */
 #define RT_USING_CONSOLE
 /* the buffer size of console*/
-#define RT_CONSOLEBUF_SIZE	        128
+#define RT_CONSOLEBUF_SIZE	        512
 // <string name="RT_CONSOLE_DEVICE_NAME" description="The device name for console" default="uart1" />
 #define RT_CONSOLE_DEVICE_NAME	    "uart5"
 

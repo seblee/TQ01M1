@@ -98,6 +98,7 @@ extern MQTTPacket_connectData client_con;
 /* Private functions ---------------------------------------------------------*/
 rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data);
 rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout);
+void  sim7600_Serialize_init_json(char **datapoint);
 /*----------------------------------------------------------------------------*/
 
 #endif
