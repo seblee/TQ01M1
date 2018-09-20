@@ -184,15 +184,15 @@ exit:
 rt_err_t mqtt_client_subscribe_topics(void)
 {
     rt_err_t rc;
-    rt_thread_delay(1000);
-    rc = mqtt_client_subscribe(TOPIC_SUB_INIT, &device_info);
-    if (rc != RT_EOK)
-    {
-        mqtt_log("TOPIC_WATER_NOTICE,RT_ERROR:%d", rc);
-        goto exit;
-    }
-    mqtt_log("%s,RT_ERROR:%d", TOPIC_SUB_INIT, rc);
-    return rc;
+    // rt_thread_delay(1000);
+    // rc = mqtt_client_subscribe(TOPIC_SUB_INIT, &device_info);
+    // if (rc != RT_EOK)
+    // {
+    //     mqtt_log("TOPIC_WATER_NOTICE,RT_ERROR:%d", rc);
+    //     goto exit;
+    // }
+    // mqtt_log("%s,RT_ERROR:%d", TOPIC_SUB_INIT, rc);
+    // return rc;
     rt_thread_delay(1000);
     /*******TQ_WATER_NOTICE********/
     rc = mqtt_client_subscribe(TOPIC_WATER_NOTICE, &device_info);
@@ -356,4 +356,87 @@ rt_err_t mqtt_client_ping(void)
         return RT_EOK;
     else
         return -RT_ERROR;
+}
+/**
+ ****************************************************************************
+ * @Function : rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t restained ,rt_uint8_t *msg, rt_uint16_t msg_len)
+ * @File     : mqtt_client.c
+ * @Program  : topic:the point topic to publish 
+ *             dup:Position: byte 1, bit 3. 0 first publish,1 has been published before
+ *             qos:Position: byte 1, bits 2-1. 0 At most once delivery;1 At least once delivery;2 Exactly once delivery
+ *             restained:Position: byte 1, bit 0.
+ *             *msg:the piont of msg
+ *             msg_len:the msg length
+ * @Created  : 2018-09-19 by seblee
+ * @Brief    : publish a topic
+ * @Version  : V1.0
+**/
+rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t restained, rt_uint8_t *msg, rt_uint16_t msg_len)
+{
+    rt_err_t rc, len;
+    unsigned short msgid;
+    MQTTString topicString;
+    rt_uint8_t *payload;
+    rt_uint16_t payload_len;
+
+    msgid = mqtt_client_packet_id();
+    topicString.cstring = topic;
+    payload = msg;
+    payload_len = msg_len;
+
+    // mqtt_log("mqtt_client_publish msg:%s",msg);
+    mqtt_log("mqtt_client_publish topic:%s", topicString.cstring);
+
+    len = MQTTSerialize_publish(write_buffer, MSG_LEN_MAX, dup, qos, restained, msgid, topicString, payload, payload_len);
+
+    rc = transport_sendPacketBuffer(0, write_buffer, len);
+    mqtt_log("mqtt_client_publish msgid:%d,packet:%d,send:%d", msgid, len, rc);
+    if (rc == len)
+        return RT_EOK;
+    else
+        return -RT_ERROR;
+}
+/**
+ ****************************************************************************
+ * @Function : rt_err_t mqtt_client_publish_topics(void)
+ * @File     : mqtt_client.c
+ * @Program  : none
+ * @Created  : 2018-09-19 by seblee
+ * @Brief    : publish init topics
+ * @Version  : V1.0
+**/
+rt_err_t mqtt_client_publish_topics(void)
+{
+    rt_err_t rc;
+    char *msg_playload = {"I am a test publish message"};
+    /*****publish TOPIC_PLATFORM_INIT************/
+    rc = mqtt_client_publish(TOPIC_PLATFORM_INIT,
+                             0,
+                             1,
+                             0,
+                             (rt_uint8_t *)msg_playload,
+                             strlen(msg_playload));
+    if (rc == RT_EOK)
+    {
+        rc = MQTTPacket_read(write_buffer, MSG_LEN_MAX, transport_getdata);
+        if (rc == PUBACK)
+        {
+            unsigned short mypacketid;
+            unsigned char dup, type;
+            if (MQTTDeserialize_ack(&type, &dup, &mypacketid, write_buffer, MSG_LEN_MAX) == 1)
+                mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
+            else
+            {
+                mqtt_log("PUBACK Deserialize err");
+                rc = -RT_ERROR;
+                goto exit;
+            }
+        }
+        else
+            goto exit;
+    }
+    else
+        goto exit;
+exit:
+    return rc;
 }

@@ -90,9 +90,8 @@ void sim7600_thread_entry(void *parameter)
 
     transport_open(write_device, device_connect.host_name, device_connect.port);
     mqtt_client_connect(write_device, &client_con);
-    result = mqtt_client_subscribe_topics();
-
-    //    mqtt_client_init_publish();
+    // result = mqtt_client_subscribe_topics();
+    result = mqtt_client_publish_topics();
     // transport_close(write_device);
     while (1)
     {
@@ -106,7 +105,7 @@ void sim7600_thread_entry(void *parameter)
     }
 }
 rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data)
-{ 
+{
     rt_uint16_t timeout = 9000;
     rt_uint32_t count = 0;
     struct rx_msg msg;
