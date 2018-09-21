@@ -78,6 +78,25 @@ typedef struct
     uint8_t aeskey_hex[AESKEY_HEX_LEN];
 #endif
 } iotx_conn_info_t, *iotx_conn_info_pt;
+
+typedef struct
+{
+    const char *topic_str;
+    rt_uint8_t dup;
+    int qos;
+    rt_uint8_t restained;
+} iot_topic_param_t;
+typedef enum
+{
+    IOT_POWERON = 0,
+    IOT_PLATFORM_INIT,
+    IOT_INIT_COMPL,
+    IOT_PARAM_REPORT,
+    IOT_REALTIME_REPORT,
+    IOT_HEART_BEAT,
+    IOT_DEVICE_UPGRADE,
+    IOT_IDEL,
+} _iot_state_t;
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -93,12 +112,13 @@ extern rt_mq_t rx_mq;
 extern iotx_device_info_t device_info;
 extern iotx_conn_info_t device_connect;
 extern MQTTPacket_connectData client_con;
+extern iot_topic_param_t iot_topics[];
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
 rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data);
 rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout);
-void  sim7600_Serialize_init_json(char **datapoint);
+void sim7600_Serialize_init_json(char **datapoint);
 /*----------------------------------------------------------------------------*/
 
 #endif

@@ -20,7 +20,22 @@
 #include "sys_conf.h"
 #include <rtthread.h>
 /* Private typedef -----------------------------------------------------------*/
-
+typedef enum
+{
+    PLATFORM_INIT = 0, /*{"TOPIC_PLATFORM_INIT"}*/
+    WATER_NOTICE,      /*{"TOPIC_WATER_NOTICE"}*/
+    WATER_STATUS,      /*{"TOPIC_WATER_STATUS"}*/
+    PARAMETER_SETUP,   /*{"TOPIC_PARAMETER_SETUP"}*/
+    PARAMETER_GET,     /*{"TOPIC_PARAMETER_GET"}*/
+    PARAMETER_REPORT,  /*{"TOPIC_PARAMETER_REPORT"}*/
+    REALTIME_REPORT,   /*{"TOPIC_REALTIME_REPORT"}*/
+    HEART_BEAT,        /*{"TOPIC_HEART_BEAT"}*/
+    DEVICE_UPGRADE,    /*{"TOPIC_DEVICE_UPGRADE"}*/
+    DEVICE_MOVE,       /*{"DEVICE_MOVE"}*/
+    DEVICE_UPDATE,     /*{"DEVICE_UPDATE"}*/
+    DEVICE_ERR,        /*{"DEVICE_ERR"}*/
+    DEVICE_GET,        /*{"DEVICE_GET"}*/
+} _topic_enmu_t;
 /* Private define ------------------------------------------------------------*/
 #define DEVICE_ID "cdtest0041"
 
@@ -40,17 +55,17 @@
 // #define PRODUCT_KEY "a1dZFsDxBvp"
 // #define DEVICE_SECRET "o5vZRqFH7csXFMNO"
 /******topics**********/
-#define TOPIC_SUB_INIT "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/sub/register_reply" /*{"TQ_PLATFORM_INIT"}*/
+#define TOPIC_SUB_INIT "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/sub/register_reply" /*{"TOPIC_PLATFORM_INIT"}*/
 
-#define TOPIC_PLATFORM_INIT "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/client2Cloud/init"                /*{"TQ_PLATFORM_INIT"}*/
-#define TOPIC_WATER_NOTICE "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/service2Cloud/get"                 /*{"TQ_WATER_NOTICE"}*/
-#define TOPIC_WATER_STATUS "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/client2Cloud/getWaterStatus"       /*{"TQ_WATER_STATUS"}*/
-#define TOPIC_PARAMETER_SETUP "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/setting"      /*{"TQ_PARAMETER_SETUP"}*/
-#define TOPIC_PARAMETER_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/getSetting"     /*{"TQ_PARAMETER_GET"}*/
-#define TOPIC_PARAMETER_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putSetting"   /*{"TQ_PARAMETER_REPORT"}*/
-#define TOPIC_REALTIME_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putRealStatus" /*{"TQ_REALTIME_REPORT"}*/
-#define TOPIC_HEART_BEAT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putTimingStatus"    /*{"TQ_HEART_BEAT"}*/
-#define TOPIC_DEVICE_UPGRADE "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/upgrade"       /*{"TQ_DEVICE_UPGRADE"}*/
+#define TOPIC_PLATFORM_INIT "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/client2Cloud/init"                /*{"TOPIC_PLATFORM_INIT"}*/
+#define TOPIC_WATER_NOTICE "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/service2Cloud/get"                 /*{"TOPIC_WATER_NOTICE"}*/
+#define TOPIC_WATER_STATUS "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/client2Cloud/getWaterStatus"       /*{"TOPIC_WATER_STATUS"}*/
+#define TOPIC_PARAMETER_SETUP "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/setting"      /*{"TOPIC_PARAMETER_SETUP"}*/
+#define TOPIC_PARAMETER_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/getSetting"     /*{"TOPIC_PARAMETER_GET"}*/
+#define TOPIC_PARAMETER_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putSetting"   /*{"TOPIC_PARAMETER_REPORT"}*/
+#define TOPIC_REALTIME_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putRealStatus" /*{"TOPIC_REALTIME_REPORT"}*/
+#define TOPIC_HEART_BEAT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putTimingStatus"    /*{"TOPIC_HEART_BEAT"}*/
+#define TOPIC_DEVICE_UPGRADE "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/upgrade"       /*{"TOPIC_DEVICE_UPGRADE"}*/
 #define TOPIC_DEVICE_MOVE "/" PRODUCT_KEY "/" DEVICE_NAME "/move"                                   /*{"DEVICE_MOVE"}*/
 #define TOPIC_DEVICE_UPDATE "/" PRODUCT_KEY "/" DEVICE_NAME "/update"                               /*{"DEVICE_UPDATE"}*/
 #define TOPIC_DEVICE_ERR "/" PRODUCT_KEY "/" DEVICE_NAME "/update/error"                            /*{"DEVICE_ERR"}*/
@@ -68,7 +83,7 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
 
 int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn);
 
-rt_err_t mqtt_client_subscribe(const char *subsc, iotx_device_info_pt iotx_dev_info);
+rt_err_t mqtt_client_subscribe(_topic_enmu_t subsc, iotx_device_info_pt iotx_dev_info);
 
 rt_err_t mqtt_client_subscribe_topics(void);
 
@@ -81,6 +96,8 @@ rt_err_t mqtt_client_ping(void);
 rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t restained, rt_uint8_t *msg, rt_uint16_t msg_len);
 
 rt_err_t mqtt_client_publish_topics(void);
+
+rt_err_t mqtt_client_publish_parameter(void);
 
 /*----------------------------------------------------------------------------*/
 

@@ -45,6 +45,23 @@ const char iot_devicename[] = {DEVICE_NAME};
 const char iot_productKey[] = {PRODUCT_KEY};
 const char iot_secret[] = {DEVICE_SECRET};
 
+volatile _iot_state_t iot_state = IOT_POWERON;
+/********topic dup qos restained**************/
+iot_topic_param_t iot_topics[] = {
+    {TOPIC_PLATFORM_INIT, 0, 1, 0},    /*{"TOPIC_PLATFORM_INIT"}*/
+    {TOPIC_WATER_NOTICE, 0, 1, 0},     /*{"TOPIC_WATER_NOTICE"}*/
+    {TOPIC_WATER_STATUS, 0, 1, 0},     /*{"TOPIC_WATER_STATUS"}*/
+    {TOPIC_PARAMETER_SETUP, 0, 1, 0},  /*{"TOPIC_PARAMETER_SETUP"}*/
+    {TOPIC_PARAMETER_GET, 0, 1, 0},    /*{"TOPIC_PARAMETER_GET"}*/
+    {TOPIC_PARAMETER_REPORT, 0, 1, 0}, /*{"TOPIC_PARAMETER_REPORT"}*/
+    {TOPIC_REALTIME_REPORT, 0, 1, 0},  /*{"TOPIC_REALTIME_REPORT"}*/
+    {TOPIC_HEART_BEAT, 0, 1, 0},       /*{"TOPIC_HEART_BEAT"}*/
+    {TOPIC_DEVICE_UPGRADE, 0, 1, 0},   /*{"TOPIC_DEVICE_UPGRADE"}*/
+    {TOPIC_DEVICE_MOVE, 0, 1, 0},      /*{"TOPIC_DEVICE_MOVE"}*/
+    {TOPIC_DEVICE_UPDATE, 0, 1, 0},    /*{"TOPIC_DEVICE_UPDATE"}*/
+    {TOPIC_DEVICE_ERR, 0, 1, 0},       /*{"TOPIC_DEVICE_ERR"}*/
+    {TOPIC_DEVICE_GET, 0, 1, 0},       /*{"TOPIC_DEVICE_GET"}*/
+};
 /* Private function prototypes -----------------------------------------------*/
 iotx_device_info_t device_info;
 iotx_conn_info_t device_connect;
@@ -55,8 +72,10 @@ MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
 void SIM7600_DIR_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Pin = SIM7600_DIR_PIN;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(SIM7600_DIR_PORT, &GPIO_InitStructure);
 }
 rt_err_t uart_input(rt_device_t dev, rt_size_t size)
@@ -78,8 +97,10 @@ void sim7600_thread_entry(void *parameter)
                          sizeof(struct rx_msg), /* 每个消息的大小是 128 - void* */
                          5,                     /* 消息队列的最大容量 */
                          RT_IPC_FLAG_FIFO);     /* 如果有多个线程等待，按照FIFO的方法分配消息 */
-    SIM7600_DIR_WIFI;
     SIM7600_DIR_Init();
+    SIM7600_DIR_WIFI;
+    iot_topics[WATER_NOTICE].topic_str = TOPIC_WATER_NOTICE;
+
     rt_thread_delay(SIM7600_THREAD_DELAY);
     write_device = rt_device_find("uart3");
     if (write_device != RT_NULL)
@@ -94,10 +115,35 @@ void sim7600_thread_entry(void *parameter)
     transport_open(write_device, device_connect.host_name, device_connect.port);
     mqtt_client_connect(write_device, &client_con);
     result = mqtt_client_subscribe_topics();
-    result = mqtt_client_publish_topics();
     // transport_close(write_device);
+    iot_state = IOT_PLATFORM_INIT;
     while (1)
     {
+        switch (iot_state)
+        {
+        case IOT_POWERON:
+            break;
+        case IOT_PLATFORM_INIT:
+            result = mqtt_client_publish_topics();
+            if (result == RT_EOK)
+                iot_state = IOT_INIT_COMPL;
+            break;
+        case IOT_INIT_COMPL: /***WATI FOR QR Code topic***/
+            break;
+        case IOT_PARAM_REPORT:
+            result = mqtt_client_publish_parameter();
+            break;
+        case IOT_REALTIME_REPORT:
+            break;
+        case IOT_HEART_BEAT:
+            break;
+        case IOT_DEVICE_UPGRADE:
+            break;
+        case IOT_IDEL:
+            break;
+        default:
+            break;
+        }
         result = mqtt_packet_read_operation();
         if (count++ >= 10)
         {
@@ -202,6 +248,57 @@ rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t le
  * @Version  : V1.0
 **/
 void sim7600_Serialize_init_json(char **datapoint)
+{
+    char sign_hex[128] = {0};
+    unsigned char sign[16];
+
+    char RequestNoStr[10] = {0};
+    unsigned short msgid;
+    int i;
+
+    /* declare a few. */
+    cJSON *root = NULL, *result;
+    msgid = mqtt_client_packet_id();
+    /* Our "Video" datatype: */
+    root = cJSON_CreateObject();
+
+    result = cJSON_AddStringToObject(root, "MCode", "001");
+    if (result == NULL)
+        sim7600_log("JSON add err");
+
+    rt_snprintf(RequestNoStr, sizeof(RequestNoStr), "%d", msgid);
+    result = cJSON_AddStringToObject(root, "RequestNo", RequestNoStr);
+    result = cJSON_AddStringToObject(root, "ProductKey", PRODUCT_KEY);
+    result = cJSON_AddStringToObject(root, "DeviceName", DEVICE_NAME);
+    result = cJSON_AddStringToObject(root, "Timestamp", "20180720115800");
+
+    rt_snprintf(sign_hex, sizeof(sign_hex), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%s&Timestamp=20180720115800&Key=123456", DEVICE_NAME, PRODUCT_KEY, RequestNoStr);
+    utils_md5((const unsigned char *)sign_hex, strlen(sign_hex), sign);
+    sim7600_log("MD5(%s)", sign_hex);
+    rt_memset(sign_hex, 0, sizeof(sign_hex));
+    for (i = 0; i < 16; ++i)
+    {
+        sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
+        sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
+    }
+    sim7600_log("MD5=%s", sign_hex);
+    cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
+    *datapoint = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    if (*datapoint)
+        sim7600_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
+}
+
+/**
+ ****************************************************************************
+ * @Function : void sim7600_Serialize_para_json(char **datapoint)
+ * @File     : sim7600.c
+ * @Program  : the point of out data
+ * @Created  : 2018-09-21 by seblee
+ * @Brief    : serialize parameter json report
+ * @Version  : V1.0
+**/
+void sim7600_Serialize_para_json(char **datapoint)
 {
     char sign_hex[128] = {0};
     unsigned char sign[16];

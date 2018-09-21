@@ -128,19 +128,22 @@ exit:
 }
 /**
  ****************************************************************************
- * @Function : rt_err_t mqtt_client_subscribe(__mqtt_topic_t topic, iotx_device_info_pt iotx_dev_info)
+ * @Function : rt_err_t mqtt_client_subscribe(_topic_enmu_t subsc, iotx_device_info_pt iotx_dev_info)
  * @File     : mqtt_client.c
  * @Program  : topic:swith topic
  * @Created  : 2018-09-14 by seblee
  * @Brief    : 
  * @Version  : V1.0
 **/
-rt_err_t mqtt_client_subscribe(const char *subsc, iotx_device_info_pt iotx_dev_info)
+rt_err_t mqtt_client_subscribe(_topic_enmu_t subsc, iotx_device_info_pt iotx_dev_info)
 {
     int req_qos = 0, rc;
     unsigned short msgid1;
     MQTTString topicString;
-    topicString.cstring = (char *)subsc;
+    char topic_cache[100];
+    rt_strncpy(topic_cache, iot_topics[subsc].topic_str, 100);
+
+    topicString.cstring = topic_cache;
     msgid1 = mqtt_client_packet_id();
     rc = MQTTSerialize_subscribe(write_buffer, MSG_LEN_MAX, 0, msgid1, 1, &topicString, &req_qos);
 
@@ -184,69 +187,60 @@ exit:
 rt_err_t mqtt_client_subscribe_topics(void)
 {
     rt_err_t rc;
-    // rt_thread_delay(1000);
-    // rc = mqtt_client_subscribe(TOPIC_SUB_INIT, &device_info);
-    // if (rc != RT_EOK)
-    // {
-    //     mqtt_log("TOPIC_WATER_NOTICE,RT_ERROR:%d", rc);
-    //     goto exit;
-    // }
-    // mqtt_log("%s,RT_ERROR:%d", TOPIC_SUB_INIT, rc);
-    // return rc;
     rt_thread_delay(1000);
     /*******TQ_WATER_NOTICE********/
-    rc = mqtt_client_subscribe(TOPIC_WATER_NOTICE, &device_info);
+    rc = mqtt_client_subscribe(WATER_NOTICE, &device_info);
     if (rc != RT_EOK)
     {
         mqtt_log("TOPIC_WATER_NOTICE,RT_ERROR:%d", rc);
         goto exit;
     }
-    rt_thread_delay(1000);
-    /*******TOPIC_PARAMETER_SETUP********/
-    rc = mqtt_client_subscribe(TOPIC_PARAMETER_SETUP, &device_info);
+    //rt_thread_delay(1000);
+    /*******PARAMETER_SETUP********/
+    rc = mqtt_client_subscribe(PARAMETER_SETUP, &device_info);
     if (rc != RT_EOK)
     {
-        mqtt_log("TOPIC_PARAMETER_SETUP,RT_ERROR:%d", rc);
+        mqtt_log("PARAMETER_SETUP,RT_ERROR:%d", rc);
         goto exit;
     }
-    rt_thread_delay(1000);
-    /*******TOPIC_PARAMETER_GET********/
-    rc = mqtt_client_subscribe(TOPIC_PARAMETER_GET, &device_info);
+    //rt_thread_delay(1000);
+    /*******PARAMETER_GET********/
+    rc = mqtt_client_subscribe(PARAMETER_GET, &device_info);
     if (rc != RT_EOK)
     {
-        mqtt_log("TOPIC_PARAMETER_GET,RT_ERROR:%d", rc);
+        mqtt_log("PARAMETER_GET,RT_ERROR:%d", rc);
         goto exit;
     }
-    rt_thread_delay(1000);
-    /*******TQ_WATER_NOTICE********/
-    rc = mqtt_client_subscribe(TOPIC_DEVICE_UPGRADE, &device_info);
+    //rt_thread_delay(1000);
+    /*******TOPIC_WATER_NOTICE********/
+    rc = mqtt_client_subscribe(DEVICE_UPGRADE, &device_info);
     if (rc != RT_EOK)
     {
-        mqtt_log("TOPIC_DEVICE_UPGRADE,RT_ERROR:%d", rc);
+        mqtt_log("DEVICE_UPGRADE,RT_ERROR:%d", rc);
         goto exit;
     }
-    rt_thread_delay(1000);
-    /*******TOPIC_DEVICE_UPGRADE********/
-    // rc = mqtt_client_subscribe(TOPIC_DEVICE_UPGRADE, &device_info);
+    //rt_thread_delay(1000);
+    /*******DEVICE_UPGRADE********/
+    // rc = mqtt_client_subscribe(DEVICE_UPGRADE, &device_info);
     // if (rc != RT_EOK)
     // {
-    //     mqtt_log("TOPIC_DEVICE_UPGRADE,RT_ERROR:%d", rc);
+    //     mqtt_log("DEVICE_UPGRADE,RT_ERROR:%d", rc);
     //     goto exit;
     // }
-    // rt_thread_delay(1000);
-    /*******TOPIC_DEVICE_MOVE********/
-    rc = mqtt_client_subscribe(TOPIC_DEVICE_MOVE, &device_info);
+    // //rt_thread_delay(1000);
+    /*******DEVICE_MOVE********/
+    rc = mqtt_client_subscribe(DEVICE_MOVE, &device_info);
     if (rc != RT_EOK)
     {
-        mqtt_log("TOPIC_DEVICE_MOVE,RT_ERROR:%d", rc);
+        mqtt_log("DEVICE_MOVE,RT_ERROR:%d", rc);
         goto exit;
     }
-    rt_thread_delay(1000);
-    /*******TOPIC_DEVICE_GET********/
-    rc = mqtt_client_subscribe(TOPIC_DEVICE_GET, &device_info);
+    //rt_thread_delay(1000);
+    /*******DEVICE_GET********/
+    rc = mqtt_client_subscribe(DEVICE_GET, &device_info);
     if (rc != RT_EOK)
     {
-        mqtt_log("TOPIC_DEVICE_GET,RT_ERROR:%d", rc);
+        mqtt_log("DEVICE_GET,RT_ERROR:%d", rc);
         goto exit;
     }
 exit:
@@ -407,12 +401,14 @@ rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t re
 **/
 rt_err_t mqtt_client_publish_topics(void)
 {
-    rt_err_t rc;
+    rt_err_t rc = -RT_ERROR;
     char *msg_playload; //need free
     sim7600_Serialize_init_json(&msg_playload);
-
+    if (msg_playload == RT_NULL)
+        goto exit;
     /*****publish TOPIC_PLATFORM_INIT************/
     rc = mqtt_client_publish(TOPIC_PLATFORM_INIT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
+    rt_free(msg_playload);
     if (rc == RT_EOK)
     {
         rc = MQTTPacket_read(write_buffer, MSG_LEN_MAX, transport_getdata);
@@ -421,7 +417,10 @@ rt_err_t mqtt_client_publish_topics(void)
             unsigned short mypacketid;
             unsigned char dup, type;
             if (MQTTDeserialize_ack(&type, &dup, &mypacketid, write_buffer, MSG_LEN_MAX) == 1)
+            {
                 mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
+                rc = RT_EOK;
+            }
             else
             {
                 mqtt_log("PUBACK Deserialize err");
@@ -436,7 +435,19 @@ rt_err_t mqtt_client_publish_topics(void)
         goto exit;
 
     /*************************************/
-
+    return rc;
 exit:
     return rc;
+}
+/**
+ ****************************************************************************
+ * @Function : rt_err_t mqtt_client_publish_parameter(void)
+ * @File     : mqtt_client.c
+ * @Program  : none
+ * @Created  : 2018-09-21 by seblee
+ * @Brief    : parameter report
+ * @Version  : V1.0
+**/
+rt_err_t mqtt_client_publish_parameter(void)
+{
 }

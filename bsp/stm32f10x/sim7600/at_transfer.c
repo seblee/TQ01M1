@@ -238,7 +238,6 @@ rt_err_t at_wifi_init(rt_device_t dev)
     rt_uint8_t count = 0;
     rt_err_t err;
     /*******wifi mode*********/
-    //DIR_WIFI_MODE:
     SIM7600_DIR_WIFI;
     /****SYNC AT************/
 SYNC_AT:
