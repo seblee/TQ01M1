@@ -101,24 +101,40 @@ typedef enum
 
 /* Private variables ---------------------------------------------------------*/
 extern rt_device_t write_device;
+
 extern rt_uint8_t write_buffer[MSG_LEN_MAX];
 
 extern const char iot_deviceid[];
+
 extern const char iot_devicename[];
+
 extern const char iot_productKey[];
+
 extern const char iot_secret[];
 
 extern rt_mq_t rx_mq;
+
 extern iotx_device_info_t device_info;
+
 extern iotx_conn_info_t device_connect;
+
 extern MQTTPacket_connectData client_con;
+
 extern iot_topic_param_t iot_topics[];
+
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
 rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data);
+
 rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout);
+
 void sim7600_Serialize_init_json(char **datapoint);
+
+void sim7600_Serialize_para_json(char **datapoint);
+
+rt_err_t sim7600_water_notice_parse(const char *Str);
+
 /*----------------------------------------------------------------------------*/
 
 #endif

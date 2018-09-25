@@ -115,6 +115,7 @@ void sim7600_thread_entry(void *parameter)
     transport_open(write_device, device_connect.host_name, device_connect.port);
     mqtt_client_connect(write_device, &client_con);
     result = mqtt_client_subscribe_topics();
+
     // transport_close(write_device);
     iot_state = IOT_PLATFORM_INIT;
     while (1)
@@ -131,7 +132,9 @@ void sim7600_thread_entry(void *parameter)
         case IOT_INIT_COMPL: /***WATI FOR QR Code topic***/
             break;
         case IOT_PARAM_REPORT:
+            sim7600_log("iot_state=%d", IOT_PARAM_REPORT);
             result = mqtt_client_publish_parameter();
+            iot_state = IOT_REALTIME_REPORT;
             break;
         case IOT_REALTIME_REPORT:
             break;
@@ -298,34 +301,51 @@ void sim7600_Serialize_init_json(char **datapoint)
  * @Brief    : serialize parameter json report
  * @Version  : V1.0
 **/
+#include "mb_event_cpad.h"
 void sim7600_Serialize_para_json(char **datapoint)
 {
-    char sign_hex[128] = {0};
+    char sign_hex[33] = {0};
     unsigned char sign[16];
+    char sign_Cache[800] = {0};
 
-    char RequestNoStr[10] = {0};
+    char StrCache[512] = {0};
     unsigned short msgid;
     int i;
 
     /* declare a few. */
-    cJSON *root = NULL, *result;
+    cJSON *root = NULL;
     msgid = mqtt_client_packet_id();
     /* Our "Video" datatype: */
     root = cJSON_CreateObject();
 
-    result = cJSON_AddStringToObject(root, "MCode", "001");
-    if (result == NULL)
-        sim7600_log("JSON add err");
+    cJSON_AddStringToObject(root, "MCode", "007");
+    rt_snprintf(StrCache, 10, "%d", msgid);
+    cJSON_AddStringToObject(root, "RequestNo", StrCache);
+    cJSON_AddStringToObject(root, "Timestamp", "20180720115800");
+    cJSON_AddStringToObject(root, "Settingversion", "20180720115800");
 
-    rt_snprintf(RequestNoStr, sizeof(RequestNoStr), "%d", msgid);
-    result = cJSON_AddStringToObject(root, "RequestNo", RequestNoStr);
-    result = cJSON_AddStringToObject(root, "ProductKey", PRODUCT_KEY);
-    result = cJSON_AddStringToObject(root, "DeviceName", DEVICE_NAME);
-    result = cJSON_AddStringToObject(root, "Timestamp", "20180720115800");
+    cJSON_AddStringToObject(root, "Setaddrstart", "100");
 
-    rt_snprintf(sign_hex, sizeof(sign_hex), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%s&Timestamp=20180720115800&Key=123456", DEVICE_NAME, PRODUCT_KEY, RequestNoStr);
-    utils_md5((const unsigned char *)sign_hex, strlen(sign_hex), sign);
-    sim7600_log("MD5(%s)", sign_hex);
+    cpad_eMBRegHoldingCB((unsigned char *)sign_Cache, 100, 80, CPAD_MB_REG_READ);
+    for (i = 0; i < 160; ++i)
+    {
+        StrCache[i * 2] = utils_hb2hex(sign_Cache[i] >> 4);
+        StrCache[i * 2 + 1] = utils_hb2hex(sign_Cache[i]);
+    }
+    sim7600_log("Settingmsg:%s", StrCache);
+
+    cJSON_AddStringToObject(root, "Settingmsg", StrCache);
+    cJSON_AddStringToObject(root, "Settingleng", "80");
+    cJSON_AddStringToObject(root, "ProductKey", PRODUCT_KEY);
+    cJSON_AddStringToObject(root, "DeviceName", DEVICE_NAME);
+
+    rt_snprintf(sign_Cache, sizeof(sign_Cache), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%d&Setaddrstart=100&Settingmsg=%s&Settingleng=80&Settingversion=20180720115800&Settingversion=%s&Timestamp=20180720115800&Key=123456",
+                DEVICE_NAME, PRODUCT_KEY, msgid, StrCache);
+
+    utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
+    sim7600_log("MD5");
+    rt_kprintf("MD5(%.400s", sign_Cache);
+    rt_kprintf("%s)\r\n", sign_Cache + 400);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
     for (i = 0; i < 16; ++i)
     {
@@ -337,5 +357,46 @@ void sim7600_Serialize_para_json(char **datapoint)
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
-        sim7600_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
+    {
+        sim7600_log("JSON len:%d,string:%s", strlen(*datapoint));
+        rt_kprintf("string:%.400s", *datapoint);
+        rt_kprintf("%s\r\n", *datapoint + 400);
+    }
+}
+/**
+ ****************************************************************************
+ * @Function : rt_err_t sim7600_water_notice_parse(const char *Str)
+ * @File     : sim7600.c
+ * @Program  : none
+ * @Created  : 2018-09-25 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+rt_err_t sim7600_water_notice_parse(const char *Str)
+{
+    rt_err_t rc;
+    char *MCode;
+    cJSON *root = RT_NULL;
+    sim7600_log("Str:%s", Str);
+    root = cJSON_Parse(Str);
+    if (!root)
+    {
+        sim7600_log("get root faild !\n");
+        rc = -1;
+    }
+    else
+    {
+        cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
+        MCode = rt_strstr(js_MCode->valuestring, "002");
+        if (MCode != RT_NULL)
+        {
+            sim7600_log("get QRCode !!!");
+            iot_state = IOT_PARAM_REPORT;
+        }
+        rc = RT_EOK;
+    }
+
+    if (root)
+        cJSON_Delete(root);
+    return rc;
 }

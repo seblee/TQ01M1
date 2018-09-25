@@ -270,6 +270,32 @@ rt_err_t mqtt_packet_read_operation(void)
             break;
         case PUBLISH:
             mqtt_log("packet type:PUBLISH");
+            unsigned char dup;
+            int qos;
+            unsigned char retained;
+            unsigned short msgid;
+            int payloadlen_in;
+            unsigned char *payload_in;
+            MQTTString receivedTopic;
+
+            rc = MQTTDeserialize_publish(&dup, &qos, &retained, &msgid, &receivedTopic,
+                                         &payload_in, &payloadlen_in, write_buffer, MSG_LEN_MAX);
+            mqtt_log("mqtt received msgid:%d,dup:%d,qos:%d", msgid, dup, qos);
+            mqtt_log("receivedTopic:%.*s", receivedTopic.lenstring.len, receivedTopic.lenstring.data);
+            mqtt_log("message arrived:%.*s", payloadlen_in, payload_in);
+            rc = mqtt_client_find_topic(receivedTopic.lenstring.data);
+            if (rc > 0)
+            {
+                switch (rc)
+                {
+                case WATER_NOTICE:
+                    sim7600_water_notice_parse((const char *)payload_in);
+                    break;
+                default:
+                    break;
+                }
+            }
+            mqtt_log("find_topic rc:%d", rc);
             break;
 
         case PUBACK:
@@ -402,7 +428,7 @@ rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t re
 rt_err_t mqtt_client_publish_topics(void)
 {
     rt_err_t rc = -RT_ERROR;
-    char *msg_playload; //need free
+    char *msg_playload = RT_NULL; //need free
     sim7600_Serialize_init_json(&msg_playload);
     if (msg_playload == RT_NULL)
         goto exit;
@@ -434,8 +460,7 @@ rt_err_t mqtt_client_publish_topics(void)
     else
         goto exit;
 
-    /*************************************/
-    return rc;
+/*************************************/
 exit:
     return rc;
 }
@@ -450,4 +475,65 @@ exit:
 **/
 rt_err_t mqtt_client_publish_parameter(void)
 {
+    rt_err_t rc = -RT_ERROR;
+    char *msg_playload = RT_NULL; //need free
+
+    sim7600_Serialize_para_json(&msg_playload);
+    if (msg_playload == RT_NULL)
+        goto exit;
+
+    /*****publish TOPIC_PLATFORM_INIT************/
+    rc = mqtt_client_publish(TOPIC_PLATFORM_INIT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
+    rt_free(msg_playload);
+    if (rc == RT_EOK)
+    {
+        rc = MQTTPacket_read(write_buffer, MSG_LEN_MAX, transport_getdata);
+        if (rc == PUBACK)
+        {
+            unsigned short mypacketid;
+            unsigned char dup, type;
+            if (MQTTDeserialize_ack(&type, &dup, &mypacketid, write_buffer, MSG_LEN_MAX) == 1)
+            {
+                mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
+                rc = RT_EOK;
+            }
+            else
+            {
+                mqtt_log("PUBACK Deserialize err");
+                rc = -RT_ERROR;
+                goto exit;
+            }
+        }
+        else
+            goto exit;
+    }
+    else
+        goto exit;
+exit:
+    return rc;
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_err_t mqtt_client_find_topic(char *topic)
+ * @File     : mqtt_client.c
+ * @Program  : topic:the putin topic
+ * @Created  : 2018-09-25 by seblee
+ * @Brief    : find the putin topic
+ * @Version  : V1.0
+**/
+rt_err_t mqtt_client_find_topic(char *topic)
+{
+    rt_err_t rc = -RT_ERROR;
+    int i;
+    for (i = PLATFORM_INIT; i < DEVICE_GET + 1; i++)
+    {
+        if (rt_strstr(topic, iot_topics[i].topic_str))
+        {
+            rc = i;
+            mqtt_log("i:%d,topic:%s", i, iot_topics[i].topic_str);
+            break;
+        }
+    }
+    return rc;
 }

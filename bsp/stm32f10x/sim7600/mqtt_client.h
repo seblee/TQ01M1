@@ -99,6 +99,7 @@ rt_err_t mqtt_client_publish_topics(void);
 
 rt_err_t mqtt_client_publish_parameter(void);
 
+rt_err_t mqtt_client_find_topic(char *topic);
 /*----------------------------------------------------------------------------*/
 
 #endif
