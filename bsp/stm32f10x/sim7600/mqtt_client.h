@@ -9,7 +9,7 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-11 16:14:43
+ * @Last Modified time: 2018-09-26 17:54:23
  ****************************************************************************
 **/
 #ifndef __MQTT_CLIENT_H_
@@ -27,7 +27,7 @@ typedef enum
     WATER_STATUS,      /*{"TOPIC_WATER_STATUS"}*/
     PARAMETER_SETUP,   /*{"TOPIC_PARAMETER_SETUP"}*/
     PARAMETER_GET,     /*{"TOPIC_PARAMETER_GET"}*/
-    PARAMETER_REPORT,  /*{"TOPIC_PARAMETER_REPORT"}*/
+    PARAMETER_PUT,     /*{"TOPIC_PARAMETER_PUT"}*/
     REALTIME_REPORT,   /*{"TOPIC_REALTIME_REPORT"}*/
     HEART_BEAT,        /*{"TOPIC_HEART_BEAT"}*/
     DEVICE_UPGRADE,    /*{"TOPIC_DEVICE_UPGRADE"}*/
@@ -62,7 +62,7 @@ typedef enum
 #define TOPIC_WATER_STATUS "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/client2Cloud/getWaterStatus"       /*{"TOPIC_WATER_STATUS"}*/
 #define TOPIC_PARAMETER_SETUP "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/setting"      /*{"TOPIC_PARAMETER_SETUP"}*/
 #define TOPIC_PARAMETER_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/getSetting"     /*{"TOPIC_PARAMETER_GET"}*/
-#define TOPIC_PARAMETER_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putSetting"   /*{"TOPIC_PARAMETER_REPORT"}*/
+#define TOPIC_PARAMETER_PUT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putSetting"      /*{"TOPIC_PARAMETER_PUT"}*/
 #define TOPIC_REALTIME_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putRealStatus" /*{"TOPIC_REALTIME_REPORT"}*/
 #define TOPIC_HEART_BEAT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putTimingStatus"    /*{"TOPIC_HEART_BEAT"}*/
 #define TOPIC_DEVICE_UPGRADE "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/upgrade"       /*{"TOPIC_DEVICE_UPGRADE"}*/
@@ -100,6 +100,9 @@ rt_err_t mqtt_client_publish_topics(void);
 rt_err_t mqtt_client_publish_parameter(void);
 
 rt_err_t mqtt_client_find_topic(char *topic);
+
+rt_err_t mqtt_client_publish_report(_topic_enmu_t topic_type);
+
 /*----------------------------------------------------------------------------*/
 
 #endif

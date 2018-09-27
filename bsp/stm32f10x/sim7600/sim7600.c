@@ -9,7 +9,7 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-11 18:18:29
+ * @Last Modified time: 2018-09-26 18:05:17
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
@@ -19,6 +19,7 @@
 #include "at_transfer.h"
 #include "cJSON.h"
 #include "utils_md5.h"
+#include "disguise_time.h"
 /* Private typedef -----------------------------------------------------------*/
 struct rx_msg
 {
@@ -48,19 +49,19 @@ const char iot_secret[] = {DEVICE_SECRET};
 volatile _iot_state_t iot_state = IOT_POWERON;
 /********topic dup qos restained**************/
 iot_topic_param_t iot_topics[] = {
-    {TOPIC_PLATFORM_INIT, 0, 1, 0},    /*{"TOPIC_PLATFORM_INIT"}*/
-    {TOPIC_WATER_NOTICE, 0, 1, 0},     /*{"TOPIC_WATER_NOTICE"}*/
-    {TOPIC_WATER_STATUS, 0, 1, 0},     /*{"TOPIC_WATER_STATUS"}*/
-    {TOPIC_PARAMETER_SETUP, 0, 1, 0},  /*{"TOPIC_PARAMETER_SETUP"}*/
-    {TOPIC_PARAMETER_GET, 0, 1, 0},    /*{"TOPIC_PARAMETER_GET"}*/
-    {TOPIC_PARAMETER_REPORT, 0, 1, 0}, /*{"TOPIC_PARAMETER_REPORT"}*/
-    {TOPIC_REALTIME_REPORT, 0, 1, 0},  /*{"TOPIC_REALTIME_REPORT"}*/
-    {TOPIC_HEART_BEAT, 0, 1, 0},       /*{"TOPIC_HEART_BEAT"}*/
-    {TOPIC_DEVICE_UPGRADE, 0, 1, 0},   /*{"TOPIC_DEVICE_UPGRADE"}*/
-    {TOPIC_DEVICE_MOVE, 0, 1, 0},      /*{"TOPIC_DEVICE_MOVE"}*/
-    {TOPIC_DEVICE_UPDATE, 0, 1, 0},    /*{"TOPIC_DEVICE_UPDATE"}*/
-    {TOPIC_DEVICE_ERR, 0, 1, 0},       /*{"TOPIC_DEVICE_ERR"}*/
-    {TOPIC_DEVICE_GET, 0, 1, 0},       /*{"TOPIC_DEVICE_GET"}*/
+    {TOPIC_PLATFORM_INIT, 0, 1, 0},   /*{"TOPIC_PLATFORM_INIT"}*/
+    {TOPIC_WATER_NOTICE, 0, 1, 0},    /*{"TOPIC_WATER_NOTICE"}*/
+    {TOPIC_WATER_STATUS, 0, 1, 0},    /*{"TOPIC_WATER_STATUS"}*/
+    {TOPIC_PARAMETER_SETUP, 0, 1, 0}, /*{"TOPIC_PARAMETER_SETUP"}*/
+    {TOPIC_PARAMETER_GET, 0, 1, 0},   /*{"TOPIC_PARAMETER_GET"}*/
+    {TOPIC_PARAMETER_PUT, 0, 1, 0},   /*{"TOPIC_PARAMETER_PUT"}*/
+    {TOPIC_REALTIME_REPORT, 0, 1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
+    {TOPIC_HEART_BEAT, 0, 1, 0},      /*{"TOPIC_HEART_BEAT"}*/
+    {TOPIC_DEVICE_UPGRADE, 0, 1, 0},  /*{"TOPIC_DEVICE_UPGRADE"}*/
+    {TOPIC_DEVICE_MOVE, 0, 1, 0},     /*{"TOPIC_DEVICE_MOVE"}*/
+    {TOPIC_DEVICE_UPDATE, 0, 1, 0},   /*{"TOPIC_DEVICE_UPDATE"}*/
+    {TOPIC_DEVICE_ERR, 0, 1, 0},      /*{"TOPIC_DEVICE_ERR"}*/
+    {TOPIC_DEVICE_GET, 0, 1, 0},      /*{"TOPIC_DEVICE_GET"}*/
 };
 /* Private function prototypes -----------------------------------------------*/
 iotx_device_info_t device_info;
@@ -77,6 +78,7 @@ void SIM7600_DIR_Init(void)
     GPIO_InitStructure.GPIO_Pin = SIM7600_DIR_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(SIM7600_DIR_PORT, &GPIO_InitStructure);
+    SIM7600_DIR_WIFI;
 }
 rt_err_t uart_input(rt_device_t dev, rt_size_t size)
 {
@@ -98,10 +100,12 @@ void sim7600_thread_entry(void *parameter)
                          5,                     /* 消息队列的最大容量 */
                          RT_IPC_FLAG_FIFO);     /* 如果有多个线程等待，按照FIFO的方法分配消息 */
     SIM7600_DIR_Init();
-    SIM7600_DIR_WIFI;
-    iot_topics[WATER_NOTICE].topic_str = TOPIC_WATER_NOTICE;
-
+    struct tm ti;
+    get_bulid_date_time(&ti);
+    current_systime_set(&ti);
     rt_thread_delay(SIM7600_THREAD_DELAY);
+
+    sim7600_log("priject build time:%04d-%02d-%d %02d:%02d:%02d", ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
     write_device = rt_device_find("uart3");
     if (write_device != RT_NULL)
     {
@@ -137,8 +141,12 @@ void sim7600_thread_entry(void *parameter)
             iot_state = IOT_REALTIME_REPORT;
             break;
         case IOT_REALTIME_REPORT:
+            mqtt_client_publish_report(REALTIME_REPORT);
+            iot_state = IOT_HEART_BEAT;
             break;
         case IOT_HEART_BEAT:
+            mqtt_client_publish_report(HEART_BEAT);
+            iot_state = IOT_DEVICE_UPGRADE;
             break;
         case IOT_DEVICE_UPGRADE:
             break;
@@ -321,9 +329,14 @@ void sim7600_Serialize_para_json(char **datapoint)
     cJSON_AddStringToObject(root, "MCode", "007");
     rt_snprintf(StrCache, 10, "%d", msgid);
     cJSON_AddStringToObject(root, "RequestNo", StrCache);
-    cJSON_AddStringToObject(root, "Timestamp", "20180720115800");
-    cJSON_AddStringToObject(root, "Settingversion", "20180720115800");
+    struct tm ti;
+    char Timestamp_str[15] = {0};
+    current_systime_get(&ti);
+    rt_snprintf(Timestamp_str, sizeof(Timestamp_str), "%04d%02d%02d%02d%02d%02d",
+                ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
 
+    cJSON_AddStringToObject(root, "Timestamp", Timestamp_str);
+    cJSON_AddStringToObject(root, "Settingversion", Timestamp_str);
     cJSON_AddStringToObject(root, "Setaddrstart", "100");
 
     cpad_eMBRegHoldingCB((unsigned char *)sign_Cache, 100, 80, CPAD_MB_REG_READ);
@@ -332,20 +345,19 @@ void sim7600_Serialize_para_json(char **datapoint)
         StrCache[i * 2] = utils_hb2hex(sign_Cache[i] >> 4);
         StrCache[i * 2 + 1] = utils_hb2hex(sign_Cache[i]);
     }
-    sim7600_log("Settingmsg:%s", StrCache);
 
     cJSON_AddStringToObject(root, "Settingmsg", StrCache);
     cJSON_AddStringToObject(root, "Settingleng", "80");
     cJSON_AddStringToObject(root, "ProductKey", PRODUCT_KEY);
     cJSON_AddStringToObject(root, "DeviceName", DEVICE_NAME);
 
-    rt_snprintf(sign_Cache, sizeof(sign_Cache), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%d&Setaddrstart=100&Settingmsg=%s&Settingleng=80&Settingversion=20180720115800&Settingversion=%s&Timestamp=20180720115800&Key=123456",
-                DEVICE_NAME, PRODUCT_KEY, msgid, StrCache);
+    rt_snprintf(sign_Cache, sizeof(sign_Cache), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%d&Setaddrstart=100&Settingleng=80&Settingmsg=%s&Settingversion=%s&Timestamp=%s&Key=123456",
+                DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str, Timestamp_str);
 
     utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
-    sim7600_log("MD5");
-    rt_kprintf("MD5(%.400s", sign_Cache);
-    rt_kprintf("%s)\r\n", sign_Cache + 400);
+    // sim7600_log("MD5");
+    // rt_kprintf("MD5(%.400s", sign_Cache);
+    // rt_kprintf("%s)\r\n", sign_Cache + 400);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
     for (i = 0; i < 16; ++i)
     {
@@ -399,4 +411,94 @@ rt_err_t sim7600_water_notice_parse(const char *Str)
     if (root)
         cJSON_Delete(root);
     return rc;
+}
+
+/**
+ ****************************************************************************
+ * @Function : void sim7600_Serialize_report_json(char **datapoint, _topic_enmu_t topic_type)
+ * @File     : sim7600.c
+ * @Program  : p:the point of data point
+ * @Created  : 2018-09-26 by seblee
+ * @Brief    : serialize reoprt json
+ * @Version  : V1.0
+**/
+void sim7600_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
+{
+    char sign_hex[33] = {0};
+    unsigned char sign[16];
+    char sign_Cache[800] = {0};
+
+    char StrCache[512] = {0};
+    unsigned short msgid;
+    int i;
+
+    cJSON *root = cJSON_CreateObject();
+
+    cJSON_AddStringToObject(root, "DeviceName", DEVICE_NAME);
+    cJSON_AddStringToObject(root, "ProductKey", PRODUCT_KEY);
+    if (topic_type == REALTIME_REPORT)
+        cJSON_AddStringToObject(root, "MCode", "008");
+    else
+        cJSON_AddStringToObject(root, "MCode", "009");
+
+    msgid = mqtt_client_packet_id();
+    rt_snprintf(StrCache, 10, "%d", msgid);
+    cJSON_AddStringToObject(root, "RequestNo", StrCache);
+    struct tm ti;
+    char Timestamp_str[15] = {0};
+    current_systime_get(&ti);
+    rt_snprintf(Timestamp_str, sizeof(Timestamp_str), "%04d%02d%02d%02d%02d%02d",
+                ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
+
+    cJSON_AddStringToObject(root, "Timestamp", Timestamp_str);
+    if (topic_type == REALTIME_REPORT)
+        cJSON_AddStringToObject(root, "Statusaddrstart", "502");
+    else
+        cJSON_AddStringToObject(root, "Statusaddrstart", "500");
+
+    rt_memset(StrCache, 0, sizeof(StrCache));
+    if (topic_type == REALTIME_REPORT)
+    {
+        cpad_eMBRegHoldingCB((unsigned char *)sign_Cache, 502, 18, CPAD_MB_REG_READ);
+        for (i = 0; i < 36; ++i)
+        {
+            StrCache[i * 2] = utils_hb2hex(sign_Cache[i] >> 4);
+            StrCache[i * 2 + 1] = utils_hb2hex(sign_Cache[i]);
+        }
+    }
+    else
+    {
+        cpad_eMBRegHoldingCB((unsigned char *)sign_Cache, 500, 50, CPAD_MB_REG_READ);
+        for (i = 0; i < 100; ++i)
+        {
+            StrCache[i * 2] = utils_hb2hex(sign_Cache[i] >> 4);
+            StrCache[i * 2 + 1] = utils_hb2hex(sign_Cache[i]);
+        }
+    }
+
+    cJSON_AddStringToObject(root, "Statusmsg", StrCache);
+    if (topic_type == REALTIME_REPORT)
+        cJSON_AddStringToObject(root, "Statusleng", "18");
+    else
+        cJSON_AddStringToObject(root, "Statusleng", "50");
+
+    if (topic_type == REALTIME_REPORT)
+        rt_snprintf(sign_Cache, sizeof(sign_Cache), "DeviceName=%s&MCode=008&ProductKey=%s&RequestNo=%d&Statusaddrstart=502&Statusleng=18&Statusmsg=%s&Timestamp=%s&Key=123456", DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str);
+    else
+        rt_snprintf(sign_Cache, sizeof(sign_Cache), "DeviceName=%s&MCode=009&ProductKey=%s&RequestNo=%d&Statusaddrstart=500&Statusleng=50&Statusmsg=%s&Timestamp=%s&Key=123456", DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str);
+
+    utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
+    // sim7600_log("MD5(%s)", sign_Cache);
+    rt_memset(sign_hex, 0, sizeof(sign_hex));
+    for (i = 0; i < 16; ++i)
+    {
+        sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
+        sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
+    }
+    sim7600_log("MD5=%s", sign_hex);
+    cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
+    *datapoint = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    if (*datapoint)
+        sim7600_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
 }

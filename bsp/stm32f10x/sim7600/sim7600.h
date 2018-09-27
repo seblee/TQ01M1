@@ -9,7 +9,7 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-11 18:18:01
+ * @Last Modified time: 2018-09-26 17:53:59
  ****************************************************************************
 **/
 #ifndef __SIM7600_H_
@@ -135,6 +135,7 @@ void sim7600_Serialize_para_json(char **datapoint);
 
 rt_err_t sim7600_water_notice_parse(const char *Str);
 
+void sim7600_Serialize_report_json(char **datapoint, rt_uint8_t topic_type);
 /*----------------------------------------------------------------------------*/
 
 #endif
