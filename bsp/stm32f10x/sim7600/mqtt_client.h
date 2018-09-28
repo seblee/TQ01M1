@@ -20,6 +20,22 @@
 #include "sys_conf.h"
 #include <rtthread.h>
 /* Private typedef -----------------------------------------------------------*/
+
+typedef enum
+{
+    MCode_PLATFORM_INIT = 1,   /*{"TOPIC_PLATFORM_INIT"}*/
+    MCode_QRCODE_GENERATE,     /*{"TOPIC_WATER_NOTICE"}*/
+    MCode_WATER_NOTICE,        /*{"TOPIC_WATER_NOTICE"}*/
+    MCode_WATER_STATUS,        /*{"TOPIC_WATER_STATUS"}*/
+    MCode_PARAMETER_SETUP,     /*{"TOPIC_PARAMETER_SETUP"}*/
+    MCode_PARAMETER_GET,       /*{"TOPIC_PARAMETER_GET"}*/
+    MCode_PARAMETER_PUT,       /*{"TOPIC_PARAMETER_PUT"}*/
+    MCode_REALTIME_REPORT,     /*{"TOPIC_REALTIME_REPORT"}*/
+    MCode_TIMING_REPORT,       /*{"TOPIC_TIMING_REPORT"}*/
+    MCode_DEVICE_UPGRADE = 36, /*{"TOPIC_DEVICE_UPGRADE"}*/
+
+} __mcode_value_t;
+
 typedef enum
 {
     PLATFORM_INIT = 0, /*{"TOPIC_PLATFORM_INIT"}*/
@@ -29,7 +45,7 @@ typedef enum
     PARAMETER_GET,     /*{"TOPIC_PARAMETER_GET"}*/
     PARAMETER_PUT,     /*{"TOPIC_PARAMETER_PUT"}*/
     REALTIME_REPORT,   /*{"TOPIC_REALTIME_REPORT"}*/
-    HEART_BEAT,        /*{"TOPIC_HEART_BEAT"}*/
+    TIMING_REPORT,     /*{"TOPIC_TIMING_REPORT"}*/
     DEVICE_UPGRADE,    /*{"TOPIC_DEVICE_UPGRADE"}*/
     DEVICE_MOVE,       /*{"DEVICE_MOVE"}*/
     DEVICE_UPDATE,     /*{"DEVICE_UPDATE"}*/
@@ -43,20 +59,19 @@ typedef enum
 // #define PRODUCT_KEY "a1YfNlQgDq0"
 // #define DEVICE_SECRET "afbL7kf8MvUBFQN2"
 /*****seblee *********/
-// #define DEVICE_NAME "HelloWorld"
-// #define PRODUCT_KEY "rl0bGtKFCYA"
-// #define DEVICE_SECRET "gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"
+#define DEVICE_NAME "HelloWorld"
+#define PRODUCT_KEY "rl0bGtKFCYA"
+#define DEVICE_SECRET "gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"
 /***********TQ************/
-#define DEVICE_NAME "cdtest004"
-#define PRODUCT_KEY "a1JOOi3mNEf"
-#define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
+// #define DEVICE_NAME "cdtest004"
+// #define PRODUCT_KEY "a1JOOi3mNEf"
+// #define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
 /***highLevel***/
-// #define DEVICE_NAME "device11111"
-// #define PRODUCT_KEY "a1dZFsDxBvp"
-// #define DEVICE_SECRET "o5vZRqFH7csXFMNO"
-/******topics**********/
-#define TOPIC_SUB_INIT "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/sub/register_reply" /*{"TOPIC_PLATFORM_INIT"}*/
+// #define DEVICE_NAME "TQ_Client01"
+// #define PRODUCT_KEY "a12Ou4Hjw3M"
+// #define DEVICE_SECRET "0ptX7AzSYlcMnVjFkVitKtJS20UoWcVB"
 
+/******topics**********/
 #define TOPIC_PLATFORM_INIT "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/client2Cloud/init"                /*{"TOPIC_PLATFORM_INIT"}*/
 #define TOPIC_WATER_NOTICE "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/service2Cloud/get"                 /*{"TOPIC_WATER_NOTICE"}*/
 #define TOPIC_WATER_STATUS "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/client2Cloud/getWaterStatus"       /*{"TOPIC_WATER_STATUS"}*/
@@ -64,12 +79,26 @@ typedef enum
 #define TOPIC_PARAMETER_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/getSetting"     /*{"TOPIC_PARAMETER_GET"}*/
 #define TOPIC_PARAMETER_PUT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putSetting"      /*{"TOPIC_PARAMETER_PUT"}*/
 #define TOPIC_REALTIME_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putRealStatus" /*{"TOPIC_REALTIME_REPORT"}*/
-#define TOPIC_HEART_BEAT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putTimingStatus"    /*{"TOPIC_HEART_BEAT"}*/
+#define TOPIC_TIMING_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putTimingStatus" /*{"TOPIC_TIMING_REPORT"}*/
 #define TOPIC_DEVICE_UPGRADE "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/upgrade"       /*{"TOPIC_DEVICE_UPGRADE"}*/
 #define TOPIC_DEVICE_MOVE "/" PRODUCT_KEY "/" DEVICE_NAME "/move"                                   /*{"DEVICE_MOVE"}*/
 #define TOPIC_DEVICE_UPDATE "/" PRODUCT_KEY "/" DEVICE_NAME "/update"                               /*{"DEVICE_UPDATE"}*/
 #define TOPIC_DEVICE_ERR "/" PRODUCT_KEY "/" DEVICE_NAME "/update/error"                            /*{"DEVICE_ERR"}*/
 #define TOPIC_DEVICE_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/get"                                     /*{"DEVICE_GET"}*/
+/***highLevel***/
+// #define TOPIC_PLATFORM_INIT "/" PRODUCT_KEY "/" DEVICE_NAME "/user/pay/client2Cloud/init"                /*{"TOPIC_PLATFORM_INIT"}*/
+// #define TOPIC_WATER_NOTICE "/" PRODUCT_KEY "/" DEVICE_NAME "/user/pay/service2Cloud/get"                 /*{"TOPIC_WATER_NOTICE"}*/
+// #define TOPIC_WATER_STATUS "/" PRODUCT_KEY "/" DEVICE_NAME "/user/pay/client2Cloud/getWaterStatus"       /*{"TOPIC_WATER_STATUS"}*/
+// #define TOPIC_PARAMETER_SETUP "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/service2Cloud/setting"      /*{"TOPIC_PARAMETER_SETUP"}*/
+// #define TOPIC_PARAMETER_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/service2Cloud/getSetting"     /*{"TOPIC_PARAMETER_GET"}*/
+// #define TOPIC_PARAMETER_PUT "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/client2Cloud/putSetting"      /*{"TOPIC_PARAMETER_PUT"}*/
+// #define TOPIC_REALTIME_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/client2Cloud/putRealStatus" /*{"TOPIC_REALTIME_REPORT"}*/
+// #define TOPIC_TIMING_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/client2Cloud/putTimingStatus" /*{"TOPIC_TIMING_REPORT"}*/
+// #define TOPIC_DEVICE_UPGRADE "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/service2Cloud/upgrade"       /*{"TOPIC_DEVICE_UPGRADE"}*/
+// #define TOPIC_DEVICE_MOVE "/" PRODUCT_KEY "/" DEVICE_NAME "/user/move"                                   /*{"DEVICE_MOVE"}*/
+// #define TOPIC_DEVICE_UPDATE "/" PRODUCT_KEY "/" DEVICE_NAME "/user/update"                               /*{"DEVICE_UPDATE"}*/
+// #define TOPIC_DEVICE_ERR "/" PRODUCT_KEY "/" DEVICE_NAME "/user/update/error"                            /*{"DEVICE_ERR"}*/
+// #define TOPIC_DEVICE_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/user/get"                                     /*{"DEVICE_GET"}*/
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/

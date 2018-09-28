@@ -37,6 +37,7 @@ const char AT_WIFI_SET_SSL_BUFF_SIZE[] = {"AT+CIPSSLSIZE=4096\r\n"};
 const char AT_WIFI_CONNECT_SSL[] = {"AT+CIPSTART"};
 const char AT_WIFI_CWJAP_DEF[] = {"AT+CWJAP_DEF=\"Cloudwater\",\"tqcd2018\"\r\n"};
 const char AT_WIFI_CIPSEND[] = {"AT+CIPSEND\r\n"};
+const char AT_WIFI_CIPCLOSE[] = {"AT+CIPCLOSE\r\n"};
 /***********at result for wifi*************************/
 const char AT_WIFI_ACK_OK[] = {"OK"};
 const char AT_WIFI_ACK_ERROR[] = {"ERROR"};
@@ -246,13 +247,12 @@ SYNC_AT:
         at_log("SYNC AT err");
         rt_thread_delay(2000);
         if (count++ < 10)
+        {
+            rt_snprintf((char *)write_buffer, sizeof(write_buffer), "+++");
+            rt_device_write(dev, 0, write_buffer, 3);
+            rt_thread_delay(1000);
             goto SYNC_AT;
-    }
-    /****Set wifi ssl buff************/
-    if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SET_SSL_BUFF_SIZE) != RT_EOK)
-    {
-        at_log("AT_WIFI_SET_SSL_BUFF_SIZE err");
-        return RT_ERROR;
+        }
     }
     /*****check wifi state****************/
     err = at_wifi_get_cipstatus(dev);
@@ -272,9 +272,23 @@ SYNC_AT:
         at_log("CWAUTOCONN=1 err:%d", err);
         at_wifi_send_message_ack_ok(dev, RT_NULL);
     }
+    if (err == 3)
+    {
+        if (at_wifi_send_message_ack_ok(dev, AT_WIFI_CIPCLOSE) != RT_EOK)
+        {
+            at_log("AT_WIFI_CIPCLOSE err");
+            return RT_ERROR;
+        }
+    }
     if (err != 2)
     {
         /**add wifi connect code**/
+    }
+    /****Set wifi ssl buff************/
+    if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SET_SSL_BUFF_SIZE) != RT_EOK)
+    {
+        at_log("AT_WIFI_SET_SSL_BUFF_SIZE err");
+        return RT_ERROR;
     }
     return RT_EOK;
 }

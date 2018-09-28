@@ -57,6 +57,13 @@
 #define SECURE_TLS 2
 #define SECURE_TCP 3
 
+#define TIMING_INTERVAL_DEFAULT 1800
+#define TIMING_INTERVAL_MIN 60
+#define TIMING_INTERVAL_MAX 60000
+
+#define REALTIME_INTERVAL_DEFAULT 10
+#define REALTIME_INTERVAL_MIN 5
+#define REALTIME_INTERVAL_MAX 1000
 /* Private typedef -----------------------------------------------------------*/
 typedef struct
 {
@@ -93,7 +100,7 @@ typedef enum
     IOT_INIT_COMPL,
     IOT_PARAM_REPORT,
     IOT_REALTIME_REPORT,
-    IOT_HEART_BEAT,
+    IOT_TIMING_REPORT,
     IOT_DEVICE_UPGRADE,
     IOT_IDEL,
 } _iot_state_t;
@@ -136,6 +143,11 @@ void sim7600_Serialize_para_json(char **datapoint);
 rt_err_t sim7600_water_notice_parse(const char *Str);
 
 void sim7600_Serialize_report_json(char **datapoint, rt_uint8_t topic_type);
+
+void sim7600_get_interval(rt_uint16_t *real, rt_uint16_t *timing);
+
+rt_err_t sim7600_parameter_get_parse(const char *Str);
+
 /*----------------------------------------------------------------------------*/
 
 #endif

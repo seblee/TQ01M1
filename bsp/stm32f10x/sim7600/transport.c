@@ -73,6 +73,9 @@ int transport_open(rt_device_t dev, char *addr, int port)
 
 int transport_close(rt_device_t dev)
 {
+    int rc;
     sprintf((char *)write_buffer, "+++\0");
-    return rt_device_write(dev, 0, write_buffer, 3);
+    rc = rt_device_write(dev, 0, write_buffer, 3);
+    rt_thread_delay(1000);
+    return rc;
 }

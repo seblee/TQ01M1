@@ -37,6 +37,8 @@ struct rx_msg
 rt_device_t write_device;
 /* 用于接收消息的消息队列*/
 rt_mq_t rx_mq;
+/***push command ***/
+rt_mq_t publish_mq = RT_NULL;
 /* 接收线程的接收缓冲区*/
 //static char uart_rx_buffer[64];
 rt_uint8_t write_buffer[MSG_LEN_MAX];
@@ -56,7 +58,7 @@ iot_topic_param_t iot_topics[] = {
     {TOPIC_PARAMETER_GET, 0, 1, 0},   /*{"TOPIC_PARAMETER_GET"}*/
     {TOPIC_PARAMETER_PUT, 0, 1, 0},   /*{"TOPIC_PARAMETER_PUT"}*/
     {TOPIC_REALTIME_REPORT, 0, 1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
-    {TOPIC_HEART_BEAT, 0, 1, 0},      /*{"TOPIC_HEART_BEAT"}*/
+    {TOPIC_TIMING_REPORT, 0, 1, 0},   /*{"TOPIC_TIMING_REPORT"}*/
     {TOPIC_DEVICE_UPGRADE, 0, 1, 0},  /*{"TOPIC_DEVICE_UPGRADE"}*/
     {TOPIC_DEVICE_MOVE, 0, 1, 0},     /*{"TOPIC_DEVICE_MOVE"}*/
     {TOPIC_DEVICE_UPDATE, 0, 1, 0},   /*{"TOPIC_DEVICE_UPDATE"}*/
@@ -94,11 +96,11 @@ void sim7600_thread_entry(void *parameter)
 {
     rt_err_t result = RT_EOK;
     rt_uint8_t count = 0;
+    rt_uint16_t realtime_interval, timing_interval, realtime_count, timing_count;
+    _iot_state_t pub_msg;
 
-    rx_mq = rt_mq_create("7600_rx_mq",
-                         sizeof(struct rx_msg), /* 每个消息的大小是 128 - void* */
-                         5,                     /* 消息队列的最大容量 */
-                         RT_IPC_FLAG_FIFO);     /* 如果有多个线程等待，按照FIFO的方法分配消息 */
+    rx_mq = rt_mq_create("7600_rx_mq", sizeof(struct rx_msg), 5, RT_IPC_FLAG_FIFO);
+    publish_mq = rt_mq_create("publish_mq", sizeof(_iot_state_t), 7, RT_IPC_FLAG_FIFO);
     SIM7600_DIR_Init();
     struct tm ti;
     get_bulid_date_time(&ti);
@@ -121,9 +123,33 @@ void sim7600_thread_entry(void *parameter)
     result = mqtt_client_subscribe_topics();
 
     // transport_close(write_device);
+    sim7600_get_interval(&realtime_interval, &timing_interval);
+
     iot_state = IOT_PLATFORM_INIT;
     while (1)
     {
+        result = mqtt_packet_read_operation();
+        if (realtime_count++ >= realtime_interval)
+        {
+            realtime_count = 0;
+            pub_msg = IOT_REALTIME_REPORT;
+            rt_mq_send(publish_mq, &pub_msg, sizeof(_iot_state_t));
+        }
+        if (timing_count++ >= 30 /* timing_interval*/)
+        {
+            timing_count = 0;
+            pub_msg = IOT_TIMING_REPORT;
+            rt_mq_send(publish_mq, &pub_msg, sizeof(_iot_state_t));
+        }
+        if (iot_state == IOT_IDEL)
+        {
+            result = rt_mq_recv(publish_mq, &pub_msg, sizeof(_iot_state_t), 0);
+            if (result == RT_EOK)
+            {
+                iot_state = pub_msg;
+            }
+        }
+        sim7600_log("iot_state=%d", iot_state);
         switch (iot_state)
         {
         case IOT_POWERON:
@@ -131,22 +157,21 @@ void sim7600_thread_entry(void *parameter)
         case IOT_PLATFORM_INIT:
             result = mqtt_client_publish_topics();
             if (result == RT_EOK)
-                iot_state = IOT_INIT_COMPL;
+                iot_state = IOT_PARAM_REPORT;
             break;
         case IOT_INIT_COMPL: /***WATI FOR QR Code topic***/
             break;
         case IOT_PARAM_REPORT:
-            sim7600_log("iot_state=%d", IOT_PARAM_REPORT);
             result = mqtt_client_publish_parameter();
-            iot_state = IOT_REALTIME_REPORT;
+            iot_state = IOT_IDEL;
             break;
         case IOT_REALTIME_REPORT:
             mqtt_client_publish_report(REALTIME_REPORT);
-            iot_state = IOT_HEART_BEAT;
+            iot_state = IOT_IDEL;
             break;
-        case IOT_HEART_BEAT:
-            mqtt_client_publish_report(HEART_BEAT);
-            iot_state = IOT_DEVICE_UPGRADE;
+        case IOT_TIMING_REPORT:
+            mqtt_client_publish_report(TIMING_REPORT);
+            iot_state = IOT_IDEL;
             break;
         case IOT_DEVICE_UPGRADE:
             break;
@@ -155,12 +180,11 @@ void sim7600_thread_entry(void *parameter)
         default:
             break;
         }
-        result = mqtt_packet_read_operation();
         if (count++ >= 10)
         {
             count = 0;
             result = mqtt_client_ping();
-            /**add ping code**/
+            continue;
         }
     }
 }
@@ -387,7 +411,6 @@ void sim7600_Serialize_para_json(char **datapoint)
 rt_err_t sim7600_water_notice_parse(const char *Str)
 {
     rt_err_t rc;
-    char *MCode;
     cJSON *root = RT_NULL;
     sim7600_log("Str:%s", Str);
     root = cJSON_Parse(Str);
@@ -399,15 +422,23 @@ rt_err_t sim7600_water_notice_parse(const char *Str)
     else
     {
         cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
-        MCode = rt_strstr(js_MCode->valuestring, "002");
-        if (MCode != RT_NULL)
+        if (!js_MCode)
+        {
+            sim7600_log("get MCode faild !\n");
+            rc = -1;
+            goto exit;
+        }
+        int MCode_value = 0;
+        sscanf(js_MCode->valuestring, "%d", &MCode_value);
+        sim7600_log("MCode_value:%d !\n", MCode_value);
+        if (MCode_value == MCode_QRCODE_GENERATE)
         {
             sim7600_log("get QRCode !!!");
             iot_state = IOT_PARAM_REPORT;
         }
         rc = RT_EOK;
     }
-
+exit:
     if (root)
         cJSON_Delete(root);
     return rc;
@@ -501,4 +532,74 @@ void sim7600_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
     cJSON_Delete(root);
     if (*datapoint)
         sim7600_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
+}
+/**
+ ****************************************************************************
+ * @Function : void sim7600_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
+ * @File     : sim7600.c
+ * @Program  : none
+ * @Created  : 2018-09-27 by seblee
+ * @Brief    : get interval time
+ * @Version  : V1.0
+**/
+void sim7600_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
+{
+    *real = REALTIME_INTERVAL_DEFAULT;
+    *timing = TIMING_INTERVAL_DEFAULT;
+    cpad_eMBRegHoldingCB((unsigned char *)write_buffer, 165, 2, CPAD_MB_REG_READ);
+    rt_uint32_t interval_temp = (write_buffer[0] << 8) | write_buffer[1];
+    interval_temp *= 60;
+    if (interval_temp > TIMING_INTERVAL_MAX)
+        interval_temp = TIMING_INTERVAL_MAX;
+    if (interval_temp < TIMING_INTERVAL_MIN)
+        interval_temp = TIMING_INTERVAL_MIN;
+    *timing = interval_temp;
+    sim7600_log("timing:%d", *timing);
+
+    interval_temp = (write_buffer[2] << 8) | write_buffer[3];
+    if (interval_temp > REALTIME_INTERVAL_MAX)
+        interval_temp = REALTIME_INTERVAL_MAX;
+    if (interval_temp < REALTIME_INTERVAL_MIN)
+        interval_temp = REALTIME_INTERVAL_MIN;
+    *real = interval_temp;
+    sim7600_log("real:%d", *real);
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_err_t sim7600_parameter_check(rt_err_t)
+ * @File     : sim7600.c
+ * @Program  : none
+ * @Created  : 2018-09-27 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+rt_err_t sim7600_parameter_get_parse(const char *Str)
+{
+    rt_err_t rc;
+    int MCode_value;
+    cJSON *root = RT_NULL;
+    sim7600_log("Str:%s", Str);
+    root = cJSON_Parse(Str);
+    if (!root)
+    {
+        sim7600_log("get root faild !\n");
+        rc = -1;
+    }
+    else
+    {
+        cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
+        sscanf(js_MCode->valuestring, "%d", &MCode_value);
+        sim7600_log("MCode_value:%d !\n", MCode_value);
+        if (MCode_value == MCode_PARAMETER_GET)
+        {
+            sim7600_log("get QRCode !!!");
+            // iot_state = IOT_PARAM_REPORT;
+        }
+        rc = RT_EOK;
+    }
+
+    if (root)
+        cJSON_Delete(root);
+    return rc;
 }

@@ -59,6 +59,14 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
     char guider_sign[GUIDER_SIGN_LEN] = {0};
     char hmac_source[512] = {0};
 
+    utils_hmac_md5("deviceNameTQ_Client01productKeya12Ou4Hjw3Mrandom567345", strlen("deviceNameTQ_Client01productKeya12Ou4Hjw3Mrandom567345"),
+                   guider_sign,
+                   "tJj4mDlfDK6hn5JU",
+                   strlen("tJj4mDlfDK6hn5JU"));
+    mqtt_log("scr:%s", "deviceNameTQ_Client01productKeya12Ou4Hjw3Mrandom567345");
+    mqtt_log("secret:%s", "tJj4mDlfDK6hn5JU");
+    mqtt_log("sign:%s", guider_sign);
+
     conn->port = aliyun_iot_port;
     rt_snprintf(conn->host_name, sizeof(conn->host_name), aliyun_domain, device_info->product_key);
     rt_snprintf(conn->username, sizeof(conn->username), "%s&%s", device_info->device_name, device_info->product_key);
@@ -213,12 +221,12 @@ rt_err_t mqtt_client_subscribe_topics(void)
     }
     //rt_thread_delay(1000);
     /*******TOPIC_WATER_NOTICE********/
-    rc = mqtt_client_subscribe(DEVICE_UPGRADE, &device_info);
-    if (rc != RT_EOK)
-    {
-        mqtt_log("DEVICE_UPGRADE,RT_ERROR:%d", rc);
-        goto exit;
-    }
+    // rc = mqtt_client_subscribe(DEVICE_UPGRADE, &device_info);
+    // if (rc != RT_EOK)
+    // {
+    //     mqtt_log("DEVICE_UPGRADE,RT_ERROR:%d", rc);
+    //     goto exit;
+    // }
     //rt_thread_delay(1000);
     /*******DEVICE_UPGRADE********/
     // rc = mqtt_client_subscribe(DEVICE_UPGRADE, &device_info);
@@ -229,20 +237,20 @@ rt_err_t mqtt_client_subscribe_topics(void)
     // }
     // //rt_thread_delay(1000);
     /*******DEVICE_MOVE********/
-    rc = mqtt_client_subscribe(DEVICE_MOVE, &device_info);
-    if (rc != RT_EOK)
-    {
-        mqtt_log("DEVICE_MOVE,RT_ERROR:%d", rc);
-        goto exit;
-    }
-    //rt_thread_delay(1000);
-    /*******DEVICE_GET********/
-    rc = mqtt_client_subscribe(DEVICE_GET, &device_info);
-    if (rc != RT_EOK)
-    {
-        mqtt_log("DEVICE_GET,RT_ERROR:%d", rc);
-        goto exit;
-    }
+    // rc = mqtt_client_subscribe(DEVICE_MOVE, &device_info);
+    // if (rc != RT_EOK)
+    // {
+    //     mqtt_log("DEVICE_MOVE,RT_ERROR:%d", rc);
+    //     goto exit;
+    // }
+    // //rt_thread_delay(1000);
+    // /*******DEVICE_GET********/
+    // rc = mqtt_client_subscribe(DEVICE_GET, &device_info);
+    // if (rc != RT_EOK)
+    // {
+    //     mqtt_log("DEVICE_GET,RT_ERROR:%d", rc);
+    //     goto exit;
+    // }
 exit:
     return rc;
 }
@@ -290,6 +298,9 @@ rt_err_t mqtt_packet_read_operation(void)
                 {
                 case WATER_NOTICE:
                     sim7600_water_notice_parse((const char *)payload_in);
+                    break;
+                case PARAMETER_GET:
+                    sim7600_parameter_get_parse((const char *)payload_in);
                     break;
                 default:
                     break;
@@ -542,7 +553,7 @@ rt_err_t mqtt_client_find_topic(char *topic)
  ****************************************************************************
  * @Function : rt_err_t mqtt_client_publish_report(_topic_enmu_t topic_type)
  * @File     : mqtt_client.c
- * @Program  : topic_type:REALTIME_REPORT/HEART_BEAT
+ * @Program  : topic_type:REALTIME_REPORT/TIMING_REPORT
  * @Created  : 2018-09-26 by seblee
  * @Brief    : publish report
  * @Version  : V1.0
@@ -560,7 +571,7 @@ rt_err_t mqtt_client_publish_report(_topic_enmu_t topic_type)
     if (type == REALTIME_REPORT)
         rc = mqtt_client_publish(TOPIC_REALTIME_REPORT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
     else
-        rc = mqtt_client_publish(TOPIC_HEART_BEAT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
+        rc = mqtt_client_publish(TOPIC_TIMING_REPORT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
     rt_free(msg_playload);
     if (rc == RT_EOK)
     {
