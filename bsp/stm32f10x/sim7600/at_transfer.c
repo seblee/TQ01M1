@@ -183,7 +183,7 @@ rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
     if (err == RT_EOK)
         return err;
     err = at_wifi_send_message_ack_ok(dev, RT_NULL);
-    // err = sim7600_read_message(dev, write_buffer, sizeof(write_buffer), 9000);
+    // err = sim7600_read_message(dev, read_buffer, sizeof(read_buffer), 9000);
 
     return err;
 }

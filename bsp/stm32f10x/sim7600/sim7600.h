@@ -111,6 +111,8 @@ extern rt_device_t write_device;
 
 extern rt_uint8_t write_buffer[MSG_LEN_MAX];
 
+extern rt_uint8_t read_buffer[MSG_LEN_MAX];
+
 extern const char iot_deviceid[];
 
 extern const char iot_devicename[];

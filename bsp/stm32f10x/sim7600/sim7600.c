@@ -42,6 +42,7 @@ rt_mq_t publish_mq = RT_NULL;
 /* 接收线程的接收缓冲区*/
 //static char uart_rx_buffer[64];
 rt_uint8_t write_buffer[MSG_LEN_MAX];
+rt_uint8_t read_buffer[MSG_LEN_MAX];
 
 const char iot_deviceid[] = {DEVICE_ID};
 const char iot_devicename[] = {DEVICE_NAME};
@@ -54,7 +55,7 @@ iot_topic_param_t iot_topics[] = {
     {TOPIC_PLATFORM_INIT, 0, 1, 0},   /*{"TOPIC_PLATFORM_INIT"}*/
     {TOPIC_WATER_NOTICE, 0, 1, 0},    /*{"TOPIC_WATER_NOTICE"}*/
     {TOPIC_WATER_STATUS, 0, 1, 0},    /*{"TOPIC_WATER_STATUS"}*/
-    {TOPIC_PARAMETER_SETUP, 0, 1, 0}, /*{"TOPIC_PARAMETER_SETUP"}*/
+    {TOPIC_PARAMETER_SET, 0, 1, 0},   /*{"TOPIC_PARAMETER_SET"}*/
     {TOPIC_PARAMETER_GET, 0, 1, 0},   /*{"TOPIC_PARAMETER_GET"}*/
     {TOPIC_PARAMETER_PUT, 0, 1, 0},   /*{"TOPIC_PARAMETER_PUT"}*/
     {TOPIC_REALTIME_REPORT, 0, 1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
@@ -157,7 +158,7 @@ void sim7600_thread_entry(void *parameter)
         case IOT_PLATFORM_INIT:
             result = mqtt_client_publish_topics();
             if (result == RT_EOK)
-                iot_state = IOT_PARAM_REPORT;
+                iot_state = IOT_INIT_COMPL;
             break;
         case IOT_INIT_COMPL: /***WATI FOR QR Code topic***/
             break;
@@ -375,13 +376,13 @@ void sim7600_Serialize_para_json(char **datapoint)
     cJSON_AddStringToObject(root, "ProductKey", PRODUCT_KEY);
     cJSON_AddStringToObject(root, "DeviceName", DEVICE_NAME);
 
-    rt_snprintf(sign_Cache, sizeof(sign_Cache), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%d&Setaddrstart=100&Settingleng=80&Settingmsg=%s&Settingversion=%s&Timestamp=%s&Key=123456",
+    rt_snprintf(sign_Cache, sizeof(sign_Cache), "DeviceName=%s&MCode=007&ProductKey=%s&RequestNo=%d&Setaddrstart=100&Settingleng=80&Settingmsg=%s&Settingversion=%s&Timestamp=%s&Key=123456",
                 DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str, Timestamp_str);
 
     utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
-    // sim7600_log("MD5");
-    // rt_kprintf("MD5(%.400s", sign_Cache);
-    // rt_kprintf("%s)\r\n", sign_Cache + 400);
+    sim7600_log("MD5");
+    rt_kprintf("MD5(%.400s", sign_Cache);
+    rt_kprintf("%s)\r\n", sign_Cache + 400);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
     for (i = 0; i < 16; ++i)
     {
@@ -593,10 +594,65 @@ rt_err_t sim7600_parameter_get_parse(const char *Str)
         sim7600_log("MCode_value:%d !\n", MCode_value);
         if (MCode_value == MCode_PARAMETER_GET)
         {
-            sim7600_log("get QRCode !!!");
-            // iot_state = IOT_PARAM_REPORT;
+            sim7600_log("get PARAMETER_GET !!!");
+            _iot_state_t pub_msg = IOT_PARAM_REPORT;
+            rt_mq_send(publish_mq, &pub_msg, sizeof(_iot_state_t));
         }
         rc = RT_EOK;
+    }
+
+    if (root)
+        cJSON_Delete(root);
+    return rc;
+}
+/**
+ ****************************************************************************
+ * @Function : rt_err_t sim7600_parameter_set_parse(const char*Str)
+ * @File     : sim7600.c
+ * @Program  : none
+ * @Created  : 2018-09-28 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+rt_err_t sim7600_parameter_set_parse(const char *Str)
+{
+    rt_err_t rc;
+    int MCode_value;
+    cJSON *root = RT_NULL;
+    sim7600_log("Str:%s", Str);
+    root = cJSON_Parse(Str);
+    if (!root)
+    {
+        sim7600_log("get root faild !\n");
+        rc = -1;
+    }
+    else
+    {
+        cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
+        sscanf(js_MCode->valuestring, "%d", &MCode_value);
+        sim7600_log("MCode_value:%d !\n", MCode_value);
+        if (MCode_value == MCode_PARAMETER_SET)
+        {
+            sim7600_log("get PARAMETER_SET !!!");
+            rt_uint16_t Setaddrstart;
+            cJSON *js_MCode = cJSON_GetObjectItem(root, "Setaddrstart");
+            sscanf(js_MCode->valuestring, "%d", &Setaddrstart);
+            rt_uint16_t Settingleng;
+            cJSON *js_MCode = cJSON_GetObjectItem(root, "Settingleng");
+            sscanf(js_MCode->valuestring, "%d", &Settingleng);
+            cJSON *js_MCode = cJSON_GetObjectItem(root, "Settingmsg");
+            char *Settingmsg_str = rt_calloc(Settingleng * 8, sizeof(rt_uint8_t));
+            if (js_MCode && Settingmsg_str)
+            {
+                rt_strncpy(Settingmsg_str, js_MCode->valuestring, Settingleng * 8);
+            }
+            if (Settingmsg_str)
+                rt_free(Settingmsg_str);
+
+            rc = RT_EOK;
+        }
+        else
+            rc = -RT_ERROR;
     }
 
     if (root)

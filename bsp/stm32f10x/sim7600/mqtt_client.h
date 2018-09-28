@@ -27,7 +27,7 @@ typedef enum
     MCode_QRCODE_GENERATE,     /*{"TOPIC_WATER_NOTICE"}*/
     MCode_WATER_NOTICE,        /*{"TOPIC_WATER_NOTICE"}*/
     MCode_WATER_STATUS,        /*{"TOPIC_WATER_STATUS"}*/
-    MCode_PARAMETER_SETUP,     /*{"TOPIC_PARAMETER_SETUP"}*/
+    MCode_PARAMETER_SET,       /*{"TOPIC_PARAMETER_SET"}*/
     MCode_PARAMETER_GET,       /*{"TOPIC_PARAMETER_GET"}*/
     MCode_PARAMETER_PUT,       /*{"TOPIC_PARAMETER_PUT"}*/
     MCode_REALTIME_REPORT,     /*{"TOPIC_REALTIME_REPORT"}*/
@@ -41,7 +41,7 @@ typedef enum
     PLATFORM_INIT = 0, /*{"TOPIC_PLATFORM_INIT"}*/
     WATER_NOTICE,      /*{"TOPIC_WATER_NOTICE"}*/
     WATER_STATUS,      /*{"TOPIC_WATER_STATUS"}*/
-    PARAMETER_SETUP,   /*{"TOPIC_PARAMETER_SETUP"}*/
+    PARAMETER_SET,     /*{"TOPIC_PARAMETER_SET"}*/
     PARAMETER_GET,     /*{"TOPIC_PARAMETER_GET"}*/
     PARAMETER_PUT,     /*{"TOPIC_PARAMETER_PUT"}*/
     REALTIME_REPORT,   /*{"TOPIC_REALTIME_REPORT"}*/
@@ -52,20 +52,24 @@ typedef enum
     DEVICE_ERR,        /*{"DEVICE_ERR"}*/
     DEVICE_GET,        /*{"DEVICE_GET"}*/
 } _topic_enmu_t;
+enum QoS
+{
+    MQTT_QOS0,
+    MQTT_QOS1,
+    MQTT_QOS2,
+    MQTT_SUBFAIL = 0x80
+};
 /* Private define ------------------------------------------------------------*/
 #define DEVICE_ID "cdtest0041"
 
-// #define DEVICE_NAME "HelloWorld"
-// #define PRODUCT_KEY "a1YfNlQgDq0"
-// #define DEVICE_SECRET "afbL7kf8MvUBFQN2"
 /*****seblee *********/
-#define DEVICE_NAME "HelloWorld"
-#define PRODUCT_KEY "rl0bGtKFCYA"
-#define DEVICE_SECRET "gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"
+// #define DEVICE_NAME "HelloWorld"
+// #define PRODUCT_KEY "rl0bGtKFCYA"
+// #define DEVICE_SECRET "gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"
 /***********TQ************/
-// #define DEVICE_NAME "cdtest004"
-// #define PRODUCT_KEY "a1JOOi3mNEf"
-// #define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
+#define DEVICE_NAME "cdtest004"
+#define PRODUCT_KEY "a1JOOi3mNEf"
+#define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
 /***highLevel***/
 // #define DEVICE_NAME "TQ_Client01"
 // #define PRODUCT_KEY "a12Ou4Hjw3M"
@@ -75,7 +79,7 @@ typedef enum
 #define TOPIC_PLATFORM_INIT "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/client2Cloud/init"                /*{"TOPIC_PLATFORM_INIT"}*/
 #define TOPIC_WATER_NOTICE "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/service2Cloud/get"                 /*{"TOPIC_WATER_NOTICE"}*/
 #define TOPIC_WATER_STATUS "/" PRODUCT_KEY "/" DEVICE_NAME "/pay/client2Cloud/getWaterStatus"       /*{"TOPIC_WATER_STATUS"}*/
-#define TOPIC_PARAMETER_SETUP "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/setting"      /*{"TOPIC_PARAMETER_SETUP"}*/
+#define TOPIC_PARAMETER_SET "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/setting"        /*{"TOPIC_PARAMETER_SET"}*/
 #define TOPIC_PARAMETER_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/service2Cloud/getSetting"     /*{"TOPIC_PARAMETER_GET"}*/
 #define TOPIC_PARAMETER_PUT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putSetting"      /*{"TOPIC_PARAMETER_PUT"}*/
 #define TOPIC_REALTIME_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/monitor/client2Cloud/putRealStatus" /*{"TOPIC_REALTIME_REPORT"}*/
@@ -89,7 +93,7 @@ typedef enum
 // #define TOPIC_PLATFORM_INIT "/" PRODUCT_KEY "/" DEVICE_NAME "/user/pay/client2Cloud/init"                /*{"TOPIC_PLATFORM_INIT"}*/
 // #define TOPIC_WATER_NOTICE "/" PRODUCT_KEY "/" DEVICE_NAME "/user/pay/service2Cloud/get"                 /*{"TOPIC_WATER_NOTICE"}*/
 // #define TOPIC_WATER_STATUS "/" PRODUCT_KEY "/" DEVICE_NAME "/user/pay/client2Cloud/getWaterStatus"       /*{"TOPIC_WATER_STATUS"}*/
-// #define TOPIC_PARAMETER_SETUP "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/service2Cloud/setting"      /*{"TOPIC_PARAMETER_SETUP"}*/
+// #define TOPIC_PARAMETER_SET "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/service2Cloud/setting"      /*{"TOPIC_PARAMETER_SET"}*/
 // #define TOPIC_PARAMETER_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/service2Cloud/getSetting"     /*{"TOPIC_PARAMETER_GET"}*/
 // #define TOPIC_PARAMETER_PUT "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/client2Cloud/putSetting"      /*{"TOPIC_PARAMETER_PUT"}*/
 // #define TOPIC_REALTIME_REPORT "/" PRODUCT_KEY "/" DEVICE_NAME "/user/monitor/client2Cloud/putRealStatus" /*{"TOPIC_REALTIME_REPORT"}*/
@@ -131,6 +135,10 @@ rt_err_t mqtt_client_publish_parameter(void);
 rt_err_t mqtt_client_find_topic(char *topic);
 
 rt_err_t mqtt_client_publish_report(_topic_enmu_t topic_type);
+
+rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len);
+
+rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, unsigned int msgId, enum msgTypes type);
 
 /*----------------------------------------------------------------------------*/
 
