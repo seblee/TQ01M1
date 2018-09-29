@@ -150,6 +150,8 @@ void sim7600_get_interval(rt_uint16_t *real, rt_uint16_t *timing);
 
 rt_err_t sim7600_parameter_get_parse(const char *Str);
 
+rt_err_t sim7600_parameter_set_parse(const char *Str);
+
 /*----------------------------------------------------------------------------*/
 
 #endif

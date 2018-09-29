@@ -63,13 +63,13 @@ enum QoS
 #define DEVICE_ID "cdtest0041"
 
 /*****seblee *********/
-// #define DEVICE_NAME "HelloWorld"
-// #define PRODUCT_KEY "rl0bGtKFCYA"
-// #define DEVICE_SECRET "gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"
+#define DEVICE_NAME "HelloWorld"
+#define PRODUCT_KEY "rl0bGtKFCYA"
+#define DEVICE_SECRET "gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"
 /***********TQ************/
-#define DEVICE_NAME "cdtest004"
-#define PRODUCT_KEY "a1JOOi3mNEf"
-#define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
+// #define DEVICE_NAME "cdtest004"
+// #define PRODUCT_KEY "a1JOOi3mNEf"
+// #define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
 /***highLevel***/
 // #define DEVICE_NAME "TQ_Client01"
 // #define PRODUCT_KEY "a12Ou4Hjw3M"

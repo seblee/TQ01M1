@@ -9,7 +9,7 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-11 18:13:38
+ * @Last Modified time: 2018-09-29 18:04:19
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
@@ -243,6 +243,73 @@ rt_err_t at_wifi_init(rt_device_t dev)
     /****SYNC AT************/
 SYNC_AT:
     if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SYNC) != RT_EOK)
+    {
+        at_log("SYNC AT err");
+        rt_thread_delay(2000);
+        if (count++ < 10)
+        {
+            rt_snprintf((char *)write_buffer, sizeof(write_buffer), "+++");
+            rt_device_write(dev, 0, write_buffer, 3);
+            rt_thread_delay(1000);
+            goto SYNC_AT;
+        }
+    }
+    /*****check wifi state****************/
+    err = at_wifi_get_cipstatus(dev);
+    at_log("err:%d", err);
+    if (err == 5)
+    {
+        char sendbuf[20] = {0};
+        rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CWMODE_DEF][0], 1);
+        err = at_wifi_send_message_ack_ok(dev, sendbuf);
+        at_log("CWMODE_DEF=1 err:%d", err);
+
+        rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CWAUTOCONN][0], 1);
+        err = at_wifi_send_message_ack_ok(dev, sendbuf);
+        at_log("CWAUTOCONN=1 err:%d", err);
+
+        err = at_wifi_send_message_ack_ok(dev, AT_WIFI_CWJAP_DEF);
+        at_log("CWAUTOCONN=1 err:%d", err);
+        at_wifi_send_message_ack_ok(dev, RT_NULL);
+    }
+    if (err == 3)
+    {
+        if (at_wifi_send_message_ack_ok(dev, AT_WIFI_CIPCLOSE) != RT_EOK)
+        {
+            at_log("AT_WIFI_CIPCLOSE err");
+            return RT_ERROR;
+        }
+    }
+    if (err != 2)
+    {
+        /**add wifi connect code**/
+    }
+    /****Set wifi ssl buff************/
+    if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SET_SSL_BUFF_SIZE) != RT_EOK)
+    {
+        at_log("AT_WIFI_SET_SSL_BUFF_SIZE err");
+        return RT_ERROR;
+    }
+    return RT_EOK;
+}
+/**
+ ****************************************************************************
+ * @Function : rt_err_t at_4g_init(void)
+ * @File     : at_transfer.c
+ * @Program  : none
+ * @Created  : 2018-09-29 by seblee
+ * @Brief    : init 7600 model
+ * @Version  : V1.0
+**/
+rt_err_t at_4g_init(void)
+{
+    rt_uint8_t count = 0;
+    rt_err_t err;
+    /*******4g mode*********/
+    SIM7600_DIR_4G;
+    /****SYNC AT************/
+SYNC_AT:
+    if (at_wifi_send_message_ack_ok(dev, AT_4G_SYNC) != RT_EOK)
     {
         at_log("SYNC AT err");
         rt_thread_delay(2000);

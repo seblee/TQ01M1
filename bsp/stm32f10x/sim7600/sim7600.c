@@ -158,7 +158,7 @@ void sim7600_thread_entry(void *parameter)
         case IOT_PLATFORM_INIT:
             result = mqtt_client_publish_topics();
             if (result == RT_EOK)
-                iot_state = IOT_INIT_COMPL;
+                iot_state = IOT_IDEL;
             break;
         case IOT_INIT_COMPL: /***WATI FOR QR Code topic***/
             break;
@@ -634,21 +634,28 @@ rt_err_t sim7600_parameter_set_parse(const char *Str)
         if (MCode_value == MCode_PARAMETER_SET)
         {
             sim7600_log("get PARAMETER_SET !!!");
-            rt_uint16_t Setaddrstart;
-            cJSON *js_MCode = cJSON_GetObjectItem(root, "Setaddrstart");
-            sscanf(js_MCode->valuestring, "%d", &Setaddrstart);
-            rt_uint16_t Settingleng;
-            cJSON *js_MCode = cJSON_GetObjectItem(root, "Settingleng");
-            sscanf(js_MCode->valuestring, "%d", &Settingleng);
-            cJSON *js_MCode = cJSON_GetObjectItem(root, "Settingmsg");
-            char *Settingmsg_str = rt_calloc(Settingleng * 8, sizeof(rt_uint8_t));
-            if (js_MCode && Settingmsg_str)
+            int Setaddrstart;
+            cJSON *js_Setaddrstart = cJSON_GetObjectItem(root, "Setaddrstart");
+            sscanf(js_Setaddrstart->valuestring, "%d", &Setaddrstart);
+            int Settingleng;
+            cJSON *js_Settingleng = cJSON_GetObjectItem(root, "Settingleng");
+            sscanf(js_Settingleng->valuestring, "%d", &Settingleng);
+            cJSON *js_Settingmsg = cJSON_GetObjectItem(root, "Settingmsg");
+            char *Settingmsg_str = rt_calloc(Settingleng * 4 + 1, sizeof(rt_uint8_t));
+            int Settingmsg_data;
+            if (js_Settingmsg && Settingmsg_str)
             {
-                rt_strncpy(Settingmsg_str, js_MCode->valuestring, Settingleng * 8);
+                rt_strncpy(Settingmsg_str, js_Settingmsg->valuestring, Settingleng * 4);
+                int i;
+                for (i = 0; i < Settingleng * 2; i++)
+                {
+                    sscanf(Settingmsg_str + 2 * i, "%02X", &Settingmsg_data);
+                    *(Settingmsg_str + i) = (uint8_t)(Settingmsg_data & (int)0xFF);
+                }
+                cpad_eMBRegHoldingCB((unsigned char *)Settingmsg_str, Setaddrstart, Settingleng, CPAD_MB_REG_SINGLE_WRITE);
             }
             if (Settingmsg_str)
                 rt_free(Settingmsg_str);
-
             rc = RT_EOK;
         }
         else

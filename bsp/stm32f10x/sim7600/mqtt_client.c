@@ -615,8 +615,8 @@ rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len)
         case WATER_NOTICE:
             sim7600_water_notice_parse((const char *)payload_in);
             break;
-        case MCode_PARAMETER_SET:
-            //  sim7600_water_notice_parse((const char *)payload_in);
+        case PARAMETER_SET:
+            sim7600_parameter_set_parse((const char *)payload_in);
             break;
         case PARAMETER_GET:
             sim7600_parameter_get_parse((const char *)payload_in);
