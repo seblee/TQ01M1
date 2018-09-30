@@ -15,7 +15,7 @@
 /* Private include -----------------------------------------------------------*/
 #include "sys_conf.h"
 #include <rtthread.h>
-#include "sim7600.h"
+#include "network.h"
 #include "at_transfer.h"
 /* Private typedef -----------------------------------------------------------*/
 
@@ -43,7 +43,7 @@ int transport_sendPacketBuffer(int sock, unsigned char *buf, int buflen)
 int transport_getdata(unsigned char *buf, int count)
 {
     /**1 second timeout**/
-    return sim7600_read_message(write_device, buf, count, 1000);
+    return network_read_message(write_device, buf, count, 1000);
 }
 
 /**

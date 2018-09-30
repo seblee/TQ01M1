@@ -19,7 +19,7 @@
 #include <rthw.h>
 #include <rtthread.h>
 #include "compiler.h"
-#include "usart.h"
+//#include "usart.h"
 
 #define UART_RX_BUFFER_SIZE		64
 #define UART_TX_DMA_NODE_SIZE	4

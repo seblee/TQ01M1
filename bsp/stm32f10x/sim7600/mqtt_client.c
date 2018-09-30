@@ -411,7 +411,7 @@ rt_err_t mqtt_client_publish_topics(void)
 {
     rt_err_t rc = -RT_ERROR;
     char *msg_playload = RT_NULL; //need free
-    sim7600_Serialize_init_json(&msg_playload);
+    network_Serialize_init_json(&msg_playload);
     if (msg_playload == RT_NULL)
         goto exit;
     /*****publish TOPIC_PLATFORM_INIT************/
@@ -460,7 +460,7 @@ rt_err_t mqtt_client_publish_parameter(void)
     rt_err_t rc = -RT_ERROR;
     char *msg_playload = RT_NULL; //need free
 
-    sim7600_Serialize_para_json(&msg_playload);
+    network_Serialize_para_json(&msg_playload);
     if (msg_playload == RT_NULL)
         goto exit;
 
@@ -534,7 +534,7 @@ rt_err_t mqtt_client_publish_report(_topic_enmu_t topic_type)
     rt_err_t rc = -RT_ERROR;
     char *msg_playload = RT_NULL; //need free
     _topic_enmu_t type = topic_type;
-    sim7600_Serialize_report_json(&msg_playload, type);
+    network_Serialize_report_json(&msg_playload, type);
     if (msg_playload == RT_NULL)
         goto exit;
 
@@ -613,13 +613,13 @@ rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len)
         switch (rc)
         {
         case WATER_NOTICE:
-            sim7600_water_notice_parse((const char *)payload_in);
+            network_water_notice_parse((const char *)payload_in);
             break;
         case PARAMETER_SET:
-            sim7600_parameter_set_parse((const char *)payload_in);
+            network_parameter_set_parse((const char *)payload_in);
             break;
         case PARAMETER_GET:
-            sim7600_parameter_get_parse((const char *)payload_in);
+            network_parameter_get_parse((const char *)payload_in);
             break;
         default:
             break;

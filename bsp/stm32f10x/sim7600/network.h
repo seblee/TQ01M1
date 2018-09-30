@@ -134,23 +134,23 @@ extern iot_topic_param_t iot_topics[];
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data);
+rt_uint32_t network_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data);
 
-rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout);
+rt_int32_t network_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout);
 
-void sim7600_Serialize_init_json(char **datapoint);
+void network_Serialize_init_json(char **datapoint);
 
-void sim7600_Serialize_para_json(char **datapoint);
+void network_Serialize_para_json(char **datapoint);
 
-rt_err_t sim7600_water_notice_parse(const char *Str);
+rt_err_t network_water_notice_parse(const char *Str);
 
-void sim7600_Serialize_report_json(char **datapoint, rt_uint8_t topic_type);
+void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type);
 
-void sim7600_get_interval(rt_uint16_t *real, rt_uint16_t *timing);
+void network_get_interval(rt_uint16_t *real, rt_uint16_t *timing);
 
-rt_err_t sim7600_parameter_get_parse(const char *Str);
+rt_err_t network_parameter_get_parse(const char *Str);
 
-rt_err_t sim7600_parameter_set_parse(const char *Str);
+rt_err_t network_parameter_set_parse(const char *Str);
 
 /*----------------------------------------------------------------------------*/
 

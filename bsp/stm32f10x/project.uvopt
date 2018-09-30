@@ -1703,7 +1703,7 @@
 
   <Group>
     <GroupName>Components</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -2034,7 +2034,7 @@
 
   <Group>
     <GroupName>modbus_monitor</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -2093,27 +2093,14 @@
   </Group>
 
   <Group>
-    <GroupName>sim_7600</GroupName>
-    <tvExp>1</tvExp>
+    <GroupName>Network</GroupName>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>15</GroupNumber>
       <FileNumber>130</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <Focus>0</Focus>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>.\sim7600\sim7600.c</PathWithFileName>
-      <FilenameWithoutPath>sim7600.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>15</GroupNumber>
-      <FileNumber>131</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -2126,7 +2113,7 @@
     </File>
     <File>
       <GroupNumber>15</GroupNumber>
-      <FileNumber>132</FileNumber>
+      <FileNumber>131</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -2139,7 +2126,7 @@
     </File>
     <File>
       <GroupNumber>15</GroupNumber>
-      <FileNumber>133</FileNumber>
+      <FileNumber>132</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -2152,7 +2139,7 @@
     </File>
     <File>
       <GroupNumber>15</GroupNumber>
-      <FileNumber>134</FileNumber>
+      <FileNumber>133</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -2165,7 +2152,7 @@
     </File>
     <File>
       <GroupNumber>15</GroupNumber>
-      <FileNumber>135</FileNumber>
+      <FileNumber>134</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -2178,7 +2165,7 @@
     </File>
     <File>
       <GroupNumber>15</GroupNumber>
-      <FileNumber>136</FileNumber>
+      <FileNumber>135</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -2191,7 +2178,7 @@
     </File>
     <File>
       <GroupNumber>15</GroupNumber>
-      <FileNumber>137</FileNumber>
+      <FileNumber>136</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -2199,6 +2186,19 @@
       <bDave2>0</bDave2>
       <PathWithFileName>.\sim7600\disguise_time.c</PathWithFileName>
       <FilenameWithoutPath>disguise_time.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>15</GroupNumber>
+      <FileNumber>137</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\sim7600\network.c</PathWithFileName>
+      <FilenameWithoutPath>network.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -2337,6 +2337,53 @@
       <bDave2>0</bDave2>
       <PathWithFileName>.\paho.mqtt.embedded-c\MQTTPacket\src\MQTTUnsubscribeServer.c</PathWithFileName>
       <FilenameWithoutPath>MQTTUnsubscribeServer.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+  </Group>
+
+  <Group>
+    <GroupName>SIM_COM</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>17</GroupNumber>
+      <FileNumber>148</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\sim7600\SIM_COM\SIMCOM_AT.c</PathWithFileName>
+      <FilenameWithoutPath>SIMCOM_AT.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>17</GroupNumber>
+      <FileNumber>149</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\sim7600\SIM_COM\SIMCOM_GSM.c</PathWithFileName>
+      <FilenameWithoutPath>SIMCOM_GSM.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>17</GroupNumber>
+      <FileNumber>150</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\sim7600\SIM_COM\SIMCOM_USER.c</PathWithFileName>
+      <FilenameWithoutPath>SIMCOM_USER.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

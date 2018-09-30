@@ -14,7 +14,7 @@
 **/
 /* Private include -----------------------------------------------------------*/
 #include "at_transfer.h"
-#include "sim7600.h"
+#include "network.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -134,7 +134,7 @@ rt_err_t at_wifi_send_message_ack_ok(rt_device_t dev, const char *AT_command)
 {
     rt_err_t err = RT_ERROR;
     char *message = RT_NULL;
-    err = sim7600_send_message(dev, AT_command, (rt_uint8_t **)(&message));
+    err = network_send_message(dev, AT_command, (rt_uint8_t **)(&message));
     at_log("count:%d", err);
     if (message)
     {
@@ -160,7 +160,7 @@ rt_err_t at_wifi_get_cipstatus(rt_device_t dev)
     rt_err_t err = RT_ERROR;
     char *message = RT_NULL;
 
-    sim7600_send_message(dev, AT_WIFI_STATUS, (rt_uint8_t **)&message);
+    network_send_message(dev, AT_WIFI_STATUS, (rt_uint8_t **)&message);
     at_log("message %s", message);
     if (message)
     {
@@ -183,7 +183,7 @@ rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
     if (err == RT_EOK)
         return err;
     err = at_wifi_send_message_ack_ok(dev, RT_NULL);
-    // err = sim7600_read_message(dev, read_buffer, sizeof(read_buffer), 9000);
+    // err = network_read_message(dev, read_buffer, sizeof(read_buffer), 9000);
 
     return err;
 }
@@ -294,14 +294,14 @@ SYNC_AT:
 }
 /**
  ****************************************************************************
- * @Function : rt_err_t at_4g_init(void)
+ * @Function : rt_err_t at_4g_init(rt_device_t dev)
  * @File     : at_transfer.c
  * @Program  : none
  * @Created  : 2018-09-29 by seblee
  * @Brief    : init 7600 model
  * @Version  : V1.0
 **/
-rt_err_t at_4g_init(void)
+rt_err_t at_4g_init(rt_device_t dev)
 {
     rt_uint8_t count = 0;
     rt_err_t err;

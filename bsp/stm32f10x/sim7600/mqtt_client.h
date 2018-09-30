@@ -15,7 +15,7 @@
 #ifndef __MQTT_CLIENT_H_
 #define __MQTT_CLIENT_H_
 /* Private include -----------------------------------------------------------*/
-#include "sim7600.h"
+#include "network.h"
 #include "MQTTPacket.h"
 #include "sys_conf.h"
 #include <rtthread.h>

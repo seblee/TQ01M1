@@ -13,7 +13,7 @@
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
-#include "sim7600.h"
+#include "network.h"
 #include "transport.h"
 #include "mqtt_client.h"
 #include "at_transfer.h"
@@ -28,8 +28,8 @@ struct rx_msg
 };
 
 /* Private define ------------------------------------------------------------*/
-#ifndef sim7600_log
-#define sim7600_log(N, ...) rt_kprintf("####[sim7600 %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#ifndef network_log
+#define network_log(N, ...) rt_kprintf("####[network %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif /* at_log(...) */
 /* Private macro -------------------------------------------------------------*/
 
@@ -73,7 +73,7 @@ MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
 /* Private functions ---------------------------------------------------------*/
 
 /* 数据到达回调函数*/
-void SIM7600_DIR_Init(void)
+void NetWork_DIR_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
@@ -102,13 +102,13 @@ void sim7600_thread_entry(void *parameter)
 
     rx_mq = rt_mq_create("7600_rx_mq", sizeof(struct rx_msg), 5, RT_IPC_FLAG_FIFO);
     publish_mq = rt_mq_create("publish_mq", sizeof(_iot_state_t), 7, RT_IPC_FLAG_FIFO);
-    SIM7600_DIR_Init();
+    NetWork_DIR_Init();
     struct tm ti;
     get_bulid_date_time(&ti);
     current_systime_set(&ti);
     rt_thread_delay(SIM7600_THREAD_DELAY);
 
-    sim7600_log("priject build time:%04d-%02d-%d %02d:%02d:%02d", ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
+    network_log("priject build time:%04d-%02d-%d %02d:%02d:%02d", ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
     write_device = rt_device_find("uart3");
     if (write_device != RT_NULL)
     {
@@ -117,14 +117,14 @@ void sim7600_thread_entry(void *parameter)
     }
     result = at_wifi_init(write_device);
     mqtt_client_init(write_device);
-    sim7600_log("mqtt_client_init done");
+    network_log("mqtt_client_init done");
 
     transport_open(write_device, device_connect.host_name, device_connect.port);
     mqtt_client_connect(write_device, &client_con);
     result = mqtt_client_subscribe_topics();
 
     // transport_close(write_device);
-    sim7600_get_interval(&realtime_interval, &timing_interval);
+    network_get_interval(&realtime_interval, &timing_interval);
 
     iot_state = IOT_PLATFORM_INIT;
     while (1)
@@ -150,7 +150,7 @@ void sim7600_thread_entry(void *parameter)
                 iot_state = pub_msg;
             }
         }
-        sim7600_log("iot_state=%d", iot_state);
+        network_log("iot_state=%d", iot_state);
         switch (iot_state)
         {
         case IOT_POWERON:
@@ -189,7 +189,7 @@ void sim7600_thread_entry(void *parameter)
         }
     }
 }
-rt_uint32_t sim7600_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data)
+rt_uint32_t network_send_message(rt_device_t dev, const char *senddata, rt_uint8_t **data)
 {
     rt_uint16_t timeout = 9000;
     rt_uint32_t count = 0;
@@ -237,8 +237,8 @@ exit:
 
 /**
  ****************************************************************************
- * @Function : rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout)
- * @File     : sim7600.c
+ * @Function : rt_int32_t network_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout)
+ * @File     : network.c
  * @Program  : dev:serial device
  *             *data:the buff read
  *             len:the length read
@@ -246,7 +246,7 @@ exit:
  * @Brief    : 
  * @Version  : V1.0
 **/
-rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout)
+rt_int32_t network_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout)
 {
     struct rx_msg msg;
     rt_err_t result = RT_EOK;
@@ -275,15 +275,15 @@ rt_int32_t sim7600_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t le
 }
 /**
  ****************************************************************************
- * @Function : void sim7600_Serialize_init_json(char **datapoint)
- * @File     : sim7600.c
+ * @Function : void network_Serialize_init_json(char **datapoint)
+ * @File     : network.c
  * @Program  : databuf:point of databuffer
  *             len:sizeof databuf
  * @Created  : 2018-09-20 by seblee
  * @Brief    : 
  * @Version  : V1.0
 **/
-void sim7600_Serialize_init_json(char **datapoint)
+void network_Serialize_init_json(char **datapoint)
 {
     char sign_hex[128] = {0};
     unsigned char sign[16];
@@ -300,7 +300,7 @@ void sim7600_Serialize_init_json(char **datapoint)
 
     result = cJSON_AddStringToObject(root, "MCode", "001");
     if (result == NULL)
-        sim7600_log("JSON add err");
+        network_log("JSON add err");
 
     rt_snprintf(RequestNoStr, sizeof(RequestNoStr), "%d", msgid);
     result = cJSON_AddStringToObject(root, "RequestNo", RequestNoStr);
@@ -310,32 +310,32 @@ void sim7600_Serialize_init_json(char **datapoint)
 
     rt_snprintf(sign_hex, sizeof(sign_hex), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%s&Timestamp=20180720115800&Key=123456", DEVICE_NAME, PRODUCT_KEY, RequestNoStr);
     utils_md5((const unsigned char *)sign_hex, strlen(sign_hex), sign);
-    sim7600_log("MD5(%s)", sign_hex);
+    network_log("MD5(%s)", sign_hex);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
     for (i = 0; i < 16; ++i)
     {
         sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
         sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
     }
-    sim7600_log("MD5=%s", sign_hex);
+    network_log("MD5=%s", sign_hex);
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
-        sim7600_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
+        network_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
 }
 
 /**
  ****************************************************************************
- * @Function : void sim7600_Serialize_para_json(char **datapoint)
- * @File     : sim7600.c
+ * @Function : void network_Serialize_para_json(char **datapoint)
+ * @File     : network.c
  * @Program  : the point of out data
  * @Created  : 2018-09-21 by seblee
  * @Brief    : serialize parameter json report
  * @Version  : V1.0
 **/
 #include "mb_event_cpad.h"
-void sim7600_Serialize_para_json(char **datapoint)
+void network_Serialize_para_json(char **datapoint)
 {
     char sign_hex[33] = {0};
     unsigned char sign[16];
@@ -380,7 +380,7 @@ void sim7600_Serialize_para_json(char **datapoint)
                 DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str, Timestamp_str);
 
     utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
-    sim7600_log("MD5");
+    network_log("MD5");
     rt_kprintf("MD5(%.400s", sign_Cache);
     rt_kprintf("%s)\r\n", sign_Cache + 400);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
@@ -389,35 +389,35 @@ void sim7600_Serialize_para_json(char **datapoint)
         sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
         sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
     }
-    sim7600_log("MD5=%s", sign_hex);
+    network_log("MD5=%s", sign_hex);
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
     {
-        sim7600_log("JSON len:%d,string:%s", strlen(*datapoint));
+        network_log("JSON len:%d,string:%s", strlen(*datapoint));
         rt_kprintf("string:%.400s", *datapoint);
         rt_kprintf("%s\r\n", *datapoint + 400);
     }
 }
 /**
  ****************************************************************************
- * @Function : rt_err_t sim7600_water_notice_parse(const char *Str)
- * @File     : sim7600.c
+ * @Function : rt_err_t network_water_notice_parse(const char *Str)
+ * @File     : network.c
  * @Program  : none
  * @Created  : 2018-09-25 by seblee
  * @Brief    : 
  * @Version  : V1.0
 **/
-rt_err_t sim7600_water_notice_parse(const char *Str)
+rt_err_t network_water_notice_parse(const char *Str)
 {
     rt_err_t rc;
     cJSON *root = RT_NULL;
-    sim7600_log("Str:%s", Str);
+    network_log("Str:%s", Str);
     root = cJSON_Parse(Str);
     if (!root)
     {
-        sim7600_log("get root faild !\n");
+        network_log("get root faild !\n");
         rc = -1;
     }
     else
@@ -425,16 +425,16 @@ rt_err_t sim7600_water_notice_parse(const char *Str)
         cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
         if (!js_MCode)
         {
-            sim7600_log("get MCode faild !\n");
+            network_log("get MCode faild !\n");
             rc = -1;
             goto exit;
         }
         int MCode_value = 0;
         sscanf(js_MCode->valuestring, "%d", &MCode_value);
-        sim7600_log("MCode_value:%d !\n", MCode_value);
+        network_log("MCode_value:%d !\n", MCode_value);
         if (MCode_value == MCode_QRCODE_GENERATE)
         {
-            sim7600_log("get QRCode !!!");
+            network_log("get QRCode !!!");
             iot_state = IOT_PARAM_REPORT;
         }
         rc = RT_EOK;
@@ -447,14 +447,14 @@ exit:
 
 /**
  ****************************************************************************
- * @Function : void sim7600_Serialize_report_json(char **datapoint, _topic_enmu_t topic_type)
- * @File     : sim7600.c
+ * @Function : void network_Serialize_report_json(char **datapoint, _topic_enmu_t topic_type)
+ * @File     : network.c
  * @Program  : p:the point of data point
  * @Created  : 2018-09-26 by seblee
  * @Brief    : serialize reoprt json
  * @Version  : V1.0
 **/
-void sim7600_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
+void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
 {
     char sign_hex[33] = {0};
     unsigned char sign[16];
@@ -520,30 +520,30 @@ void sim7600_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
         rt_snprintf(sign_Cache, sizeof(sign_Cache), "DeviceName=%s&MCode=009&ProductKey=%s&RequestNo=%d&Statusaddrstart=500&Statusleng=50&Statusmsg=%s&Timestamp=%s&Key=123456", DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str);
 
     utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
-    // sim7600_log("MD5(%s)", sign_Cache);
+    // network_log("MD5(%s)", sign_Cache);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
     for (i = 0; i < 16; ++i)
     {
         sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
         sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
     }
-    sim7600_log("MD5=%s", sign_hex);
+    network_log("MD5=%s", sign_hex);
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
-        sim7600_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
+        network_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
 }
 /**
  ****************************************************************************
- * @Function : void sim7600_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
- * @File     : sim7600.c
+ * @Function : void network_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
+ * @File     : network.c
  * @Program  : none
  * @Created  : 2018-09-27 by seblee
  * @Brief    : get interval time
  * @Version  : V1.0
 **/
-void sim7600_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
+void network_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
 {
     *real = REALTIME_INTERVAL_DEFAULT;
     *timing = TIMING_INTERVAL_DEFAULT;
@@ -555,7 +555,7 @@ void sim7600_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
     if (interval_temp < TIMING_INTERVAL_MIN)
         interval_temp = TIMING_INTERVAL_MIN;
     *timing = interval_temp;
-    sim7600_log("timing:%d", *timing);
+    network_log("timing:%d", *timing);
 
     interval_temp = (write_buffer[2] << 8) | write_buffer[3];
     if (interval_temp > REALTIME_INTERVAL_MAX)
@@ -563,38 +563,38 @@ void sim7600_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
     if (interval_temp < REALTIME_INTERVAL_MIN)
         interval_temp = REALTIME_INTERVAL_MIN;
     *real = interval_temp;
-    sim7600_log("real:%d", *real);
+    network_log("real:%d", *real);
 }
 
 /**
  ****************************************************************************
- * @Function : rt_err_t sim7600_parameter_check(rt_err_t)
- * @File     : sim7600.c
+ * @Function : rt_err_t network_parameter_check(rt_err_t)
+ * @File     : network.c
  * @Program  : none
  * @Created  : 2018-09-27 by seblee
  * @Brief    : 
  * @Version  : V1.0
 **/
-rt_err_t sim7600_parameter_get_parse(const char *Str)
+rt_err_t network_parameter_get_parse(const char *Str)
 {
     rt_err_t rc;
     int MCode_value;
     cJSON *root = RT_NULL;
-    sim7600_log("Str:%s", Str);
+    network_log("Str:%s", Str);
     root = cJSON_Parse(Str);
     if (!root)
     {
-        sim7600_log("get root faild !\n");
+        network_log("get root faild !\n");
         rc = -1;
     }
     else
     {
         cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
         sscanf(js_MCode->valuestring, "%d", &MCode_value);
-        sim7600_log("MCode_value:%d !\n", MCode_value);
+        network_log("MCode_value:%d !\n", MCode_value);
         if (MCode_value == MCode_PARAMETER_GET)
         {
-            sim7600_log("get PARAMETER_GET !!!");
+            network_log("get PARAMETER_GET !!!");
             _iot_state_t pub_msg = IOT_PARAM_REPORT;
             rt_mq_send(publish_mq, &pub_msg, sizeof(_iot_state_t));
         }
@@ -607,33 +607,33 @@ rt_err_t sim7600_parameter_get_parse(const char *Str)
 }
 /**
  ****************************************************************************
- * @Function : rt_err_t sim7600_parameter_set_parse(const char*Str)
- * @File     : sim7600.c
+ * @Function : rt_err_t network_parameter_set_parse(const char*Str)
+ * @File     : network.c
  * @Program  : none
  * @Created  : 2018-09-28 by seblee
  * @Brief    : 
  * @Version  : V1.0
 **/
-rt_err_t sim7600_parameter_set_parse(const char *Str)
+rt_err_t network_parameter_set_parse(const char *Str)
 {
     rt_err_t rc;
     int MCode_value;
     cJSON *root = RT_NULL;
-    sim7600_log("Str:%s", Str);
+    network_log("Str:%s", Str);
     root = cJSON_Parse(Str);
     if (!root)
     {
-        sim7600_log("get root faild !\n");
+        network_log("get root faild !\n");
         rc = -1;
     }
     else
     {
         cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
         sscanf(js_MCode->valuestring, "%d", &MCode_value);
-        sim7600_log("MCode_value:%d !\n", MCode_value);
+        network_log("MCode_value:%d !\n", MCode_value);
         if (MCode_value == MCode_PARAMETER_SET)
         {
-            sim7600_log("get PARAMETER_SET !!!");
+            network_log("get PARAMETER_SET !!!");
             int Setaddrstart;
             cJSON *js_Setaddrstart = cJSON_GetObjectItem(root, "Setaddrstart");
             sscanf(js_Setaddrstart->valuestring, "%d", &Setaddrstart);
