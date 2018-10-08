@@ -9,12 +9,13 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-29 18:04:19
+ * @Last Modified time: 2018-10-08 18:10:42
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
 #include "at_transfer.h"
 #include "network.h"
+#include "SIMCOM_USER.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -124,6 +125,11 @@ const char AT_VTS[] = {"AT+VTS=\r\n"};                //Send DTMF
 const char ATMicOn[] = "AT+CMUT=0\r\n";
 const char ATMicOff[] = "AT+CMUT=1\r\n";
 const char Gsm_cmd_Turn_Off[] = {"AT+CPOWD=1\r\n"}; //关模块命令
+
+/*---------------------------------------------------------------*/
+
+SIMCOM_HANDLE g_SIMCOM_Handle; //SIMCOM通信模块句柄
+
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
@@ -183,7 +189,6 @@ rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
     if (err == RT_EOK)
         return err;
     err = at_wifi_send_message_ack_ok(dev, RT_NULL);
-    // err = network_read_message(dev, read_buffer, sizeof(read_buffer), 9000);
 
     return err;
 }
@@ -292,6 +297,34 @@ SYNC_AT:
     }
     return RT_EOK;
 }
+static bool GPRS_UART_SendData(rt_uint8_t DataBuff[], u16 DataLen)
+{
+    u16 Len;
+    Len = rt_device_write(write_device, 0, DataBuff, DataLen);
+    if (Len == DataLen)
+        return TRUE;
+    else
+        return FALSE;
+}
+
+static int GPRS_UART_ReadData(u8 **pDataBuff, u8 ByteTimeOutMs, u16 TimeOutMs, u16 *pReceiveDelayMs) //接收数据接口
+{
+    int receiveLen;
+    *pDataBuff = read_buffer;
+    receiveLen = network_read_message(write_device, read_buffer, 1024, TimeOutMs);
+    return receiveLen;
+}
+//清除接收缓冲区
+static void GPRS_UART_ClearData(void)
+{
+    rt_device_read(write_device, 0, read_buffer, MSG_LEN_MAX);
+    rt_memset(read_buffer, 0, MSG_LEN_MAX);
+    rt_memset(write_buffer, 0, MSG_LEN_MAX);
+}
+void SYS_DelayMS(u32 ms)
+{
+    rt_thread_delay(ms);
+}
 /**
  ****************************************************************************
  * @Function : rt_err_t at_4g_init(rt_device_t dev)
@@ -307,20 +340,29 @@ rt_err_t at_4g_init(rt_device_t dev)
     rt_err_t err;
     /*******4g mode*********/
     SIM7600_DIR_4G;
+    SYS_DelayMS(1000);
+    const char *pModeInof;
     /****SYNC AT************/
-SYNC_AT:
-    if (at_wifi_send_message_ack_ok(dev, AT_4G_SYNC) != RT_EOK)
+    //初始化SIMCOM句柄接口
+    SIMCOM_Init(&g_SIMCOM_Handle,
+                GPRS_UART_SendData,  //发送数据接口，如果发送失败，返回FALSE,成功返回TRUE;
+                GPRS_UART_ReadData,  //接收数据接口，返回数据长度，如果失败返回<=0,成功，返回数据长度
+                GPRS_UART_ClearData, //清除接收缓冲区函数，用于清除接收数据缓冲区数据
+                RT_NULL,             //DTR引脚电平控制-用于控制sleep模式或者退出透传模式
+                RT_NULL,             //PWRKEY开机引脚电平控制-用于开机
+                RT_NULL,             //获取STATUS引脚电平-用于指示模块上电状态
+                RT_NULL,             //DCD-上拉输入，高电平AT指令模式，低电平为透传模式
+                SYS_DelayMS,         //系统延时函数
+                RT_NULL              //清除系统看门狗(可以为空)
+    );
+    //SIMCOM模块上电初始化并注册网络
+    if ((err = SIMCOM_RegisNetwork(&g_SIMCOM_Handle, 6, 60, &pModeInof)) != SIMCOM_INIT_OK)
     {
-        at_log("SYNC AT err");
-        rt_thread_delay(2000);
-        if (count++ < 10)
-        {
-            rt_snprintf((char *)write_buffer, sizeof(write_buffer), "+++");
-            rt_device_write(dev, 0, write_buffer, 3);
-            rt_thread_delay(1000);
-            goto SYNC_AT;
-        }
+        at_log("SIMCOM_Regis err:%d", err);
     }
+
+SYNC_AT:
+
     /*****check wifi state****************/
     err = at_wifi_get_cipstatus(dev);
     at_log("err:%d", err);

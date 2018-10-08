@@ -68,13 +68,13 @@ static rt_uint8_t monitor_slave_stack[512];
 //static rt_uint8_t team_stack[ 512 ];
 static rt_uint8_t mbm_fsm_stack[512];
 static rt_uint8_t di_stack[256];
-static rt_uint8_t daq_stack[1024];
-static rt_uint8_t core_stack[1024];
-static rt_uint8_t cpad_stack[2560];
+static rt_uint8_t daq_stack[512];
+static rt_uint8_t core_stack[512];
+static rt_uint8_t cpad_stack[512];
 //static rt_uint8_t tcom_stack[ 512 ];
 static rt_uint8_t bkg_stack[512];
-static rt_uint8_t testcase_stack[1024];
-static rt_uint8_t sim7600_stack[2048];
+static rt_uint8_t testcase_stack[512];
+static rt_uint8_t sim7600_stack[2560];
 
 static struct rt_thread modbus_master_thread;
 //static struct rt_thread modbus_slave_thread;

@@ -9,7 +9,7 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-26 18:05:17
+ * @Last Modified time: 2018-10-08 18:02:28
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
@@ -115,7 +115,8 @@ void sim7600_thread_entry(void *parameter)
         rt_device_set_rx_indicate(write_device, uart_input);
         rt_device_open(write_device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);
     }
-    result = at_wifi_init(write_device);
+    // result = at_wifi_init(write_device);
+    result = at_4g_init(write_device);
     mqtt_client_init(write_device);
     network_log("mqtt_client_init done");
 
@@ -136,7 +137,7 @@ void sim7600_thread_entry(void *parameter)
             pub_msg = IOT_REALTIME_REPORT;
             rt_mq_send(publish_mq, &pub_msg, sizeof(_iot_state_t));
         }
-        if (timing_count++ >= 30 /* timing_interval*/)
+        if (timing_count++ >= timing_interval)
         {
             timing_count = 0;
             pub_msg = IOT_TIMING_REPORT;
@@ -260,7 +261,7 @@ rt_int32_t network_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t le
         result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg), timer);
         if (result == RT_EOK)
         {
-            timer = 100;
+            timer = 50;
             rx_length = msg.size;
             rx_length = rx_length > (len - count) ? (len - count) : rx_length;
             rx_length = rt_device_read(msg.dev, 0, data + count, rx_length);
