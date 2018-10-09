@@ -37,6 +37,7 @@ extern const char AT_WIFI_CIPSEND[];
 
 /* Private functions ---------------------------------------------------------*/
 rt_err_t at_wifi_init(rt_device_t dev);
+rt_err_t at_4g_init(rt_device_t dev);
 rt_err_t at_wifi_send_message_ack_ok(rt_device_t dev, const char *AT_command);
 rt_err_t at_wifi_get_cipstatus(rt_device_t dev);
 rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port);

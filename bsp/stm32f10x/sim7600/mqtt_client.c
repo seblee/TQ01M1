@@ -94,6 +94,7 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
                 "|",
                 device_info->device_id, SECURE_TCP, MD5_METHOD);
     // mqtt_log("client_id:%s", conn->client_id);
+    conn->style = IOT_4G_MODE;
 }
 
 int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn)

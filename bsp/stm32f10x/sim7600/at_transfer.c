@@ -336,7 +336,6 @@ void SYS_DelayMS(u32 ms)
 **/
 rt_err_t at_4g_init(rt_device_t dev)
 {
-    rt_uint8_t count = 0;
     rt_err_t err;
     /*******4g mode*********/
     SIM7600_DIR_4G;
@@ -357,47 +356,9 @@ rt_err_t at_4g_init(rt_device_t dev)
     );
     //SIMCOM模块上电初始化并注册网络
     if ((err = SIMCOM_RegisNetwork(&g_SIMCOM_Handle, 6, 60, &pModeInof)) != SIMCOM_INIT_OK)
-    {
         at_log("SIMCOM_Regis err:%d", err);
-    }
+    else
+        err = RT_EOK;
 
-SYNC_AT:
-
-    /*****check wifi state****************/
-    err = at_wifi_get_cipstatus(dev);
-    at_log("err:%d", err);
-    if (err == 5)
-    {
-        char sendbuf[20] = {0};
-        rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CWMODE_DEF][0], 1);
-        err = at_wifi_send_message_ack_ok(dev, sendbuf);
-        at_log("CWMODE_DEF=1 err:%d", err);
-
-        rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CWAUTOCONN][0], 1);
-        err = at_wifi_send_message_ack_ok(dev, sendbuf);
-        at_log("CWAUTOCONN=1 err:%d", err);
-
-        err = at_wifi_send_message_ack_ok(dev, AT_WIFI_CWJAP_DEF);
-        at_log("CWAUTOCONN=1 err:%d", err);
-        at_wifi_send_message_ack_ok(dev, RT_NULL);
-    }
-    if (err == 3)
-    {
-        if (at_wifi_send_message_ack_ok(dev, AT_WIFI_CIPCLOSE) != RT_EOK)
-        {
-            at_log("AT_WIFI_CIPCLOSE err");
-            return RT_ERROR;
-        }
-    }
-    if (err != 2)
-    {
-        /**add wifi connect code**/
-    }
-    /****Set wifi ssl buff************/
-    if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SET_SSL_BUFF_SIZE) != RT_EOK)
-    {
-        at_log("AT_WIFI_SET_SSL_BUFF_SIZE err");
-        return RT_ERROR;
-    }
-    return RT_EOK;
+    return err;
 }

@@ -72,6 +72,13 @@ typedef struct
     char device_id[DEVICE_ID_LEN + 1];
     char device_secret[DEVICE_SECRET_LEN + 1];
 } iotx_device_info_t, *iotx_device_info_pt;
+
+typedef enum
+{
+    IOT_WIFI_MODE = 0,
+    IOT_4G_MODE,
+} _iot_wireless_style_t;
+
 typedef struct
 {
     uint16_t port;
@@ -79,11 +86,7 @@ typedef struct
     char client_id[CLIENT_ID_LEN + 1];
     char username[USER_NAME_LEN + 1];
     char password[PASSWORD_LEN + 1];
-    const char *pub_key;
-#ifdef MQTT_ID2_AUTH
-    char aeskey_str[AESKEY_STR_LEN];
-    uint8_t aeskey_hex[AESKEY_HEX_LEN];
-#endif
+    _iot_wireless_style_t style;
 } iotx_conn_info_t, *iotx_conn_info_pt;
 
 typedef struct

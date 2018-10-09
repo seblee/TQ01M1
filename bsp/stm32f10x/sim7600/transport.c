@@ -9,7 +9,7 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-11 18:09:06
+ * @Last Modified time: 2018-10-09 13:14:32
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
@@ -51,22 +51,29 @@ return >=0 for a socket descriptor, <0 for an error code
 @todo Basically moved from the sample without changes, should accomodate same usage for 'sock' for clarity,
 removing indirections
 */
-int transport_open(rt_device_t dev, char *addr, int port)
+int transport_open(rt_device_t dev, iotx_conn_info_t *conn)
 {
     rt_err_t err = RT_EOK;
-    /*******connect tcp/ssl************/
-    err = at_wifi_connect_ssl(dev, addr, port);
-    transport_log("connect_ssl err:%d", err);
-    if (err == RT_EOK)
+
+    if (conn->style == IOT_WIFI_MODE)
     {
-        err = at_wifi_set_CIPMODE_mode(dev);
-        transport_log("set_CIPMODE err:%d", err);
+        /*******connect tcp/ssl************/
+        err = at_wifi_connect_ssl(dev, conn->host_name, conn->port);
+        transport_log("connect_ssl err:%d", err);
+        if (err == RT_EOK)
+        {
+            err = at_wifi_set_CIPMODE_mode(dev);
+            transport_log("set_CIPMODE err:%d", err);
+        }
+        if (err == RT_EOK)
+        {
+            /******start data transfer*********/
+            err = at_wifi_send_message_ack_ok(dev, AT_WIFI_CIPSEND);
+            transport_log("CIPSEND err:%d", err);
+        }
     }
-    if (err == RT_EOK)
+    else if (conn->style == IOT_4G_MODE)
     {
-        /******start data transfer*********/
-        err = at_wifi_send_message_ack_ok(dev, AT_WIFI_CIPSEND);
-        transport_log("CIPSEND err:%d", err);
     }
     return err;
 }

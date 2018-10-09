@@ -116,7 +116,7 @@ void sim7600_thread_entry(void *parameter)
         rt_device_open(write_device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);
     }
     // result = at_wifi_init(write_device);
-    result = at_4g_init(write_device);
+    result = at_4g_init(write_device); 
     mqtt_client_init(write_device);
     network_log("mqtt_client_init done");
 

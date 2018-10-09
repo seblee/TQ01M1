@@ -16,7 +16,7 @@
 #define __TRANSPORT_H_
 /* Private include -----------------------------------------------------------*/
 #include <rtthread.h>
-
+#include "network.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -32,7 +32,7 @@ rt_size_t transport_sendPacketBuffer(rt_device_t dev, unsigned char *buf, int bu
 
 int transport_getdata(unsigned char *buf, int count);
 
-int transport_open(rt_device_t dev, char *addr, int port);
+int transport_open(rt_device_t dev, iotx_conn_info_t *conn);
 
 int transport_close(rt_device_t dev);
 
