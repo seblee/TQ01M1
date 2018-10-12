@@ -115,12 +115,12 @@ void sim7600_thread_entry(void *parameter)
         rt_device_set_rx_indicate(write_device, uart_input);
         rt_device_open(write_device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);
     }
-    // result = at_wifi_init(write_device);
-    result = at_4g_init(write_device); 
+    result = at_wifi_init(write_device);
+    //   result = at_4g_init(write_device);
     mqtt_client_init(write_device);
     network_log("mqtt_client_init done");
 
-    transport_open(write_device, device_connect.host_name, device_connect.port);
+    transport_open(write_device, &device_connect);
     mqtt_client_connect(write_device, &client_con);
     result = mqtt_client_subscribe_topics();
 
@@ -159,7 +159,7 @@ void sim7600_thread_entry(void *parameter)
         case IOT_PLATFORM_INIT:
             result = mqtt_client_publish_topics();
             if (result == RT_EOK)
-                iot_state = IOT_IDEL;
+                iot_state = IOT_INIT_COMPL;
             break;
         case IOT_INIT_COMPL: /***WATI FOR QR Code topic***/
             break;
@@ -637,23 +637,52 @@ rt_err_t network_parameter_set_parse(const char *Str)
             network_log("get PARAMETER_SET !!!");
             int Setaddrstart;
             cJSON *js_Setaddrstart = cJSON_GetObjectItem(root, "Setaddrstart");
+            if (js_Setaddrstart == RT_NULL)
+            {
+                rc = -RT_ERROR;
+                network_log("get js_Setaddrstart err !!!");
+            }
             sscanf(js_Setaddrstart->valuestring, "%d", &Setaddrstart);
+            network_log("get Setaddrstart:%d", Setaddrstart);
             int Settingleng;
             cJSON *js_Settingleng = cJSON_GetObjectItem(root, "Settingleng");
+            if (js_Settingleng == RT_NULL)
+            {
+                rc = -RT_ERROR;
+                network_log("get js_Settingleng err !!!");
+            }
             sscanf(js_Settingleng->valuestring, "%d", &Settingleng);
+            network_log("get Settingleng:%d", Settingleng);
             cJSON *js_Settingmsg = cJSON_GetObjectItem(root, "Settingmsg");
+            if (js_Settingmsg == RT_NULL)
+            {
+                rc = -RT_ERROR;
+                network_log("get js_Settingmsg err !!!");
+            }
             char *Settingmsg_str = rt_calloc(Settingleng * 4 + 1, sizeof(rt_uint8_t));
+            if (Settingmsg_str == RT_NULL)
+            {
+                rc = -RT_ERROR;
+                network_log("get Settingmsg_str err !!!");
+            }
             int Settingmsg_data;
-            if (js_Settingmsg && Settingmsg_str)
+            if ((js_Settingmsg != RT_NULL) && (Settingmsg_str != RT_NULL))
             {
                 rt_strncpy(Settingmsg_str, js_Settingmsg->valuestring, Settingleng * 4);
+                network_log("get Settingmsg_str:%s", Settingmsg_str);
                 int i;
+                unsigned char *Settingmsg_data_buf = rt_calloc(Settingleng * 2, sizeof(rt_uint8_t));
+
                 for (i = 0; i < Settingleng * 2; i++)
                 {
                     sscanf(Settingmsg_str + 2 * i, "%02X", &Settingmsg_data);
-                    *(Settingmsg_str + i) = (uint8_t)(Settingmsg_data & (int)0xFF);
+                    Settingmsg_data_buf[i] = (uint8_t)(Settingmsg_data & (int)0xFF);
+                    rt_kprintf("%02x", Settingmsg_data_buf[i]);
                 }
-                cpad_eMBRegHoldingCB((unsigned char *)Settingmsg_str, Setaddrstart, Settingleng, CPAD_MB_REG_SINGLE_WRITE);
+
+                cpad_eMBRegHoldingCB((unsigned char *)Settingmsg_data_buf, Setaddrstart, Settingleng, CPAD_MB_REG_MULTIPLE_WRITE);
+                if (Settingmsg_data_buf)
+                    rt_free(Settingmsg_data_buf);
             }
             if (Settingmsg_str)
                 rt_free(Settingmsg_str);

@@ -20,7 +20,6 @@
  */
 #include "mb_event_cpad.h"
 
-
 #include "mbport_cpad.h"
 #include "global_var.h"
 #include "event_record.h"
@@ -28,45 +27,44 @@
 #include "dio_bsp.h"
 /*------------------------Slave mode use these variables----------------------*/
 //Slave mode:HoldingRegister variables
-extern cpad_slave_st  cpad_slave_inst;
+extern cpad_slave_st cpad_slave_inst;
 static uint16_t mbs_read_reg(uint16_t read_addr);
 
-USHORT   cpad_usSRegHoldBuf[CMD_REG_SIZE]   ;
-USHORT   cpad_usSRegHoldStart = CPAD_S_REG_HOLDING_START;
+USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
+USHORT cpad_usSRegHoldStart = CPAD_S_REG_HOLDING_START;
 
-
-typedef struct 
+typedef struct
 {
 	uint8_t reg_type; //0=config_reg;1 =status_reg;
 	uint16_t reg_addr;
 	uint8_t reg_w_r; //3 =write&read,2=read_only,3=write_only
-}reg_table_st;
+} reg_table_st;
 
 //内存到modbus的映射表。
 //元素位置对应ModeBus  协议栈中usSRegHoldBuf位置
 //元素值对应conf_reg_map_inst，内存数据的位置。
 
-void cpad_modbus_slave_thread_entry(void* parameter)
+void cpad_modbus_slave_thread_entry(void *parameter)
 {
-		extern sys_reg_st		g_sys; 
-		extern local_reg_st l_sys;
-	
-		rt_thread_delay(MODBUS_SLAVE_THREAD_DELAY);
-	  cpad_MBRTUInit(1 , UPORT_CPAD, 19200,  MB_PAR_NONE);
-		rt_kprintf("cpad_modbus_slave_thread_entry\n");	
-		while(1)
-		{
-//				if(l_sys.SEL_Jump&Com_Pad)//串口屏
-//				{
-//					Cpad_Update();
-//					rt_thread_delay(200);					
-//				}
-//				else
-//				{
-					cpad_MBPoll();
-					rt_thread_delay(10);					
-//				}
-		}
+	extern sys_reg_st g_sys;
+	extern local_reg_st l_sys;
+
+	rt_thread_delay(MODBUS_SLAVE_THREAD_DELAY);
+	cpad_MBRTUInit(1, UPORT_CPAD, 19200, MB_PAR_NONE);
+	rt_kprintf("cpad_modbus_slave_thread_entry\n");
+	while (1)
+	{
+		//				if(l_sys.SEL_Jump&Com_Pad)//串口屏
+		//				{
+		//					Cpad_Update();
+		//					rt_thread_delay(200);
+		//				}
+		//				else
+		//				{
+		cpad_MBPoll();
+		rt_thread_delay(10);
+		//				}
+	}
 }
 
 //******************************保持寄存器回调函数**********************************
@@ -83,429 +81,386 @@ void cpad_modbus_slave_thread_entry(void* parameter)
 //**********************************************************************************
 
 eMBErrorCode
-cpad_eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint8_t eMode )
+cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint8_t eMode)
 {
-		extern local_reg_st l_sys;
-		extern sys_reg_st  g_sys; 
-		extern  conf_reg_map_st conf_reg_map_inst[];	
-    eMBErrorCode eStatus=MB_ENOERR ;
-    USHORT iRegIndex ;
-    USHORT*pusRegHoldingBuf ;
-    USHORT REG_HOLDING_START ;
-    USHORT REG_HOLDING_NREGS ;
-    USHORT usRegHoldStart ;
-    USHORT i ;
+	extern local_reg_st l_sys;
+	extern sys_reg_st g_sys;
+	extern conf_reg_map_st conf_reg_map_inst[];
+	eMBErrorCode eStatus = MB_ENOERR;
+	USHORT iRegIndex;
+	USHORT *pusRegHoldingBuf;
+	USHORT REG_HOLDING_START;
+	USHORT REG_HOLDING_NREGS;
+	USHORT usRegHoldStart;
+	USHORT i;
 
-		uint16              cmd_value;
-		uint16_t            temp = 0;
-		uint16_t            u16RegAddr = 0;
-	
-    pusRegHoldingBuf=cpad_usSRegHoldBuf ;
-    REG_HOLDING_START=CPAD_S_REG_HOLDING_START ;
-    REG_HOLDING_NREGS=CPAD_S_REG_HOLDING_NREGS ;
-    usRegHoldStart=cpad_usSRegHoldStart ;
-    //usAddress--;//FreeModbus功能函数中已经加1，为保证与缓冲区首地址一致，故减1
-    if((usAddress>=REG_HOLDING_START)&&
-    (usAddress+usNRegs<=REG_HOLDING_START+REG_HOLDING_NREGS))
-    {
-        iRegIndex=usAddress-usRegHoldStart ;
-        switch(eMode)
-        {
-            /* Pass current register values to the protocol stack. */
-            case CPAD_MB_REG_READ :
-            while(usNRegs>0)
-            {
-                cmd_value=mbs_read_reg(iRegIndex);
-                *pucRegBuffer++=(unsigned char)(cmd_value>>8);
-                *pucRegBuffer++=(unsigned char)(cmd_value&0xFF);
-                iRegIndex++;
-                usNRegs--;
-            }
-            break ;
-            
-            /* Update current register values with new values from the
+	uint16 cmd_value;
+	uint16_t temp = 0;
+	uint16_t u16RegAddr = 0;
+
+	pusRegHoldingBuf = cpad_usSRegHoldBuf;
+	REG_HOLDING_START = CPAD_S_REG_HOLDING_START;
+	REG_HOLDING_NREGS = CPAD_S_REG_HOLDING_NREGS;
+	usRegHoldStart = cpad_usSRegHoldStart;
+	//usAddress--;//FreeModbus功能函数中已经加1，为保证与缓冲区首地址一致，故减1
+	if ((usAddress >= REG_HOLDING_START) &&
+		(usAddress + usNRegs <= REG_HOLDING_START + REG_HOLDING_NREGS))
+	{
+		iRegIndex = usAddress - usRegHoldStart;
+		switch (eMode)
+		{
+		/* Pass current register values to the protocol stack. */
+		case CPAD_MB_REG_READ:
+			while (usNRegs > 0)
+			{
+				cmd_value = mbs_read_reg(iRegIndex);
+				*pucRegBuffer++ = (unsigned char)(cmd_value >> 8);
+				*pucRegBuffer++ = (unsigned char)(cmd_value & 0xFF);
+				iRegIndex++;
+				usNRegs--;
+			}
+			break;
+
+		/* Update current register values with new values from the
                          * protocol stack. */
-            case CPAD_MB_REG_SINGLE_WRITE :
-//						//forbid modbuss option power switch
-//						if((iRegIndex == 0)&&(g_sys.config.general.power_mode_mb_en ==0))
-//						{
-//								eStatus = MB_ENOREG;
-//								break;//	case MB_REG_WRITE:
-//						}
-            while( usNRegs > 0 )
-            {
-				
-						//超出可写范围报错判断
-								if ((usAddress + usNRegs) <= (REG_HOLDING_START+CPAD_REG_HOLDING_WRITE_NREGS))
+		case CPAD_MB_REG_SINGLE_WRITE:
+			//						//forbid modbuss option power switch
+			//						if((iRegIndex == 0)&&(g_sys.config.general.power_mode_mb_en ==0))
+			//						{
+			//								eStatus = MB_ENOREG;
+			//								break;//	case MB_REG_WRITE:
+			//						}
+			while (usNRegs > 0)
+			{
+
+				//超出可写范围报错判断
+				if ((usAddress + usNRegs) <= (REG_HOLDING_START + CPAD_REG_HOLDING_WRITE_NREGS))
+				{
+					if ((usAddress + usNRegs) >= (REG_HOLDING_START + CONFIG_REG_MAP_OFFSET + 1))
+					{
+						cmd_value = (*pucRegBuffer) << 8;
+						cmd_value += *(pucRegBuffer + 1);
+						//写入保持寄存器中同时跟新到内存和flash保存
+						// 写入寄存器和EEPROM中。
+						//  g_sys.status.general.TEST=0x5A;
+						u16RegAddr = iRegIndex - CONFIG_REG_MAP_OFFSET;
+						switch (u16RegAddr)
+						{
+						case FACTORY_RESET: //出厂设置
+						{
+							temp = cmd_value;
+							if (temp == 0x3C) //恢复原始参数
+							{
+								reset_runtime(0xFF); //清零所有运行时间
+								set_load_flag(0x02);
+								rt_thread_delay(1000);
+								NVIC_SystemReset();
+								return MB_ENOERR;
+							}
+							else if (temp == 0x5A) //恢复出厂设置
+							{
+								set_load_flag(0x01);
+								rt_thread_delay(1000);
+								NVIC_SystemReset();
+								return MB_ENOERR;
+							}
+							else if (temp == 0x69) //保存出厂设置
+							{
+								save_conf_reg(0x01);
+								rt_thread_delay(1000);
+								NVIC_SystemReset();
+								return MB_ENOERR;
+							}
+							else
+							{
+								eStatus = MB_ENORES;
+								break;
+							}
+						}
+						break;
+						case MANUAL_TSET: //测试模式
+						{
+							temp = cmd_value;
+							if (temp == MANUAL_TEST_UNABLE)
+							{
+								rt_thread_delay(500);
+								NVIC_SystemReset();
+								return MB_ENOERR;
+							}
+							else
+							{
+								if (reg_map_write(conf_reg_map_inst[iRegIndex - CONFIG_REG_MAP_OFFSET].id, &cmd_value, 1, USER_CPAD) == CPAD_ERR_NOERR)
 								{
-										
-										if((usAddress + usNRegs) >= (REG_HOLDING_START + CONFIG_REG_MAP_OFFSET+1))
-										{
-												cmd_value=(*pucRegBuffer) << 8;
-												cmd_value+=*(pucRegBuffer+1);
-												//写入保持寄存器中同时跟新到内存和flash保存
-												// 写入寄存器和EEPROM中。
-//																								g_sys.status.general.TEST=0x5A;		
-												u16RegAddr=iRegIndex-CONFIG_REG_MAP_OFFSET;
-												switch(u16RegAddr)
-												{
-													case FACTORY_RESET://出厂设置
-														{
-																temp = cmd_value;
-																if(temp == 0x3C)//恢复原始参数
-																{		
-																		reset_runtime(0xFF);//清零所有运行时间																	
-																		set_load_flag(0x02);													
-																		rt_thread_delay(1000);						
-																		NVIC_SystemReset();
-																		return MB_ENOERR;
-																}
-																else if(temp == 0x5A)//恢复出厂设置
-																{									
-																		set_load_flag(0x01);													
-																		rt_thread_delay(1000);						
-																		NVIC_SystemReset();
-																		return MB_ENOERR;
-																}
-																else if(temp == 0x69)//保存出厂设置
-																{									
-																		save_conf_reg(0x01);													
-																		rt_thread_delay(1000);						
-																		NVIC_SystemReset();
-																		return MB_ENOERR;
-																}
-																else
-																{
-																		eStatus = MB_ENORES;
-																		break;					
-																}	
-															}																
-														break;
-													case MANUAL_TSET://测试模式
-														{
-															temp = cmd_value;
-															if(temp==MANUAL_TEST_UNABLE)
-															{
-																	rt_thread_delay(500);						
-																	NVIC_SystemReset();
-																	return MB_ENOERR;																
-															}
-															else
-															{
-																	if(reg_map_write(conf_reg_map_inst[iRegIndex-CONFIG_REG_MAP_OFFSET].id,&cmd_value,1,USER_CPAD)
-																		==CPAD_ERR_NOERR)
-																	{
-																				iRegIndex++;
-																				usNRegs--;	
-																	}
-																	else
-																	{
-																		
-																		eStatus = MB_ENORES;
-																		break;//	 while( usNRegs > 0 )
-																	}	
-															}
-														}
-														break;														
-													case CLEAR_RT://清零部件运行时间
-														{
-															temp = cmd_value;
-															if(temp)//清零部件运行时间
-															{									
-																	reset_runtime(temp);
-																	return MB_ENOERR;
-															}
-															else
-															{
-																	eStatus = MB_ENORES;
-																	break;					
-															}	
-														}															
-														break;
-													case CLEAR_ALARM://清除告警
-														{
-															temp = cmd_value;
-															if(temp==0x5A)//清零部件运行时间
-															{									
-																	clear_alarm();
-																	return MB_ENOERR;
-															}
-															else
-															{
-																	eStatus = MB_ENORES;
-																	break;					
-															}
-														}
-														break;
-													case SET_TL://系统时间低位
-														{
-															temp = cmd_value;
-															if(temp!=NULL)//系统时间低位
-															{		
-																	l_sys.Set_Systime_Delay=SETTIME_DELAY;															
-																	l_sys.Set_Systime_Flag|=0x01;													
-																	g_sys.config.ComPara.u16Set_Time[0]=temp;
-																	return MB_ENOERR;
-															}
-															else
-															{
-																	eStatus = MB_ENORES;
-																	break;					
-															}	
-														}															
-														break;
-													case SET_TH://系统时间高位
-														{
-															temp = cmd_value;
-															if(temp!=NULL)//系统时间高位
-															{		
-																	l_sys.Set_Systime_Delay=SETTIME_DELAY;		
-																	l_sys.Set_Systime_Flag|=0x02;												
-																	g_sys.config.ComPara.u16Set_Time[1]=temp;
-																	return MB_ENOERR;
-															}
-															else
-															{
-																	eStatus = MB_ENORES;
-																	break;					
-															}
-														}
-														break;	
-													default:
-													{
-															if(reg_map_write(conf_reg_map_inst[iRegIndex-CONFIG_REG_MAP_OFFSET].id,&cmd_value,1,USER_CPAD)
-																==CPAD_ERR_NOERR)
-															{
-																		iRegIndex++;
-																		usNRegs--;	
-															}
-															else
-															{
-																
-																eStatus = MB_ENORES;
-																break;//	 while( usNRegs > 0 )
-															}			
-														}															
-														break;																												
-													}
-												}
-//												
-//												if(iRegIndex-CONFIG_REG_MAP_OFFSET == FACTORY_RESET)//出厂设置
-//												{
-//													temp = cmd_value;
-//													if(temp == 0x3C)//恢复原始参数
-//													{									
-//															set_load_flag(0x02);													
-//															rt_thread_delay(1000);						
-//															NVIC_SystemReset();
-//															return MB_ENOERR;
-//													}
-//													else if(temp == 0x5A)//恢复出厂设置
-//													{									
-//															set_load_flag(0x01);													
-//															rt_thread_delay(1000);						
-//															NVIC_SystemReset();
-//															return MB_ENOERR;
-//													}
-//													else if(temp == 0x69)//保存出厂设置
-//													{									
-//															save_conf_reg(0x01);													
-//															rt_thread_delay(1000);						
-//															NVIC_SystemReset();
-//															return MB_ENOERR;
-//													}
-//													else
-//													{
-//															eStatus = MB_ENORES;
-//															break;					
-//													}
-//												}
-//												else
-//												if(iRegIndex-CONFIG_REG_MAP_OFFSET == CLEAR_RT)//清零部件运行时间
-//												{
-//													temp = cmd_value;
-//													if(temp)//清零部件运行时间
-//													{									
-//															reset_runtime(temp);
-//															return MB_ENOERR;
-//													}
-//													else
-//													{
-//															eStatus = MB_ENORES;
-//															break;					
-//													}
-//												}
-//												else
-//												if(iRegIndex-CONFIG_REG_MAP_OFFSET == CLEAR_ALARM)//清除当前告警
-//												{
-//													temp = cmd_value;
-//													if(temp==0x5A)//清零部件运行时间
-//													{									
-//															clear_alarm();
-//															return MB_ENOERR;
-//													}
-//													else
-//													{
-//															eStatus = MB_ENORES;
-//															break;					
-//													}
-//												}
-//												else
-//												if(iRegIndex-CONFIG_REG_MAP_OFFSET == SET_TL)//系统时间低位
-//												{
-//													temp = cmd_value;
-//													if(temp!=NULL)//系统时间低位
-//													{		
-//															l_sys.Set_Systime_Delay=SETTIME_DELAY;															
-//															l_sys.Set_Systime_Flag|=0x01;													
-//															g_sys.config.ComPara.u16Set_Time[0]=temp;
-//															return MB_ENOERR;
-//													}
-//													else
-//													{
-//															eStatus = MB_ENORES;
-//															break;					
-//													}
-//												}
-//												else
-//												if(iRegIndex-CONFIG_REG_MAP_OFFSET == SET_TH)//系统时间高位
-//												{
-//													temp = cmd_value;
-//													if(temp!=NULL)//系统时间高位
-//													{		
-//															l_sys.Set_Systime_Delay=SETTIME_DELAY;		
-//															l_sys.Set_Systime_Flag|=0x02;												
-//															g_sys.config.ComPara.u16Set_Time[1]=temp;
-//															return MB_ENOERR;
-//													}
-//													else
-//													{
-//															eStatus = MB_ENORES;
-//															break;					
-//													}
-//												}
-//												else
-//												if(reg_map_write(conf_reg_map_inst[iRegIndex-CONFIG_REG_MAP_OFFSET].id,&cmd_value,1,USER_CPAD)
-//													==CPAD_ERR_NOERR)
-//												{
-//															iRegIndex++;
-//															usNRegs--;	
-//												}
-//												else
-//												{
-//													
-//													eStatus = MB_ENORES;
-//													break;//	 while( usNRegs > 0 )
-//												}
-//											}
-											else
-											{
-														pusRegHoldingBuf[iRegIndex] = *pucRegBuffer++ << 8;
-														pusRegHoldingBuf[iRegIndex] |= *pucRegBuffer++;
-														iRegIndex++;
-														usNRegs--;	
-											}	
+									iRegIndex++;
+									usNRegs--;
 								}
 								else
 								{
-										
-									eStatus = MB_ENOREG;
-										break;//  while( usNRegs > 0 )
+
+									eStatus = MB_ENORES;
+									break; //	 while( usNRegs > 0 )
 								}
-								
+							}
 						}
-            break ;
-            
-            case CPAD_MB_REG_MULTIPLE_WRITE :
-            //手操器分帧传输，一帧最大是16个寄存器
-            if((usNRegs>0)&&(usNRegs<=16))
-            {
-                //超出可写范围报错判断
-                if((usAddress+usNRegs)<=(REG_HOLDING_START+CPAD_REG_HOLDING_WRITE_NREGS))
-                {
-                    if((usAddress+usNRegs)>=(REG_HOLDING_START+CONFIG_REG_MAP_OFFSET+1))
-                    {
-                        for(i=0;i<usNRegs;i++)
-                        {
-                            cmd_value=(*pucRegBuffer)<<8 ;
-                            cmd_value+=*(pucRegBuffer+1);                           
-                            *(conf_reg_map_inst[usAddress-CONFIG_REG_MAP_OFFSET+i].reg_ptr)=cmd_value ;						
-                            pucRegBuffer+=2 ;
-                        }
-                        if(CONF_REG_MAP_NUM==(usAddress-CONFIG_REG_MAP_OFFSET+i))
-                        {
-                            rt_kprintf("modbus multiple write complete.\n");                            
-                            save_conf_reg(0);           //写入保持寄存器中同时跟新到内存和flash保存  // 写入寄存器和EEPROM中。
+						break;
+						case CLEAR_RT: //清零部件运行时间
+						{
+							temp = cmd_value;
+							if (temp) //清零部件运行时间
+							{
+								reset_runtime(temp);
+								return MB_ENOERR;
+							}
+							else
+							{
+								eStatus = MB_ENORES;
+								break;
+							}
 						}
-                    }
-                }
-                else 
-                {
-                    
-                    eStatus=MB_ENOREG ;
-                    break ;
-                }
-                
-            }
-            break ;
-        }
-    }
-    else 
-    {
-        eStatus=MB_ENOREG ;
-    }
-    return eStatus ;
+						break;
+						case CLEAR_ALARM: //清除告警
+						{
+							temp = cmd_value;
+							if (temp == 0x5A) //清零部件运行时间
+							{
+								clear_alarm();
+								return MB_ENOERR;
+							}
+							else
+							{
+								eStatus = MB_ENORES;
+								break;
+							}
+						}
+						break;
+						case SET_TL: //系统时间低位
+						{
+							temp = cmd_value;
+							if (temp != NULL) //系统时间低位
+							{
+								l_sys.Set_Systime_Delay = SETTIME_DELAY;
+								l_sys.Set_Systime_Flag |= 0x01;
+								g_sys.config.ComPara.u16Set_Time[0] = temp;
+								return MB_ENOERR;
+							}
+							else
+							{
+								eStatus = MB_ENORES;
+								break;
+							}
+						}
+						break;
+						case SET_TH: //系统时间高位
+						{
+							temp = cmd_value;
+							if (temp != NULL) //系统时间高位
+							{
+								l_sys.Set_Systime_Delay = SETTIME_DELAY;
+								l_sys.Set_Systime_Flag |= 0x02;
+								g_sys.config.ComPara.u16Set_Time[1] = temp;
+								return MB_ENOERR;
+							}
+							else
+							{
+								eStatus = MB_ENORES;
+								break;
+							}
+						}
+						break;
+						default:
+						{
+							if (reg_map_write(conf_reg_map_inst[iRegIndex - CONFIG_REG_MAP_OFFSET].id, &cmd_value, 1, USER_CPAD) == CPAD_ERR_NOERR)
+							{
+								iRegIndex++;
+								usNRegs--;
+							}
+							else
+							{
+
+								eStatus = MB_ENORES;
+								break; //	 while( usNRegs > 0 )
+							}
+						}
+						break;
+						}
+					}
+					// 	if (iRegIndex - CONFIG_REG_MAP_OFFSET == FACTORY_RESET) //出厂设置
+					// 	{
+					// 		temp = cmd_value;
+					// 		if (temp == 0x3C) //恢复原始参数
+					// 		{
+					// 			set_load_flag(0x02);
+					// 			rt_thread_delay(1000);
+					// 			NVIC_SystemReset();
+					// 			return MB_ENOERR;
+					// 		}
+					// 		else if (temp == 0x5A) //恢复出厂设置
+					// 		{
+					// 			set_load_flag(0x01);
+					// 			rt_thread_delay(1000);
+					// 			NVIC_SystemReset();
+					// 			return MB_ENOERR;
+					// 		}
+					// 		else if (temp == 0x69) //保存出厂设置
+					// 		{
+					// 			save_conf_reg(0x01);
+					// 			rt_thread_delay(1000);
+					// 			NVIC_SystemReset();
+					// 			return MB_ENOERR;
+					// 		}
+					// 		else
+					// 		{
+					// 			eStatus = MB_ENORES;
+					// 			break;
+					// 		}
+					// 	}
+					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == CLEAR_RT) //清零部件运行时间
+					// 	{
+					// 		temp = cmd_value;
+					// 		if (temp) //清零部件运行时间
+					// 		{
+					// 			reset_runtime(temp);
+					// 			return MB_ENOERR;
+					// 		}
+					// 		else
+					// 		{
+					// 			eStatus = MB_ENORES;
+					// 			break;
+					// 		}
+					// 	}
+					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == CLEAR_ALARM) //清除当前告警
+					// 	{
+					// 		temp = cmd_value;
+					// 		if (temp == 0x5A) //清零部件运行时间
+					// 		{
+					// 			clear_alarm();
+					// 			return MB_ENOERR;
+					// 		}
+					// 		else
+					// 		{
+					// 			eStatus = MB_ENORES;
+					// 			break;
+					// 		}
+					// 	}
+					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == SET_TL) //系统时间低位
+					// 	{
+					// 		temp = cmd_value;
+					// 		if (temp != NULL) //系统时间低位
+					// 		{
+					// 			l_sys.Set_Systime_Delay = SETTIME_DELAY;
+					// 			l_sys.Set_Systime_Flag |= 0x01;
+					// 			g_sys.config.ComPara.u16Set_Time[0] = temp;
+					// 			return MB_ENOERR;
+					// 		}
+					// 		else
+					// 		{
+					// 			eStatus = MB_ENORES;
+					// 			break;
+					// 		}
+					// 	}
+					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == SET_TH) //系统时间高位
+					// 	{
+					// 		temp = cmd_value;
+					// 		if (temp != NULL) //系统时间高位
+					// 		{
+					// 			l_sys.Set_Systime_Delay = SETTIME_DELAY;
+					// 			l_sys.Set_Systime_Flag |= 0x02;
+					// 			g_sys.config.ComPara.u16Set_Time[1] = temp;
+					// 			return MB_ENOERR;
+					// 		}
+					// 		else
+					// 		{
+					// 			eStatus = MB_ENORES;
+					// 			break;
+					// 		}
+					// 	}
+					// 	else if (reg_map_write(conf_reg_map_inst[iRegIndex - CONFIG_REG_MAP_OFFSET].id, &cmd_value, 1, USER_CPAD) == CPAD_ERR_NOERR)
+					// 	{
+					// 		iRegIndex++;
+					// 		usNRegs--;
+					// 	}
+					// 	else
+					// 	{
+
+					// 		eStatus = MB_ENORES;
+					// 		break; //	 while( usNRegs > 0 )
+					// 	}
+					// }
+					else
+					{
+						pusRegHoldingBuf[iRegIndex] = *pucRegBuffer++ << 8;
+						pusRegHoldingBuf[iRegIndex] |= *pucRegBuffer++;
+						iRegIndex++;
+						usNRegs--;
+					}
+				}
+				else
+				{
+
+					eStatus = MB_ENOREG;
+					break; //  while( usNRegs > 0 )
+				}
+			}
+			break;
+
+		case CPAD_MB_REG_MULTIPLE_WRITE:
+			//手操器分帧传输，一帧最大是16个寄存器
+			if ((usNRegs > 0) && (usNRegs <= 100))
+			{
+				//超出可写范围报错判断
+				if ((usAddress + usNRegs) <= (REG_HOLDING_START + CPAD_REG_HOLDING_WRITE_NREGS))
+				{
+					if ((usAddress + usNRegs) >= (REG_HOLDING_START + CONFIG_REG_MAP_OFFSET + 1))
+					{
+						for (i = 0; i < usNRegs; i++)
+						{
+							cmd_value = (*pucRegBuffer) << 8;
+							cmd_value += *(pucRegBuffer + 1);
+							*(conf_reg_map_inst[usAddress - CONFIG_REG_MAP_OFFSET + i].reg_ptr) = cmd_value;
+							pucRegBuffer += 2;
+						}
+						if (CONF_REG_MAP_NUM == (usAddress - CONFIG_REG_MAP_OFFSET + i))
+						{
+							rt_kprintf("modbus multiple write complete.\n");
+							save_conf_reg(0); //写入保持寄存器中同时跟新到内存和flash保存  // 写入寄存器和EEPROM中。
+						}
+					}
+				}
+				else
+				{
+					rt_kprintf("CPAD_MB_REG_MULTIPLE_WRITE 数量过多 failed\n");
+					eStatus = MB_ENOREG;
+					break;
+				}
+			}
+			break;
+		}
+	}
+	else
+	{
+		eStatus = MB_ENOREG;
+	}
+	return eStatus;
 }
-
-
-
 
 static uint16_t mbs_read_reg(uint16_t read_addr)
 {
-		extern	conf_reg_map_st conf_reg_map_inst[];
-		extern  sts_reg_map_st status_reg_map_inst[];
-		if(read_addr<CMD_REG_SIZE)
-		{
-				return(cpad_usSRegHoldBuf[read_addr]);
-		}
-		else if((CMD_REG_SIZE<=read_addr)&&(read_addr<(CONF_REG_MAP_NUM+CMD_REG_SIZE)))
-		{
-			 return(*(conf_reg_map_inst[read_addr-CMD_REG_SIZE].reg_ptr));
-		}
-		else if((STATUS_REG_MAP_OFFSET<=read_addr)&&(read_addr<( STATUS_REG_MAP_OFFSET+STATUS_REG_MAP_NUM)))
-		{
-			 return(*(status_reg_map_inst[read_addr-STATUS_REG_MAP_OFFSET].reg_ptr));	
-		}
-		else 
-		{
-				return(0x7fff);
-		}
+	extern conf_reg_map_st conf_reg_map_inst[];
+	extern sts_reg_map_st status_reg_map_inst[];
+	if (read_addr < CMD_REG_SIZE)
+	{
+		return (cpad_usSRegHoldBuf[read_addr]);
+	}
+	else if ((CMD_REG_SIZE <= read_addr) && (read_addr < (CONF_REG_MAP_NUM + CMD_REG_SIZE)))
+	{
+		return (*(conf_reg_map_inst[read_addr - CMD_REG_SIZE].reg_ptr));
+	}
+	else if ((STATUS_REG_MAP_OFFSET <= read_addr) && (read_addr < (STATUS_REG_MAP_OFFSET + STATUS_REG_MAP_NUM)))
+	{
+		return (*(status_reg_map_inst[read_addr - STATUS_REG_MAP_OFFSET].reg_ptr));
+	}
+	else
+	{
+		return (0x7fff);
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

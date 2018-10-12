@@ -15,6 +15,10 @@
 #include "dio_bsp.h"
 //configuration parameters
 
+#ifndef var_log
+#define var_log(N, ...) rt_kprintf("####[var %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#endif /* at_log(...) */
+
 typedef enum
 {
 	INIT_LOAD_USR = 0,
@@ -846,7 +850,7 @@ uint16 reg_map_write(uint16 reg_addr, uint16 *wr_data, uint8_t wr_cnt, uint16 Us
 	{
 		err_code = CPAD_ERR_ADDR_OR;
 		//			rt_kprintf("MB_SLAVE CPAD_ERR_ADDR_OR1 failed\n");
-		rt_kprintf("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
+		var_log("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
 		return err_code;
 	}
 	//			g_sys.status.general.TEST|=0x02;
@@ -857,7 +861,7 @@ uint16 reg_map_write(uint16 reg_addr, uint16 *wr_data, uint8_t wr_cnt, uint16 Us
 		{
 			err_code = CPAD_ERR_PERM_OR;
 			//					rt_kprintf("CPAD_ERR_PERM_OR1 failed\n");
-			rt_kprintf("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
+			var_log("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
 			return err_code;
 		}
 	}
@@ -868,7 +872,7 @@ uint16 reg_map_write(uint16 reg_addr, uint16 *wr_data, uint8_t wr_cnt, uint16 Us
 		{
 			err_code = CPAD_ERR_WR_OR;
 			//					rt_kprintf("CPAD_ERR_WR_OR02 failed\n");
-			rt_kprintf("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
+			var_log("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
 			return err_code;
 		}
 	}
@@ -879,7 +883,7 @@ uint16 reg_map_write(uint16 reg_addr, uint16 *wr_data, uint8_t wr_cnt, uint16 Us
 		{
 			err_code = CPAD_ERR_DATA_OR;
 			//						rt_kprintf("CPAD_ERR_WR_OR03 failed\n");
-			rt_kprintf("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
+			var_log("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
 			return err_code;
 		}
 
@@ -889,7 +893,7 @@ uint16 reg_map_write(uint16 reg_addr, uint16 *wr_data, uint8_t wr_cnt, uint16 Us
 			{
 				err_code = CPAD_ERR_CONFLICT_OR;
 				//								rt_kprintf("CHK_PTR:CPAD_ERR_WR_OR failed\n");
-				rt_kprintf("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
+				var_log("err_code=%d,User_ID=%d,reg_addr=%d,wr_data=%d\n", err_code, User_ID, reg_addr, *wr_data);
 				return err_code;
 			}
 		}
@@ -901,7 +905,7 @@ uint16 reg_map_write(uint16 reg_addr, uint16 *wr_data, uint8_t wr_cnt, uint16 Us
 		ee_wr_data = *(wr_data + i);								 //buffer current write data
 		*(conf_reg_map_inst[reg_addr + i].reg_ptr) = *(wr_data + i); //write data to designated register
 																	 //						g_sys.status.general.TEST|=0x10;
-		rt_kprintf("ee_rd_data=%d,ee_wr_data=%X\n,", ee_rd_data, ee_wr_data);
+		var_log("ee_rd_data=%d,ee_wr_data=%X\n,", ee_rd_data, ee_wr_data);
 		//空调写标识
 		//				if(User_ID == USER_CPAD)
 		//				{
