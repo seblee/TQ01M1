@@ -1237,6 +1237,11 @@
               <FileType>1</FileType>
               <FilePath>.\sim7600\SIM_COM\SIMCOM_USER.c</FilePath>
             </File>
+            <File>
+              <FileName>SIMCOM_GPRS.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\sim7600\SIM_COM\SIMCOM_GPRS.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

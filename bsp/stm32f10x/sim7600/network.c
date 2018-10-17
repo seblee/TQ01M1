@@ -20,6 +20,7 @@
 #include "cJSON.h"
 #include "utils_md5.h"
 #include "disguise_time.h"
+#include "SIMCOM_AT.h"
 /* Private typedef -----------------------------------------------------------*/
 struct rx_msg
 {
@@ -70,6 +71,7 @@ iot_topic_param_t iot_topics[] = {
 iotx_device_info_t device_info;
 iotx_conn_info_t device_connect;
 MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
+SIMCOM_HANDLE g_SIMCOM_Handle; //SIMCOM通信模块句柄
 /* Private functions ---------------------------------------------------------*/
 
 /* 数据到达回调函数*/
@@ -107,6 +109,7 @@ void sim7600_thread_entry(void *parameter)
     get_bulid_date_time(&ti);
     current_systime_set(&ti);
     rt_thread_delay(SIM7600_THREAD_DELAY);
+    device_connect.style = IOT_4G_MODE;
 
     network_log("priject build time:%04d-%02d-%d %02d:%02d:%02d", ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
     write_device = rt_device_find("uart3");
@@ -115,15 +118,16 @@ void sim7600_thread_entry(void *parameter)
         rt_device_set_rx_indicate(write_device, uart_input);
         rt_device_open(write_device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);
     }
-    result = at_wifi_init(write_device);
-    //   result = at_4g_init(write_device);
+    if (device_connect.style == IOT_WIFI_MODE)
+        result = at_wifi_init(write_device);
+    else if (device_connect.style == IOT_4G_MODE)
+        result = at_4g_init(write_device);
     mqtt_client_init(write_device);
     network_log("mqtt_client_init done");
 
     transport_open(write_device, &device_connect);
     mqtt_client_connect(write_device, &client_con);
     result = mqtt_client_subscribe_topics();
-
     // transport_close(write_device);
     network_get_interval(&realtime_interval, &timing_interval);
 

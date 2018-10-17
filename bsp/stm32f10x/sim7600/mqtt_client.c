@@ -86,15 +86,21 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
                 "%s",
                 guider_sign);
     // mqtt_log("password:%s", conn->password);
-
-    rt_snprintf(conn->client_id, sizeof(conn->client_id),
-                "%s"
-                "|securemode=%d"
-                ",signmethod=%s"
-                "|",
-                device_info->device_id, SECURE_TCP, MD5_METHOD);
+    if (conn->style == IOT_WIFI_MODE)
+        rt_snprintf(conn->client_id, sizeof(conn->client_id),
+                    "%s"
+                    "|securemode=%d"
+                    ",signmethod=%s"
+                    "|",
+                    device_info->device_id, SECURE_TCP, MD5_METHOD);
+    else if (conn->style == IOT_4G_MODE)
+        rt_snprintf(conn->client_id, sizeof(conn->client_id),
+                    "%s"
+                    "|securemode=%d"
+                    ",signmethod=%s"
+                    "|",
+                    device_info->device_id, SECURE_TCP, MD5_METHOD);
     // mqtt_log("client_id:%s", conn->client_id);
-    conn->style = IOT_4G_MODE;
 }
 
 int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn)
@@ -197,12 +203,12 @@ rt_err_t mqtt_client_subscribe_topics(void)
 {
     rt_err_t rc;
     rt_thread_delay(1000);
-    /*******TQ_WATER_NOTICE********/
+    /*******WATER_NOTICE********/
     rc = mqtt_client_subscribe(WATER_NOTICE, &device_info);
     if (rc != RT_EOK)
     {
-        mqtt_log("TOPIC_WATER_NOTICE,RT_ERROR:%d", rc);
-        goto exit;
+        mqtt_log("WATER_NOTICE,RT_ERROR:%d", rc);
+        // goto exit;
     }
     //rt_thread_delay(1000);
     /*******PARAMETER_SET********/
@@ -210,7 +216,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
     if (rc != RT_EOK)
     {
         mqtt_log("PARAMETER_SET,RT_ERROR:%d", rc);
-        goto exit;
+        // goto exit;
     }
     //rt_thread_delay(1000);
     /*******PARAMETER_GET********/
@@ -218,16 +224,9 @@ rt_err_t mqtt_client_subscribe_topics(void)
     if (rc != RT_EOK)
     {
         mqtt_log("PARAMETER_GET,RT_ERROR:%d", rc);
-        goto exit;
+        // goto exit;
     }
-    //rt_thread_delay(1000);
-    /*******TOPIC_WATER_NOTICE********/
-    // rc = mqtt_client_subscribe(DEVICE_UPGRADE, &device_info);
-    // if (rc != RT_EOK)
-    // {
-    //     mqtt_log("DEVICE_UPGRADE,RT_ERROR:%d", rc);
-    //     goto exit;
-    // }
+
     //rt_thread_delay(1000);
     /*******DEVICE_UPGRADE********/
     // rc = mqtt_client_subscribe(DEVICE_UPGRADE, &device_info);

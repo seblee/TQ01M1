@@ -128,8 +128,6 @@ const char Gsm_cmd_Turn_Off[] = {"AT+CPOWD=1\r\n"}; //关模块命令
 
 /*---------------------------------------------------------------*/
 
-SIMCOM_HANDLE g_SIMCOM_Handle; //SIMCOM通信模块句柄
-
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/

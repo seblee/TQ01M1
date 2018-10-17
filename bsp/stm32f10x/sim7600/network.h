@@ -19,6 +19,7 @@
 #include <rtthread.h>
 #include "board.h"
 #include "MQTTPacket.h"
+#include "SIMCOM.h"
 /* Private define ------------------------------------------------------------*/
 /* From device.h */
 #define PRODUCT_KEY_LEN (20)
@@ -134,6 +135,7 @@ extern MQTTPacket_connectData client_con;
 
 extern iot_topic_param_t iot_topics[];
 
+extern SIMCOM_HANDLE g_SIMCOM_Handle;
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
