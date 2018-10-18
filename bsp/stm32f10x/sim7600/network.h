@@ -26,6 +26,7 @@
 #define DEVICE_NAME_LEN (32)
 #define DEVICE_ID_LEN (64)
 #define DEVICE_SECRET_LEN (64)
+#define DEVICE_INFO_FLAG ((rt_uint16_t)0xA5A5)
 
 #define MODULE_VENDOR_ID (32) /* Partner ID */
 
@@ -68,6 +69,7 @@
 /* Private typedef -----------------------------------------------------------*/
 typedef struct
 {
+    rt_uint16_t flag;
     char product_key[PRODUCT_KEY_LEN + 1];
     char device_name[DEVICE_NAME_LEN + 1];
     char device_id[DEVICE_ID_LEN + 1];
@@ -97,6 +99,7 @@ typedef struct
     int qos;
     rt_uint8_t restained;
 } iot_topic_param_t;
+
 typedef enum
 {
     IOT_POWERON = 0,
@@ -157,6 +160,9 @@ rt_err_t network_parameter_get_parse(const char *Str);
 
 rt_err_t network_parameter_set_parse(const char *Str);
 
+rt_err_t network_get_register(void);
+
+rt_err_t network_register_parse(const char *Str, iotx_device_info_t *device_info);
 /*----------------------------------------------------------------------------*/
 
 #endif

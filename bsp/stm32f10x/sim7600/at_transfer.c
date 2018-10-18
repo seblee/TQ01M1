@@ -30,12 +30,13 @@ const char *const AT_COMMAND[] = {
     "CIPMODE", /*{"CIPMODE"}*/
     "CWMODE_DEF",
     "CWAUTOCONN",
+    "CIPSEND",
 };
 
 const char AT_WIFI_SYNC[] = {"AT\r\n"};
 const char AT_WIFI_STATUS[] = {"AT+CIPSTATUS\r\n"};
 const char AT_WIFI_SET_SSL_BUFF_SIZE[] = {"AT+CIPSSLSIZE=4096\r\n"};
-const char AT_WIFI_CONNECT_SSL[] = {"AT+CIPSTART"};
+const char AT_WIFI_CIPSTART[] = {"AT+CIPSTART"};
 const char AT_WIFI_CWJAP_DEF[] = {"AT+CWJAP_DEF=\"Cloudwater\",\"tqcd2018\"\r\n"};
 const char AT_WIFI_CIPSEND[] = {"AT+CIPSEND\r\n"};
 const char AT_WIFI_CIPCLOSE[] = {"AT+CIPCLOSE\r\n"};
@@ -134,7 +135,7 @@ const char Gsm_cmd_Turn_Off[] = {"AT+CPOWD=1\r\n"}; //关模块命令
 
 /*----------------------------------------------------------------------------*/
 /****test AT************/
-rt_err_t at_wifi_send_message_ack_ok(rt_device_t dev, const char *AT_command)
+rt_err_t at_wifi_send_message_ack(rt_device_t dev, const char *AT_command, const char *pKeyword)
 {
     rt_err_t err = RT_ERROR;
     char *message = RT_NULL;
@@ -143,7 +144,7 @@ rt_err_t at_wifi_send_message_ack_ok(rt_device_t dev, const char *AT_command)
     if (message)
     {
         at_log("message:%s", message);
-        char *wifi_status = rt_strstr(message, AT_WIFI_ACK_OK);
+        char *wifi_status = rt_strstr(message, pKeyword);
         if (wifi_status != RT_NULL)
             err = RT_EOK;
         else
@@ -177,35 +178,49 @@ rt_err_t at_wifi_get_cipstatus(rt_device_t dev)
     }
     return err;
 }
-rt_err_t at_wifi_connect_ssl(rt_device_t dev, char *host, int port)
+rt_err_t at_wifi_CIPSTART(rt_device_t dev, __wifi_remote_t type, char *host, int port)
 {
     rt_err_t err = RT_ERROR;
     char send_buffer[100] = {0};
-    rt_sprintf(send_buffer, "%s=\"TCP\",\"%s\",%d,10\r\n", AT_WIFI_CONNECT_SSL, host, port);
-    err = at_wifi_send_message_ack_ok(dev, send_buffer);
+
+    switch (type)
+    {
+    case REMOTE_TCP:
+        rt_sprintf(send_buffer, "%s=\"TCP\",\"%s\",%d,10\r\n", AT_WIFI_CIPSTART, host, port);
+        break;
+    case REMOTE_UDP:
+        rt_sprintf(send_buffer, "%s=\"UDP\",\"%s\",%d,10\r\n", AT_WIFI_CIPSTART, host, port);
+        break;
+    case REMOTE_SSL:
+        rt_sprintf(send_buffer, "%s=\"SSL\",\"%s\",%d,10\r\n", AT_WIFI_CIPSTART, host, port);
+        break;
+    default:
+        break;
+    }
+    err = at_wifi_send_message_ack(dev, send_buffer, "OK");
     at_log("receive ok err:%ld", err);
     if (err == RT_EOK)
         return err;
-    err = at_wifi_send_message_ack_ok(dev, RT_NULL);
+    err = at_wifi_send_message_ack(dev, RT_NULL, "OK");
 
     return err;
 }
 
 /**
  ****************************************************************************
-* @Function : rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev)
+* @Function : rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev, rt_uint8_t value)
  * @File     : at_transfer.c
  * @Program  : none
  * @Created  : 2018-09-12 by seblee
  * @Brief    : CIPMODE=1
  * @Version  : V1.0
 **/
-rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev)
+rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev, rt_uint8_t value)
 {
     char sendbuf[20] = {0};
     /*AT+CIPMODE=1*/
-    rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CIPMODE][0], 1);
-    return at_wifi_send_message_ack_ok(dev, sendbuf);
+    rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CIPMODE][0], value);
+    return at_wifi_send_message_ack(dev, sendbuf, "OK");
 }
 
 /**
@@ -245,7 +260,7 @@ rt_err_t at_wifi_init(rt_device_t dev)
     SIM7600_DIR_WIFI;
     /****SYNC AT************/
 SYNC_AT:
-    if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SYNC) != RT_EOK)
+    if (at_wifi_send_message_ack(dev, AT_WIFI_SYNC, "OK") != RT_EOK)
     {
         at_log("SYNC AT err");
         rt_thread_delay(2000);
@@ -264,20 +279,20 @@ SYNC_AT:
     {
         char sendbuf[20] = {0};
         rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CWMODE_DEF][0], 1);
-        err = at_wifi_send_message_ack_ok(dev, sendbuf);
+        err = at_wifi_send_message_ack(dev, sendbuf, "OK");
         at_log("CWMODE_DEF=1 err:%d", err);
 
         rt_sprintf(sendbuf, "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CWAUTOCONN][0], 1);
-        err = at_wifi_send_message_ack_ok(dev, sendbuf);
+        err = at_wifi_send_message_ack(dev, sendbuf, "OK");
         at_log("CWAUTOCONN=1 err:%d", err);
 
-        err = at_wifi_send_message_ack_ok(dev, AT_WIFI_CWJAP_DEF);
+        err = at_wifi_send_message_ack(dev, AT_WIFI_CWJAP_DEF, "OK");
         at_log("CWAUTOCONN=1 err:%d", err);
-        at_wifi_send_message_ack_ok(dev, RT_NULL);
+        at_wifi_send_message_ack(dev, RT_NULL, "OK");
     }
     if (err == 3)
     {
-        if (at_wifi_send_message_ack_ok(dev, AT_WIFI_CIPCLOSE) != RT_EOK)
+        if (at_wifi_send_message_ack(dev, AT_WIFI_CIPCLOSE, "OK") != RT_EOK)
         {
             at_log("AT_WIFI_CIPCLOSE err");
             return RT_ERROR;
@@ -288,7 +303,7 @@ SYNC_AT:
         /**add wifi connect code**/
     }
     /****Set wifi ssl buff************/
-    if (at_wifi_send_message_ack_ok(dev, AT_WIFI_SET_SSL_BUFF_SIZE) != RT_EOK)
+    if (at_wifi_send_message_ack(dev, AT_WIFI_SET_SSL_BUFF_SIZE, "OK") != RT_EOK)
     {
         at_log("AT_WIFI_SET_SSL_BUFF_SIZE err");
         return RT_ERROR;
@@ -358,5 +373,181 @@ rt_err_t at_4g_init(rt_device_t dev)
     else
         err = RT_EOK;
 
+    return err;
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_err_t at_wifi_https(rt_device_t dev, char *host, int port, char *request, char **response)
+ * @File     : at_transfer.c
+ * @Program  : none
+ * @Created  : 2018-10-17 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+rt_err_t at_wifi_https(rt_device_t dev, char *host, int port, char *request, char **response)
+{
+    rt_err_t err;
+    char sendbuf[200] = {0};
+    char *message = RT_NULL;
+    rt_uint8_t retry = 3;
+    /*****check wifi state****************/
+    err = at_wifi_get_cipstatus(dev);
+    at_log("err:%d", err);
+    err = at_wifi_CIPSTART(dev, REMOTE_SSL, host, port);
+    at_log("connect_ssl err:%d", err);
+    err = at_wifi_set_CIPMODE_mode(dev, 0);
+    at_log("connect_ssl err:%d", err);
+    if (err != RT_EOK)
+        goto exit;
+    rt_snprintf(sendbuf, sizeof(sendbuf), "%s+%s=%d\r\n", AT_HEADER, &AT_COMMAND[CIPSEND][0], strlen(request));
+    at_log("CIPSEND:%s", sendbuf);
+    err = at_wifi_send_message_ack(dev, sendbuf, ">");
+    if (RT_EOK != RT_EOK)
+        goto exit;
+    err = network_send_message(dev, request, (rt_uint8_t **)&message);
+    if (message)
+    {
+        at_log("message %s", message);
+        if (rt_strstr(message, "SEND OK") == RT_NULL)
+        {
+            err = -RT_ERROR;
+            goto exit;
+        }
+    }
+    else
+    {
+        at_log("message %s", message);
+        err = -RT_ERROR;
+        goto exit;
+    }
+    if (rt_strstr(message, AT_WIFI_REMOTE_REC) != RT_NULL)
+        goto parser_data;
+    rt_free(message);
+    message = RT_NULL;
+    do
+    {
+        err = network_send_message(dev, RT_NULL, (rt_uint8_t **)&message);
+        at_log("leng %s", err);
+        if (message)
+        {
+            if (rt_strstr(message, AT_WIFI_REMOTE_REC))
+                goto parser_data;
+            rt_free(message);
+            message = RT_NULL;
+        }
+        retry--;
+    } while (retry);
+    if (retry == 0)
+    {
+        err = -RT_ERROR;
+        goto exit;
+    }
+
+parser_data:
+    err = RT_EOK;
+    if (response)
+        *response = message;
+    else
+        rt_free(message);
+exit:
+    at_wifi_send_message_ack(dev, AT_WIFI_CIPCLOSE, "OK");
+    return err;
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_err_t at_wifi_https(rt_device_t dev, char *host, int port, char *request, char **response)
+ * @File     : at_transfer.c
+ * @Program  : none
+ * @Created  : 2018-10-17 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+rt_err_t at_4g_https(SIMCOM_HANDLE *pHandle, char *host, int port, char *request, char **response)
+{
+    rt_err_t err;
+    char sendbuf[200] = {0};
+    char *message = RT_NULL;
+    bool result;
+    /*****check 4G state****************/
+    if (pHandle->s_isInitStatus != TRUE)
+    {
+        err = -RT_ERROR;
+        goto exit;
+    }
+    //+CHTTPSSTART: 0
+    result = SIMCOM_COMMAND_ACK(pHandle, "AT+CHTTPSSTART", "OK", "+CHTTPSSTART: ", &err);
+    if (result == TRUE)
+    {
+        at_log("CHTTPSSTART err:%d", err);
+        if (err != 0)
+        {
+            err = -RT_ERROR;
+            goto exit;
+        }
+    }
+    else
+    {
+        at_log("AT+CHTTPSSTART err");
+        err = -RT_ERROR;
+        goto exit;
+    }
+    rt_snprintf(sendbuf, sizeof(sendbuf), "AT+CHTTPSOPSE=\"%s\",%d,2", host, port);
+    //+CHTTPSOPSE: 0
+    result = SIMCOM_COMMAND_ACK(pHandle, sendbuf, "OK", "+CHTTPSOPSE: ", &err);
+    if (result == TRUE)
+    {
+        at_log("CHTTPSOPSE err:%d", err);
+        if (err != 0)
+        {
+            err = -RT_ERROR;
+            goto exit;
+        }
+    }
+    else
+    {
+        at_log("AT+CHTTPSOPSE err");
+        err = -RT_ERROR;
+        goto exit;
+    }
+    rt_snprintf(sendbuf, sizeof(sendbuf), "AT+CHTTPSSEND=%d", rt_strlen(request));
+    //+CHTTPSOPSE: 0
+    result = SIMCOM_COMMAND_ACK(pHandle, sendbuf, ">", RT_NULL, &err);
+    if (result = TRUE)
+    {
+        at_log("CHTTPSOPSE err:%d", err);
+        if (err != 0)
+        {
+            err = -RT_ERROR;
+            goto exit;
+        }
+    }
+    else
+    {
+        at_log("AT+CHTTPSSEND err");
+        err = -RT_ERROR;
+        goto exit;
+    }
+    rt_snprintf(sendbuf, sizeof(sendbuf), "AT+CHTTPSSEND=%d", rt_strlen(request));
+    //+CHTTPSOPSE: 0
+    result = SIMCOM_COMMAND_ACK(pHandle, request, "OK", "+CHTTPSSEND: ", &err);
+    if (result = TRUE)
+    {
+        at_log("+CHTTPSSEND:%d", err);
+        if (err != 0)
+        {
+            err = -RT_ERROR;
+            goto exit;
+        }
+    }
+    else
+    {
+        at_log("AT+CHTTPSSEND err");
+        err = -RT_ERROR;
+        goto exit;
+    }
+
+exit:
     return err;
 }

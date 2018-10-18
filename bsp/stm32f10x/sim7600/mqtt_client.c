@@ -59,14 +59,6 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
     char guider_sign[GUIDER_SIGN_LEN] = {0};
     char hmac_source[512] = {0};
 
-    utils_hmac_md5("deviceNameTQ_Client01productKeya12Ou4Hjw3Mrandom567345", strlen("deviceNameTQ_Client01productKeya12Ou4Hjw3Mrandom567345"),
-                   guider_sign,
-                   "tJj4mDlfDK6hn5JU",
-                   strlen("tJj4mDlfDK6hn5JU"));
-    mqtt_log("scr:%s", "deviceNameTQ_Client01productKeya12Ou4Hjw3Mrandom567345");
-    mqtt_log("secret:%s", "tJj4mDlfDK6hn5JU");
-    mqtt_log("sign:%s", guider_sign);
-
     conn->port = aliyun_iot_port;
     rt_snprintf(conn->host_name, sizeof(conn->host_name), aliyun_domain, device_info->product_key);
     rt_snprintf(conn->username, sizeof(conn->username), "%s&%s", device_info->device_name, device_info->product_key);
@@ -224,7 +216,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
     if (rc != RT_EOK)
     {
         mqtt_log("PARAMETER_GET,RT_ERROR:%d", rc);
-        // goto exit;
+        goto exit;
     }
 
     //rt_thread_delay(1000);

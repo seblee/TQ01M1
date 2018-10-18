@@ -21,6 +21,7 @@
 #include "utils_md5.h"
 #include "disguise_time.h"
 #include "SIMCOM_AT.h"
+#include "utils_hmac.h"
 /* Private typedef -----------------------------------------------------------*/
 struct rx_msg
 {
@@ -109,7 +110,7 @@ void sim7600_thread_entry(void *parameter)
     get_bulid_date_time(&ti);
     current_systime_set(&ti);
     rt_thread_delay(SIM7600_THREAD_DELAY);
-    device_connect.style = IOT_4G_MODE;
+    device_connect.style = IOT_WIFI_MODE;
 
     network_log("priject build time:%04d-%02d-%d %02d:%02d:%02d", ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
     write_device = rt_device_find("uart3");
@@ -122,6 +123,9 @@ void sim7600_thread_entry(void *parameter)
         result = at_wifi_init(write_device);
     else if (device_connect.style == IOT_4G_MODE)
         result = at_4g_init(write_device);
+
+    network_get_register();
+
     mqtt_client_init(write_device);
     network_log("mqtt_client_init done");
 
@@ -201,6 +205,7 @@ rt_uint32_t network_send_message(rt_device_t dev, const char *senddata, rt_uint8
     struct rx_msg msg;
     rt_err_t result = RT_EOK;
     rt_uint32_t rx_length;
+    rt_uint8_t *p;
     if (senddata)
         rt_device_write(dev, 0, senddata, strlen(senddata));
 
@@ -218,17 +223,21 @@ rt_uint32_t network_send_message(rt_device_t dev, const char *senddata, rt_uint8
             timeout = 100;
             rx_length = msg.size;
             if (*data == RT_NULL)
-                *data = (rt_uint8_t *)rt_calloc(rx_length + 1, sizeof(rt_uint8_t));
+                p = (rt_uint8_t *)rt_calloc(rx_length + 1, sizeof(rt_uint8_t));
             else
-                *data = (rt_uint8_t *)rt_realloc(*data, rx_length + count + 1);
-            if (*data == RT_NULL)
+                p = (rt_uint8_t *)rt_realloc(*data, rx_length + count + 1);
+
+            if (p == RT_NULL)
                 goto exit;
+            *data = p;
             rx_length = rt_device_read(msg.dev, 0, (*data + count), rx_length);
             count += rx_length;
         }
         if (result == -RT_ETIMEOUT)
             break;
     }
+    if ((count != 0) && (*data != RT_NULL))
+        *(*data + count) = 0;
     return count;
 exit:
     rt_kprintf("err count:%d\r\n", count);
@@ -696,6 +705,163 @@ rt_err_t network_parameter_set_parse(const char *Str)
             rc = -RT_ERROR;
     }
 
+    if (root)
+        cJSON_Delete(root);
+    return rc;
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_err_t network_get_register(void)
+ * @File     : network.c
+ * @Program  : none
+ * @Created  : 2018-10-17 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+rt_err_t network_get_register(void)
+{
+    rt_err_t err;
+    char *rec = RT_NULL;
+    char guider_sign[256] = {0};
+    char request[512] = {0};
+
+    rt_snprintf(request, sizeof(request),
+                "deviceName%sproductKey%srandom567345",
+                REGISTER_DEVICE_NAME, REGISTER_PRODUCT_KEY);
+    network_log("scr:%s", request);
+    utils_hmac_md5(request, strlen(request),
+                   guider_sign,
+                   REGISTER_PRODUCT_SECRET,
+                   strlen(REGISTER_PRODUCT_SECRET));
+    network_log("sign:%s", guider_sign);
+    rt_snprintf((char *)write_buffer, sizeof(write_buffer),
+                "productKey=%s&deviceName=%s&random=567345&sign=%s&signMethod=HmacMD5",
+                REGISTER_PRODUCT_KEY, REGISTER_DEVICE_NAME, guider_sign);
+    network_log("body:%s", write_buffer);
+
+    rt_snprintf(request, sizeof(request),
+                "POST %s HTTP/1.1\r\n"
+                "Host: %s\r\n"
+                "Content-Type: application/x-www-form-urlencoded\r\n"
+                "Content-Length: %d\r\n"
+                "\r\n"
+                "%s",
+                REGISTER_PATH, REGISTER_HOST, strlen((char *)write_buffer), write_buffer);
+    network_log("request:%s", request);
+
+    if (device_connect.style == IOT_WIFI_MODE)
+    {
+        err = at_wifi_https(write_device, REGISTER_HOST, REGISTER_PORT, request, &rec);
+        if (err == RT_EOK)
+        {
+            if (rec)
+            {
+                char *response = rt_strstr(rec, AT_WIFI_REMOTE_REC);
+                if (response)
+                {
+                    char *body = rt_strstr(response, "\r\n\r\n");
+                    if (body)
+                    {
+                        body += 4;
+                        network_register_parse((const char *)body, &device_info);
+                    }
+                }
+                rt_free(rec);
+            }
+        }
+    }
+    if (device_connect.style == IOT_4G_MODE)
+    {
+    }
+    network_log("response:%s", rec);
+    return err;
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_err_t network_register_parse(const char *Str, iotx_device_info_t *dev_info)
+ * @File     : network.c
+ * @Program  : Str:in put json
+ * @Created  : 2018-10-18 by seblee
+ * @Brief    : parse register_json data
+ * @Version  : V1.0
+**/
+rt_err_t network_register_parse(const char *Str, iotx_device_info_t *dev_info)
+{
+    rt_err_t rc;
+    cJSON *root = RT_NULL;
+    network_log("Str:%s", Str);
+    root = cJSON_Parse(Str);
+    if (!root)
+    {
+        network_log("get root faild !\n");
+        rc = -RT_ERROR;
+    }
+    else
+    {
+        cJSON *js_Code = cJSON_GetObjectItem(root, "code");
+        if (js_Code == RT_NULL)
+        {
+            rc = -RT_ERROR;
+            network_log("get js_Code err !!!");
+            goto exit;
+        }
+        network_log("code:%d !\n", js_Code->valueint);
+        cJSON *js_Message = cJSON_GetObjectItem(root, "message");
+        if (js_Message == RT_NULL)
+        {
+            rc = -RT_ERROR;
+            network_log("get js_Message err !!!");
+            goto exit;
+        }
+        network_log("message:%s !\n", js_Message->valuestring);
+        if (js_Code->valueint == 200)
+        {
+            cJSON *js_Data = cJSON_GetObjectItem(root, "data");
+            if (js_Data == RT_NULL)
+            {
+                rc = -RT_ERROR;
+                network_log("get js_Data err !!!");
+                goto exit;
+            }
+            cJSON *js_deviceName = cJSON_GetObjectItem(js_Data, "deviceName");
+            if (js_deviceName == RT_NULL)
+            {
+                rc = -RT_ERROR;
+                network_log("get js_deviceName err !!!");
+                goto exit;
+            }
+            cJSON *js_deviceSecret = cJSON_GetObjectItem(js_Data, "deviceSecret");
+            if (js_deviceSecret == RT_NULL)
+            {
+                rc = -RT_ERROR;
+                network_log("get js_deviceSecret err !!!");
+                goto exit;
+            }
+            cJSON *js_productKey = cJSON_GetObjectItem(js_Data, "productKey");
+            if (js_productKey == RT_NULL)
+            {
+                rc = -RT_ERROR;
+                network_log("get js_productKey err !!!");
+                goto exit;
+            }
+            rt_memset(dev_info, 0, sizeof(iotx_device_info_t));
+            rt_snprintf(dev_info->device_name, sizeof(dev_info->device_name), "%s", js_deviceName->valuestring);
+            rt_snprintf(dev_info->product_key, sizeof(dev_info->product_key), "%s", js_productKey->valuestring);
+            rt_snprintf(dev_info->device_secret, sizeof(dev_info->device_secret), "%s", js_deviceSecret->valuestring);
+            rt_snprintf(dev_info->device_id, sizeof(dev_info->device_id), "%s", DEVICE_ID);
+
+            network_log("device_id:%s", dev_info->device_id);
+            network_log("device_name:%s", dev_info->device_name);
+            network_log("product_key:%s", dev_info->product_key);
+            network_log("device_secret:%s", dev_info->device_secret);
+            dev_info->flag = DEVICE_INFO_FLAG;
+        }
+        else
+            rc = -RT_ERROR;
+    }
+exit:
     if (root)
         cJSON_Delete(root);
     return rc;

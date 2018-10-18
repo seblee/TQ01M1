@@ -59,17 +59,17 @@ int transport_open(rt_device_t dev, iotx_conn_info_t *conn)
     if (conn->style == IOT_WIFI_MODE)
     {
         /*******connect tcp/ssl************/
-        err = at_wifi_connect_ssl(dev, conn->host_name, conn->port);
+        err = at_wifi_CIPSTART(dev, REMOTE_TCP, conn->host_name, conn->port);
         transport_log("connect_ssl err:%d", err);
         if (err == RT_EOK)
         {
-            err = at_wifi_set_CIPMODE_mode(dev);
+            err = at_wifi_set_CIPMODE_mode(dev, 1);
             transport_log("set_CIPMODE err:%d", err);
         }
         if (err == RT_EOK)
         {
             /******start data transfer*********/
-            err = at_wifi_send_message_ack_ok(dev, AT_WIFI_CIPSEND);
+            err = at_wifi_send_message_ack(dev, AT_WIFI_CIPSEND, "OK");
             transport_log("CIPSEND err:%d", err);
         }
     }
