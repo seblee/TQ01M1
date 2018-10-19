@@ -60,6 +60,8 @@ rt_err_t at_wifi_set_CIPMODE_mode(rt_device_t dev, rt_uint8_t value);
 
 rt_err_t at_wifi_https(rt_device_t dev, char *host, int port, char *request, char **response);
 
+rt_err_t at_4g_https(rt_device_t dev, char *host, int port, char *request, char **response);
+
 /*----------------------------------------------------------------------------*/
 
 #endif

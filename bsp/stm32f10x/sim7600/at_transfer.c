@@ -457,97 +457,21 @@ exit:
 
 /**
  ****************************************************************************
- * @Function : rt_err_t at_wifi_https(rt_device_t dev, char *host, int port, char *request, char **response)
+ * @Function : rt_err_t at_4g_https(SIMCOM_HANDLE *pHandle, char *host, int port, char *request, char **response)
  * @File     : at_transfer.c
  * @Program  : none
  * @Created  : 2018-10-17 by seblee
  * @Brief    : 
  * @Version  : V1.0
 **/
-rt_err_t at_4g_https(SIMCOM_HANDLE *pHandle, char *host, int port, char *request, char **response)
+rt_err_t at_4g_https(rt_device_t dev, char *host, int port, char *request, char **response)
 {
-    rt_err_t err;
-    char sendbuf[200] = {0};
-    char *message = RT_NULL;
     bool result;
-    /*****check 4G state****************/
-    if (pHandle->s_isInitStatus != TRUE)
-    {
-        err = -RT_ERROR;
-        goto exit;
-    }
-    //+CHTTPSSTART: 0
-    result = SIMCOM_COMMAND_ACK(pHandle, "AT+CHTTPSSTART", "OK", "+CHTTPSSTART: ", &err);
+    // char *requ = request;
+    // char **respon = response;
+    result = SIMCOM_HTTPS_operations(&g_SIMCOM_Handle, host, port, request, response);
+    // result = SIMCOM_HTTPS_operations(pHandle, host, port, requ, respon);
     if (result == TRUE)
-    {
-        at_log("CHTTPSSTART err:%d", err);
-        if (err != 0)
-        {
-            err = -RT_ERROR;
-            goto exit;
-        }
-    }
-    else
-    {
-        at_log("AT+CHTTPSSTART err");
-        err = -RT_ERROR;
-        goto exit;
-    }
-    rt_snprintf(sendbuf, sizeof(sendbuf), "AT+CHTTPSOPSE=\"%s\",%d,2", host, port);
-    //+CHTTPSOPSE: 0
-    result = SIMCOM_COMMAND_ACK(pHandle, sendbuf, "OK", "+CHTTPSOPSE: ", &err);
-    if (result == TRUE)
-    {
-        at_log("CHTTPSOPSE err:%d", err);
-        if (err != 0)
-        {
-            err = -RT_ERROR;
-            goto exit;
-        }
-    }
-    else
-    {
-        at_log("AT+CHTTPSOPSE err");
-        err = -RT_ERROR;
-        goto exit;
-    }
-    rt_snprintf(sendbuf, sizeof(sendbuf), "AT+CHTTPSSEND=%d", rt_strlen(request));
-    //+CHTTPSOPSE: 0
-    result = SIMCOM_COMMAND_ACK(pHandle, sendbuf, ">", RT_NULL, &err);
-    if (result = TRUE)
-    {
-        at_log("CHTTPSOPSE err:%d", err);
-        if (err != 0)
-        {
-            err = -RT_ERROR;
-            goto exit;
-        }
-    }
-    else
-    {
-        at_log("AT+CHTTPSSEND err");
-        err = -RT_ERROR;
-        goto exit;
-    }
-    rt_snprintf(sendbuf, sizeof(sendbuf), "AT+CHTTPSSEND=%d", rt_strlen(request));
-    //+CHTTPSOPSE: 0
-    result = SIMCOM_COMMAND_ACK(pHandle, request, "OK", "+CHTTPSSEND: ", &err);
-    if (result = TRUE)
-    {
-        at_log("+CHTTPSSEND:%d", err);
-        if (err != 0)
-        {
-            err = -RT_ERROR;
-            goto exit;
-        }
-    }
-    else
-    {
-        at_log("AT+CHTTPSSEND err");
-        err = -RT_ERROR;
-        goto exit;
-    }
-
-exit:
-    return err;
+        return RT_EOK;
+    return -RT_ERROR;
 }

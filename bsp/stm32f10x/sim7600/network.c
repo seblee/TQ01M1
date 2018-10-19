@@ -110,7 +110,7 @@ void sim7600_thread_entry(void *parameter)
     get_bulid_date_time(&ti);
     current_systime_set(&ti);
     rt_thread_delay(SIM7600_THREAD_DELAY);
-    device_connect.style = IOT_WIFI_MODE;
+    device_connect.style = IOT_4G_MODE;
 
     network_log("priject build time:%04d-%02d-%d %02d:%02d:%02d", ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
     write_device = rt_device_find("uart3");
@@ -768,13 +768,28 @@ rt_err_t network_get_register(void)
                     }
                 }
                 rt_free(rec);
+                rec = RT_NULL;
             }
         }
     }
     if (device_connect.style == IOT_4G_MODE)
     {
+        err = at_4g_https(write_device, REGISTER_HOST, REGISTER_PORT, request, &rec);
+        if (err == RT_EOK)
+        {
+            if (rec)
+            {
+                char *body = rt_strstr(rec, "\r\n\r\n");
+                if (body)
+                {
+                    body += 4;
+                    network_register_parse((const char *)body, &device_info);
+                }
+                rt_free(rec);
+                rec = RT_NULL;
+            }
+        }
     }
-    network_log("response:%s", rec);
     return err;
 }
 
@@ -807,7 +822,7 @@ rt_err_t network_register_parse(const char *Str, iotx_device_info_t *dev_info)
             network_log("get js_Code err !!!");
             goto exit;
         }
-        network_log("code:%d !\n", js_Code->valueint);
+        network_log("code:%d !", js_Code->valueint);
         cJSON *js_Message = cJSON_GetObjectItem(root, "message");
         if (js_Message == RT_NULL)
         {
@@ -815,7 +830,7 @@ rt_err_t network_register_parse(const char *Str, iotx_device_info_t *dev_info)
             network_log("get js_Message err !!!");
             goto exit;
         }
-        network_log("message:%s !\n", js_Message->valuestring);
+        network_log("message:%s !", js_Message->valuestring);
         if (js_Code->valueint == 200)
         {
             cJSON *js_Data = cJSON_GetObjectItem(root, "data");
