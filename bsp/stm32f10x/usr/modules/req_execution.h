@@ -61,6 +61,7 @@ enum
 {
     HEART_POT = 0x01,//热灌
     HMI_KEY = 0x02,
+	  OPEN_PWP = 0x04,//开盖时，打开净化泵
 };
 #define ChildKey_Cnt  3
 #define ChildKey_Lose 5
@@ -75,11 +76,13 @@ enum
     D_L = 0x08,
     D_M = 0x10,
     D_U = 0x20,
+    D_MU = 0x40,
 };
 
 //流量脉冲
 enum
 {
+    L200  = 380,
     L300  = 570,
     L500  = 1250,
     L1000 = 2750,
@@ -87,9 +90,14 @@ enum
     L2000 = 5450,
 };
 //流量因子
-#define L300_FACTOR   0.47846889952153110047846889952153
-//#define L300_FACTOR   0.52631578947368421052631578947368
-#define L500_FACTOR   0.4
+//#define L300_FACTOR   0.47846889952153110047846889952153
+//#define L300_FACTOR   0.38277511961722488038277511961722
+//#define L300_FACTOR   0.405
+//#define L500_FACTOR   0.4
+#define L200_FACTOR   0.28
+#define L300_FACTOR   0.33
+#define L500_FACTOR   0.34
+//#define L500_FACTOR   0.36
 #define L1000_FACTOR  0.36363636363636363636363636363636
 #define L1500_FACTOR  0.34482758620689655172413793103448
 #define L2000_FACTOR  0.36697247706422018348623853211009
@@ -122,7 +130,7 @@ enum
 
 #define  RH_DEALY  10
 #define  WRITEHEAT_MAX  250
-#define  CLOSEHEAT_MAX  3
+#define  CLOSEHEAT_MAX  5
 
 //杀菌
 #define STERILIZE_BIT0   0x01

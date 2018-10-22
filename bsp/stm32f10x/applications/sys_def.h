@@ -34,10 +34,15 @@ typedef uint32_t          time_t;
 
 #ifdef 	SYS_HMI_TQ
 #define CONF_REG_MAP_NUM				120
-#define SOFTWARE_VER						0x1202
+#define SOFTWARE_VER						0x120B
+
+#elif 	SYS_HMI_TQ_T10	
+#define CONF_REG_MAP_NUM				120
+#define SOFTWARE_VER						0x1001
+
 #elif 	SYS_HMI_VJL	
 #define CONF_REG_MAP_NUM				106
-#define SOFTWARE_VER						0x1103
+#define SOFTWARE_VER						0x110A
 #endif
 
 #define STATUS_REG_MAP_NUM			40

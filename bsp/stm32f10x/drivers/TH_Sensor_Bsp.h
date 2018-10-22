@@ -8,7 +8,9 @@
 /******************************************************************************************************/
 /******************************************************************************************************/
 
-#define   ERROR_CNT_MAX   100		 //异常次数
+#define   ERROR_CNT_MAX   30		 //异常次数
+#define   TEMP_OFFSET		50
+#define   HUM_OFFSET		100
 
 //#define II_AM_SDA_00_Pin		GPIO_Pin_9
 //#define II_AM_SDA_00_GPIO		GPIOD
@@ -19,7 +21,7 @@
 #define II_AM_SDA_00_Pin		GPIO_Pin_4
 #define II_AM_SDA_00_GPIO		GPIOB
 
-#define II_AM_SDA_01_Pin		GPIO_Pin_13
+#define II_AM_SDA_01_Pin		GPIO_Pin_3
 #define II_AM_SDA_01_GPIO		GPIOB
 
 //#define AM_SDA_READ()   GPIO_ReadInputDataBit(II_AM_SDA_GPIO,II_AM_SDA_Pin)

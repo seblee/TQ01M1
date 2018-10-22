@@ -63,7 +63,7 @@ enum
 
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t modbus_master_stack[512];
-//static rt_uint8_t modbus_slave_stack[512];
+static rt_uint8_t modbus_slave_stack[ 512 ];
 static rt_uint8_t monitor_slave_stack[512];
 //static rt_uint8_t team_stack[ 512 ];
 static rt_uint8_t mbm_fsm_stack[512];
@@ -77,7 +77,7 @@ static rt_uint8_t testcase_stack[512];
 static rt_uint8_t sim7600_stack[2560];
 
 static struct rt_thread modbus_master_thread;
-//static struct rt_thread modbus_slave_thread;
+static struct rt_thread modbus_slave_thread;
 static struct rt_thread CPAD_slave_thread;
 //static struct rt_thread tcom_thread;
 //static struct rt_thread team_thread;
@@ -139,28 +139,28 @@ int rt_application_init(void)
     if (result == RT_EOK)
     {
         rt_thread_startup(&modbus_master_thread);
+    }			
+		
+		//modbus_slave_thread_entry		
+    result = rt_thread_init(&modbus_slave_thread,
+                            "mb_slave",
+                            modbus_slave_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t*)&modbus_slave_stack[0],
+                            sizeof(modbus_slave_stack),
+                            MODBUS_SLAVE_THREAD_PRIO,
+                            20);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&modbus_slave_thread);
     }
-
-    //modbus_slave_thread_entry
-    // result = rt_thread_init(&modbus_slave_thread,
-    //                         "mb_slave",
-    //                         modbus_slave_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&modbus_slave_stack[0],
-    //                         sizeof(modbus_slave_stack),
-    //                         MODBUS_SLAVE_THREAD_PRIO,
-    //                         20);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&modbus_slave_thread);
-    // }
-
-    //CPAD_slave_thread_entry
-    result = rt_thread_init(&CPAD_slave_thread,
+		
+		//CPAD_slave_thread_entry
+		 result = rt_thread_init(&CPAD_slave_thread,
                             "CPAD_slave",
                             cpad_modbus_slave_thread_entry,
                             RT_NULL,
-                            (rt_uint8_t *)&monitor_slave_stack[0],
+                            (rt_uint8_t*)&monitor_slave_stack[0],
                             sizeof(monitor_slave_stack),
                             MONITOR_SLAVE_THREAD_PRIO,
                             5);
@@ -168,19 +168,20 @@ int rt_application_init(void)
     {
         rt_thread_startup(&CPAD_slave_thread);
     }
+		
+//    result = rt_thread_init(&team_thread,
+//                            "teamwork",
+//                            team_thread_entry,
+//                            RT_NULL,
+//                            (rt_uint8_t*)&team_stack[0],
+//                            sizeof(team_stack),
+//                            TEAM_THREAD_PRIO,
+//                            5);
+//    if (result == RT_EOK)
+//    {
+//        rt_thread_startup(&team_thread);
+//    }		
 
-    //    result = rt_thread_init(&team_thread,
-    //                            "teamwork",
-    //                            team_thread_entry,
-    //                            RT_NULL,
-    //                            (rt_uint8_t*)&team_stack[0],
-    //                            sizeof(team_stack),
-    //                            TEAM_THREAD_PRIO,
-    //                            5);
-    //    if (result == RT_EOK)
-    //    {
-    //        rt_thread_startup(&team_thread);
-    //    }
 
     result = rt_thread_init(&mbm_fsm_thread,
                             "mbm_fsm",

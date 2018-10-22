@@ -33,10 +33,10 @@ typedef enum
 #define CMD_REG_MAP_OFFSET   0
 #define CONFIG_REG_MAP_OFFSET  64
 
-#ifdef 	SYS_HMI_TQ
-#define STATUS_REG_MAP_OFFSET  500
-#elif 	SYS_HMI_VJL	
+#ifdef 	SYS_HMI_VJL
 #define STATUS_REG_MAP_OFFSET  170
+#else
+#define STATUS_REG_MAP_OFFSET  500
 #endif
 ////#define STATUS_REG_MAP_OFFSET  170
 //#define STATUS_REG_MAP_OFFSET  500

@@ -67,26 +67,30 @@ const pin_map_st in_pin_map_inst[Pin_Map_In]=//数字输入Pin_Map
 #define Pin_Map_Out  21
 const pin_map_st out_pin_map_inst[Pin_Map_Out]=//数字输出Pin_Map
 {
-//		{GPIO_Pin_7, 	  GPIOE},		//DO1
-//		{GPIO_Pin_1, 	  GPIOB},		//DO2
-//		{GPIO_Pin_0, 		GPIOB},		//DO3
-//		{GPIO_Pin_5, 		GPIOC},		//DO4
-//		{GPIO_Pin_4, 		GPIOC},		//DO5
-//		{GPIO_Pin_7, 		GPIOA},		//DO6
-//		{GPIO_Pin_6, 	  GPIOA},		//DO7
-//		{GPIO_Pin_5,  	GPIOA},		//DO8
-//		{GPIO_Pin_9, 	  GPIOE},		//DO9
-//		{GPIO_Pin_8, 	  GPIOE},		//DO10
-//		{GPIO_Pin_10, 	GPIOE},		//DO11
-//		{GPIO_Pin_11, 	GPIOE},		//DO12
-//		{GPIO_Pin_12, 	GPIOE},		//DO13
-//		{GPIO_Pin_13, 	GPIOE},		//DO14
-//		{GPIO_Pin_14, 	GPIOE},		//DO15
-//		{GPIO_Pin_2, 		GPIOE},		//DO16
-////    {GPIO_Pin_1, 		GPIOE},		//DO17
-////		{GPIO_Pin_9, 		GPIOB},		//DO18
-////    {GPIO_Pin_8, 		GPIOB},		//DO19
-//		{GPIO_Pin_13, 	GPIOC},		//LED
+#ifdef 	SYS_HMI_TQ_T10
+		{GPIO_Pin_4, 	  GPIOC},		//DO1
+		{GPIO_Pin_7, 	  GPIOA},		//DO2
+		{GPIO_Pin_6, 		GPIOA},		//DO3
+		{GPIO_Pin_5, 		GPIOA},		//DO4
+    {GPIO_Pin_0, 		GPIOB},		//DO17//T10,UV_24V,DO5与DO17互换		
+		{GPIO_Pin_2, 		GPIOA},		//DO6
+		{GPIO_Pin_1, 	  GPIOA},		//DO7
+		{GPIO_Pin_0,  	GPIOA},		//DO8
+		{GPIO_Pin_8, 	  GPIOE},		//DO9
+		{GPIO_Pin_10, 	GPIOE},		//DO10
+		{GPIO_Pin_11, 	GPIOE},		//DO11
+		{GPIO_Pin_12, 	GPIOE},		//DO12
+		{GPIO_Pin_13, 	GPIOE},		//DO13
+		{GPIO_Pin_14, 	GPIOE},		//DO14
+		{GPIO_Pin_7, 	  GPIOE},		//DO15
+		{GPIO_Pin_1, 		GPIOB},		//DO16
+		
+		{GPIO_Pin_4, 		GPIOA},		//DO5
+		{GPIO_Pin_5, 		GPIOC},		//DO18
+		{GPIO_Pin_9, 		GPIOE},		//DO19-LOCKLED
+		{GPIO_Pin_11, 	GPIOA},		//DO20-PWRCTRL
+		{GPIO_Pin_13, 	GPIOC},		//LED,RUN
+#else
 		{GPIO_Pin_4, 	  GPIOC},		//DO1
 		{GPIO_Pin_7, 	  GPIOA},		//DO2
 		{GPIO_Pin_6, 		GPIOA},		//DO3
@@ -103,11 +107,14 @@ const pin_map_st out_pin_map_inst[Pin_Map_Out]=//数字输出Pin_Map
 		{GPIO_Pin_14, 	GPIOE},		//DO14
 		{GPIO_Pin_7, 	  GPIOE},		//DO15
 		{GPIO_Pin_1, 		GPIOB},		//DO16
+		
     {GPIO_Pin_0, 		GPIOB},		//DO17
 		{GPIO_Pin_5, 		GPIOC},		//DO18
 		{GPIO_Pin_9, 		GPIOE},		//DO19-LOCKLED
 		{GPIO_Pin_11, 	GPIOA},		//DO20-PWRCTRL
 		{GPIO_Pin_13, 	GPIOC},		//LED,RUN
+#endif
+
 };
 
 

@@ -109,13 +109,23 @@ enum
 	TEST_NORMAL_WATER = 0x03,	  //出常温水
 	TEST_HEAT_WATER = 0x04,		   //出热水
 	TEST_PRPDUCE_COLDWATER = 0x05, //制冰水
+    TEST_UV=0x06,  					//UV测试
+    TEST_UR=0x07,  					//UV2测试
 	TEST_Relay = 0x3C,			   //继电器测试
 	TEST_ALL_OUT = 0x5A,		   //全开
 };
 
 #define TEST_TIME 1   //测试时间1s
 #define TEST_CICLE 15 //开关周期
+#define TEST_UV2_OPEN  30/2 //开关周期
+#define TEST_UV2_CLOSE  90/2 //开关周期
+#define TEST_UV1_OPEN  600/2 //开关周期
+#define TEST_UV1_CLOSE  6600/2 //开关周期
 
+#define TEST_UR2_OPEN  5 //开关周期
+#define TEST_UR2_CLOSE  5 //开关周期
+#define TEST_UR1_OPEN  10 //开关周期
+#define TEST_UR1_CLOSE  10 //开关周期
 //手动测试模式
 enum
 {

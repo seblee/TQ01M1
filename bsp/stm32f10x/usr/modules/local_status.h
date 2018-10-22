@@ -155,6 +155,7 @@ typedef struct
 		uint16_t  OutWater_Delay[3];//按键出水延时
 		uint8_t   ChildLock_Key;//童锁
 		uint8_t   ChildLock_Cnt[2];//童锁计数器
+		uint16_t  u16Uart_Timeout;//串口重启			
 }local_reg_st;
 
 enum

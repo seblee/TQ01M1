@@ -126,7 +126,19 @@ static int16_t calc_hi_press_ai(uint16_t adc_value,uint16_t k_factor,int16_t cal
 		}
     return (int16_t)ret_val;    
 }
-
+//≤‚¡øUVπ‚«ø
+static int16_t Calc_UV_ai(uint16_t adc_value,uint16_t k_factor,int16_t cali)
+{
+    int32_t ret_val = 0;
+    //As Vo/Vcc*100 = K*P+10, Vadc*4/Vcc*100 = K*P+10. Vadc = 3.3/4096 * N. 
+    //(((3.3/4096)*N)*4)/Vcc*100 = K*P ;
+    ret_val = ((3.3*adc_value*100*4)/(4096*5) - 10)*1000/k_factor + (int16_t)(cali); //unit is BAR(aka. 0.1MPaG)
+	  if(ret_val <=0)
+		{
+				ret_val =ABNORMAL_VALUE;
+		}
+    return (int16_t)ret_val;    
+}
 ////water flow supper voice wave
 //static int16_t calc_water_flow_ai(uint16_t adc_value,int16_t cali)
 //{

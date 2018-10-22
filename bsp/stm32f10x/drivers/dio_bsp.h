@@ -11,7 +11,7 @@ enum
 		DI_DRINK_DOWN_BPOS,					
 		DI_DRINK_MIDDLE_BPOS,						
 		DI_DRINK_UP_BPOS,	
-		DI_DRINK_MD_BPOS,				
+		DI_DRINK_MU_BPOS,				
 		DI_HI_PRESS1_BPOS,							
 		DI_HI_PRESS2_BPOS,				
 		DI_Cold_1_BPOS,					
