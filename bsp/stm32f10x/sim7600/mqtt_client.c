@@ -36,15 +36,15 @@ int mqtt_client_init(rt_device_t dev)
     /*******init client parameter*********/
     mqtt_log("mqtt_client_init");
     rt_memset(&device_info, 0, sizeof(iotx_device_info_t));
-    rt_strncpy(device_info.product_key, iot_productKey, PRODUCT_KEY_LEN);
-    rt_strncpy(device_info.device_name, iot_devicename, DEVICE_NAME_LEN);
-    rt_strncpy(device_info.device_secret, iot_secret, DEVICE_SECRET_LEN);
-    rt_sprintf(device_info.device_id, iot_deviceid, DEVICE_ID_LEN);
+    rt_strncpy(device_info.product_key, PRODUCT_KEY, strlen(PRODUCT_KEY));
+    rt_strncpy(device_info.device_name, DEVICE_NAME, strlen(DEVICE_NAME));
+    rt_strncpy(device_info.device_secret, DEVICE_SECRET, strlen(DEVICE_SECRET));
+    rt_sprintf(device_info.device_id, DEVICE_ID, strlen(DEVICE_ID));
     // mqtt_log("product_key:%s", device_info.product_key);
     // mqtt_log("device_name:%s", device_info.device_name);
     // mqtt_log("device_secret:%s", device_info.device_secret);
     // mqtt_log("device_id:%s", device_info.device_id);
-    mqtt_setup_connect_info(&device_connect, &device_info);
+    mqtt_setup_connect_info(&device_connect, device_info_p);
     client_con.keepAliveInterval = 60;
     client_con.clientID.cstring = (char *)device_connect.client_id;
     client_con.username.cstring = (char *)device_connect.username;
@@ -196,7 +196,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
     rt_err_t rc;
     rt_thread_delay(1000);
     /*******WATER_NOTICE********/
-    rc = mqtt_client_subscribe(WATER_NOTICE, &device_info);
+    rc = mqtt_client_subscribe(WATER_NOTICE, device_info_p);
     if (rc != RT_EOK)
     {
         mqtt_log("WATER_NOTICE,RT_ERROR:%d", rc);
@@ -204,7 +204,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
     }
     //rt_thread_delay(1000);
     /*******PARAMETER_SET********/
-    rc = mqtt_client_subscribe(PARAMETER_SET, &device_info);
+    rc = mqtt_client_subscribe(PARAMETER_SET, device_info_p);
     if (rc != RT_EOK)
     {
         mqtt_log("PARAMETER_SET,RT_ERROR:%d", rc);
@@ -212,7 +212,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
     }
     //rt_thread_delay(1000);
     /*******PARAMETER_GET********/
-    rc = mqtt_client_subscribe(PARAMETER_GET, &device_info);
+    rc = mqtt_client_subscribe(PARAMETER_GET, device_info_p);
     if (rc != RT_EOK)
     {
         mqtt_log("PARAMETER_GET,RT_ERROR:%d", rc);
@@ -221,7 +221,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
 
     //rt_thread_delay(1000);
     /*******DEVICE_UPGRADE********/
-    // rc = mqtt_client_subscribe(DEVICE_UPGRADE, &device_info);
+    // rc = mqtt_client_subscribe(DEVICE_UPGRADE,device_info_p);
     // if (rc != RT_EOK)
     // {
     //     mqtt_log("DEVICE_UPGRADE,RT_ERROR:%d", rc);
@@ -229,7 +229,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
     // }
     // //rt_thread_delay(1000);
     /*******DEVICE_MOVE********/
-    // rc = mqtt_client_subscribe(DEVICE_MOVE, &device_info);
+    // rc = mqtt_client_subscribe(DEVICE_MOVE,device_info_p);
     // if (rc != RT_EOK)
     // {
     //     mqtt_log("DEVICE_MOVE,RT_ERROR:%d", rc);
@@ -237,7 +237,7 @@ rt_err_t mqtt_client_subscribe_topics(void)
     // }
     // //rt_thread_delay(1000);
     // /*******DEVICE_GET********/
-    // rc = mqtt_client_subscribe(DEVICE_GET, &device_info);
+    // rc = mqtt_client_subscribe(DEVICE_GET,device_info_p);
     // if (rc != RT_EOK)
     // {
     //     mqtt_log("DEVICE_GET,RT_ERROR:%d", rc);

@@ -46,11 +46,6 @@ rt_mq_t publish_mq = RT_NULL;
 rt_uint8_t write_buffer[MSG_LEN_MAX];
 rt_uint8_t read_buffer[MSG_LEN_MAX];
 
-const char iot_deviceid[] = {DEVICE_ID};
-const char iot_devicename[] = {DEVICE_NAME};
-const char iot_productKey[] = {PRODUCT_KEY};
-const char iot_secret[] = {DEVICE_SECRET};
-
 volatile _iot_state_t iot_state = IOT_POWERON;
 /********topic dup qos restained**************/
 iot_topic_param_t iot_topics[] = {
@@ -69,6 +64,8 @@ iot_topic_param_t iot_topics[] = {
     {TOPIC_DEVICE_GET, 0, 1, 0},      /*{"TOPIC_DEVICE_GET"}*/
 };
 /* Private function prototypes -----------------------------------------------*/
+extern sys_reg_st g_sys;
+iotx_device_info_pt device_info_p = (iotx_device_info_t *)g_sys.config.ComPara.device_info;
 iotx_device_info_t device_info;
 iotx_conn_info_t device_connect;
 MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
@@ -764,7 +761,7 @@ rt_err_t network_get_register(void)
                     if (body)
                     {
                         body += 4;
-                        network_register_parse((const char *)body, &device_info);
+                        network_register_parse((const char *)body, device_info_p);
                     }
                 }
                 rt_free(rec);
@@ -783,7 +780,7 @@ rt_err_t network_get_register(void)
                 if (body)
                 {
                     body += 4;
-                    network_register_parse((const char *)body, &device_info);
+                    network_register_parse((const char *)body, device_info_p);
                 }
                 rt_free(rec);
                 rec = RT_NULL;
@@ -794,7 +791,7 @@ rt_err_t network_get_register(void)
 }
 
 /**
- ****************************************************************************
+ **************************************************************** ************
  * @Function : rt_err_t network_register_parse(const char *Str, iotx_device_info_t *dev_info)
  * @File     : network.c
  * @Program  : Str:in put json

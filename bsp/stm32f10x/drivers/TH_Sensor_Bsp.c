@@ -219,6 +219,7 @@ uint8_t Read_Sensor(uint16_t *u16TH_Buff,uint8_t u8SN)
 	int16_t i16Temprature;//定义温湿度变量
 	uint16_t u16Humi;//定义温湿度变量 
 	
+    Sensor_ErrorFlag=Sensor_ErrorFlag;
 	ENTER_CRITICAL_SECTION(); //关全局中断	
 	AM23XX_start(u8SN);//从机发送起始信号
 

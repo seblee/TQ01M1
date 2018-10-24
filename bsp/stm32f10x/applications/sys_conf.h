@@ -689,7 +689,8 @@ typedef struct
 	uint16_t u16ColdWater_Mode;		   //冰水模式
 	uint16_t u16ColdWater_StartTemp;   //制冰水温度
 	uint16_t u16ColdWater_StopTemp;	//制冰水停止温度
-	uint16_t u16NetworkPrioty;		   //网络优先
+	uint16_t u16NetworkPriority;		   //网络优先
+    uint16_t device_info[25];//三元组信息
 } ComPara_Conf_st;
 
 typedef struct

@@ -120,17 +120,11 @@ extern rt_uint8_t write_buffer[MSG_LEN_MAX];
 
 extern rt_uint8_t read_buffer[MSG_LEN_MAX];
 
-extern const char iot_deviceid[];
-
-extern const char iot_devicename[];
-
-extern const char iot_productKey[];
-
-extern const char iot_secret[];
-
 extern rt_mq_t rx_mq;
 
 extern iotx_device_info_t device_info;
+
+extern iotx_device_info_pt device_info_p;
 
 extern iotx_conn_info_t device_connect;
 
