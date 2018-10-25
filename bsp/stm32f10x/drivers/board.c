@@ -29,9 +29,9 @@
 #include "Delay.h"
 #include "TH_SENSOR_BSP.h"
 
-#ifdef  RT_USING_COMPONENTS_INIT
+#ifdef RT_USING_COMPONENTS_INIT
 #include <components.h>
-#endif  /* RT_USING_COMPONENTS_INIT */
+#endif /* RT_USING_COMPONENTS_INIT */
 
 /**
  * @addtogroup STM32
@@ -48,15 +48,15 @@
 *******************************************************************************/
 void NVIC_Configuration(void)
 {
-#ifdef  VECT_TAB_RAM
+#ifdef VECT_TAB_RAM
     /* Set the Vector Table base location at 0x20000000 */
     NVIC_SetVectorTable(NVIC_VectTab_RAM, 0x0);
-#else  /* VECT_TAB_FLASH  */
+#else /* VECT_TAB_FLASH  */
     /* Set the Vector Table base location at 0x08000000 */
-   NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x3000);//IAP BOOTUP ADDRESS
-	//	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0);//standalone bootup address
+    NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x3000); //IAP BOOTUP ADDRESS
+                                                     //	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0);//standalone bootup address
 #endif
-		NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 }
 
 /**
@@ -72,8 +72,8 @@ void SysTick_Handler(void)
 
     /* leave interrupt */
     rt_interrupt_leave();
-		 
-//		TimingDelay_Decrement();
+
+    //		TimingDelay_Decrement();
 }
 
 /**
@@ -85,11 +85,11 @@ void rt_hw_board_init(void)
     NVIC_Configuration();
 
     /* Configure the SysTick */
-    SysTick_Config( SystemCoreClock / RT_TICK_PER_SECOND );
+    SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
 
     drv_usart_init();
-    rt_console_set_device(RT_CONSOLE_DEVICE_NAME);	
-	
+    rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
+
 #ifdef RT_USING_COMPONENTS_INIT
     rt_components_board_init();
 #endif
@@ -97,21 +97,21 @@ void rt_hw_board_init(void)
 
 void hw_drivers_init(void)
 {
-	drv_adc_dma_init();//模拟输入初始化
-		
- 	drv_dio_init();		//数字输入输出初始化
-	
-	drv_pwm_init();		//模拟输出初始化
-	
-	drv_i2c_init();		//IIC初始化
-	
-	AM_Init();				//AM Sensor init
-	
-	drv_rtc_init();		//RTC初始化
-	
-	Drv_CNT_Pluse_Init();//脉冲计数
-	
-//	xPort_Usart_Init(UART_HEAT);//加热器	
-//	drv_led_init();
+    drv_adc_dma_init(); //模拟输入初始化
+
+    drv_dio_init(); //数字输入输出初始化
+
+    drv_pwm_init(); //模拟输出初始化
+
+    drv_i2c_init(); //IIC初始化
+
+    AM_Init(); //AM Sensor init
+
+    drv_rtc_init(); //RTC初始化
+
+    Drv_CNT_Pluse_Init(); //脉冲计数
+
+    //	xPort_Usart_Init(UART_HEAT);//加热器
+    //	drv_led_init();
 }
 /*@}*/

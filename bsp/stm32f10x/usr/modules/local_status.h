@@ -6,76 +6,76 @@
 
 enum
 {
-		RESET_REQ = 0,
-		LOCAL_REQ,
-		TEAM_REQ,
-		TARGET_REQ,
-		MAX_REQ,
-		REQ_MAX_CNT,
+    RESET_REQ = 0,
+    LOCAL_REQ,
+    TEAM_REQ,
+    TARGET_REQ,
+    MAX_REQ,
+    REQ_MAX_CNT,
 };
 
 enum
 {
-		T_REQ = 0,
-		H_REQ,
-		F_REQ,
-		REQ_MAX_LEVEL,
+    T_REQ = 0,
+    H_REQ,
+    F_REQ,
+    REQ_MAX_LEVEL,
 };
 
 //global FSM states definition
 enum
 {
-		T_FSM_TOP_ID = 0,
-		T_FSM_STANALONE_ID,
-		T_FSM_TEAM_ID,
-		H_FSM_MAX_ID_CNT
+    T_FSM_TOP_ID = 0,
+    T_FSM_STANALONE_ID,
+    T_FSM_TEAM_ID,
+    H_FSM_MAX_ID_CNT
 };
 
 //global top-level FSM states definition
 enum
 {
-		T_FSM_STATE_IDLE=0,
-		T_FSM_STATE_STANDALONE,
-		T_FSM_STATE_TEAM,
-		T_FSM_MAX_CNT,
+    T_FSM_STATE_IDLE = 0,
+    T_FSM_STATE_STANDALONE,
+    T_FSM_STATE_TEAM,
+    T_FSM_MAX_CNT,
 };
 
 enum
 {
-		BITMAP_REQ=0,
-		BITMAP_ALARM,
-		BITMAP_MANUAL,
-		BITMAP_FINAL,
-		BITMAP_MASK,
-		BITMAP_MAX_CNT,
+    BITMAP_REQ = 0,
+    BITMAP_ALARM,
+    BITMAP_MANUAL,
+    BITMAP_FINAL,
+    BITMAP_MASK,
+    BITMAP_MAX_CNT,
 };
 
 enum
 {
-		FAN_FSM_STATE=0,
-		COMPRESS_SIG_FSM_STATE,
-		COMPRESS1_FSM_STATE,
-		COMPRESS2_FSM_STATE,
-		HEATER_FSM_STATE,
-		DEHUMER_FSM_STATE,
-		HUMIDIFIER_FSM_STATE,
+    FAN_FSM_STATE = 0,
+    COMPRESS_SIG_FSM_STATE,
+    COMPRESS1_FSM_STATE,
+    COMPRESS2_FSM_STATE,
+    HEATER_FSM_STATE,
+    DEHUMER_FSM_STATE,
+    HUMIDIFIER_FSM_STATE,
     WATERVALVE_FSM_STATE,
-    DP_FSM_STATE,//Ë«µçÔ´
-		L_FSM_STATE_MAX_NUM,
+    DP_FSM_STATE, //åŒç”µæº
+    L_FSM_STATE_MAX_NUM,
 };
 
 enum
 {
-		COMP_CONSTANT_FRE=0,//¶¨Æµ
-		COMP_QABP,//±äÆµ
+    COMP_CONSTANT_FRE = 0, //å®šé¢‘
+    COMP_QABP,             //å˜é¢‘
 };
 
 enum
 {
-		T_FSM_SIG_IDLE=0,
-		T_FSM_SIG_STANDALONE,
-		T_FSM_SIG_TEAM,
-		T_FSM_SIG_SHUT
+    T_FSM_SIG_IDLE = 0,
+    T_FSM_SIG_STANDALONE,
+    T_FSM_SIG_TEAM,
+    T_FSM_SIG_SHUT
 };
 
 /*
@@ -88,102 +88,101 @@ enum
 
 typedef struct
 {
-		int16_t p_saved;
-		int16_t i_saved;
-		int16_t req_saved;
-}pid_reg_st;
+    int16_t p_saved;
+    int16_t i_saved;
+    int16_t req_saved;
+} pid_reg_st;
 
 typedef struct
 {
-    int16_t set_point;   //Desired Value
-    double  proportion; //Proportional Const
-    double  integral;   //Integral Const
-    double  derivative; //Derivative Const
-    int16_t last_error;  //Error[-1]
-    int16_t prev_error;  //Error[-2]
-}pid_param_st;
+    int16_t set_point;  //Desired Value
+    double proportion;  //Proportional Const
+    double integral;    //Integral Const
+    double derivative;  //Derivative Const
+    int16_t last_error; //Error[-1]
+    int16_t prev_error; //Error[-2]
+} pid_param_st;
 
 typedef struct
 {
-		pid_reg_st temp;
-		pid_reg_st hum;
-}pid_st;
+    pid_reg_st temp;
+    pid_reg_st hum;
+} pid_st;
 
 typedef struct
 {
-		uint16_t 	Fan_Dehumer_Delay;//·ç»úµµÎ»ÑÓÊ±,Alair£¬20161113
-		uint8_t   Fan_Dehumer_State;//·ç»úµµÎ»,Alair£¬20161113
-		uint8_t   Fan_Gear;//·ç»úµµÎ»,Alair£¬20161113
-		uint8_t   Fan_default_cnt;//Òì³£·ç»ú¸öÊı
-}Fan_st;
+    uint16_t Fan_Dehumer_Delay; //é£æœºæ¡£ä½å»¶æ—¶,Alairï¼Œ20161113
+    uint8_t Fan_Dehumer_State;  //é£æœºæ¡£ä½,Alairï¼Œ20161113
+    uint8_t Fan_Gear;           //é£æœºæ¡£ä½,Alairï¼Œ20161113
+    uint8_t Fan_default_cnt;    //å¼‚å¸¸é£æœºä¸ªæ•°
+} Fan_st;
 
-
-typedef struct 
+typedef struct
 {
-		int16_t 	require[REQ_MAX_CNT][REQ_MAX_LEVEL];		
-		uint16_t 	bitmap[2][BITMAP_MAX_CNT];
-		int16_t 	ao_list[AO_MAX_CNT][BITMAP_MAX_CNT];
-		uint16_t 	comp_timeout[DO_MAX_CNT];
-		uint16_t	t_fsm_state;
-		uint16_t	t_fsm_signal;
-		int16_t   ec_fan_diff_reg;
-		int16_t   ec_fan_suc_temp;
-		uint16_t  authen_cd;
-		uint16_t	debug_flag;
-		uint16_t	debug_tiemout;
-		uint16_t 	l_fsm_state[L_FSM_STATE_MAX_NUM];
-		pid_st		pid;
-		Fan_st		Fan;
-		uint8_t   Fan_Close;//·ç»ú¿ª¹ØĞÅºÅ
-		uint8_t   Comp_Close;//Ñ¹Ëõ»ú¿ª¹ØĞÅºÅ
-		uint8_t   Pwp_Open;//¾»»¯±Ã¿ª¹ØĞÅºÅ
-		uint8_t   OutWater_Flag;//³öË®ÖĞ
-		uint8_t   OutWater_OK;//³öË®Íê³É
-		uint8_t   HeatWater_st;//¼ÓÈÈÆ÷³öË®×´Ì¬
-		uint16_t  HeatWater_Flow;//¼ÓÈÈÆ÷³öË®Á÷Á¿
-		uint16_t  HeatWater_Time;//¼ÓÈÈÆ÷³öË®Ê±¼ä
-		uint8_t   Cold_Water;//ÖÆ±ùË®ĞÅºÅ
-		uint8_t 	SEL_Jump;//ÌøÏßÑ¡Ôñ
-		uint16_t 	comp_startup_interval;
-		uint16_t 	comp_stop_interval;
-		uint16_t 	PowerOn_Time;//¿ª»ú¼ÆÊ±
-		uint16_t 	TH_Check_Interval;//ÎÂÊª¶È¼ì²â¼ä¸ô
-		uint16_t 	TH_Check_Delay;//ÎÂÊª¶È¼ì²â¼ä¸ô
-		uint8_t 	Set_Systime_Flag;//ÉèÖÃÏµÍ³Ê±¼ä±êÊ¶
-		uint8_t 	Set_Systime_Delay;//ÉèÖÃÏµÍ³µÈ´ıÑÓÊ±
-		uint8_t   OutWater_Key;//°´¼ü³öË®
-		uint16_t  OutWater_Delay[3];//°´¼ü³öË®ÑÓÊ±
-		uint8_t   ChildLock_Key;//Í¯Ëø
-		uint8_t   ChildLock_Cnt[2];//Í¯Ëø¼ÆÊıÆ÷
-		uint16_t  u16Uart_Timeout;//´®¿ÚÖØÆô			
-}local_reg_st;
+    int16_t require[REQ_MAX_CNT][REQ_MAX_LEVEL];
+    uint16_t bitmap[2][BITMAP_MAX_CNT];
+    int16_t ao_list[AO_MAX_CNT][BITMAP_MAX_CNT];
+    uint16_t comp_timeout[DO_MAX_CNT];
+    uint16_t t_fsm_state;
+    uint16_t t_fsm_signal;
+    int16_t ec_fan_diff_reg;
+    int16_t ec_fan_suc_temp;
+    uint16_t authen_cd;
+    uint16_t debug_flag;
+    uint16_t debug_tiemout;
+    uint16_t l_fsm_state[L_FSM_STATE_MAX_NUM];
+    pid_st pid;
+    Fan_st Fan;
+    uint8_t Fan_Close;       //é£æœºå¼€å…³ä¿¡å·
+    uint8_t Comp_Close;      //å‹ç¼©æœºå¼€å…³ä¿¡å·
+    uint8_t Pwp_Open;        //å‡€åŒ–æ³µå¼€å…³ä¿¡å·
+    uint8_t OutWater_Flag;   //å‡ºæ°´ä¸­
+    uint8_t OutWater_OK;     //å‡ºæ°´å®Œæˆ
+    uint8_t HeatWater_st;    //åŠ çƒ­å™¨å‡ºæ°´çŠ¶æ€
+    uint16_t HeatWater_Flow; //åŠ çƒ­å™¨å‡ºæ°´æµé‡
+    uint16_t HeatWater_Time; //åŠ çƒ­å™¨å‡ºæ°´æ—¶é—´
+    uint8_t Cold_Water;      //åˆ¶å†°æ°´ä¿¡å·
+    uint8_t SEL_Jump;        //è·³çº¿é€‰æ‹©
+    uint16_t comp_startup_interval;
+    uint16_t comp_stop_interval;
+    uint16_t PowerOn_Time;      //å¼€æœºè®¡æ—¶
+    uint16_t TH_Check_Interval; //æ¸©æ¹¿åº¦æ£€æµ‹é—´éš”
+    uint16_t TH_Check_Delay;    //æ¸©æ¹¿åº¦æ£€æµ‹é—´éš”
+    uint8_t Set_Systime_Flag;   //è®¾ç½®ç³»ç»Ÿæ—¶é—´æ ‡è¯†
+    uint8_t Set_Systime_Delay;  //è®¾ç½®ç³»ç»Ÿç­‰å¾…å»¶æ—¶
+    uint8_t OutWater_Key;       //æŒ‰é”®å‡ºæ°´
+    uint16_t OutWater_Delay[3]; //æŒ‰é”®å‡ºæ°´å»¶æ—¶
+    uint8_t ChildLock_Key;      //ç«¥é”
+    uint8_t ChildLock_Cnt[2];   //ç«¥é”è®¡æ•°å™¨
+    uint16_t u16Uart_Timeout;   //ä¸²å£é‡å¯
+} local_reg_st;
 
 enum
 {
-		FAN_DEHUMER_IDLE= 0,
-		FAN_DEHUMER_START ,
-		FAN_DEHUMER_NORMAL,
+    FAN_DEHUMER_IDLE = 0,
+    FAN_DEHUMER_START,
+    FAN_DEHUMER_NORMAL,
 };
-//·ç»úµµÎ»,Alair£¬20161113
+//é£æœºæ¡£ä½,Alairï¼Œ20161113
 enum
 {
-		HUM_FLUSH = 0,
-		HUM_DRAIN,
-		HUM_FILL,
+    HUM_FLUSH = 0,
+    HUM_DRAIN,
+    HUM_FILL,
 };
-//»»Ë®×´Ì¬,Alair£¬20161113
+//æ¢æ°´çŠ¶æ€,Alairï¼Œ20161113
 enum
 {
-		FAN_GEAR_NO = 0,
-		FAN_GEAR_LOW,
-		FAN_GEAR_MID,
-		FAN_GEAR_HIGH,
+    FAN_GEAR_NO = 0,
+    FAN_GEAR_LOW,
+    FAN_GEAR_MID,
+    FAN_GEAR_HIGH,
 };
 #define FAN_GEAR_START FAN_GEAR_LOW
-//Alair,20170304,Ë®·§Ê¹ÄÜ×´Ì¬
+//Alair,20170304,æ°´é˜€ä½¿èƒ½çŠ¶æ€
 enum
 {
-    WATER_OFF = 0,	
+    WATER_OFF = 0,
     WATER_ON,
 };
 

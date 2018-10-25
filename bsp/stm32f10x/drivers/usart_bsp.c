@@ -442,11 +442,11 @@ static void NVIC_Configuration(struct stm32_uart *uart)
 
 void drv_usart_init(void)
 {
-    struct stm32_uart* uart;
-//    struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT;
- 		struct serial_configure config_fc = RT_SERIAL_CONFIG_DEFAULT;
-		config_fc.reserved = 1;
-	
+    struct stm32_uart *uart;
+    struct serial_configure config = RT_SERIAL_CONFIG_DEFAULT;
+    struct serial_configure config_fc = RT_SERIAL_CONFIG_DEFAULT;
+    config_fc.reserved = 1;
+
     RCC_Configuration();
     GPIO_Configuration();
 
@@ -481,10 +481,10 @@ void drv_usart_init(void)
 
 #ifdef RT_USING_UART3
     uart = &uart3;
-    config_fc.baud_rate = BAUD_RATE_115200;
+    config.baud_rate = BAUD_RATE_115200;
 
-    serial3.ops    = &stm32_uart_ops;
-    serial3.config = config_fc;
+    serial3.ops = &stm32_uart_ops;
+    serial3.config = config;
 
     NVIC_Configuration(&uart3);
 
@@ -769,11 +769,11 @@ void Comm_Service(void)
             break;
         case SEND_Wait: //发送等待（由g_ComGap检查）----------------------------
                         //	            if (g_ComGap[port]> PROTOCOL_FRAME_SendGap)               //发送延时到？
-        {
-            g_ComGap[port] = 0;           //通讯字节间隔定时开始
-            g_ComStat[port] = SEND_Going; //置"正在发送"状态
-        }
-        break;
+            {
+                g_ComGap[port] = 0;           //通讯字节间隔定时开始
+                g_ComStat[port] = SEND_Going; //置"正在发送"状态
+            }
+            break;
         case SEND_Going: //正在发送（检查发送端是否打开）------------------------
             if (g_ComGap[port] < 100)
             {

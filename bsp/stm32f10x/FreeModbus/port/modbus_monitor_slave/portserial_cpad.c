@@ -42,15 +42,15 @@ void cpad_MBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 	USART_DeInit(USART2);
-	//======================Ê±ÖÓ³õÊ¼»¯=======================================
+	//======================æ—¶é’Ÿåˆå§‹åŒ–=======================================
 	//	RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD ,	ENABLE);
 	//	RCC_APB1PeriphClockCmd(	RCC_APB1Periph_UART5,ENABLE);
 	/* Enable UART GPIO clocks */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOD | RCC_APB2Periph_AFIO, ENABLE);
 	/* Enable UART clock */
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-	GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE); //USART2ÖØÓ³Éä
-	//======================IO³õÊ¼»¯=========================================
+	GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE); //USART2é‡æ˜ å°„
+	//======================IOåˆå§‹åŒ–=========================================
 	//UART2_TX
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -60,25 +60,25 @@ void cpad_MBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_InitStructure.GPIO_Pin = UART2_GPIO_RX;
 	GPIO_Init(UART2_GPIO, &GPIO_InitStructure);
-	//ÅäÖÃ485·¢ËÍºÍ½ÓÊÕÄ£Ê½
-	//TODO   ÔİÊ±ÏÈĞ´A1 µÈÖ®ºó×éÍø²âÊÔÊ±ÔÙĞŞ¸Ä
+	//é…ç½®485å‘é€å’Œæ¥æ”¶æ¨¡å¼
+	//TODO   æš‚æ—¶å…ˆå†™A1 ç­‰ä¹‹åç»„ç½‘æµ‹è¯•æ—¶å†ä¿®æ”¹
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Pin = UART2_DIR_GPIO_PIN;
 	GPIO_Init(UART2_DIR_GPIO, &GPIO_InitStructure);
-	//======================´®¿Ú³õÊ¼»¯=======================================
+	//======================ä¸²å£åˆå§‹åŒ–=======================================
 	USART_InitStructure.USART_BaudRate = ulBaudRate;
-	//ÉèÖÃĞ£ÑéÄ£Ê½
+	//è®¾ç½®æ ¡éªŒæ¨¡å¼
 	switch (eParity)
 	{
-	case MB_PAR_NONE: //ÎŞĞ£Ñé
+	case MB_PAR_NONE: //æ— æ ¡éªŒ
 		USART_InitStructure.USART_Parity = USART_Parity_No;
 		USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 		break;
-	case MB_PAR_ODD: //ÆæĞ£Ñé
+	case MB_PAR_ODD: //å¥‡æ ¡éªŒ
 		USART_InitStructure.USART_Parity = USART_Parity_Odd;
 		USART_InitStructure.USART_WordLength = USART_WordLength_9b;
 		break;
-	case MB_PAR_EVEN: //Å¼Ğ£Ñé
+	case MB_PAR_EVEN: //å¶æ ¡éªŒ
 		USART_InitStructure.USART_Parity = USART_Parity_Even;
 		USART_InitStructure.USART_WordLength = USART_WordLength_9b;
 		break;
@@ -95,8 +95,8 @@ void cpad_MBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 	USART_Cmd(USART2, ENABLE);
 
-	//=====================ÖĞ¶Ï³õÊ¼»¯======================================
-	//ÉèÖÃNVICÓÅÏÈ¼¶·Ö×éÎªGroup2£º0-3ÇÀÕ¼Ê½ÓÅÏÈ¼¶£¬0-3µÄÏìÓ¦Ê½ÓÅÏÈ¼¶
+	//=====================ä¸­æ–­åˆå§‹åŒ–======================================
+	//è®¾ç½®NVICä¼˜å…ˆçº§åˆ†ç»„ä¸ºGroup2ï¼š0-3æŠ¢å å¼ä¼˜å…ˆçº§ï¼Œ0-3çš„å“åº”å¼ä¼˜å…ˆçº§
 	//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -128,7 +128,7 @@ void cpad_xMBPortSerialPutByte(uint8_t *ucbyte, uint16_t len)
 	USART_ITConfig(USART2, USART_IT_TC, ENABLE);
 }
 
-//MB´®¿Ú½ÓÊÕÊı¾İ
+//MBä¸²å£æ¥æ”¶æ•°æ®
 uint8_t CpadPortSerialReceiveFSM_MBS(void)
 {
 	uint8_t rec_data;
@@ -194,7 +194,7 @@ uint8_t CpadPortSerialReceiveFSM_MBS(void)
 	return 1;
 }
 
-//T5´®¿Ú½ÓÊÕÊı¾İ
+//T5ä¸²å£æ¥æ”¶æ•°æ®
 uint8_t CpadPortSerialReceiveFSM_T5(void)
 {
 	uint8_t rec_data;
@@ -269,7 +269,7 @@ void USART2_IRQHandler(void)
 	extern local_reg_st l_sys;
 	uint8_t rec_data, tx_data;
 	rt_interrupt_enter();
-	//Òç³ö´íÎó
+	//æº¢å‡ºé”™è¯¯
 
 	rec_data = rec_data;
 	if (USART_GetFlagStatus(USART2, USART_FLAG_ORE) == SET)
@@ -277,12 +277,12 @@ void USART2_IRQHandler(void)
 		rec_data = USART_ReceiveData(USART2);
 		//USART_ClearFlag(UART5 USART_FLAG_ORE);
 	}
-	//½ÓÊÕÖĞ¶Ï
+	//æ¥æ”¶ä¸­æ–­
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET)
 	{
 		l_sys.u16Uart_Timeout = 0;
 		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-		if (l_sys.SEL_Jump & Com_Pad) //´®¿ÚÆÁ
+		if (l_sys.SEL_Jump & Com_Pad) //ä¸²å£å±
 		{
 			CpadPortSerialReceiveFSM_T5();
 		}
@@ -291,7 +291,7 @@ void USART2_IRQHandler(void)
 			CpadPortSerialReceiveFSM_MBS();
 		}
 	}
-	//·¢ËÍÖĞ¶Ï
+	//å‘é€ä¸­æ–­
 	if (USART_GetITStatus(USART2, USART_IT_TC) == SET)
 	{
 		USART_ClearFlag(USART2, USART_FLAG_TC);

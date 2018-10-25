@@ -2,99 +2,97 @@
 #include "Delay.h"
 
 /**************************
-*ÄÚ²¿ÑÓÊ±
+*å†…éƒ¨å»¶æ—¶
 ***************************/
 
 /*---------------------------------
-ÑÓÊ±us
+å»¶æ—¶us
 -----------------------------------*/
 /*---------------------------------
-ÑÓÊ±us
+å»¶æ—¶us
 -----------------------------------*/
 void Delay_ms(unsigned long u32us)
 {
-		unsigned long i;
-		
-		while(u32us--)
-		{
-				for(i=0;i<5000;i++);
-		}	
+    unsigned long i;
+
+    while (u32us--)
+    {
+        for (i = 0; i < 5000; i++)
+            ;
+    }
 }
 
 void Delay_us(unsigned long u32us)
 {
-		unsigned char i;
-		
-		while(u32us--)
-		{
-				for(i=0;i<9;i++);
-//				for(i=0;i<7;i++);
-		}	
+    unsigned char i;
+
+    while (u32us--)
+    {
+        for (i = 0; i < 9; i++)
+            ;
+    }
 }
 
 void Delay05us(void)
 {
-		unsigned char i;
-		for(i=0; i<1; i++);
+    unsigned char i;
+    for (i = 0; i < 1; i++)
+        ;
 }
-
-
 
 static volatile uint32_t TimingDelay = 0;
 
 void Delay_sys(volatile unsigned long nTime)
-{ 
-  TimingDelay = nTime;
+{
+    TimingDelay = nTime;
 
-  while(TimingDelay != 0);
+    while (TimingDelay != 0)
+        ;
 }
 
 void TimingDelay_Decrement(void)
 {
-  if (TimingDelay != 0x00)
-  { 
-    TimingDelay--;
-  }
+    if (TimingDelay != 0x00)
+    {
+        TimingDelay--;
+    }
 }
 
-static u8  fac_us=0;
-static u16 fac_ms=0;
+static u8 fac_us = 0;
+static u16 fac_ms = 0;
 
-void delay_init(void)	 
+void delay_init(void)
 {
 
-//	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);	//ÏµÍ³Ê±ÖÓ³õÊ¼»¯£¬Ñ¡ÔñÍâ²¿Ê±ÖÓ  HCLK/8
-	fac_us=SystemCoreClock/8000000;	//ÎªÏµÍ³Ê±ÖÓµÄ1/8  
-	fac_ms=(u16)fac_us*1000;//´ú±íÃ¿¸ömsÐèÒªµÄsystickÊ±ÖÓÊý   
-}								    
-	    								   
-void delay_1us(uint32_t nus)//ÑÓÊ±us
-{		
-	u32 temp;	    	 
-	SysTick->LOAD=nus*fac_us; 	 
-	SysTick->VAL=0x00;       
-	SysTick->CTRL|=SysTick_CTRL_ENABLE_Msk ;       
-	do
-	{
-		temp=SysTick->CTRL;
-	}
-	while(temp&0x01&&!(temp&(1<<16)));
-	SysTick->CTRL&=~SysTick_CTRL_ENABLE_Msk;      
-	SysTick->VAL =0X00;        
+    //	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);	//ç³»ç»Ÿæ—¶é’Ÿåˆå§‹åŒ–ï¼Œé€‰æ‹©å¤–éƒ¨æ—¶é’Ÿ  HCLK/8
+    fac_us = SystemCoreClock / 8000000; //ä¸ºç³»ç»Ÿæ—¶é’Ÿçš„1/8
+    fac_ms = (u16)fac_us * 1000;        //ä»£è¡¨æ¯ä¸ªmséœ€è¦çš„systickæ—¶é’Ÿæ•°
 }
 
-void delay_1ms(uint16_t nms)//ÑÓÊ±ms
-{	 		  	  
-	u32 temp;		   
-	SysTick->LOAD=(u32)nms*fac_ms;
-	SysTick->VAL =0x00;           
-	SysTick->CTRL|=SysTick_CTRL_ENABLE_Msk ;        
-	do
-	{
-		temp=SysTick->CTRL;
-	}
-	while(temp&0x01&&!(temp&(1<<16)));
-	SysTick->CTRL&=~SysTick_CTRL_ENABLE_Msk;      
-	SysTick->VAL =0X00;     
+void delay_1us(uint32_t nus) //å»¶æ—¶us
+{
+    u32 temp;
+    SysTick->LOAD = nus * fac_us;
+    SysTick->VAL = 0x00;
+    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+    do
+    {
+        temp = SysTick->CTRL;
+    } while (temp & 0x01 && !(temp & (1 << 16)));
+    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+    SysTick->VAL = 0X00;
 }
 
+void delay_1ms(uint16_t nms) //å»¶æ—¶ms
+{
+    u32 temp;
+    SysTick->LOAD = (u32)nms * fac_ms;
+    SysTick->VAL = 0x00;
+    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+    do
+    {
+        temp = SysTick->CTRL;
+    } while (temp & 0x01 && !(temp & (1 << 16)));
+    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+    SysTick->VAL = 0X00;
+}
