@@ -5,57 +5,57 @@
 #define HUM_CURRENT_UNIT 1.19
 enum
 {
-	HUM_FSM_STATE_IDLE = 0,
-	HUM_FSM_STATE_CHECK,
-	HUM_FSM_STATE_WARM,
-	HUM_FSM_STATE_DRAIN, //排水
-	HUM_FSM_STATE_HUM,   //加湿
-	HUM_FSM_STATE_FILL,  //注水
-	HUM_FSM_STATE_FLUSH, //冲刷换水
+    HUM_FSM_STATE_IDLE = 0,
+    HUM_FSM_STATE_CHECK,
+    HUM_FSM_STATE_WARM,
+    HUM_FSM_STATE_DRAIN, //排水
+    HUM_FSM_STATE_HUM,   //加湿
+    HUM_FSM_STATE_FILL,  //注水
+    HUM_FSM_STATE_FLUSH, //冲刷换水
 
 };
 
 enum
 {
-	HUM_TYPE_FIX,
-	HUM_TYPE_P,
-	HUM_TYPE_INFRARED, //红外加湿
+    HUM_TYPE_FIX,
+    HUM_TYPE_P,
+    HUM_TYPE_INFRARED, //红外加湿
 };
 
 enum
 {
-	COMPRESSOR_FSM_STATE_IDLE = 0,
-	COMPRESSOR_FSM_STATE_INIT,
-	COMPRESSOR_FSM_STATE_STARTUP,
-	COMPRESSOR_FSM_STATE_NORMAL,
-	COMPRESSOR_FSM_STATE_SHUTING,
-	COMPRESSOR_FSM_STATE_STOP,
+    COMPRESSOR_FSM_STATE_IDLE = 0,
+    COMPRESSOR_FSM_STATE_INIT,
+    COMPRESSOR_FSM_STATE_STARTUP,
+    COMPRESSOR_FSM_STATE_NORMAL,
+    COMPRESSOR_FSM_STATE_SHUTING,
+    COMPRESSOR_FSM_STATE_STOP,
 };
 
 //风机状态机
 enum
 {
-	FSM_FAN_IDLE = 0,
-	FSM_FAN_INIT,
-	FSM_FAN_START_UP,
-	FSM_FAN_NORM,
-	FSM_FAN_SHUT
+    FSM_FAN_IDLE = 0,
+    FSM_FAN_INIT,
+    FSM_FAN_START_UP,
+    FSM_FAN_NORM,
+    FSM_FAN_SHUT
 };
 //出水模式
 enum
 {
-	WATER_NO = 0x00,
-	WATER_NORMAL_ICE = 0x01,
-	WATER_HEAT = 0x02,
-	WATER_NORMAL_ICE_2 = 0x04,
+    WATER_NO = 0x00,
+    WATER_NORMAL_ICE = 0x01,
+    WATER_HEAT = 0x02,
+    WATER_NORMAL_ICE_2 = 0x04,
 };
 
 //水路控制方案
 enum
 {
-	HEART_POT = 0x01, //热灌
-	HMI_KEY = 0x02,
-	OPEN_PWP = 0x04, //开盖时，打开净化泵
+    HEART_POT = 0x01, //热灌
+    HMI_KEY = 0x02,
+    OPEN_PWP = 0x04, //开盖时，打开净化泵
 };
 #define ChildKey_Cnt 3
 #define ChildKey_Lose 5
@@ -63,24 +63,24 @@ enum
 //水位
 enum
 {
-	S_L = 0x01,
-	S_M = 0x02,
-	S_U = 0x04,
-	D_L = 0x08,
-	D_M = 0x10,
-	D_U = 0x20,
-	D_MU = 0x40,
+    S_L = 0x01,
+    S_M = 0x02,
+    S_U = 0x04,
+    D_L = 0x08,
+    D_M = 0x10,
+    D_U = 0x20,
+    D_MU = 0x40,
 };
 
 //流量脉冲
 enum
 {
-	L200 = 380,
-	L300 = 570,
-	L500 = 1250,
-	L1000 = 2750,
-	L1500 = 4350,
-	L2000 = 5450,
+    L200 = 380,
+    L300 = 570,
+    L500 = 1250,
+    L1000 = 2750,
+    L1500 = 4350,
+    L2000 = 5450,
 };
 //流量因子
 //#define L300_FACTOR   0.47846889952153110047846889952153
@@ -102,23 +102,23 @@ enum
 //出水状态
 enum
 {
-	HEATER_IDLE = 0,
-	HEATER_SEND,
-	WATER_READ,
-	WATER_OUT,
+    HEATER_IDLE = 0,
+    HEATER_SEND,
+    WATER_READ,
+    WATER_OUT,
 };
 //加热器控制
 enum
 {
-	CLOSE_HEAT = 0,
-	OPEN_HEAT,
+    CLOSE_HEAT = 0,
+    OPEN_HEAT,
 };
 
 //加热器出水状态
 enum
 {
-	HEAT_NO = 0,
-	HEAT_OUTWATER = 0x01,
+    HEAT_NO = 0,
+    HEAT_OUTWATER = 0x01,
 };
 
 #define RH_DEALY 10
@@ -135,15 +135,15 @@ enum
 #define FIXED_SAVETIME 900
 enum
 {
-	FAN_MODE_FIX = 0,		//定速模式
-	FAN_MODE_PRESS_DIFF,	//压差模式
-	FAN_MODE_AVR_RETURN,	//回风平均
-	FAN_MODE_AVR_SUPPLY,	//送风平均
-	FAN_MODE_TEMP_DIFF,		//温差平均
-	FAN_MODE_MAX_RETURN,	//回风热点
-	FAN_MODE_MAX_SUPPLY,	//送风热点
-	FAN_MODE_TEMP_MAX_DIFF, //温差热点
-	FAM_MODE_INV_COMP,		//变频跟踪
+    FAN_MODE_FIX = 0,       //定速模式
+    FAN_MODE_PRESS_DIFF,    //压差模式
+    FAN_MODE_AVR_RETURN,    //回风平均
+    FAN_MODE_AVR_SUPPLY,    //送风平均
+    FAN_MODE_TEMP_DIFF,     //温差平均
+    FAN_MODE_MAX_RETURN,    //回风热点
+    FAN_MODE_MAX_SUPPLY,    //送风热点
+    FAN_MODE_TEMP_MAX_DIFF, //温差热点
+    FAM_MODE_INV_COMP,      //变频跟踪
 };
 void hum_capacity_calc(void);
 void req_execution(int16_t target_req_temp, int16_t target_req_hum);

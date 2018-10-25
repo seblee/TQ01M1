@@ -63,8 +63,8 @@ enum
 
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t modbus_master_stack[512];
-static rt_uint8_t modbus_slave_stack[512];
-static rt_uint8_t monitor_slave_stack[512];
+// static rt_uint8_t modbus_slave_stack[512];
+static rt_uint8_t monitor_slave_stack[1536];
 //static rt_uint8_t team_stack[ 512 ];
 static rt_uint8_t mbm_fsm_stack[512];
 static rt_uint8_t di_stack[256];
@@ -77,7 +77,7 @@ static rt_uint8_t testcase_stack[512];
 static rt_uint8_t sim7600_stack[2560];
 
 static struct rt_thread modbus_master_thread;
-static struct rt_thread modbus_slave_thread;
+// static struct rt_thread modbus_slave_thread;
 static struct rt_thread CPAD_slave_thread;
 //static struct rt_thread tcom_thread;
 //static struct rt_thread team_thread;
@@ -142,18 +142,18 @@ int rt_application_init(void)
     }
 
     //modbus_slave_thread_entry
-    result = rt_thread_init(&modbus_slave_thread,
-                            "mb_slave",
-                            modbus_slave_thread_entry,
-                            RT_NULL,
-                            (rt_uint8_t *)&modbus_slave_stack[0],
-                            sizeof(modbus_slave_stack),
-                            MODBUS_SLAVE_THREAD_PRIO,
-                            20);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&modbus_slave_thread);
-    }
+    // result = rt_thread_init(&modbus_slave_thread,
+    //                         "mb_slave",
+    //                         modbus_slave_thread_entry,
+    //                         RT_NULL,
+    //                         (rt_uint8_t *)&modbus_slave_stack[0],
+    //                         sizeof(modbus_slave_stack),
+    //                         MODBUS_SLAVE_THREAD_PRIO,
+    //                         20);
+    // if (result == RT_EOK)
+    // {
+    //     rt_thread_startup(&modbus_slave_thread);
+    // }
 
     //CPAD_slave_thread_entry
     result = rt_thread_init(&CPAD_slave_thread,
@@ -286,18 +286,18 @@ int rt_application_init(void)
         rt_thread_startup(&testcase_thread);
     }
 
-    result = rt_thread_init(&sim7600_thread,
-                            "sim7600_test",
-                            sim7600_thread_entry,
-                            RT_NULL,
-                            (rt_uint8_t *)&sim7600_stack[0],
-                            sizeof(sim7600_stack),
-                            SIM7600_THREAD_PRIO,
-                            5);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&sim7600_thread);
-    }
+    // result = rt_thread_init(&sim7600_thread,
+    //                         "sim7600_test",
+    //                         sim7600_thread_entry,
+    //                         RT_NULL,
+    //                         (rt_uint8_t *)&sim7600_stack[0],
+    //                         sizeof(sim7600_stack),
+    //                         SIM7600_THREAD_PRIO,
+    //                         5);
+    // if (result == RT_EOK)
+    // {
+    //     rt_thread_startup(&sim7600_thread);
+    // }
 
     return 0;
 }
