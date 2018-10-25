@@ -769,11 +769,11 @@ void Comm_Service(void)
             break;
         case SEND_Wait: //发送等待（由g_ComGap检查）----------------------------
                         //	            if (g_ComGap[port]> PROTOCOL_FRAME_SendGap)               //发送延时到？
-        {
-            g_ComGap[port] = 0;           //通讯字节间隔定时开始
-            g_ComStat[port] = SEND_Going; //置"正在发送"状态
-        }
-        break;
+            {
+                g_ComGap[port] = 0;           //通讯字节间隔定时开始
+                g_ComStat[port] = SEND_Going; //置"正在发送"状态
+            }
+            break;
         case SEND_Going: //正在发送（检查发送端是否打开）------------------------
             if (g_ComGap[port] < 100)
             {

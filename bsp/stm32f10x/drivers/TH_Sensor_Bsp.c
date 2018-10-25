@@ -3,6 +3,8 @@
 #include "TH_SENSOR_BSP.h"
 #include "string.h"
 #include "user_mb_app.h"
+#include "stdlib.h"
+#include "math.h"
 
 void AM_BUS_Config(void)
 {
@@ -155,7 +157,7 @@ void AM23XX_start(uint8_t u8SN)
 	AM_SDA_H(u8SN);   //释放总线
 	AM_SDA_IN(u8SN);
 	;			  //设为输入模式，判断传感器响应信号
-	Delay_us(30); //延时30us
+	Delay_us(40); //延时30us
 }
 
 /********************************************\
@@ -163,44 +165,6 @@ void AM23XX_start(uint8_t u8SN)
 \********************************************/
 unsigned char Read_SensorData(uint8_t u8SN)
 {
-	//	unsigned char i;
-	//	unsigned char buffer,tmp;
-	//	unsigned short cnt;
-	//	buffer = 0;
-	//	for(i=0;i<8;i++)
-	//	{
-	//		cnt=0;
-	//		while(!AM_SDA_READ(u8SN))	//检测上次低电平是否结束
-	//		{
-	////		  if(++cnt >= 300)
-	//		  if(++cnt >= 900)
-	//		   {
-	//					break;
-	//		   }
-	//		}
-	//		//延时Min=26us Max50us 跳过数据"0" 的高电平
-	//		Delay_us(30);//延时30us
-	//
-	//		//判断传感器发送数据位
-	//		tmp =0;
-	//		if(AM_SDA_READ(u8SN))
-	//		{
-	//		  tmp = 1;
-	//		}
-	//		cnt =0;
-	//		while(AM_SDA_READ(u8SN))		//等待高电平 结束
-	//		{
-	////		   	if(++cnt >= 200)
-	//		   	if(++cnt >= 600)
-	//			{
-	//			  break;
-	//			}
-	//		}
-	//		buffer <<=1;
-	//		buffer |= tmp;
-	//	}
-	//	return buffer;
-
 	uint8_t i;
 	uint16_t j;
 	uint8_t data = 0, bit = 0;
@@ -253,7 +217,8 @@ uint8_t Read_Sensor(uint16_t *u16TH_Buff, uint8_t u8SN)
 	int16_t i16Temprature;	 //定义温湿度变量
 	uint16_t u16Humi;		   //定义温湿度变量
 
-	AM23XX_start(u8SN); //从机发送起始信号
+	ENTER_CRITICAL_SECTION(); //关全局中断
+	AM23XX_start(u8SN);		  //从机发送起始信号
 
 	Sensor_AnswerFlag = 0; //传感器响应标志
 	//判断从机是否有低电平响应信号 如不响应则跳出，响应则向下运行
@@ -334,6 +299,7 @@ uint8_t Read_Sensor(uint16_t *u16TH_Buff, uint8_t u8SN)
 		Sensor_ErrorFlag = 0; //未收到传感器响应
 		rt_kprintf("Sensor Error!!\r\n");
 	}
+	EXIT_CRITICAL_SECTION(); //开全局中断
 
 	return Sensor_AnswerFlag;
 }
@@ -341,6 +307,7 @@ uint8_t Read_Sensor(uint16_t *u16TH_Buff, uint8_t u8SN)
 #define AM_SENSOR_NUM 2
 uint16_t u16TH_Sensor[AM_SENSOR_NUM] = {0};
 #define TH_AVE_NUM 5
+#define JUMP_OFFSET 30
 /********************************************\
 |* 功能： 温湿度更新             	        *|
 \********************************************/
@@ -352,12 +319,15 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
 	static uint8_t u8TH_CNT[AM_SENSOR_NUM] = {0};
 	static uint8_t u8Err_CNT[AM_SENSOR_NUM] = {0};
 	static uint16_t u16TH_Ave[AM_SENSOR_NUM][2][TH_AVE_NUM] = {0};
+	static uint8_t u8Offset_CNT = 0;
+	static uint16_t u16LastTH[2] = {0};
 
 	uint8_t i = 0, j = 0, k = 0;			//收到起始标志位
 	uint8_t u8SenFlag[AM_SENSOR_NUM] = {0}; //收到起始标志位
 	Com_tnh_st u16TH_Buff = {0};
 	uint16_t u16TH_Sum[AM_SENSOR_NUM][2] = {0};
 	uint8_t u8TH_Cnt[AM_SENSOR_NUM][2] = {0};
+	int16_t i16Offset_Buff[2] = {0};
 
 	u8CNT++;
 	if (u8CNT >= 0xFF)
@@ -365,14 +335,20 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
 		u8CNT = 0x00;
 	}
 	//		i=u8CNT%AM_SENSOR_NUM;
-	i = u8CNT % 5;
+	i = u8CNT % 6;
 	//		//两次读取间隔至少2S
 	//		Delay_ms(1500);//延时1500ms
 	if (i != 0)
 	{
-		//			AM23XX_start(i);//从机发送起始信号
 		return 0;
 	}
+	//温湿度跳变判断延时
+	u8Offset_CNT++;
+	if (u8Offset_CNT >= JUMP_OFFSET)
+	{
+		u8Offset_CNT = JUMP_OFFSET;
+	}
+
 	memset(&u16TH_Sensor[0], 0x00, 4);
 
 	//		//映射回风温湿度
@@ -394,10 +370,10 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
 		else
 		{
 			u8Err_CNT[i] = 0;
-			u16TH_Buff.Temp = u16TH_Sensor[0] + (int16_t)(gds_ptr->config.general.temp_sensor_cali[i].temp);
-			u16TH_Buff.Hum = u16TH_Sensor[1] + (int16_t)(gds_ptr->config.general.temp_sensor_cali[i].hum);
+			u16TH_Buff.Temp = u16TH_Sensor[0];
+			u16TH_Buff.Hum = u16TH_Sensor[1];
 			//更新状态MBM_COM_STS_REG_NO
-			gds_ptr->status.status_remap[MBM_COM_STS_REG_NO] |= (0x0001 << i);
+			gds_ptr->status.status_remap[MBM_COM_STS_REG_NO] |= (0x0001 << 0);
 		}
 	}
 	else
@@ -407,29 +383,44 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
 
 	if (u8Err_CNT[i] > ERROR_CNT_MAX)
 	{
-		//			u8Err_CNT[i]=0;
-		g_sys.status.ComSta.u16TH[i].Temp = 0;
-		g_sys.status.ComSta.u16TH[i].Hum = 0;
-		//更新状态MBM_COM_STS_REG_NO
-		gds_ptr->status.status_remap[MBM_COM_STS_REG_NO] &= ~(0x0001 << i);
+		//			g_sys.status.ComSta.u16TH[i].Temp = 0;
+		//			g_sys.status.ComSta.u16TH[i].Hum = 0;
+		//			//更新状态MBM_COM_STS_REG_NO
+		g_sys.status.ComSta.u16TH[0].Temp = 285;
+		g_sys.status.ComSta.u16TH[0].Hum = 567;
+		gds_ptr->status.status_remap[MBM_COM_STS_REG_NO] &= ~(0x0001 << 0);
+		AM_Init(); //AM Sensor init
+		i = 0;
 	}
 	else if (u8Err_CNT[i] == 0)
 	//		else
 	{
-		u8TH_CNT[i]++;
-		if (u8TH_CNT[i] >= 0xFF)
+		if ((u16TH_Buff.Temp <= 999) && ((u16TH_Buff.Temp != 0) && (u16TH_Buff.Hum != 0)))
 		{
-			u8TH_CNT[i] = 0x00;
+			if (u16TH_Buff.Hum <= 999)
+			{
+				i16Offset_Buff[0] = (int16_t)u16TH_Buff.Temp - (int16_t)u16LastTH[0];
+				i16Offset_Buff[1] = (int16_t)u16TH_Buff.Hum - (int16_t)u16LastTH[1];
+				if (((abs(i16Offset_Buff[0]) > TEMP_OFFSET) || (abs(i16Offset_Buff[1]) > HUM_OFFSET)) && (u8Offset_CNT >= JUMP_OFFSET))
+				{
+				}
+				else
+				{
+					u8TH_CNT[i]++;
+					if (u8TH_CNT[i] >= 0xFF)
+					{
+						u8TH_CNT[i] = 0x00;
+					}
+					j = u8TH_CNT[i] % TH_AVE_NUM;
+
+					u16LastTH[0] = u16TH_Buff.Temp;
+					u16LastTH[1] = u16TH_Buff.Hum;
+					u16TH_Ave[i][0][j] = u16TH_Buff.Temp;
+					u16TH_Ave[i][1][j] = u16TH_Buff.Hum;
+				}
+			}
 		}
-		j = u8TH_CNT[i] % TH_AVE_NUM;
-		if ((u16TH_Buff.Temp <= 1000) && ((u16TH_Buff.Temp != 0) && (u16TH_Buff.Hum != 0)))
-		{
-			u16TH_Ave[i][0][j] = u16TH_Buff.Temp;
-		}
-		if ((u16TH_Buff.Hum <= 1000) && ((u16TH_Buff.Temp != 0) && (u16TH_Buff.Hum != 0)))
-		{
-			u16TH_Ave[i][1][j] = u16TH_Buff.Hum;
-		}
+
 		//		rt_kprintf("Temp=%x,1= %x,1= %x,3 = %x,4=%x\n",u16TH_Ave[0][0][0],u16TH_Ave[0][0][1],u16TH_Ave[0][0][2],u16TH_Ave[0][0][3],u16TH_Ave[0][0][4]);
 
 		for (k = 0; k < TH_AVE_NUM; k++)
@@ -445,12 +436,12 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
 				u8TH_Cnt[i][1]++;
 			}
 		}
-		g_sys.status.ComSta.u16TH[i].Temp = u16TH_Sum[i][0] / u8TH_Cnt[i][0];
-		g_sys.status.ComSta.u16TH[i].Hum = u16TH_Sum[i][1] / u8TH_Cnt[i][1];
+		g_sys.status.ComSta.u16TH[i].Temp = u16TH_Sum[i][0] / u8TH_Cnt[i][0] + (int16_t)g_sys.config.general.temp_sensor_cali[0].temp;
+		g_sys.status.ComSta.u16TH[i].Hum = u16TH_Sum[i][1] / u8TH_Cnt[i][1] + (int16_t)g_sys.config.general.temp_sensor_cali[0].hum;
 	}
 	//		g_sys.status.ComSta.u16TH[0].Temp=285;
 	//		g_sys.status.ComSta.u16TH[0].Temp=567;
-	//		rt_kprintf("u8CNT=%x,i=%x,u8SenFlag[0]= %x,u16TH_Sensor[0]= %x,[1] = %x,u8Err_CNT[0]=%x,Temp=%x,Hum=%x\n",u8CNT,i,u8SenFlag[0],u16TH_Sensor[0],u16TH_Sensor[1],u8Err_CNT[0],g_sys.status.ComSta.u16TH[0].Temp,g_sys.status.ComSta.u16TH[0].Hum);
+	rt_kprintf("u8CNT=%x,i=%x,u8SenFlag[0]= %x,u16TH_Sensor[0]= %x,[1] = %x,u8Err_CNT[0]=%x,Temp=%x,Hum=%x\n", u8CNT, i, u8SenFlag[0], u16TH_Sensor[0], u16TH_Sensor[1], u8Err_CNT[0], g_sys.status.ComSta.u16TH[0].Temp, g_sys.status.ComSta.u16TH[0].Hum);
 
 	return u8SenFlag[i];
 }

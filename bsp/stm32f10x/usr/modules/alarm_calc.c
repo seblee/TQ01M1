@@ -644,7 +644,7 @@ uint8_t get_alarm_bitmap(uint8_t alarm_id)
 static void alarm_arbiration(void)
 {
 	uint8_t compress1_alarm = 0, compress2_alarm = 0, close_dev = 0;
-	uint8_t index;
+	//		uint8_t index;
 
 	if (get_alarm_bitmap(ACL_HI_PRESS1)) //高压
 	{
@@ -1159,37 +1159,33 @@ static uint16_t acl04(alarm_acl_status_st *acl_ptr)
 //ACL_E5 温湿度传感器故障
 static uint16_t acl05(alarm_acl_status_st *acl_ptr)
 {
-	int16_t min;
-	int16_t max;
 	uint8_t req;
-	int16_t meter;
+	uint16_t u16mb_comp;
 
+	//uint16_t HUM_erro=0;
+	req = 0;
 	// 解除 报警
 	if (acl_clear(acl_ptr))
 	{
+		g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = 0;
 		return (ALARM_ACL_CLEARED);
 	}
 
-	max = ACL_TEM_MAX;
-	min = ACL_TEM_MIN;
+	//		u16mb_comp=g_sys.config.dev_mask.mb_comp;
+	u16mb_comp = 0x01;
 
-	req = 0;
-
-	//TH
-	if ((g_sys.config.dev_mask.mb_comp) & (0x01 << 0x00))
+	if (g_sys.status.status_remap[MBM_COM_STS_REG_NO] != u16mb_comp)
 	{
-		meter = g_sys.status.ComSta.u16TH[0].Temp;
-		if (compare_calc(meter, min, max, OUT_MIN_MAX_TYPE))
-		{
-			sys_set_remap_status(SENSOR_STS_REG_NO, AI_NTC3 + 1, 1);
-			req = 1;
-		}
-		else
-		{
-			sys_set_remap_status(SENSOR_STS_REG_NO, AI_NTC3 + 1, 0);
-		}
+		g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = (g_sys.status.status_remap[MBM_COM_STS_REG_NO]) ^ (u16mb_comp);
+		req = 1;
 	}
-	acl_ptr->alram_value = g_sys.status.status_remap[SENSOR_STS_REG_NO];
+	else
+	{
+		g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = 0;
+		req = 0;
+	}
+	acl_ptr->alram_value = g_sys.status.status_remap[MBM_COM_STS_REG_NO];
+	//		rt_kprintf("status_remap[MBM_COM_STS_REG_NO] = %x,mb_comp = %x,req = %x\n",g_sys.status.status_remap[MBM_COM_STS_REG_NO],g_sys.config.dev_mask.mb_comp,req);
 	return (req);
 }
 

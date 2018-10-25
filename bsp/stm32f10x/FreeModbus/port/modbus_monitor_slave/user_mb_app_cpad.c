@@ -40,9 +40,9 @@ typedef struct
 	uint8_t reg_w_r; //3 =write&read,2=read_only,3=write_only
 } reg_table_st;
 
-//ÄÚ´æµ½modbusµÄÓ³Éä±í¡£
-//ÔªËØÎ»ÖÃ¶ÔÓ¦ModeBus  Ğ­ÒéÕ»ÖĞusSRegHoldBufÎ»ÖÃ
-//ÔªËØÖµ¶ÔÓ¦conf_reg_map_inst£¬ÄÚ´æÊı¾İµÄÎ»ÖÃ¡£
+//å†…å­˜åˆ°modbusçš„æ˜ å°„è¡¨ã€‚
+//å…ƒç´ ä½ç½®å¯¹åº”ModeBus  åè®®æ ˆä¸­usSRegHoldBufä½ç½®
+//å…ƒç´ å€¼å¯¹åº”conf_reg_map_instï¼Œå†…å­˜æ•°æ®çš„ä½ç½®ã€‚
 
 void cpad_modbus_slave_thread_entry(void *parameter)
 {
@@ -54,7 +54,13 @@ void cpad_modbus_slave_thread_entry(void *parameter)
 	rt_kprintf("cpad_modbus_slave_thread_entry\n");
 	while (1)
 	{
-		//				if(l_sys.SEL_Jump&Com_Pad)//´®¿ÚÆÁ
+		l_sys.u16Uart_Timeout++;
+		if (l_sys.u16Uart_Timeout >= 500)
+		{
+			l_sys.u16Uart_Timeout = 0;
+			cpad_MBRTUInit(1, UPORT_CPAD, 19200, MB_PAR_NONE);
+		}
+		//				if(l_sys.SEL_Jump&Com_Pad)//ä¸²å£å±
 		//				{
 		//					Cpad_Update();
 		//					rt_thread_delay(200);
@@ -67,17 +73,17 @@ void cpad_modbus_slave_thread_entry(void *parameter)
 	}
 }
 
-//******************************±£³Ö¼Ä´æÆ÷»Øµ÷º¯Êı**********************************
-//º¯Êı¶¨Òå: eMBErrorCode eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode )
-//Ãè    Êö£º±£³Ö¼Ä´æÆ÷Ïà¹ØµÄ¹¦ÄÜ£¨¶Á¡¢Á¬Ğø¶Á¡¢Ğ´¡¢Á¬ĞøĞ´£©
-//Èë¿Ú²ÎÊı£ºpucRegBuffer : Èç¹ûĞèÒª¸üĞÂÓÃ»§¼Ä´æÆ÷ÊıÖµ£¬Õâ¸ö»º³åÇø±ØĞëÖ¸ÏòĞÂµÄ¼Ä´æÆ÷ÊıÖµ¡£
-//                         Èç¹ûĞ­ÒéÕ»ÏëÖªµÀµ±Ç°µÄÊıÖµ£¬»Øµ÷º¯Êı±ØĞë½«µ±Ç°ÖµĞ´ÈëÕâ¸ö»º³åÇø
-//			usAddress    : ¼Ä´æÆ÷µÄÆğÊ¼µØÖ·¡£
-//			usNRegs      : ¼Ä´æÆ÷ÊıÁ¿
-//          eMode        : Èç¹û¸Ã²ÎÊıÎªeMBRegisterMode::MB_REG_WRITE£¬ÓÃ»§µÄÓ¦ÓÃÊıÖµ½«´ÓpucRegBufferÖĞµÃµ½¸üĞÂ¡£
-//                         Èç¹û¸Ã²ÎÊıÎªeMBRegisterMode::MB_REG_READ£¬ÓÃ»§ĞèÒª½«µ±Ç°µÄÓ¦ÓÃÊı¾İ´æ´¢ÔÚpucRegBufferÖĞ
-//³ö¿Ú²ÎÊı£ºeMBErrorCode : Õâ¸öº¯Êı½«·µ»ØµÄ´íÎóÂë
-//±¸    ×¢£ºEditor£ºArmink 2010-10-31    Company: BXXJS
+//******************************ä¿æŒå¯„å­˜å™¨å›è°ƒå‡½æ•°**********************************
+//å‡½æ•°å®šä¹‰: eMBErrorCode eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode )
+//æ    è¿°ï¼šä¿æŒå¯„å­˜å™¨ç›¸å…³çš„åŠŸèƒ½ï¼ˆè¯»ã€è¿ç»­è¯»ã€å†™ã€è¿ç»­å†™ï¼‰
+//å…¥å£å‚æ•°ï¼špucRegBuffer : å¦‚æœéœ€è¦æ›´æ–°ç”¨æˆ·å¯„å­˜å™¨æ•°å€¼ï¼Œè¿™ä¸ªç¼“å†²åŒºå¿…é¡»æŒ‡å‘æ–°çš„å¯„å­˜å™¨æ•°å€¼ã€‚
+//                         å¦‚æœåè®®æ ˆæƒ³çŸ¥é“å½“å‰çš„æ•°å€¼ï¼Œå›è°ƒå‡½æ•°å¿…é¡»å°†å½“å‰å€¼å†™å…¥è¿™ä¸ªç¼“å†²åŒº
+//			usAddress    : å¯„å­˜å™¨çš„èµ·å§‹åœ°å€ã€‚
+//			usNRegs      : å¯„å­˜å™¨æ•°é‡
+//          eMode        : å¦‚æœè¯¥å‚æ•°ä¸ºeMBRegisterMode::MB_REG_WRITEï¼Œç”¨æˆ·çš„åº”ç”¨æ•°å€¼å°†ä»pucRegBufferä¸­å¾—åˆ°æ›´æ–°ã€‚
+//                         å¦‚æœè¯¥å‚æ•°ä¸ºeMBRegisterMode::MB_REG_READï¼Œç”¨æˆ·éœ€è¦å°†å½“å‰çš„åº”ç”¨æ•°æ®å­˜å‚¨åœ¨pucRegBufferä¸­
+//å‡ºå£å‚æ•°ï¼šeMBErrorCode : è¿™ä¸ªå‡½æ•°å°†è¿”å›çš„é”™è¯¯ç 
+//å¤‡    æ³¨ï¼šEditorï¼šArmink 2010-10-31    Company: BXXJS
 //**********************************************************************************
 
 eMBErrorCode
@@ -102,7 +108,7 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 	REG_HOLDING_START = CPAD_S_REG_HOLDING_START;
 	REG_HOLDING_NREGS = CPAD_S_REG_HOLDING_NREGS;
 	usRegHoldStart = cpad_usSRegHoldStart;
-	//usAddress--;//FreeModbus¹¦ÄÜº¯ÊıÖĞÒÑ¾­¼Ó1£¬Îª±£Ö¤Óë»º³åÇøÊ×µØÖ·Ò»ÖÂ£¬¹Ê¼õ1
+	//usAddress--;//FreeModbusåŠŸèƒ½å‡½æ•°ä¸­å·²ç»åŠ 1ï¼Œä¸ºä¿è¯ä¸ç¼“å†²åŒºé¦–åœ°å€ä¸€è‡´ï¼Œæ•…å‡1
 	if ((usAddress >= REG_HOLDING_START) &&
 		(usAddress + usNRegs <= REG_HOLDING_START + REG_HOLDING_NREGS))
 	{
@@ -133,38 +139,38 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 			while (usNRegs > 0)
 			{
 
-				//³¬³ö¿ÉĞ´·¶Î§±¨´íÅĞ¶Ï
+				//è¶…å‡ºå¯å†™èŒƒå›´æŠ¥é”™åˆ¤æ–­
 				if ((usAddress + usNRegs) <= (REG_HOLDING_START + CPAD_REG_HOLDING_WRITE_NREGS))
 				{
 					if ((usAddress + usNRegs) >= (REG_HOLDING_START + CONFIG_REG_MAP_OFFSET + 1))
 					{
 						cmd_value = (*pucRegBuffer) << 8;
 						cmd_value += *(pucRegBuffer + 1);
-						//Ğ´Èë±£³Ö¼Ä´æÆ÷ÖĞÍ¬Ê±¸úĞÂµ½ÄÚ´æºÍflash±£´æ
-						// Ğ´Èë¼Ä´æÆ÷ºÍEEPROMÖĞ¡£
-						//  g_sys.status.general.TEST=0x5A;
+						//å†™å…¥ä¿æŒå¯„å­˜å™¨ä¸­åŒæ—¶è·Ÿæ–°åˆ°å†…å­˜å’Œflashä¿å­˜
+						// å†™å…¥å¯„å­˜å™¨å’ŒEEPROMä¸­ã€‚
+						//																								g_sys.status.general.TEST=0x5A;
 						u16RegAddr = iRegIndex - CONFIG_REG_MAP_OFFSET;
 						switch (u16RegAddr)
 						{
-						case FACTORY_RESET: //³ö³§ÉèÖÃ
+						case FACTORY_RESET: //å‡ºå‚è®¾ç½®
 						{
 							temp = cmd_value;
-							if (temp == 0x3C) //»Ö¸´Ô­Ê¼²ÎÊı
+							if (temp == 0x3C) //æ¢å¤åŸå§‹å‚æ•°
 							{
-								reset_runtime(0xFF); //ÇåÁãËùÓĞÔËĞĞÊ±¼ä
+								reset_runtime(0xFF); //æ¸…é›¶æ‰€æœ‰è¿è¡Œæ—¶é—´
 								set_load_flag(0x02);
 								rt_thread_delay(1000);
 								NVIC_SystemReset();
 								return MB_ENOERR;
 							}
-							else if (temp == 0x5A) //»Ö¸´³ö³§ÉèÖÃ
+							else if (temp == 0x5A) //æ¢å¤å‡ºå‚è®¾ç½®
 							{
 								set_load_flag(0x01);
 								rt_thread_delay(1000);
 								NVIC_SystemReset();
 								return MB_ENOERR;
 							}
-							else if (temp == 0x69) //±£´æ³ö³§ÉèÖÃ
+							else if (temp == 0x69) //ä¿å­˜å‡ºå‚è®¾ç½®
 							{
 								save_conf_reg(0x01);
 								rt_thread_delay(1000);
@@ -178,7 +184,7 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 							}
 						}
 						break;
-						case MANUAL_TSET: //²âÊÔÄ£Ê½
+						case MANUAL_TSET: //æµ‹è¯•æ¨¡å¼
 						{
 							temp = cmd_value;
 							if (temp == MANUAL_TEST_UNABLE)
@@ -203,10 +209,10 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 							}
 						}
 						break;
-						case CLEAR_RT: //ÇåÁã²¿¼şÔËĞĞÊ±¼ä
+						case CLEAR_RT: //æ¸…é›¶éƒ¨ä»¶è¿è¡Œæ—¶é—´
 						{
 							temp = cmd_value;
-							if (temp) //ÇåÁã²¿¼şÔËĞĞÊ±¼ä
+							if (temp) //æ¸…é›¶éƒ¨ä»¶è¿è¡Œæ—¶é—´
 							{
 								reset_runtime(temp);
 								return MB_ENOERR;
@@ -218,10 +224,10 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 							}
 						}
 						break;
-						case CLEAR_ALARM: //Çå³ı¸æ¾¯
+						case CLEAR_ALARM: //æ¸…é™¤å‘Šè­¦
 						{
 							temp = cmd_value;
-							if (temp == 0x5A) //ÇåÁã²¿¼şÔËĞĞÊ±¼ä
+							if (temp == 0x5A) //æ¸…é›¶éƒ¨ä»¶è¿è¡Œæ—¶é—´
 							{
 								clear_alarm();
 								return MB_ENOERR;
@@ -233,10 +239,10 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 							}
 						}
 						break;
-						case SET_TL: //ÏµÍ³Ê±¼äµÍÎ»
+						case SET_TL: //ç³»ç»Ÿæ—¶é—´ä½ä½
 						{
 							temp = cmd_value;
-							if (temp != NULL) //ÏµÍ³Ê±¼äµÍÎ»
+							if (temp != NULL) //ç³»ç»Ÿæ—¶é—´ä½ä½
 							{
 								l_sys.Set_Systime_Delay = SETTIME_DELAY;
 								l_sys.Set_Systime_Flag |= 0x01;
@@ -250,10 +256,10 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 							}
 						}
 						break;
-						case SET_TH: //ÏµÍ³Ê±¼ä¸ßÎ»
+						case SET_TH: //ç³»ç»Ÿæ—¶é—´é«˜ä½
 						{
 							temp = cmd_value;
-							if (temp != NULL) //ÏµÍ³Ê±¼ä¸ßÎ»
+							if (temp != NULL) //ç³»ç»Ÿæ—¶é—´é«˜ä½
 							{
 								l_sys.Set_Systime_Delay = SETTIME_DELAY;
 								l_sys.Set_Systime_Flag |= 0x02;
@@ -284,24 +290,25 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 						break;
 						}
 					}
-					// 	if (iRegIndex - CONFIG_REG_MAP_OFFSET == FACTORY_RESET) //³ö³§ÉèÖÃ
+
+					// 	if (iRegIndex - CONFIG_REG_MAP_OFFSET == FACTORY_RESET) //å‡ºå‚è®¾ç½®
 					// 	{
 					// 		temp = cmd_value;
-					// 		if (temp == 0x3C) //»Ö¸´Ô­Ê¼²ÎÊı
+					// 		if (temp == 0x3C) //æ¢å¤åŸå§‹å‚æ•°
 					// 		{
 					// 			set_load_flag(0x02);
 					// 			rt_thread_delay(1000);
 					// 			NVIC_SystemReset();
 					// 			return MB_ENOERR;
 					// 		}
-					// 		else if (temp == 0x5A) //»Ö¸´³ö³§ÉèÖÃ
+					// 		else if (temp == 0x5A) //æ¢å¤å‡ºå‚è®¾ç½®
 					// 		{
 					// 			set_load_flag(0x01);
 					// 			rt_thread_delay(1000);
 					// 			NVIC_SystemReset();
 					// 			return MB_ENOERR;
 					// 		}
-					// 		else if (temp == 0x69) //±£´æ³ö³§ÉèÖÃ
+					// 		else if (temp == 0x69) //ä¿å­˜å‡ºå‚è®¾ç½®
 					// 		{
 					// 			save_conf_reg(0x01);
 					// 			rt_thread_delay(1000);
@@ -314,10 +321,10 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 					// 			break;
 					// 		}
 					// 	}
-					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == CLEAR_RT) //ÇåÁã²¿¼şÔËĞĞÊ±¼ä
+					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == CLEAR_RT) //æ¸…é›¶éƒ¨ä»¶è¿è¡Œæ—¶é—´
 					// 	{
 					// 		temp = cmd_value;
-					// 		if (temp) //ÇåÁã²¿¼şÔËĞĞÊ±¼ä
+					// 		if (temp) //æ¸…é›¶éƒ¨ä»¶è¿è¡Œæ—¶é—´
 					// 		{
 					// 			reset_runtime(temp);
 					// 			return MB_ENOERR;
@@ -328,10 +335,10 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 					// 			break;
 					// 		}
 					// 	}
-					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == CLEAR_ALARM) //Çå³ıµ±Ç°¸æ¾¯
+					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == CLEAR_ALARM) //æ¸…é™¤å½“å‰å‘Šè­¦
 					// 	{
 					// 		temp = cmd_value;
-					// 		if (temp == 0x5A) //ÇåÁã²¿¼şÔËĞĞÊ±¼ä
+					// 		if (temp == 0x5A) //æ¸…é›¶éƒ¨ä»¶è¿è¡Œæ—¶é—´
 					// 		{
 					// 			clear_alarm();
 					// 			return MB_ENOERR;
@@ -342,10 +349,10 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 					// 			break;
 					// 		}
 					// 	}
-					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == SET_TL) //ÏµÍ³Ê±¼äµÍÎ»
+					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == SET_TL) //ç³»ç»Ÿæ—¶é—´ä½ä½
 					// 	{
 					// 		temp = cmd_value;
-					// 		if (temp != NULL) //ÏµÍ³Ê±¼äµÍÎ»
+					// 		if (temp != NULL) //ç³»ç»Ÿæ—¶é—´ä½ä½
 					// 		{
 					// 			l_sys.Set_Systime_Delay = SETTIME_DELAY;
 					// 			l_sys.Set_Systime_Flag |= 0x01;
@@ -358,10 +365,10 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 					// 			break;
 					// 		}
 					// 	}
-					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == SET_TH) //ÏµÍ³Ê±¼ä¸ßÎ»
+					// 	else if (iRegIndex - CONFIG_REG_MAP_OFFSET == SET_TH) //ç³»ç»Ÿæ—¶é—´é«˜ä½
 					// 	{
 					// 		temp = cmd_value;
-					// 		if (temp != NULL) //ÏµÍ³Ê±¼ä¸ßÎ»
+					// 		if (temp != NULL) //ç³»ç»Ÿæ—¶é—´é«˜ä½
 					// 		{
 					// 			l_sys.Set_Systime_Delay = SETTIME_DELAY;
 					// 			l_sys.Set_Systime_Flag |= 0x02;
@@ -404,10 +411,10 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 			break;
 
 		case CPAD_MB_REG_MULTIPLE_WRITE:
-			//ÊÖ²ÙÆ÷·ÖÖ¡´«Êä£¬Ò»Ö¡×î´óÊÇ16¸ö¼Ä´æÆ÷
+			//æ‰‹æ“å™¨åˆ†å¸§ä¼ è¾“ï¼Œä¸€å¸§æœ€å¤§æ˜¯16ä¸ªå¯„å­˜å™¨
 			if ((usNRegs > 0) && (usNRegs <= 100))
 			{
-				//³¬³ö¿ÉĞ´·¶Î§±¨´íÅĞ¶Ï
+				//è¶…å‡ºå¯å†™èŒƒå›´æŠ¥é”™åˆ¤æ–­
 				if ((usAddress + usNRegs) <= (REG_HOLDING_START + CPAD_REG_HOLDING_WRITE_NREGS))
 				{
 					if ((usAddress + usNRegs) >= (REG_HOLDING_START + CONFIG_REG_MAP_OFFSET + 1))
@@ -422,13 +429,13 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
 						if (CONF_REG_MAP_NUM == (usAddress - CONFIG_REG_MAP_OFFSET + i))
 						{
 							rt_kprintf("modbus multiple write complete.\n");
-							save_conf_reg(0); //Ğ´Èë±£³Ö¼Ä´æÆ÷ÖĞÍ¬Ê±¸úĞÂµ½ÄÚ´æºÍflash±£´æ  // Ğ´Èë¼Ä´æÆ÷ºÍEEPROMÖĞ¡£
+							save_conf_reg(0); //å†™å…¥ä¿æŒå¯„å­˜å™¨ä¸­åŒæ—¶è·Ÿæ–°åˆ°å†…å­˜å’Œflashä¿å­˜  // å†™å…¥å¯„å­˜å™¨å’ŒEEPROMä¸­ã€‚
 						}
 					}
 				}
 				else
 				{
-					rt_kprintf("CPAD_MB_REG_MULTIPLE_WRITE ÊıÁ¿¹ı¶à failed\n");
+					rt_kprintf("CPAD_MB_REG_MULTIPLE_WRITE æ•°é‡è¿‡å¤š failed\n");
 					eStatus = MB_ENOREG;
 					break;
 				}
