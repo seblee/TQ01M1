@@ -142,7 +142,6 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
                 //超出可写范围报错判断
                 if ((usAddress + usNRegs) <= (REG_HOLDING_START + CPAD_REG_HOLDING_WRITE_NREGS))
                 {
-
                     if ((usAddress + usNRegs) >= (REG_HOLDING_START + CONFIG_REG_MAP_OFFSET + 1))
                     {
                         cmd_value = (*pucRegBuffer) << 8;
@@ -422,11 +421,11 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
                             *(conf_reg_map_inst[usAddress - CONFIG_REG_MAP_OFFSET + i].reg_ptr) = cmd_value;
                             pucRegBuffer += 2;
                         }
-                        if (CONF_REG_MAP_NUM == (usAddress - CONFIG_REG_MAP_OFFSET + i))
-                        {
-                            rt_kprintf("modbus multiple write complete.\n");
-                            save_conf_reg(0); //写入保持寄存器中同时跟新到内存和flash保存  // 写入寄存器和EEPROM中。
-                        }
+                        // if (CONF_REG_MAP_NUM == (usAddress - CONFIG_REG_MAP_OFFSET + i))
+                        // {
+                        rt_kprintf("modbus multiple write complete.\n");
+                        save_conf_reg(0); //写入保持寄存器中同时跟新到内存和flash保存  // 写入寄存器和EEPROM中。
+                        // }
                     }
                 }
                 else

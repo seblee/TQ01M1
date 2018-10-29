@@ -238,6 +238,7 @@ void Cpad_Send(uint8_t u8RW, uint16_t u16Addr, uint8_t u8Num, uint16_t u16Offset
     uint16_t addr, nreg;
     eMBErrorCode errcode = MB_ENOERR;
 
+    errcode = errcode;
     cpad_slave_inst.rxbuf[0] = (uint8_t)(T5_HEAD >> 8);
     cpad_slave_inst.rxbuf[1] = (uint8_t)(T5_HEAD);
     if (u8RW == T5_WRITE) //写命令

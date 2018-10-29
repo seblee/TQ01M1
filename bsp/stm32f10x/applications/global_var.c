@@ -350,7 +350,10 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
 	{297, &g_sys.config.ComPara.device_info[97], 0, 0xffff, 0, 2, 1, NULL},
 	{298, &g_sys.config.ComPara.device_info[98], 0, 0xffff, 0, 2, 1, NULL},
 	{299, &g_sys.config.ComPara.device_info[99], 0, 0xffff, 0, 2, 1, NULL},
+<<<<<<< HEAD
 
+=======
+>>>>>>> develop_1
 #endif
 };
 
@@ -417,6 +420,7 @@ static init_state_em get_ee_status(void)
 	I2C_EE_BufRead(&ee_pflag, STS_EE_ADDR, 1); //启动区
 
 	l_sys.SEL_Jump = GetSEL();
+	//TEST
 	if (l_sys.SEL_Jump & Start_Init) //上电初始化
 	{
 		reset_runtime(0xFF); //清零所有运行时间
@@ -609,17 +613,37 @@ uint16_t save_conf_reg(uint8_t addr_sel)
 
 	return err_cnt;
 }
-
+static uint16_t conf_reg_read_ee(uint16_t addr);
 static uint16_t init_load_default(void)
 {
 	uint16_t i, ret;
 	ret = 1;
 	for (i = 0; i < CONF_REG_MAP_NUM; i++) //initialize global variable with default values
 	{
+#ifdef SYS_HMI_VJL
 		if (conf_reg_map_inst[i].reg_ptr != NULL)
 		{
 			*(conf_reg_map_inst[i].reg_ptr) = conf_reg_map_inst[i].dft;
 		}
+#else
+		if (i < CONF_REG_SID_START)
+		{
+			if (conf_reg_map_inst[i].reg_ptr != NULL)
+			{
+				*(conf_reg_map_inst[i].reg_ptr) = conf_reg_map_inst[i].dft;
+			}
+		}
+		else //三元组信息恢复到内存变量
+		{
+			uint16_t sum = 0, sum_reg;
+			sum_reg = sum;
+			sum += conf_reg_read_ee(i);
+			if (sum != sum_reg)
+			{
+				rt_kprintf("Err addr:%d\n", i);
+			}
+		}
+#endif
 	}
 	authen_init();
 	ret = 1;
@@ -693,7 +717,7 @@ static uint16_t init_load_user_conf(void)
 static uint16_t init_load_factory_conf(void)
 {
 	uint16_t buf_reg[CONF_REG_MAP_NUM + 1];
-	uint16_t i;
+	uint16_t i, sum = 0, sum_reg;
 	uint16_t chk_res;
 	uint16_t ee_load_addr;
 	ee_load_addr = CONF_REG_FACT_ADDR;
@@ -705,10 +729,29 @@ static uint16_t init_load_factory_conf(void)
 	{
 		for (i = 0; i < CONF_REG_MAP_NUM; i++) //initialize global variable with default values
 		{
+#ifdef SYS_HMI_VJL
 			if (conf_reg_map_inst[i].reg_ptr != NULL)
 			{
 				*(conf_reg_map_inst[i].reg_ptr) = conf_reg_map_inst[i].dft;
 			}
+#else
+			if (i < CONF_REG_SID_START)
+			{
+				if (conf_reg_map_inst[i].reg_ptr != NULL)
+				{
+					*(conf_reg_map_inst[i].reg_ptr) = conf_reg_map_inst[i].dft;
+				}
+			}
+			else //三元组信息恢复到内存变量
+			{
+				sum_reg = sum;
+				sum += conf_reg_read_ee(i);
+				if (sum != sum_reg)
+				{
+					rt_kprintf("Err addr:%d\n", i);
+				}
+			}
+#endif
 		}
 		return 0;
 	}

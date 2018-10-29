@@ -126,13 +126,16 @@ enum
 #define TEST_UR2_CLOSE 5  //开关周期
 #define TEST_UR1_OPEN 10  //开关周期
 #define TEST_UR1_CLOSE 10 //开关周期
-//手动测试模式
-enum
-{
-    MANUAL_TEST_UNABLE = 0,    //退出测试模式
-    MANUAL_MODE_ENABLE = 0x01, //手动模式
-    TEST_MODE_ENABLE = 0x02,   //测试模式
-};
+<<<<<<< HEAD
+== == == =
+
+>>>>>>> develop_1
+             //手动测试模式
+    enum {
+        MANUAL_TEST_UNABLE = 0,    //退出测试模式
+        MANUAL_MODE_ENABLE = 0x01, //手动模式
+        TEST_MODE_ENABLE = 0x02,   //测试模式
+    };
 
 ///////////////////////////////////////////////////////////////
 //system configuration
@@ -690,7 +693,7 @@ typedef struct
     uint16_t u16ColdWater_StartTemp;   //制冰水温度
     uint16_t u16ColdWater_StopTemp;    //制冰水停止温度
     uint16_t u16NetworkPriority;       //网络优先
-    uint16_t device_info[25];          //三元组信息
+    uint16_t device_info[100];         //三元组信息
 } ComPara_Conf_st;
 
 typedef struct

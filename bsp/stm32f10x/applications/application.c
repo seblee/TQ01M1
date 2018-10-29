@@ -63,7 +63,7 @@ enum
 
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t modbus_master_stack[512];
-static rt_uint8_t modbus_slave_stack[1024];
+static rt_uint8_t modbus_slave_stack[512];
 static rt_uint8_t monitor_slave_stack[1536];
 //static rt_uint8_t team_stack[ 512 ];
 static rt_uint8_t mbm_fsm_stack[512];
