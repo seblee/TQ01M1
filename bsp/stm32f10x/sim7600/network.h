@@ -70,10 +70,10 @@
 typedef struct
 {
     rt_uint16_t flag;
-    char product_key[PRODUCT_KEY_LEN + 1];
     char device_name[DEVICE_NAME_LEN + 1];
-    char device_id[DEVICE_ID_LEN + 1];
+    char product_key[PRODUCT_KEY_LEN + 1];
     char device_secret[DEVICE_SECRET_LEN + 1];
+    char device_id[DEVICE_ID_LEN + 1];
 } iotx_device_info_t, *iotx_device_info_pt;
 
 typedef enum

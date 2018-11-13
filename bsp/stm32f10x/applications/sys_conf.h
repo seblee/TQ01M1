@@ -126,16 +126,14 @@ enum
 #define TEST_UR2_CLOSE 5  //开关周期
 #define TEST_UR1_OPEN 10  //开关周期
 #define TEST_UR1_CLOSE 10 //开关周期
-<<<<<<< HEAD
-== == == =
 
->>>>>>> develop_1
-             //手动测试模式
-    enum {
-        MANUAL_TEST_UNABLE = 0,    //退出测试模式
-        MANUAL_MODE_ENABLE = 0x01, //手动模式
-        TEST_MODE_ENABLE = 0x02,   //测试模式
-    };
+//手动测试模式
+enum
+{
+    MANUAL_TEST_UNABLE = 0,    //退出测试模式
+    MANUAL_MODE_ENABLE = 0x01, //手动模式
+    TEST_MODE_ENABLE = 0x02,   //测试模式
+};
 
 ///////////////////////////////////////////////////////////////
 //system configuration

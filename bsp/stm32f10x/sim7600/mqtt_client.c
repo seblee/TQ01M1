@@ -44,7 +44,8 @@ int mqtt_client_init(rt_device_t dev)
     // mqtt_log("device_name:%s", device_info.device_name);
     // mqtt_log("device_secret:%s", device_info.device_secret);
     // mqtt_log("device_id:%s", device_info.device_id);
-    mqtt_setup_connect_info(&device_connect, device_info_p);
+    // mqtt_setup_connect_info(&device_connect, device_info_p);
+    mqtt_setup_connect_info(&device_connect, &device_info);
     client_con.keepAliveInterval = 60;
     client_con.clientID.cstring = (char *)device_connect.client_id;
     client_con.username.cstring = (char *)device_connect.username;

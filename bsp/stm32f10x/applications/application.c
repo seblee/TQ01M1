@@ -286,18 +286,18 @@ int rt_application_init(void)
         rt_thread_startup(&testcase_thread);
     }
 
-    // result = rt_thread_init(&sim7600_thread,
-    //                         "sim7600_test",
-    //                         sim7600_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&sim7600_stack[0],
-    //                         sizeof(sim7600_stack),
-    //                         SIM7600_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&sim7600_thread);
-    // }
+    result = rt_thread_init(&sim7600_thread,
+                            "sim7600_test",
+                            sim7600_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&sim7600_stack[0],
+                            sizeof(sim7600_stack),
+                            SIM7600_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&sim7600_thread);
+    }
 
     return 0;
 }

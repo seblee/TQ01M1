@@ -350,10 +350,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
 	{297, &g_sys.config.ComPara.device_info[97], 0, 0xffff, 0, 2, 1, NULL},
 	{298, &g_sys.config.ComPara.device_info[98], 0, 0xffff, 0, 2, 1, NULL},
 	{299, &g_sys.config.ComPara.device_info[99], 0, 0xffff, 0, 2, 1, NULL},
-<<<<<<< HEAD
-
-=======
->>>>>>> develop_1
+ 
 #endif
 };
 

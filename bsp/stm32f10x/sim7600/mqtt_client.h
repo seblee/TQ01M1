@@ -63,7 +63,7 @@ enum QoS
 #define DEVICE_ID "cdtest0041"
 #define REGISTER_PRODUCT_KEY "a1JOOi3mNEf"
 #define REGISTER_PRODUCT_SECRET "BQjNWOG8EJWa4nFu"
-#define REGISTER_DEVICE_NAME "register_device_test_01"
+#define REGISTER_DEVICE_NAME "register_device_test_04"
 
 #define REGISTER_HOST "iot-auth.cn-shanghai.aliyuncs.com"
 #define REGISTER_PATH "/auth/register/device"

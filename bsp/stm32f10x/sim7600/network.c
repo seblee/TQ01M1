@@ -121,7 +121,7 @@ void sim7600_thread_entry(void *parameter)
     else if (device_connect.style == IOT_4G_MODE)
         result = at_4g_init(write_device);
 
-    network_get_register();
+    // network_get_register();
 
     mqtt_client_init(write_device);
     network_log("mqtt_client_init done");
