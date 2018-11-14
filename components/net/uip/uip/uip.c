@@ -798,7 +798,7 @@ uip_process(u8_t flag)
 	    
 	  case UIP_FIN_WAIT_1:
 	  case UIP_CLOSING:
-	  case UIP_LAST_ACK:
+	  case UIP_LAST_ACK: 
 	    /* In all these states we should retransmit a FINACK. */
 	    goto tcp_send_finack;
 	    

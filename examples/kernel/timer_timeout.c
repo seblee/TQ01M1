@@ -11,7 +11,7 @@
 static rt_thread_t tid = RT_NULL;
 
 /* 消息队列控制块 */
-static struct rt_messagequeue mq;
+static struct rt_messagequeue mq; 
 /* 消息队列中用到的放置消息的内存池 */
 static char msg_pool[2048];
 
