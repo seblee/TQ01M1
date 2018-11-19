@@ -292,6 +292,14 @@ struct rt_list_node
     struct rt_list_node *prev;                          /**< point to prev node. */
 };
 typedef struct rt_list_node rt_list_t;                  /**< Type for lists. */
+/**
+ * Single List structure
+ */
+struct rt_slist_node
+{
+    struct rt_slist_node *next;                         /**< point to next node. */
+};
+typedef struct rt_slist_node rt_slist_t;                /**< Type for single list. */
 
 /**
  * @addtogroup KernelObject
@@ -725,6 +733,15 @@ struct rt_mempool
 typedef struct rt_mempool *rt_mp_t;
 #endif
 
+/**
+ * WaitQueue structure
+ */
+struct rt_wqueue
+{
+    rt_uint32_t flag;
+    rt_list_t waiting_list;
+};
+typedef struct rt_wqueue rt_wqueue_t;
 /*@}*/
 
 #ifdef RT_USING_DEVICE
@@ -809,6 +826,19 @@ enum rt_device_class_type
 
 typedef struct rt_device *rt_device_t;
 /**
+ * operations set for device object
+ */
+struct rt_device_ops
+{
+    /* common device interface */
+    rt_err_t  (*init)   (rt_device_t dev);
+    rt_err_t  (*open)   (rt_device_t dev, rt_uint16_t oflag);
+    rt_err_t  (*close)  (rt_device_t dev);
+    rt_size_t (*read)   (rt_device_t dev, rt_off_t pos, void *buffer, rt_size_t size);
+    rt_size_t (*write)  (rt_device_t dev, rt_off_t pos, const void *buffer, rt_size_t size);
+    rt_err_t  (*control)(rt_device_t dev, int cmd, void *args);
+};
+/**
  * Device structure
  */
 struct rt_device
@@ -826,6 +856,9 @@ struct rt_device
     rt_err_t (*rx_indicate)(rt_device_t dev, rt_size_t size);
     rt_err_t (*tx_complete)(rt_device_t dev, void *buffer);
 
+#ifdef RT_USING_DEVICE_OPS
+    const struct rt_device_ops *ops;
+#else
     /* common device interface */
     rt_err_t  (*init)   (rt_device_t dev);
     rt_err_t  (*open)   (rt_device_t dev, rt_uint16_t oflag);
@@ -833,6 +866,12 @@ struct rt_device
     rt_size_t (*read)   (rt_device_t dev, rt_off_t pos, void *buffer, rt_size_t size);
     rt_size_t (*write)  (rt_device_t dev, rt_off_t pos, const void *buffer, rt_size_t size);
     rt_err_t  (*control)(rt_device_t dev, rt_uint8_t cmd, void *args);
+#endif
+
+#if defined(RT_USING_POSIX)
+    const struct dfs_file_ops *fops;
+    struct rt_wqueue wait_queue;
+#endif
 
     void                     *user_data;                /**< device private data */
 };
