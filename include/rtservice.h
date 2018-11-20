@@ -39,6 +39,14 @@ extern "C" {
 /*@{*/
 
 /**
+ * rt_container_of - return the member address of ptr, if the type of ptr is the
+ * struct type.
+ */
+#define rt_container_of(ptr, type, member) \
+    ((type *)((char *)(ptr) - (unsigned long)(&((type *)0)->member)))
+
+
+/**
  * @brief initialize a list object
  */
 #define RT_LIST_OBJECT_INIT(object) { &(object), &(object) }
@@ -113,6 +121,61 @@ rt_inline int rt_list_isempty(const rt_list_t *l)
 #define rt_list_entry(node, type, member) \
     ((type *)((char *)(node) - (unsigned long)(&((type *)0)->member)))
 
+/**
+ * @brief initialize a single list
+ *
+ * @param l the single list to be initialized
+ */
+rt_inline void rt_slist_init(rt_slist_t *l)
+{
+    l->next = RT_NULL;
+}
+
+rt_inline void rt_slist_append(rt_slist_t *l, rt_slist_t *n)
+{
+    struct rt_slist_node *node;
+
+    node = l;
+    while (node->next) node = node->next;
+
+    /* append the node to the tail */
+    node->next = n;
+    n->next = RT_NULL;
+}
+rt_inline rt_slist_t *rt_slist_remove(rt_slist_t *l, rt_slist_t *n)
+{
+    /* remove slist head */
+    struct rt_slist_node *node = l;
+    while (node->next && node->next != n) node = node->next;
+
+    /* remove node */
+    if (node->next != (rt_slist_t *)0) node->next = node->next->next;
+
+    return l;
+}
+
+rt_inline rt_slist_t *rt_slist_first(rt_slist_t *l)
+{
+    return l->next;
+}
+rt_inline rt_slist_t *rt_slist_next(rt_slist_t *n)
+{
+    return n->next;
+}
+
+rt_inline int rt_slist_isempty(rt_slist_t *l)
+{
+    return l->next == RT_NULL;
+}
+
+/**
+ * @brief get the struct for this single list node
+ * @param node the entry point
+ * @param type the type of structure
+ * @param member the name of list in structure
+ */
+#define rt_slist_entry(node, type, member) \
+    rt_container_of(node, type, member)
 /*@}*/
 
 #ifdef __cplusplus

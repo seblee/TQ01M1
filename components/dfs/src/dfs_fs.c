@@ -39,11 +39,11 @@
  *
  * @return RT_EOK on successful, -RT_ERROR on failed.
  */
-int dfs_register(const struct dfs_filesystem_operation *ops)
+int dfs_register(const struct dfs_filesystem_ops *ops)
 {
     int ret = RT_EOK;
-    const struct dfs_filesystem_operation **empty = RT_NULL;
-    const struct dfs_filesystem_operation **iter;
+    const struct dfs_filesystem_ops **empty = RT_NULL;
+    const struct dfs_filesystem_ops **iter;
 
     /* lock filesystem */
     dfs_lock();
@@ -219,7 +219,7 @@ int dfs_mount(const char   *device_name,
               unsigned long rwflag,
               const void   *data)
 {
-    const struct dfs_filesystem_operation **ops;
+    const struct dfs_filesystem_ops **ops;
     struct dfs_filesystem *iter;
     struct dfs_filesystem *fs = RT_NULL;
     char *fullpath = RT_NULL;
@@ -453,7 +453,7 @@ int dfs_mkfs(const char *fs_name, const char *device_name)
     if (index < DFS_FILESYSTEM_TYPES_MAX)
     {
         /* find file system operation */
-        const struct dfs_filesystem_operation *ops = filesystem_operation_table[index];
+        const struct dfs_filesystem_ops *ops = filesystem_operation_table[index];
         if (ops->mkfs == RT_NULL)
         {
             rt_set_errno(-DFS_STATUS_ENOSYS);

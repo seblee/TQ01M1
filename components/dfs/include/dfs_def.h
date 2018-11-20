@@ -163,7 +163,12 @@
         typedef long off_t;
         typedef int mode_t;
     #endif
-
+#ifndef F_GETFL
+#define F_GETFL  3
+#endif
+#ifndef F_SETFL
+#define F_SETFL  4
+#endif
 /* Device error codes */
 #define DFS_STATUS_OK            0       /* no error */
 #define DFS_STATUS_ENOENT        2       /* No such file or directory */
@@ -290,7 +295,20 @@ struct dirent
     char d_name[DFS_PATH_MAX];   /* The null-terminated file name */
 };
 #endif
+struct rt_pollreq;struct dfs_fd;
+struct dfs_file_ops
+{
+    int (*open)     (struct dfs_fd *fd);
+    int (*close)    (struct dfs_fd *fd);
+    int (*ioctl)    (struct dfs_fd *fd, int cmd, void *args);
+    int (*read)     (struct dfs_fd *fd, void *buf, size_t count);
+    int (*write)    (struct dfs_fd *fd, const void *buf, size_t count);
+    int (*flush)    (struct dfs_fd *fd);
+    int (*lseek)    (struct dfs_fd *fd, off_t offset);
+    int (*getdents) (struct dfs_fd *fd, struct dirent *dirp, unsigned long  count);
 
+    int (*poll)     (struct dfs_fd *fd, struct rt_pollreq *req);
+};
 /* file descriptor */
 #define DFS_FD_MAGIC	 0xfdfd
 struct dfs_fd
@@ -300,7 +318,7 @@ struct dfs_fd
     char *path;                  /* Name (below mount point) */
     int ref_count;               /* Descriptor reference count */
 
-    struct dfs_filesystem *fs;   /* Resident file system */
+     const struct dfs_file_ops *fops;
 
     rt_uint32_t flags;           /* Descriptor flags */
     rt_size_t   size;            /* Size in bytes */

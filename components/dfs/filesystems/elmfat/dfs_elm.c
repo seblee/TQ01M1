@@ -312,10 +312,14 @@ int dfs_elm_open(struct dfs_fd *file)
 
 #if (_VOLUMES > 1)
     int vol;
+    struct dfs_filesystem *fs = (struct dfs_filesystem *)file->data;
     extern int elm_get_vol(FATFS * fat);
 
+    if (fs == NULL)
+        return -DFS_STATUS_ENOENT;
+
     /* add path for ELM FatFS driver support */
-    vol = elm_get_vol((FATFS *)file->fs->data);
+    vol = elm_get_vol((FATFS *)fs->data);
     if (vol < 0)
         return -DFS_STATUS_ENOENT;
     drivers_fn = rt_malloc(256);
@@ -459,7 +463,7 @@ int dfs_elm_ioctl(struct dfs_fd *file, int cmd, void *args)
     return -DFS_STATUS_ENOSYS;
 }
 
-int dfs_elm_read(struct dfs_fd *file, void *buf, rt_size_t len)
+int dfs_elm_read(struct dfs_fd *file, void *buf, size_t len)
 {
     FIL *fd;
     FRESULT result;
@@ -482,7 +486,7 @@ int dfs_elm_read(struct dfs_fd *file, void *buf, rt_size_t len)
     return elm_result_to_dfs(result);
 }
 
-int dfs_elm_write(struct dfs_fd *file, const void *buf, rt_size_t len)
+int dfs_elm_write(struct dfs_fd *file, const void *buf, size_t len)
 {
     FIL *fd;
     FRESULT result;
@@ -779,15 +783,8 @@ int dfs_elm_stat(struct dfs_filesystem *fs, const char *path, struct stat *st)
     return elm_result_to_dfs(result);
 }
 
-static const struct dfs_filesystem_operation dfs_elm =
+static const struct dfs_file_ops dfs_elm_fops = 
 {
-    "elm",
-    DFS_FS_FLAG_DEFAULT,
-    dfs_elm_mount,
-    dfs_elm_unmount,
-    dfs_elm_mkfs,
-    dfs_elm_statfs,
-
     dfs_elm_open,
     dfs_elm_close,
     dfs_elm_ioctl,
@@ -796,6 +793,20 @@ static const struct dfs_filesystem_operation dfs_elm =
     dfs_elm_flush,
     dfs_elm_lseek,
     dfs_elm_getdents,
+    RT_NULL, /* poll interface */
+};
+
+static const struct dfs_filesystem_ops dfs_elm =
+{
+    "elm",
+    DFS_FS_FLAG_DEFAULT,
+    &dfs_elm_fops,
+
+    dfs_elm_mount,
+    dfs_elm_unmount,
+    dfs_elm_mkfs,
+    dfs_elm_statfs,
+
     dfs_elm_unlink,
     dfs_elm_stat,
     dfs_elm_rename,

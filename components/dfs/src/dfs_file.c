@@ -25,7 +25,7 @@
 
 #include <dfs.h>
 #include <dfs_file.h>
-
+#include <rtlibc.h>
 /**
  * @addtogroup FileApi
  */
@@ -60,6 +60,14 @@ int dfs_file_open(struct dfs_fd *fd, const char *path, int flags)
 
     dfs_log(DFS_DEBUG_INFO, ("open file:%s", fullpath));
 
+        /* Check whether file is already open */
+    if (fd_is_open(fullpath) == 0)
+    {
+        rt_free(fullpath); /* release path */
+
+        return -DFS_STATUS_EBUSY;
+    }
+    
     /* find filesystem */
     fs = dfs_filesystem_lookup(fullpath);
     if (fs == RT_NULL)
@@ -70,13 +78,14 @@ int dfs_file_open(struct dfs_fd *fd, const char *path, int flags)
     }
 
     dfs_log(DFS_DEBUG_INFO, ("open in filesystem:%s", fs->ops->name));
-    fd->fs = fs;
+ fd->fops  = fs->ops->fops; /* set file ops */
 
     /* initialize the fd item */
     fd->type  = FT_REGULAR;
     fd->flags = flags;
     fd->size  = 0;
     fd->pos   = 0;
+    fd->data  = fs;
 
     if (!(fs->ops->flags & DFS_FS_FLAG_FULLPATH))
     {
@@ -93,20 +102,20 @@ int dfs_file_open(struct dfs_fd *fd, const char *path, int flags)
     }
 
     /* specific file system open routine */
-    if (fs->ops->open == RT_NULL)
+    if (fd->fops->open == RT_NULL)
     {
-        /* clear fd */
+          /* clear fd */
         rt_free(fd->path);
-        rt_memset(fd, 0, sizeof(*fd));
+        fd->path = NULL;
 
         return -DFS_STATUS_ENOSYS;
     }
 
-    if ((result = fs->ops->open(fd)) < 0)
+    if ((result = fd->fops->open(fd)) < 0)
     {
-        /* clear fd */
+        /* clear fd */ 
         rt_free(fd->path);
-        rt_memset(fd, 0, sizeof(*fd));
+        fd->path = NULL;
 
         dfs_log(DFS_DEBUG_INFO, ("open failed"));
 
@@ -135,16 +144,19 @@ int dfs_file_close(struct dfs_fd *fd)
 {
     int result = 0;
 
-    if (fd != RT_NULL && fd->fs->ops->close != RT_NULL)
-        result = fd->fs->ops->close(fd);
+    if (fd == NULL)
+        return   -DFS_STATUS_ENXIO;
+    
+        if (fd->fops->close != NULL)
+        result = fd->fops->close(fd);
 
     /* close fd error, return */
     if (result < 0)
         return result;
 
     rt_free(fd->path);
-    rt_memset(fd, 0, sizeof(struct dfs_fd));
-
+    fd->path = NULL;
+    
     return result;
 }
 
@@ -159,14 +171,32 @@ int dfs_file_close(struct dfs_fd *fd)
  */
 int dfs_file_ioctl(struct dfs_fd *fd, int cmd, void *args)
 {
-    struct dfs_filesystem *fs;
+   
 
-    if (fd == RT_NULL || fd->type != FT_REGULAR)
+    if (fd == RT_NULL  )
         return -DFS_STATUS_EINVAL;
+    /* regular file system fd */
+    if (fd->type == FT_REGULAR)
+    {
+        switch (cmd)
+        {
+        case F_GETFL:
+            return fd->flags; /* return flags */
+        case F_SETFL:
+            {
+                int flags = (int)args;
+                int mask  = O_NONBLOCK | O_APPEND;
 
-    fs = fd->fs;
-    if (fs->ops->ioctl != RT_NULL) 
-        return fs->ops->ioctl(fd, cmd, args);
+                flags &= mask;
+                fd->flags &= ~mask;
+                fd->flags |= flags;
+            }
+            return 0;
+        }
+    }
+ 
+    if (fd->fops->ioctl != NULL)
+        return fd->fops->ioctl(fd, cmd, args);
 
     return -DFS_STATUS_ENOSYS;
 }
@@ -183,17 +213,15 @@ int dfs_file_ioctl(struct dfs_fd *fd, int cmd, void *args)
  */
 int dfs_file_read(struct dfs_fd *fd, void *buf, rt_size_t len)
 {
-    struct dfs_filesystem *fs;
-    int result = 0;
+     int result = 0;
 
     if (fd == RT_NULL) 
         return -DFS_STATUS_EINVAL;
 
-    fs = (struct dfs_filesystem *)fd->fs;
-    if (fs->ops->read == RT_NULL) 
+      if (fd->fops->read == NULL)
         return -DFS_STATUS_ENOSYS;
 
-    if ((result = fs->ops->read(fd, buf, len)) < 0)
+     if ((result = fd->fops->read(fd, buf, len)) < 0)
         fd->flags |= DFS_F_EOF;
 
     return result;
@@ -210,15 +238,12 @@ int dfs_file_read(struct dfs_fd *fd, void *buf, rt_size_t len)
  */
 int dfs_file_getdents(struct dfs_fd *fd, struct dirent *dirp, rt_size_t nbytes)
 {
-    struct dfs_filesystem *fs;
-
-    /* parameter check */
-    if (fd == RT_NULL || fd->type != FT_DIRECTORY) 
+      /* parameter check */
+    if (fd == NULL || fd->type != FT_DIRECTORY)
         return -DFS_STATUS_EINVAL;
 
-    fs = (struct dfs_filesystem *)fd->fs;
-    if (fs->ops->getdents != RT_NULL)
-        return fs->ops->getdents(fd, dirp, nbytes);
+    if (fd->fops->getdents != NULL)
+        return fd->fops->getdents(fd, dirp, nbytes);
 
     return -DFS_STATUS_ENOSYS;
 }
@@ -287,16 +312,13 @@ __exit:
  */
 int dfs_file_write(struct dfs_fd *fd, const void *buf, rt_size_t len)
 {
-    struct dfs_filesystem *fs;
-
-    if (fd == RT_NULL)
+        if (fd == NULL)
         return -DFS_STATUS_EINVAL;
 
-    fs = fd->fs;
-    if (fs->ops->write == RT_NULL)
+      if (fd->fops->write == NULL)
         return -DFS_STATUS_ENOSYS;
 
-    return fs->ops->write(fd, buf, len);
+      return fd->fops->write(fd, buf, len);
 }
 
 /**
@@ -308,16 +330,14 @@ int dfs_file_write(struct dfs_fd *fd, const void *buf, rt_size_t len)
  */
 int dfs_file_flush(struct dfs_fd *fd)
 {
-    struct dfs_filesystem *fs;
-
+ 
     if (fd == RT_NULL)
         return -DFS_STATUS_EINVAL;
 
-    fs = fd->fs;
-    if (fs->ops->flush == RT_NULL)
+    if (fd->fops->flush == NULL)
         return -DFS_STATUS_ENOSYS;
 
-    return fs->ops->flush(fd);
+ return fd->fops->flush(fd);
 }
 
 /**
@@ -331,17 +351,14 @@ int dfs_file_flush(struct dfs_fd *fd)
 int dfs_file_lseek(struct dfs_fd *fd, rt_off_t offset)
 {
     int result;
-    struct dfs_filesystem *fs = fd->fs;
-
-    if (fd == RT_NULL)
+    
+      if (fd == NULL)
         return -DFS_STATUS_EINVAL;
-    fs = fd->fs;
-    if (fs == RT_NULL)
-        return -DFS_STATUS_EINVAL;
-    if (fs->ops->lseek == RT_NULL)
+  
+      if (fd->fops->lseek == NULL)
         return -DFS_STATUS_ENOSYS;
 
-    result = fs->ops->lseek(fd, offset);
+       result = fd->fops->lseek(fd, offset);
 
     /* update current position */
     if (result >= 0)

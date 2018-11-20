@@ -58,7 +58,7 @@ int dfs_device_fs_ioctl(struct dfs_fd *file, int cmd, void *args)
     return -DFS_STATUS_EIO;
 }
 
-int dfs_device_fs_read(struct dfs_fd *file, void *buf, rt_size_t count)
+int dfs_device_fs_read(struct dfs_fd *file, void *buf, size_t count)
 {
     int result;
     rt_device_t dev_id;
@@ -76,7 +76,7 @@ int dfs_device_fs_read(struct dfs_fd *file, void *buf, rt_size_t count)
     return result;
 }
 
-int dfs_device_fs_write(struct dfs_fd *file, const void *buf, rt_size_t count)
+int dfs_device_fs_write(struct dfs_fd *file, const void *buf, size_t count)
 {
     int result;
     rt_device_t dev_id;
@@ -271,23 +271,36 @@ int dfs_device_fs_getdents(struct dfs_fd *file, struct dirent *dirp, rt_uint32_t
     return index * sizeof(struct dirent);
 }
 
-static const struct dfs_filesystem_operation _device_fs = 
+static int dfs_device_fs_poll(struct dfs_fd *fd, struct rt_pollreq *req)
 {
-    "devfs",
-    DFS_FS_FLAG_DEFAULT,
-    dfs_device_fs_mount,
-    RT_NULL,
-    RT_NULL,
-    RT_NULL,
+    int mask = 0;
 
+    return mask;
+}
+
+static const struct dfs_file_ops _device_fops = 
+{
     dfs_device_fs_open,
     dfs_device_fs_close,
     dfs_device_fs_ioctl,
     dfs_device_fs_read,
     dfs_device_fs_write,
-    RT_NULL,
-    RT_NULL,
+    RT_NULL,                    /* flush */
+    RT_NULL,                    /* lseek */
     dfs_device_fs_getdents,
+    dfs_device_fs_poll,
+};
+static const struct dfs_filesystem_ops _device_fs = 
+{
+    "devfs",
+    DFS_FS_FLAG_DEFAULT,
+    &_device_fops,
+
+    dfs_device_fs_mount,
+    RT_NULL,
+    RT_NULL,
+    RT_NULL,
+
     RT_NULL,
     dfs_device_fs_stat,
     RT_NULL,

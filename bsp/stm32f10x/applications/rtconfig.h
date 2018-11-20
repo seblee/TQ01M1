@@ -111,8 +111,8 @@
 
 /* POSIX layer and C standard library */
 
-#define RT_USING_LIBC
-//#define RT_USING_POSIX
+//#define RT_USING_MINILIBC
+#define RT_USING_POSIX
 /* Socket abstraction layer */
 
 #define RT_USING_SAL
@@ -131,6 +131,18 @@
 #define AT_USING_SOCKET
 #define AT_USING_CLI
 #define AT_SW_VERSION_NUM 0x10200
+
+/* Wiced WiFi */
+
+#define PKG_USING_AT_DEVICE
+#define PKG_AT_INIT_BY_THREAD
+#define AT_DEVICE_ESP8266
+#define AT_DEVICE_SOCKETS_NUM 5
+#define AT_DEVICE_NAME "uart3"
+#define AT_DEVICE_RECV_BUFF_LEN 1024
+#define AT_DEVICE_WIFI_SSID "Cloudwater"
+#define AT_DEVICE_WIFI_PASSWORD "tqcd2018"
+#define PKG_USING_AT_DEVICE_LATEST_VERSION
 /* SECTION: lwip, a lighwight TCP/IP protocol stack */
 /* #define RT_USING_LWIP */
 /* LwIP uses RT-Thread Memory Management */

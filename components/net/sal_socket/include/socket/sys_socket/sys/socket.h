@@ -14,7 +14,9 @@
 
 #include <rtthread.h>
 #include <sal_socket.h>
-
+#ifdef SAL_USING_POSIX
+#include <ipc/waitqueue.h>
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif

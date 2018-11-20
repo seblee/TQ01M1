@@ -15,10 +15,11 @@
 #include <dfs_file.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-const struct dfs_file_ops* dfs_net_get_fops(void);
+const struct dfs_file_ops *dfs_net_get_fops(void);
 int dfs_net_getsocket(int fd);
 
 #ifdef __cplusplus
@@ -26,4 +27,3 @@ int dfs_net_getsocket(int fd);
 #endif
 
 #endif
-

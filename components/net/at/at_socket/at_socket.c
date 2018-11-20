@@ -12,12 +12,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <sys/time.h>
+
 
 #include <at_socket.h>
 
 #ifdef SAL_USING_POSIX
-#include <dfs_poll.h>
+//#include <dfs_poll.h>
 #endif
 
 #define LOG_TAG              "at.skt"
@@ -50,7 +50,7 @@ typedef enum {
 /* the global array of available sockets */
 static struct at_socket sockets[AT_SOCKETS_NUM] = { 0 };
 /* AT device socket options */
-static struct at_device_ops *at_dev_ops = RT_NULL;
+static struct at_device_ops *at_dev_ops = RT_NULL; 
 
 struct at_socket *at_get_socket(int socket)
 {
@@ -86,7 +86,7 @@ static size_t at_recvpkt_put(rt_slist_t *rlist, const char *ptr, size_t length)
 
     rt_slist_append(rlist, &pkt->list);
 
-    return length;
+    return length; 
 }
 
 /* delete and free all receive buffer list */
@@ -100,13 +100,13 @@ static int at_recvpkt_all_delete(rt_slist_t *rlist)
 
     for(node = rt_slist_first(rlist); node; node = rt_slist_next(node))
     {
-        pkt = rt_slist_entry(node, struct at_recv_pkt, list);
+        pkt = rt_slist_entry(node, struct at_recv_pkt, list); 
         if (pkt->buff)
         {
-            rt_free(pkt->buff);
+            rt_free(pkt->buff); 
         }
-        if(pkt)
-        {
+        if(pkt)  
+        { 
             rt_free(pkt);
             pkt = RT_NULL;
         }
@@ -813,7 +813,11 @@ __exit:
 
     return result;
 }
-
+ struct timeval
+ {
+     long tv_sec;  /* seconds */
+     long tv_usec; /* and microseconds */
+ };
 int at_send(int socket, const void *data, size_t size, int flags)
 {
     return at_sendto(socket, data, size, flags, RT_NULL, 0);

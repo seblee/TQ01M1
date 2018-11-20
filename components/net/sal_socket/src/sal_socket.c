@@ -10,7 +10,7 @@
 
 #include <rtthread.h>
 #include <rthw.h>
-
+#include <rtdevice.h>
 #include <sal_socket.h>
 #include <sal_netdb.h>
 #include <sal.h>

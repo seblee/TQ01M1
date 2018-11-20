@@ -1,15 +1,18 @@
-# RT-Thread building script for bridge
-
+# for libc component
 import os
+Import('rtconfig')
+
 from building import *
 
-cwd = GetCurrentDir()
 objs = []
-list = os.listdir(cwd)
 
-for d in list:
-    path = os.path.join(cwd, d)
-    if os.path.isfile(os.path.join(path, 'SConscript')):
-        objs = objs + SConscript(os.path.join(d, 'SConscript'))
+if GetDepend('RT_USING_LIBC'):
+    if rtconfig.PLATFORM == 'gcc':
+        objs = objs + SConscript('newlib/SConscript')
+    elif rtconfig.PLATFORM == 'armcc':
+        objs = objs + SConscript('armlibc/SConscript')
+else:
+    if rtconfig.PLATFORM == 'gcc':
+        objs = objs + SConscript('minilibc/SConscript')
 
 Return('objs')

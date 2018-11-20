@@ -27,7 +27,7 @@
 #include <dfs_file.h>
 
 /* Global variables */
-const struct dfs_filesystem_operation *filesystem_operation_table[DFS_FILESYSTEM_TYPES_MAX];
+const struct dfs_filesystem_ops *filesystem_operation_table[DFS_FILESYSTEM_TYPES_MAX];
 struct dfs_filesystem filesystem_table[DFS_FILESYSTEMS_MAX];
 
 /* device filesystem lock */
@@ -42,7 +42,7 @@ struct dfs_fd fd_table[3 + DFS_FD_MAX];
 #else
 struct dfs_fd fd_table[DFS_FD_MAX];
 #endif
-
+static struct dfs_fdtable _fdtab;
 /**
  * @addtogroup DFS
  */
@@ -213,7 +213,9 @@ int fd_is_open(const char *pathname)
     unsigned int index;
     struct dfs_filesystem *fs;
     struct dfs_fd *fd;
+    struct dfs_fdtable *fdt;
 
+    fdt = dfs_fdtable_get();
     fullpath = dfs_normalize_path(RT_NULL, pathname);
     if (fullpath != RT_NULL)
     {
@@ -234,13 +236,12 @@ int fd_is_open(const char *pathname)
             mountpath = fullpath + strlen(fs->path);
 
         dfs_lock();
-        for (index = 0; index < DFS_FD_MAX; index++)
+        for (index = 0; index < fdt->maxfd; index++)
         {
-            fd = &(fd_table[index]);
-            if (fd->fs == RT_NULL)
-                continue;
+            fd = fdt->fds[index];
+            if (fd == NULL || fd->fops == NULL || fd->path == NULL) continue;
 
-            if (fd->fs == fs && strcmp(fd->path, mountpath) == 0)
+            if (fd->fops == fs->ops->fops && strcmp(fd->path, mountpath) == 0)
             {
                 /* found file in file descriptor table */
                 rt_free(fullpath);
@@ -408,3 +409,23 @@ up_one:
 }
 /*@}*/
 
+/**
+ * This function will get the file descriptor table of current process.
+ */
+struct dfs_fdtable* dfs_fdtable_get(void)
+{
+    struct dfs_fdtable *fdt;
+#ifdef RT_USING_LWP
+    struct rt_lwp *lwp;
+
+    lwp = (struct rt_lwp *)rt_thread_self()->lwp;
+    if (lwp)
+        fdt = &lwp->fdt;
+    else
+        fdt = &_fdtab;
+#else
+    fdt = &_fdtab;
+#endif
+
+    return fdt;
+}

@@ -33,6 +33,11 @@ extern "C" {
 
 #define NO_WORKING_DIR  "system does not support working directory\n"
 
+struct dfs_fdtable
+{
+    unsigned long maxfd;
+    struct dfs_fd **fds;
+};
 char *dfs_normalize_path(const char *directory, const char *filename);
 const char *dfs_subdir(const char *directory, const char *filename);
 
@@ -41,6 +46,8 @@ int fd_new(void);
 struct dfs_fd *fd_get(int fd);
 void fd_put(struct dfs_fd *fd);
 int fd_is_open(const char *pathname);
+
+struct dfs_fdtable* dfs_fdtable_get(void);
 
 #ifdef __cplusplus
 }
