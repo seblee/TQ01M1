@@ -10,3 +10,6 @@
 [submodule "bsp/stm32f10x/sim7600/ESP8266_AT_stm32"]
 	path = bsp/stm32f10x/sim7600/ESP8266_AT_stm32
 	url = git@github.com:seblee/ESP8266_AT_stm32.git
+[submodule "bsp/stm32f10x/at_device-latest"]
+	path = bsp/stm32f10x/at_device-latest
+	url = git@github.com:seblee/at_device.git

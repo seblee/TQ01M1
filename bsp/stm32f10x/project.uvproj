@@ -883,6 +883,11 @@
               <FilePath>..\..\components\drivers\src\ringbuffer.c</FilePath>
             </File>
             <File>
+              <FileName>waitqueue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\drivers\src\waitqueue.c</FilePath>
+            </File>
+            <File>
               <FileName>workqueue.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\components\drivers\src\workqueue.c</FilePath>
@@ -1290,41 +1295,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>libc</GroupName>
-          <Files>
-            <File>
-              <FileName>libc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\components\libc\compilers\armlibc\libc.c</FilePath>
-            </File>
-            <File>
-              <FileName>mem_std.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\components\libc\compilers\armlibc\mem_std.c</FilePath>
-            </File>
-            <File>
-              <FileName>stdio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\components\libc\compilers\armlibc\stdio.c</FilePath>
-            </File>
-            <File>
-              <FileName>stubs.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\components\libc\compilers\armlibc\stubs.c</FilePath>
-            </File>
-            <File>
-              <FileName>time.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\components\libc\compilers\armlibc\time.c</FilePath>
-            </File>
-            <File>
-              <FileName>gmtime_r.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\components\libc\compilers\common\gmtime_r.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>AT</GroupName>
           <Files>
             <File>
@@ -1376,6 +1346,16 @@
               <FileName>dfs_net.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\components\net\sal_socket\dfs_net\dfs_net.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>at_device</GroupName>
+          <Files>
+            <File>
+              <FileName>at_socket_esp8266.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\at_device-latest\at_socket_esp8266.c</FilePath>
             </File>
           </Files>
         </Group>

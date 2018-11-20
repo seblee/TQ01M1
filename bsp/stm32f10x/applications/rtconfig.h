@@ -129,7 +129,7 @@
 #define AT_USING_CLIENT
 #define AT_CLIENT_NUM_MAX 1
 #define AT_USING_SOCKET
-#define AT_USING_CLI
+//#define AT_USING_CLI
 #define AT_SW_VERSION_NUM 0x10200
 
 /* Wiced WiFi */
