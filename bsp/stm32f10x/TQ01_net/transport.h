@@ -1,0 +1,41 @@
+/**
+ ****************************************************************************
+ * @Warning :Without permission from the author,Not for commercial use
+ * @File    :
+ * @Author  :Seblee
+ * @date    :2018-09-06 17:22:33
+ * @version :V1.0.0
+ *************************************************
+ * @brief   :
+ ****************************************************************************
+ * @Last Modified by: Seblee
+ * @Last Modified time: 2018-09-11 16:12:05
+ ****************************************************************************
+**/
+#ifndef __TRANSPORT_H_
+#define __TRANSPORT_H_
+/* Private include -----------------------------------------------------------*/
+#include <rtthread.h>
+#include "network.h"
+/* Private typedef -----------------------------------------------------------*/
+
+/* Private define ------------------------------------------------------------*/
+
+/* Private macro -------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
+/* Private function prototypes -----------------------------------------------*/
+
+/* Private functions ---------------------------------------------------------*/
+rt_size_t transport_sendPacketBuffer(rt_device_t dev, unsigned char *buf, int buflen);
+
+int transport_getdata(unsigned char *buf, int count);
+
+int transport_open(rt_device_t dev, iotx_conn_info_t *conn);
+
+int transport_close(rt_device_t dev);
+
+/*----------------------------------------------------------------------------*/
+
+#endif

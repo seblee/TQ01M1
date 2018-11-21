@@ -364,7 +364,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD, USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>applications;.;drivers;Libraries\STM32F10x_StdPeriph_Driver\inc;Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;.\Libraries\STM32_Cryptographic_Library\inc;..\..\components\CMSIS\Include;..\..\include;..\..\libcpu\arm\cortex-m3;..\..\libcpu\arm\common;..\..\components\drivers\include;..\..\components\dfs\include;..\..\components\dfs\filesystems\devfs;..\..\components\dfs\filesystems\elmfat;..\..\components\drivers\include;..\..\components\finsh;..\..\components\init;..\..\components\net\at\include;..\..\components\net\at\at_socket;.\FreeModbus\modbus\include;.\FreeModbus\port;.\FreeModbus\modbus\rtu;.\usr\modules;.\kits;.\FreeModbus\port\modbus_monitor_slave;.\paho.mqtt.embedded-c\MQTTPacket\src;.\sim7600;.\sim7600\SIM_COM;.\cJSON;..\..\components\net\sal_socket\include;..\..\components\net\sal_socket\include\socket;..\..\components\net\sal_socket\impl;..\..\components\net\sal_socket\include\dfs_net;..\..\components\net\sal_socket\include\dfs_net\sys_select;..\..\components\net\sal_socket\include\socket\sys_socket</IncludePath>
+              <IncludePath>applications;.;drivers;Libraries\STM32F10x_StdPeriph_Driver\inc;Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;.\Libraries\STM32_Cryptographic_Library\inc;..\..\components\CMSIS\Include;..\..\include;..\..\libcpu\arm\cortex-m3;..\..\libcpu\arm\common;..\..\components\drivers\include;..\..\components\dfs\include;..\..\components\dfs\filesystems\devfs;..\..\components\dfs\filesystems\elmfat;..\..\components\drivers\include;..\..\components\finsh;..\..\components\init;..\..\components\net\at\include;..\..\components\net\at\at_socket;.\FreeModbus\modbus\include;.\FreeModbus\port;.\FreeModbus\modbus\rtu;.\usr\modules;.\kits;.\FreeModbus\port\modbus_monitor_slave;.\paho.mqtt.embedded-c\MQTTPacket\src;.\sim7600\SIM_COM;.\cJSON;..\..\components\net\sal_socket\include;..\..\components\net\sal_socket\include\socket;..\..\components\net\sal_socket\impl;..\..\components\net\sal_socket\include\dfs_net;..\..\components\net\sal_socket\include\dfs_net\sys_select;..\..\components\net\sal_socket\include\socket\sys_socket;.\TQ01_net</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1170,47 +1170,37 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Network</GroupName>
+          <GroupName>TQ01_net</GroupName>
           <Files>
-            <File>
-              <FileName>transport.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\sim7600\transport.c</FilePath>
-            </File>
             <File>
               <FileName>cJSON.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\cJSON\cJSON.c</FilePath>
             </File>
             <File>
-              <FileName>at_transfer.c</FileName>
+              <FileName>network.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\sim7600\at_transfer.c</FilePath>
-            </File>
-            <File>
-              <FileName>mqtt_client.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\sim7600\mqtt_client.c</FilePath>
+              <FilePath>.\TQ01_net\network.c</FilePath>
             </File>
             <File>
               <FileName>utils_hmac.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\sim7600\utils_hmac.c</FilePath>
+              <FilePath>.\TQ01_net\utils_hmac.c</FilePath>
             </File>
             <File>
               <FileName>utils_md5.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\sim7600\utils_md5.c</FilePath>
+              <FilePath>.\TQ01_net\utils_md5.c</FilePath>
             </File>
             <File>
               <FileName>disguise_time.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\sim7600\disguise_time.c</FilePath>
+              <FilePath>.\TQ01_net\disguise_time.c</FilePath>
             </File>
             <File>
-              <FileName>network.c</FileName>
+              <FileName>paho_mqtt_pipe.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\sim7600\network.c</FilePath>
+              <FilePath>.\TQ01_net\paho_mqtt_pipe.c</FilePath>
             </File>
           </Files>
         </Group>

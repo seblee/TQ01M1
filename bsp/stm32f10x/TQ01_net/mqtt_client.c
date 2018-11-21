@@ -9,14 +9,13 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-11-21 14:44:30
+ * @Last Modified time: 2018-09-26 18:04:54
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
 #include "mqtt_client.h"
 #include "utils_hmac.h"
 #include "transport.h"
-#include "paho_mqtt.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -32,52 +31,8 @@
 /* Private functions ---------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
-
-static void mqtt_sub_callback(MQTTClient *c, MessageData *msg_data)
+int mqtt_client_init(rt_device_t dev)
 {
-    *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
-    LOG_D("mqtt sub callback: %.*s %.*s",
-          msg_data->topicName->lenstring.len,
-          msg_data->topicName->lenstring.data,
-          msg_data->message->payloadlen,
-          (char *)msg_data->message->payload);
-
-    return;
-}
-
-static void mqtt_sub_default_callback(MQTTClient *c, MessageData *msg_data)
-{
-    *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
-    LOG_D("mqtt sub default callback: %.*s %.*s",
-          msg_data->topicName->lenstring.len,
-          msg_data->topicName->lenstring.data,
-          msg_data->message->payloadlen,
-          (char *)msg_data->message->payload);
-    return;
-}
-
-static void mqtt_connect_callback(MQTTClient *c)
-{
-    LOG_D("inter mqtt_connect_callback!");
-}
-
-static void mqtt_online_callback(MQTTClient *c)
-{
-    LOG_D("inter mqtt_online_callback!");
-}
-
-static void mqtt_offline_callback(MQTTClient *c)
-{
-    LOG_D("inter mqtt_offline_callback!");
-}
-
-int mqtt_client_init(MQTTClient *client)
-{
-    iotx_device_info_t device_info;
-    iotx_conn_info_t device_connect;
-
-    MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
-    client->isconnected = 0;
     /*******init client parameter*********/
     mqtt_log("mqtt_client_init");
     rt_memset(&device_info, 0, sizeof(iotx_device_info_t));
@@ -85,70 +40,19 @@ int mqtt_client_init(MQTTClient *client)
     rt_strncpy(device_info.device_name, DEVICE_NAME, strlen(DEVICE_NAME));
     rt_strncpy(device_info.device_secret, DEVICE_SECRET, strlen(DEVICE_SECRET));
     rt_sprintf(device_info.device_id, DEVICE_ID, strlen(DEVICE_ID));
-    rt_snprintf(device_info.device_id, sizeof(device_connect.client_id), "rtthread%d", rt_tick_get());
     // mqtt_log("product_key:%s", device_info.product_key);
     // mqtt_log("device_name:%s", device_info.device_name);
     // mqtt_log("device_secret:%s", device_info.device_secret);
     // mqtt_log("device_id:%s", device_info.device_id);
     // mqtt_setup_connect_info(&device_connect, device_info_p);
-
-    /* generate the random client ID */
     mqtt_setup_connect_info(&device_connect, &device_info);
-    // mqtt_log("clientID:%s", client_con.clientID.cstring);
-    // mqtt_log("username:%s", client_con.username.cstring);
-    // mqtt_log("password:%s", client_con.password.cstring);
-
     client_con.keepAliveInterval = 60;
     client_con.clientID.cstring = (char *)device_connect.client_id;
     client_con.username.cstring = (char *)device_connect.username;
     client_con.password.cstring = (char *)device_connect.password;
-
-    {
-        char mqtt_uri[100] = {0};
-        rt_snprintf(mqtt_uri, sizeof(mqtt_uri),
-                    "tcp:%s:%d",
-                    device_connect.host_name,
-                    device_connect.port);
-        char p = malloc
-    }
-    /* config connect param */
-    memcpy(&client->condata, &client_con, sizeof(client_con));
-    /* config MQTT will param. */
-    // client->condata.willFlag = 1;
-    // client->condata.will.qos = 1;
-    // client->condata.will.retained = 0;
-    // client->condata.will.topicName.cstring = MQTT_PUBTOPIC;
-    // client->condata.will.message.cstring = MQTT_WILLMSG;
-
-    /* malloc buffer. */
-    client->buf_size = client->readbuf_size = 1024;
-    client->buf = malloc(client->buf_size);
-    client->readbuf = malloc(client->readbuf_size);
-    if (!(client->buf && client->readbuf))
-    {
-        LOG_E("no memory for MQTT client buffer!");
-        goto _exit;
-    }
-    /* set event callback function */
-    client->connect_callback = mqtt_connect_callback;
-    client->online_callback = mqtt_online_callback;
-    client->offline_callback = mqtt_offline_callback;
-
-    /* set subscribe table and event callback */
-    {
-        rt_uint8_t i;
-        for (i = 0; i < MAX_MESSAGE_HANDLERS; i++)
-        {
-            client->messageHandlers[i].topicFilter = iot_topics[i].topic_str;
-            client->messageHandlers[i].callback = mqtt_sub_callback;
-            client->messageHandlers[i].qos = iot_topics[i].qos;
-        }
-    }
-
-    /* set default subscribe event callback */
-    client->defaultMessageHandler = mqtt_sub_default_callback;
-
-_exit:
+    // mqtt_log("clientID:%s", client_con.clientID.cstring);
+    // mqtt_log("username:%s", client_con.username.cstring);
+    // mqtt_log("password:%s", client_con.password.cstring);
     return 0;
 }
 void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info)
