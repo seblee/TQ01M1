@@ -14,6 +14,6 @@ void mbm_fsm_thread_entry(void *parameter);
 void bkg_thread_entry(void *parameter);
 void di_thread_entry(void *parameter);
 
-void sim7600_thread_entry(void *parameter);
+void net_thread_entry(void *parameter);
 
 #endif //__THREADS_ENTRIES

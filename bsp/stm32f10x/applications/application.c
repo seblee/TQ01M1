@@ -47,7 +47,7 @@ enum
     MODBUS_SLAVE_THREAD_PRIO,
     MONITOR_SLAVE_THREAD_PRIO,
     MODBUS_MASTER_THREAD_PRIO,
-    SIM7600_THREAD_PRIO,
+    NET_THREAD_PRIO,
     //		TCOM_THREAD_PRIO,
     //		TEAM_THREAD_PRIO,
     MBM_FSM_THREAD_PRIO,
@@ -74,7 +74,7 @@ static rt_uint8_t cpad_stack[512];
 //static rt_uint8_t tcom_stack[ 512 ];
 static rt_uint8_t bkg_stack[512];
 static rt_uint8_t testcase_stack[512];
-static rt_uint8_t sim7600_stack[2560];
+static rt_uint8_t net_stack[4096];
 
 static struct rt_thread modbus_master_thread;
 static struct rt_thread modbus_slave_thread;
@@ -88,7 +88,7 @@ static struct rt_thread core_thread;
 static struct rt_thread cpad_thread;
 static struct rt_thread bkg_thread;
 static struct rt_thread testcase_thread;
-static struct rt_thread sim7600_thread;
+static struct rt_thread net_thread;
 
 void set_boot_flag(void);
 
@@ -286,20 +286,20 @@ int rt_application_init(void)
         rt_thread_startup(&testcase_thread);
     }
 
-    // result = rt_thread_init(&sim7600_thread,
-    //                         "sim7600_test",
-    //                         sim7600_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&sim7600_stack[0],
-    //                         sizeof(sim7600_stack),
-    //                         SIM7600_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&sim7600_thread);
-    // }
+    result = rt_thread_init(&net_thread,
+                            "net_test",
+                            net_thread_entry,
+                            RT_NULL, 
+                            (rt_uint8_t *)&net_stack[0],
+                            sizeof(net_stack),
+                            NET_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&net_thread);
+    }
 
-    return 0;
+    return 0; 
 }
 
 void set_boot_flag(void)

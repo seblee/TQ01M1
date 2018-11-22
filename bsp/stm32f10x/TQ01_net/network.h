@@ -98,7 +98,7 @@ typedef struct
 {
     const char *topic_str;
     rt_uint8_t dup;
-    int qos;
+    enum QoS qos;
     rt_uint8_t restained;
 } iot_topic_param_t;
 
@@ -117,8 +117,6 @@ typedef enum
 
 /* Private variables ---------------------------------------------------------*/
 extern rt_device_t write_device;
-
-extern rt_uint8_t write_buffer[MSG_LEN_MAX];
 
 extern rt_uint8_t read_buffer[MSG_LEN_MAX];
 

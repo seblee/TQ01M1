@@ -9,7 +9,7 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-11-21 11:53:34
+ * @Last Modified time: 2018-11-21 15:56:38
  ****************************************************************************
 **/
 #ifndef __MQTT_CLIENT_H_
@@ -52,7 +52,7 @@ typedef enum
     DEVICE_ERR,        /*{"DEVICE_ERR"}*/
     DEVICE_GET,        /*{"DEVICE_GET"}*/
 } _topic_enmu_t;
-enum QoS
+enum MQTT_QoS
 {
     MQTT_QOS0,
     MQTT_QOS1,
@@ -60,8 +60,8 @@ enum QoS
     MQTT_SUBFAIL = 0x80
 };
 /* Private define ------------------------------------------------------------*/
-#define DEVICE_TQ
-// #define DEVICE_SEBLEE
+//#define DEVICE_TQ
+#define DEVICE_SEBLEE
 // #define DEVICE_HIGHTLEVEL
 
 #define DEVICE_ID "cdtest0041"
@@ -128,7 +128,7 @@ enum QoS
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-int mqtt_client_init(rt_device_t dev);
+int mqtt_client_init(MQTTClient *client);
 
 void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info);
 

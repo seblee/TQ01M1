@@ -9,19 +9,35 @@
  * @brief   :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-09-26 18:04:54
+ * @Last Modified time: 2018-11-21 16:01:28
  ****************************************************************************
 **/
 /* Private include -----------------------------------------------------------*/
 #include "mqtt_client.h"
 #include "utils_hmac.h"
 #include "transport.h"
+#include "paho_mqtt.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
 #ifndef mqtt_log
 #define mqtt_log(N, ...) rt_kprintf("####[MQTT %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
-#endif /* at_log(...) */
+#endif /* mqtt_log(...) */
+
+#define DBG_ENABLE
+#define DBG_SECTION_NAME "mqtt"
+#ifdef MQTT_DEBUG
+#define DBG_LEVEL DBG_LOG
+#else
+#define DBG_LEVEL DBG_INFO
+#endif /* MQTT_DEBUG */
+#define DBG_COLOR
+#include <rtdbg.h>
+
+#ifndef LOG_D
+#error "Please update the 'rtdbg.h' file to GitHub latest version (https://github.com/RT-Thread/rt-thread/blob/master/include/rtdbg.h)"
+#endif
+
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -31,8 +47,52 @@
 /* Private functions ---------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
-int mqtt_client_init(rt_device_t dev)
+
+static void mqtt_sub_callback(MQTTClient *c, MessageData *msg_data)
 {
+    *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
+    LOG_D("mqtt sub callback: %.*s %.*s",
+          msg_data->topicName->lenstring.len,
+          msg_data->topicName->lenstring.data,
+          msg_data->message->payloadlen,
+          (char *)msg_data->message->payload);
+
+    return;
+}
+
+static void mqtt_sub_default_callback(MQTTClient *c, MessageData *msg_data)
+{
+    *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
+    LOG_D("mqtt sub default callback: %.*s %.*s",
+          msg_data->topicName->lenstring.len,
+          msg_data->topicName->lenstring.data,
+          msg_data->message->payloadlen,
+          (char *)msg_data->message->payload);
+    return;
+}
+
+static void mqtt_connect_callback(MQTTClient *c)
+{
+    LOG_D("inter mqtt_connect_callback!");
+}
+
+static void mqtt_online_callback(MQTTClient *c)
+{
+    LOG_D("inter mqtt_online_callback!");
+}
+
+static void mqtt_offline_callback(MQTTClient *c)
+{
+    LOG_D("inter mqtt_offline_callback!");
+}
+
+int mqtt_client_init(MQTTClient *client)
+{
+    iotx_device_info_t device_info;
+    iotx_conn_info_t device_connect;
+
+    MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
+    client->isconnected = 0;
     /*******init client parameter*********/
     mqtt_log("mqtt_client_init");
     rt_memset(&device_info, 0, sizeof(iotx_device_info_t));
@@ -40,19 +100,89 @@ int mqtt_client_init(rt_device_t dev)
     rt_strncpy(device_info.device_name, DEVICE_NAME, strlen(DEVICE_NAME));
     rt_strncpy(device_info.device_secret, DEVICE_SECRET, strlen(DEVICE_SECRET));
     rt_sprintf(device_info.device_id, DEVICE_ID, strlen(DEVICE_ID));
-    // mqtt_log("product_key:%s", device_info.product_key);
-    // mqtt_log("device_name:%s", device_info.device_name);
-    // mqtt_log("device_secret:%s", device_info.device_secret);
-    // mqtt_log("device_id:%s", device_info.device_id);
+    rt_snprintf(device_info.device_id, sizeof(device_connect.client_id), "rtthread%d", rt_tick_get());
+    LOG_D("product_key:%s", device_info.product_key);
+    LOG_D("device_name:%s", device_info.device_name);
+    LOG_D("device_secret:%s", device_info.device_secret);
+    LOG_D("device_id:%s", device_info.device_id);
     // mqtt_setup_connect_info(&device_connect, device_info_p);
+
+    /* generate the random client ID */
     mqtt_setup_connect_info(&device_connect, &device_info);
+
     client_con.keepAliveInterval = 60;
     client_con.clientID.cstring = (char *)device_connect.client_id;
     client_con.username.cstring = (char *)device_connect.username;
     client_con.password.cstring = (char *)device_connect.password;
-    // mqtt_log("clientID:%s", client_con.clientID.cstring);
-    // mqtt_log("username:%s", client_con.username.cstring);
-    // mqtt_log("password:%s", client_con.password.cstring);
+    LOG_D("clientID:%s", client_con.clientID.cstring);
+    LOG_D("username:%s", client_con.username.cstring);
+    LOG_D("password:%s", client_con.password.cstring);
+
+    {
+        char mqtt_uri[100] = {0};
+        rt_snprintf(mqtt_uri, sizeof(mqtt_uri),
+                    "tcp://%s:%d",
+                    device_connect.host_name,
+                    device_connect.port);
+        char *uri_p = rt_malloc(strlen(mqtt_uri) + 1);
+        if (!uri_p)
+        {
+            LOG_D("no memory for MQTT client buffer!");
+            goto _exit;
+        }
+        rt_memset(uri_p, 0, strlen(mqtt_uri) + 1);
+        rt_strncpy(uri_p, mqtt_uri, strlen(mqtt_uri));
+        client->uri = uri_p;
+    }
+
+    LOG_D("client->uri:%s", client->uri);
+    /* config connect param */
+    memcpy(&client->condata, &client_con, sizeof(client_con));
+    LOG_D("client->clientID:%s", client->condata.clientID);
+    LOG_D("client->username:%s", client->condata.username);
+    LOG_D("client->password:%s", client->condata.password);
+
+    LOG_D("clientID:%s", client_con.clientID.cstring);
+    LOG_D("username:%s", client_con.username.cstring);
+    LOG_D("password:%s", client_con.password.cstring);
+    /* config MQTT will param. */
+    // client->condata.willFlag = 1;
+    // client->condata.will.qos = 1;
+    // client->condata.will.retained = 0;
+    // client->condata.will.topicName.cstring = MQTT_PUBTOPIC;
+    // client->condata.will.message.cstring = MQTT_WILLMSG;
+
+    /* malloc buffer. */
+    client->buf_size = client->readbuf_size = 1024;
+    client->buf = rt_malloc(client->buf_size);
+    client->readbuf = rt_malloc(client->readbuf_size);
+    if (!(client->buf && client->readbuf))
+    {
+        LOG_D("no memory for MQTT client buffer!");
+        goto _exit;
+    }
+    /* set event callback function */
+    client->connect_callback = mqtt_connect_callback;
+    client->online_callback = mqtt_online_callback;
+    client->offline_callback = mqtt_offline_callback;
+
+    /* set subscribe table and event callback */
+    {
+        rt_uint8_t i;
+        for (i = 0; i < MAX_MESSAGE_HANDLERS; i++)
+        {
+
+            client->messageHandlers[i].topicFilter = (char *)iot_topics[i].topic_str;
+            client->messageHandlers[i].callback = mqtt_sub_callback;
+            client->messageHandlers[i].qos = iot_topics[i].qos;
+            LOG_D("Subscribe #%d>>Qos:%d,Subscribe:%s", i, client->messageHandlers[i].qos, client->messageHandlers[i].topicFilter);
+        }
+    }
+
+    /* set default subscribe event callback */
+    client->defaultMessageHandler = mqtt_sub_default_callback;
+
+_exit:
     return 0;
 }
 void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info)
@@ -68,9 +198,9 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
                 "deviceName%s"
                 "productKey%s",
                 device_info->device_id, device_info->device_name, device_info->product_key);
-    // mqtt_log("host_name:%s", conn->host_name);
-    // mqtt_log("username:%s", conn->username);
-    // mqtt_log("hmac_source:%s", hmac_source);
+    LOG_D("host_name:%s", conn->host_name);
+    LOG_D("username:%s", conn->username);
+    LOG_D("hmac_source:%s", hmac_source);
     utils_hmac_md5(hmac_source, strlen(hmac_source),
                    guider_sign,
                    device_info->device_secret,
@@ -78,175 +208,24 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
     rt_snprintf(conn->password, sizeof(conn->password),
                 "%s",
                 guider_sign);
-    // mqtt_log("password:%s", conn->password);
-    if (conn->style == IOT_WIFI_MODE)
-        rt_snprintf(conn->client_id, sizeof(conn->client_id),
-                    "%s"
-                    "|securemode=%d"
-                    ",signmethod=%s"
-                    "|",
-                    device_info->device_id, SECURE_TCP, MD5_METHOD);
-    else if (conn->style == IOT_4G_MODE)
-        rt_snprintf(conn->client_id, sizeof(conn->client_id),
-                    "%s"
-                    "|securemode=%d"
-                    ",signmethod=%s"
-                    "|",
-                    device_info->device_id, SECURE_TCP, MD5_METHOD);
-    // mqtt_log("client_id:%s", conn->client_id);
+    LOG_D("password:%s", conn->password);
+    // if (conn->style == IOT_WIFI_MODE)
+    //     rt_snprintf(conn->client_id, sizeof(conn->client_id),
+    //                 "%s"
+    //                 "|securemode=%d"
+    //                 ",signmethod=%s"
+    //                 "|",
+    //                 device_info->device_id, SECURE_TCP, MD5_METHOD);
+    // else if (conn->style == IOT_4G_MODE)
+    rt_snprintf(conn->client_id, sizeof(conn->client_id),
+                "%s"
+                "|securemode=%d"
+                ",signmethod=%s"
+                "|",
+                device_info->device_id, SECURE_TCP, MD5_METHOD);
+    LOG_D("client_id:%s", conn->client_id);
 }
 
-int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn)
-{
-    rt_int16_t len;
-
-    len = MQTTSerialize_connect(write_buffer, MSG_LEN_MAX, conn);
-    if (len <= 0)
-    {
-        mqtt_log("Serialize connect packet failed,len = %d", len);
-        return -RT_ERROR;
-    }
-
-    mqtt_log("MQTTSerialize_connect done");
-
-    if (transport_sendPacketBuffer(0, write_buffer, len) == len)
-    {
-        mqtt_log("send mqtt connect packet done");
-    }
-    else
-        goto exit;
-    /* wait for connack */
-    rt_memset(read_buffer, 0, sizeof(read_buffer));
-    if (MQTTPacket_read(read_buffer, sizeof(read_buffer), transport_getdata) == CONNACK)
-    {
-        unsigned char sessionPresent, connack_rc;
-        mqtt_log("get CONNACK packet");
-        if (MQTTDeserialize_connack(&sessionPresent, &connack_rc, read_buffer, sizeof(read_buffer)) != 1 || connack_rc != 0)
-        {
-            mqtt_log("Unable to connect, return code %d\n", connack_rc);
-            goto exit;
-        }
-    }
-    else
-        goto exit;
-    mqtt_log("MQTT connect sucess!!!");
-    return RT_EOK;
-exit:
-    return -RT_ERROR;
-}
-/**
- ****************************************************************************
- * @Function : rt_err_t mqtt_client_subscribe(_topic_enmu_t subsc, iotx_device_info_pt iotx_dev_info)
- * @File     : mqtt_client.c
- * @Program  : topic:swith topic
- * @Created  : 2018-09-14 by seblee
- * @Brief    : 
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_subscribe(_topic_enmu_t subsc, iotx_device_info_pt iotx_dev_info)
-{
-    int req_qos = 0, rc;
-    unsigned short msgid1;
-    MQTTString topicString;
-    char topic_cache[100];
-    rt_strncpy(topic_cache, iot_topics[subsc].topic_str, 100);
-
-    topicString.cstring = topic_cache;
-    msgid1 = mqtt_client_packet_id();
-    rc = MQTTSerialize_subscribe(write_buffer, MSG_LEN_MAX, 0, msgid1, 1, &topicString, &req_qos);
-
-    mqtt_log("len:%d,write_buffer:%s", rc, write_buffer + 5);
-    transport_sendPacketBuffer(0, write_buffer, rc);
-    mqtt_log("send mqtt subscription packet done");
-
-    rt_memset(read_buffer, 0, rc);
-    if (MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata) == SUBACK) /* wait for suback */
-    {
-        mqtt_log("get SUBACK");
-        unsigned short submsgid;
-        int subcount;
-        int granted_qos;
-
-        rc = MQTTDeserialize_suback(&submsgid, 1, &subcount, &granted_qos, read_buffer, sizeof(read_buffer));
-        if (granted_qos != 0)
-        {
-            mqtt_log("granted qos != 0, %d", granted_qos);
-            if (granted_qos == MQTT_SUBFAIL)
-                goto exit;
-        }
-    }
-    else
-        goto exit;
-    mqtt_log("subscribe topic:%s sucess!!!", subsc);
-    return RT_EOK;
-exit:
-    mqtt_log("RT_ERROR");
-    return -RT_ERROR;
-}
-/**
- ****************************************************************************
- * @Function : rt_err_t mqtt_client_subscribe_topics(void)
- * @File     : mqtt_client.c
- * @Program  : none
- * @Created  : 2018-09-17 by seblee
- * @Brief    : subscribe all topics
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_subscribe_topics(void)
-{
-    rt_err_t rc;
-    rt_thread_delay(1000);
-    /*******WATER_NOTICE********/
-    rc = mqtt_client_subscribe(WATER_NOTICE, device_info_p);
-    if (rc != RT_EOK)
-    {
-        mqtt_log("WATER_NOTICE,RT_ERROR:%d", rc);
-        // goto exit;
-    }
-    //rt_thread_delay(1000);
-    /*******PARAMETER_SET********/
-    rc = mqtt_client_subscribe(PARAMETER_SET, device_info_p);
-    if (rc != RT_EOK)
-    {
-        mqtt_log("PARAMETER_SET,RT_ERROR:%d", rc);
-        // goto exit;
-    }
-    //rt_thread_delay(1000);
-    /*******PARAMETER_GET********/
-    rc = mqtt_client_subscribe(PARAMETER_GET, device_info_p);
-    if (rc != RT_EOK)
-    {
-        mqtt_log("PARAMETER_GET,RT_ERROR:%d", rc);
-        goto exit;
-    }
-
-    //rt_thread_delay(1000);
-    /*******DEVICE_UPGRADE********/
-    // rc = mqtt_client_subscribe(DEVICE_UPGRADE,device_info_p);
-    // if (rc != RT_EOK)
-    // {
-    //     mqtt_log("DEVICE_UPGRADE,RT_ERROR:%d", rc);
-    //     goto exit;
-    // }
-    // //rt_thread_delay(1000);
-    /*******DEVICE_MOVE********/
-    // rc = mqtt_client_subscribe(DEVICE_MOVE,device_info_p);
-    // if (rc != RT_EOK)
-    // {
-    //     mqtt_log("DEVICE_MOVE,RT_ERROR:%d", rc);
-    //     goto exit;
-    // }
-    // //rt_thread_delay(1000);
-    // /*******DEVICE_GET********/
-    // rc = mqtt_client_subscribe(DEVICE_GET,device_info_p);
-    // if (rc != RT_EOK)
-    // {
-    //     mqtt_log("DEVICE_GET,RT_ERROR:%d", rc);
-    //     goto exit;
-    // }
-exit:
-    return rc;
-}
 /**
  ****************************************************************************
  * @Function : rt_err_t mqtt_packet_read_operation(void)
@@ -259,7 +238,7 @@ exit:
 rt_err_t mqtt_packet_read_operation(void)
 {
     rt_err_t rc = -1;
-    rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
+    // rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
     if (rc > 0)
     {
         switch (rc)
@@ -271,16 +250,16 @@ rt_err_t mqtt_packet_read_operation(void)
             break;
         case PUBLISH:
             mqtt_log("packet type:PUBLISH");
-            mqtt_client_receive_publish((const char *)read_buffer, MSG_LEN_MAX);
+            // mqtt_client_receive_publish((const char *)read_buffer, MSG_LEN_MAX);
             break;
         case PUBACK:
         {
-            unsigned short mypacketid;
-            unsigned char dup, type;
-            if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
-                mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
-            else
-                mqtt_log("PUBACK Deserialize err");
+            //            unsigned short mypacketid;
+            //            unsigned char dup, type;
+            // if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
+            //     mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
+            // else
+            //     mqtt_log("PUBACK Deserialize err");
         }
         break;
         case PUBREC:
@@ -332,113 +311,7 @@ unsigned short mqtt_client_packet_id(void)
         id = 1;
     return id++;
 }
-/**
- ****************************************************************************
- * @Function : rt_err_t mqtt_client_ping(void)
- * @File     : mqtt_client.c
- * @Program  : none
- * @Created  : 2018-09-18 by seblee
- * @Brief    : ping server keep alive
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_ping(void)
-{
-    rt_err_t rc, len;
-    len = MQTTSerialize_pingreq(write_buffer, MSG_LEN_MAX);
-    rc = transport_sendPacketBuffer(0, write_buffer, len);
-    mqtt_log("mqtt_client_ping packet:%d,send:%d", len, rc);
-    if (rc == len)
-        return RT_EOK;
-    else
-        return -RT_ERROR;
-}
-/**
- ****************************************************************************
- * @Function : rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t restained ,rt_uint8_t *msg, rt_uint16_t msg_len)
- * @File     : mqtt_client.c
- * @Program  : topic:the point topic to publish 
- *             dup:Position: byte 1, bit 3. 0 first publish,1 has been published before
- *             qos:Position: byte 1, bits 2-1. 0 At most once delivery;1 At least once delivery;2 Exactly once delivery
- *             restained:Position: byte 1, bit 0.
- *             *msg:the piont of msg
- *             msg_len:the msg length
- * @Created  : 2018-09-19 by seblee
- * @Brief    : publish a topic
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t restained, rt_uint8_t *msg, rt_uint16_t msg_len)
-{
-    rt_err_t rc, len;
-    unsigned short msgid;
-    MQTTString topicString;
-    rt_uint8_t *payload;
-    rt_uint16_t payload_len;
 
-    msgid = mqtt_client_packet_id();
-    topicString.cstring = topic;
-    payload = msg;
-    payload_len = msg_len;
-
-    // mqtt_log("mqtt_client_publish msg:%s",msg);
-    mqtt_log("mqtt_client_publish topic:%s", topicString.cstring);
-
-    len = MQTTSerialize_publish(write_buffer, MSG_LEN_MAX, dup, qos, restained, msgid, topicString, payload, payload_len);
-
-    rc = transport_sendPacketBuffer(0, write_buffer, len);
-    mqtt_log("mqtt_client_publish msgid:%d,packet:%d,send:%d", msgid, len, rc);
-    if (rc == len)
-        return RT_EOK;
-    else
-        return -RT_ERROR;
-}
-/**
- ****************************************************************************
- * @Function : rt_err_t mqtt_client_publish_topics(void)
- * @File     : mqtt_client.c
- * @Program  : none
- * @Created  : 2018-09-19 by seblee
- * @Brief    : publish init topics
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_publish_topics(void)
-{
-    rt_err_t rc = -RT_ERROR;
-    char *msg_playload = RT_NULL; //need free
-    network_Serialize_init_json(&msg_playload);
-    if (msg_playload == RT_NULL)
-        goto exit;
-    /*****publish TOPIC_PLATFORM_INIT************/
-    rc = mqtt_client_publish(TOPIC_PLATFORM_INIT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
-    rt_free(msg_playload);
-    if (rc == RT_EOK)
-    {
-        rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
-        if (rc == PUBACK)
-        {
-            unsigned short mypacketid;
-            unsigned char dup, type;
-            if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
-            {
-                mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
-                rc = RT_EOK;
-            }
-            else
-            {
-                mqtt_log("PUBACK Deserialize err");
-                rc = -RT_ERROR;
-                goto exit;
-            }
-        }
-        else
-            goto exit;
-    }
-    else
-        goto exit;
-
-/*************************************/
-exit:
-    return rc;
-}
 /**
  ****************************************************************************
  * @Function : rt_err_t mqtt_client_publish_parameter(void)
@@ -462,22 +335,22 @@ rt_err_t mqtt_client_publish_parameter(void)
     rt_free(msg_playload);
     if (rc == RT_EOK)
     {
-        rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
+        // rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
         if (rc == PUBACK)
         {
-            unsigned short mypacketid;
-            unsigned char dup, type;
-            if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
-            {
-                mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
-                rc = RT_EOK;
-            }
-            else
-            {
-                mqtt_log("PUBACK Deserialize err");
-                rc = -RT_ERROR;
-                goto exit;
-            }
+            // unsigned short mypacketid;
+            // unsigned char dup, type;
+            // if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
+            // {
+            //     mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
+            //     rc = RT_EOK;
+            // }
+            // else
+            // {
+            //     mqtt_log("PUBACK Deserialize err");
+            //     rc = -RT_ERROR;
+            //     goto exit;
+            // }
         }
         else
             goto exit;
@@ -539,25 +412,25 @@ rt_err_t mqtt_client_publish_report(_topic_enmu_t topic_type)
     rt_free(msg_playload);
     if (rc == RT_EOK)
     {
-        rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
-        if (rc == PUBACK)
-        {
-            unsigned short mypacketid;
-            unsigned char dup, type;
-            if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
-            {
-                mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
-                rc = RT_EOK;
-            }
-            else
-            {
-                mqtt_log("PUBACK Deserialize err");
-                rc = -RT_ERROR;
-                goto exit;
-            }
-        }
-        else
-            goto exit;
+        // rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
+        // if (rc == PUBACK)
+        // {
+        //     unsigned short mypacketid;
+        //     unsigned char dup, type;
+        //     if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
+        //     {
+        //         mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
+        //         rc = RT_EOK;
+        //     }
+        //     else
+        //     {
+        //         mqtt_log("PUBACK Deserialize err");
+        //         rc = -RT_ERROR;
+        //         goto exit;
+        //     }
+        // }
+        // else
+        //     goto exit;
     }
     else
         goto exit;
@@ -589,13 +462,13 @@ rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len)
     rc = MQTTDeserialize_publish(&dup, &qos, &retained, &msgid, &receivedTopic,
                                  &payload_in, &payloadlen_in, p, length);
     mqtt_log("mqtt received msgid:%d,dup:%d,qos:%d", msgid, dup, qos);
-    if (qos == MQTT_QOS0)
-    {
-    }
-    else if (qos == MQTT_QOS1)
-        result = mqtt_client_MQTTPuback(write_buffer, MSG_LEN_MAX, msgid, PUBACK);
-    else if (qos == MQTT_QOS2)
-        result = mqtt_client_MQTTPuback(write_buffer, MSG_LEN_MAX, msgid, PUBREC);
+    //    if (qos == MQTT_QOS0)
+    //    {
+    //    }
+    //    else if (qos == MQTT_QOS1)
+    //        result = mqtt_client_MQTTPuback(write_buffer, MSG_LEN_MAX, msgid, PUBACK);
+    //    else if (qos == MQTT_QOS2)
+    //        result = mqtt_client_MQTTPuback(write_buffer, MSG_LEN_MAX, msgid, PUBREC);
 
     mqtt_log("receivedTopic:%.*s", receivedTopic.lenstring.len, receivedTopic.lenstring.data);
     mqtt_log("message arrived:%.*s", payloadlen_in, payload_in);
@@ -644,7 +517,7 @@ rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, unsigned int msg
 
     if (len <= 0)
         return -RT_ERROR;
-    rc = transport_sendPacketBuffer(0, c, len);
+    // rc = transport_sendPacketBuffer(0, c, len);
     mqtt_log("Puback packet:%d,send:%d,msgId:%d", len, rc, msgId);
     if (rc == len)
         return RT_EOK;

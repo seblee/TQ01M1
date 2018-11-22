@@ -3,67 +3,64 @@
  * @Warning :Without permission from the author,Not for commercial use
  * @File    :
  * @Author  :Seblee
- * @date    :2018-09-06 17:14:15
- * @version :V 1.0.0
+ * @date    :2018-11-21 10:40:27
+ * @version : V1.0.0
  *************************************************
- * @brief   :
+ * @brief :
  ****************************************************************************
  * @Last Modified by: Seblee
- * @Last Modified time: 2018-11-21 10:42:33
+ * @Last Modified time: 2018-11-21 16:05:07
  ****************************************************************************
 **/
+
 /* Private include -----------------------------------------------------------*/
 #include "network.h"
 #include "mqtt_client.h"
+#include "disguise_time.h"
+
 #include "cJSON.h"
 #include "utils_md5.h"
-#include "disguise_time.h"
-#include "SIMCOM_AT.h"
-#include "utils_hmac.h"
-#include "paho_mqtt.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
 #ifndef network_log
 #define network_log(N, ...) rt_kprintf("####[network %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif /* at_log(...) */
+
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 
-/***push command ***/
-rt_mq_t publish_mq = RT_NULL;
-
-volatile _iot_state_t iot_state = IOT_POWERON;
 /********topic dup qos restained**************/
-iot_topic_param_t iot_topics[] = {
-    {TOPIC_PLATFORM_INIT, 0, 1, 0},   /*{"TOPIC_PLATFORM_INIT"}*/
-    {TOPIC_WATER_NOTICE, 0, 1, 0},    /*{"TOPIC_WATER_NOTICE"}*/
-    {TOPIC_WATER_STATUS, 0, 1, 0},    /*{"TOPIC_WATER_STATUS"}*/
-    {TOPIC_PARAMETER_SET, 0, 1, 0},   /*{"TOPIC_PARAMETER_SET"}*/
-    {TOPIC_PARAMETER_GET, 0, 1, 0},   /*{"TOPIC_PARAMETER_GET"}*/
-    {TOPIC_PARAMETER_PUT, 0, 1, 0},   /*{"TOPIC_PARAMETER_PUT"}*/
-    {TOPIC_REALTIME_REPORT, 0, 1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
-    {TOPIC_TIMING_REPORT, 0, 1, 0},   /*{"TOPIC_TIMING_REPORT"}*/
-    {TOPIC_DEVICE_UPGRADE, 0, 1, 0},  /*{"TOPIC_DEVICE_UPGRADE"}*/
-    {TOPIC_DEVICE_MOVE, 0, 1, 0},     /*{"TOPIC_DEVICE_MOVE"}*/
-    {TOPIC_DEVICE_UPDATE, 0, 1, 0},   /*{"TOPIC_DEVICE_UPDATE"}*/
-    {TOPIC_DEVICE_ERR, 0, 1, 0},      /*{"TOPIC_DEVICE_ERR"}*/
-    {TOPIC_DEVICE_GET, 0, 1, 0},      /*{"TOPIC_DEVICE_GET"}*/
+iot_topic_param_t iot_topics[MAX_MESSAGE_HANDLERS] = {
+    {TOPIC_PLATFORM_INIT, 0, QOS1, 0},   /*{"TOPIC_PLATFORM_INIT"}*/
+    {TOPIC_WATER_NOTICE, 0, QOS1, 0},    /*{"TOPIC_WATER_NOTICE"}*/
+    {TOPIC_WATER_STATUS, 0, QOS1, 0},    /*{"TOPIC_WATER_STATUS"}*/
+    {TOPIC_PARAMETER_SET, 0, QOS1, 0},   /*{"TOPIC_PARAMETER_SET"}*/
+    {TOPIC_PARAMETER_GET, 0, QOS1, 0},   /*{"TOPIC_PARAMETER_GET"}*/
+    {TOPIC_PARAMETER_PUT, 0, QOS1, 0},   /*{"TOPIC_PARAMETER_PUT"}*/
+    {TOPIC_REALTIME_REPORT, 0, QOS1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
+    {TOPIC_TIMING_REPORT, 0, QOS1, 0},   /*{"TOPIC_TIMING_REPORT"}*/
+    {TOPIC_DEVICE_UPGRADE, 0, QOS1, 0},  /*{"TOPIC_DEVICE_UPGRADE"}*/
+    {TOPIC_DEVICE_MOVE, 0, QOS1, 0},     /*{"TOPIC_DEVICE_MOVE"}*/
+    {TOPIC_DEVICE_UPDATE, 0, QOS1, 0},   /*{"TOPIC_DEVICE_UPDATE"}*/
+    {TOPIC_DEVICE_ERR, 0, QOS1, 0},      /*{"TOPIC_DEVICE_ERR"}*/
+    {TOPIC_DEVICE_GET, 0, QOS1, 0},      /*{"TOPIC_DEVICE_GET"}*/
 };
-/* Private function prototypes -----------------------------------------------*/
-extern sys_reg_st g_sys;
-iotx_device_info_pt device_info_p = (iotx_device_info_t *)g_sys.config.ComPara.device_info;
-iotx_device_info_t device_info;
-iotx_conn_info_t device_connect;
-
-SIMCOM_HANDLE g_SIMCOM_Handle; //SIMCOM通信模块句柄
-
-/* define MQTT client context */
 static MQTTClient client;
+extern sys_reg_st g_sys;
+/* Private function prototypes -----------------------------------------------*/
+
 /* Private functions ---------------------------------------------------------*/
 
-/* 数据到达回调函数*/
+/*----------------------------------------------------------------------------*/
+
+/* Private function prototypes -----------------------------------------------*/
+
+/* define MQTT client context */
+/* Private functions ---------------------------------------------------------*/
+
+/* 数据通道控制 */
 void NetWork_DIR_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -74,12 +71,33 @@ void NetWork_DIR_Init(void)
     GPIO_Init(SIM7600_DIR_PORT, &GPIO_InitStructure);
     SIM7600_DIR_WIFI;
 }
-
+int esp8266_at_socket_device_init(void);
 void net_thread_entry(void *parameter)
 {
+    /**NetWork_DIR_Init**/
+    network_log("#### net_thread_entry start ####");
+    NetWork_DIR_Init();
+    struct tm ti;
+    get_bulid_date_time(&ti);
+    current_systime_set(&ti);
+    rt_thread_delay(rt_tick_from_millisecond(5000));
+    network_log("#### rt_tick_from_millisecond ####");
+    if (g_sys.config.ComPara.u16NetworkPriority)
+    {
+        network_log("####  _DIR_4G ####");
+        SIM7600_DIR_4G;
+    }
+    else
+    {
+        network_log("####  _DIR_WIFI ####");
+        SIM7600_DIR_WIFI;
+        esp8266_at_socket_device_init();
+    }
 
-    MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
-    static char cid[20] = {0};
+    // SIM7600_DIR_WIFI;
+    // network_log("#### at_socket_device_init ####");
+    // esp8266_at_socket_device_init();
+    // network_log("#### at_socket_device_init ####");
 
     static int is_started = 0;
     if (is_started)
@@ -87,11 +105,14 @@ void net_thread_entry(void *parameter)
         return;
     }
     /* config MQTT context param */
-    {
-        client.isconnected = 0;
-    }
-}
 
+    mqtt_client_init(&client); 
+    rt_thread_delay(rt_tick_from_millisecond(5000));
+    paho_mqtt_start(&client);
+    is_started = 1;
+    return;
+}
+//INIT_APP_EXPORT(net_thread_entry);
 /**
  ****************************************************************************
  * @Function : void network_Serialize_init_json(char **datapoint)
@@ -254,7 +275,7 @@ rt_err_t network_water_notice_parse(const char *Str)
         if (MCode_value == MCode_QRCODE_GENERATE)
         {
             network_log("get QRCode !!!");
-            iot_state = IOT_PARAM_REPORT;
+            //          iot_state = IOT_PARAM_REPORT;
         }
         rc = RT_EOK;
     }
@@ -364,25 +385,25 @@ void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
 **/
 void network_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
 {
-    *real = REALTIME_INTERVAL_DEFAULT;
-    *timing = TIMING_INTERVAL_DEFAULT;
-    cpad_eMBRegHoldingCB((unsigned char *)write_buffer, 165, 2, CPAD_MB_REG_READ);
-    rt_uint32_t interval_temp = (write_buffer[0] << 8) | write_buffer[1];
-    interval_temp *= 60;
-    if (interval_temp > TIMING_INTERVAL_MAX)
-        interval_temp = TIMING_INTERVAL_MAX;
-    if (interval_temp < TIMING_INTERVAL_MIN)
-        interval_temp = TIMING_INTERVAL_MIN;
-    *timing = interval_temp;
-    network_log("timing:%d", *timing);
+    //    *real = REALTIME_INTERVAL_DEFAULT;
+    //    *timing = TIMING_INTERVAL_DEFAULT;
+    //    cpad_eMBRegHoldingCB((unsigned char *)write_buffer, 165, 2, CPAD_MB_REG_READ);
+    //    rt_uint32_t interval_temp = (write_buffer[0] << 8) | write_buffer[1];
+    //    interval_temp *= 60;
+    //    if (interval_temp > TIMING_INTERVAL_MAX)
+    //        interval_temp = TIMING_INTERVAL_MAX;
+    //    if (interval_temp < TIMING_INTERVAL_MIN)
+    //        interval_temp = TIMING_INTERVAL_MIN;
+    //    *timing = interval_temp;
+    //    network_log("timing:%d", *timing);
 
-    interval_temp = (write_buffer[2] << 8) | write_buffer[3];
-    if (interval_temp > REALTIME_INTERVAL_MAX)
-        interval_temp = REALTIME_INTERVAL_MAX;
-    if (interval_temp < REALTIME_INTERVAL_MIN)
-        interval_temp = REALTIME_INTERVAL_MIN;
-    *real = interval_temp;
-    network_log("real:%d", *real);
+    //    interval_temp = (write_buffer[2] << 8) | write_buffer[3];
+    //    if (interval_temp > REALTIME_INTERVAL_MAX)
+    //        interval_temp = REALTIME_INTERVAL_MAX;
+    //    if (interval_temp < REALTIME_INTERVAL_MIN)
+    //        interval_temp = REALTIME_INTERVAL_MIN;
+    //    *real = interval_temp;
+    //    network_log("real:%d", *real);
 }
 
 /**
@@ -414,8 +435,8 @@ rt_err_t network_parameter_get_parse(const char *Str)
         if (MCode_value == MCode_PARAMETER_GET)
         {
             network_log("get PARAMETER_GET !!!");
-            _iot_state_t pub_msg = IOT_PARAM_REPORT;
-            rt_mq_send(publish_mq, &pub_msg, sizeof(_iot_state_t));
+            //      _iot_state_t pub_msg = IOT_PARAM_REPORT;
+            //    rt_mq_send(publish_mq, &pub_msg, sizeof(_iot_state_t));
         }
         rc = RT_EOK;
     }
@@ -527,74 +548,74 @@ rt_err_t network_parameter_set_parse(const char *Str)
 rt_err_t network_get_register(void)
 {
     rt_err_t err;
-    char *rec = RT_NULL;
-    char guider_sign[256] = {0};
-    char request[512] = {0};
+    //    char *rec = RT_NULL;
+    //    char guider_sign[256] = {0};
+    //    char request[512] = {0};
 
-    rt_snprintf(request, sizeof(request),
-                "deviceName%sproductKey%srandom567345",
-                REGISTER_DEVICE_NAME, REGISTER_PRODUCT_KEY);
-    network_log("scr:%s", request);
-    utils_hmac_md5(request, strlen(request),
-                   guider_sign,
-                   REGISTER_PRODUCT_SECRET,
-                   strlen(REGISTER_PRODUCT_SECRET));
-    network_log("sign:%s", guider_sign);
-    rt_snprintf((char *)write_buffer, sizeof(write_buffer),
-                "productKey=%s&deviceName=%s&random=567345&sign=%s&signMethod=HmacMD5",
-                REGISTER_PRODUCT_KEY, REGISTER_DEVICE_NAME, guider_sign);
-    network_log("body:%s", write_buffer);
+    //    rt_snprintf(request, sizeof(request),
+    //                "deviceName%sproductKey%srandom567345",
+    //                REGISTER_DEVICE_NAME, REGISTER_PRODUCT_KEY);
+    //    network_log("scr:%s", request);
+    // //   utils_hmac_md5(request, strlen(request),
+    ////                   guider_sign,
+    ////                   REGISTER_PRODUCT_SECRET,
+    //                   strlen(REGISTER_PRODUCT_SECRET));
+    //    network_log("sign:%s", guider_sign);
+    //    rt_snprintf((char *)write_buffer, sizeof(write_buffer),
+    //                "productKey=%s&deviceName=%s&random=567345&sign=%s&signMethod=HmacMD5",
+    //                REGISTER_PRODUCT_KEY, REGISTER_DEVICE_NAME, guider_sign);
+    //    network_log("body:%s", write_buffer);
 
-    rt_snprintf(request, sizeof(request),
-                "POST %s HTTP/1.1\r\n"
-                "Host: %s\r\n"
-                "Content-Type: application/x-www-form-urlencoded\r\n"
-                "Content-Length: %d\r\n"
-                "\r\n"
-                "%s",
-                REGISTER_PATH, REGISTER_HOST, strlen((char *)write_buffer), write_buffer);
-    network_log("request:%s", request);
+    //    rt_snprintf(request, sizeof(request),
+    //                "POST %s HTTP/1.1\r\n"
+    //                "Host: %s\r\n"
+    //                "Content-Type: application/x-www-form-urlencoded\r\n"
+    //                "Content-Length: %d\r\n"
+    //                "\r\n"
+    //                "%s",
+    //                REGISTER_PATH, REGISTER_HOST, strlen((char *)write_buffer), write_buffer);
+    //    network_log("request:%s", request);
 
-    if (device_connect.style == IOT_WIFI_MODE)
-    {
-        err = at_wifi_https(write_device, REGISTER_HOST, REGISTER_PORT, request, &rec);
-        if (err == RT_EOK)
-        {
-            if (rec)
-            {
-                char *response = rt_strstr(rec, AT_WIFI_REMOTE_REC);
-                if (response)
-                {
-                    char *body = rt_strstr(response, "\r\n\r\n");
-                    if (body)
-                    {
-                        body += 4;
-                        network_register_parse((const char *)body, device_info_p);
-                    }
-                }
-                rt_free(rec);
-                rec = RT_NULL;
-            }
-        }
-    }
-    if (device_connect.style == IOT_4G_MODE)
-    {
-        err = at_4g_https(write_device, REGISTER_HOST, REGISTER_PORT, request, &rec);
-        if (err == RT_EOK)
-        {
-            if (rec)
-            {
-                char *body = rt_strstr(rec, "\r\n\r\n");
-                if (body)
-                {
-                    body += 4;
-                    network_register_parse((const char *)body, device_info_p);
-                }
-                rt_free(rec);
-                rec = RT_NULL;
-            }
-        }
-    }
+    //    if (device_connect.style == IOT_WIFI_MODE)
+    //    {
+    //        err = at_wifi_https(write_device, REGISTER_HOST, REGISTER_PORT, request, &rec);
+    //        if (err == RT_EOK)
+    //        {
+    //            if (rec)
+    //            {
+    //                char *response = rt_strstr(rec, AT_WIFI_REMOTE_REC);
+    //                if (response)
+    //                {
+    //                    char *body = rt_strstr(response, "\r\n\r\n");
+    //                    if (body)
+    //                    {
+    //                        body += 4;
+    //                        network_register_parse((const char *)body, device_info_p);
+    //                    }
+    //                }
+    //                rt_free(rec);
+    //                rec = RT_NULL;
+    //            }
+    //        }
+    //    }
+    //    if (device_connect.style == IOT_4G_MODE)
+    //    {
+    //        err = at_4g_https(write_device, REGISTER_HOST, REGISTER_PORT, request, &rec);
+    //        if (err == RT_EOK)
+    //        {
+    //            if (rec)
+    //            {
+    //                char *body = rt_strstr(rec, "\r\n\r\n");
+    //                if (body)
+    //                {
+    //                    body += 4;
+    //                    network_register_parse((const char *)body, device_info_p);
+    //                }
+    //                rt_free(rec);
+    //                rec = RT_NULL;
+    //            }
+    //        }
+    //    }
     return err;
 }
 

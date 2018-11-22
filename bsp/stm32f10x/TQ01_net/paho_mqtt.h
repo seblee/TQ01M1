@@ -12,23 +12,33 @@
 #endif
 
 #ifndef PKG_PAHOMQTT_SUBSCRIBE_HANDLERS
-#define MAX_MESSAGE_HANDLERS    1 /* redefinable - how many subscriptions do you want? */
+#define MAX_MESSAGE_HANDLERS 1 /* redefinable - how many subscriptions do you want? */
 #else
-#define MAX_MESSAGE_HANDLERS    PKG_PAHOMQTT_SUBSCRIBE_HANDLERS
+#define MAX_MESSAGE_HANDLERS PKG_PAHOMQTT_SUBSCRIBE_HANDLERS
 #endif
 
-#define MAX_PACKET_ID           65535 /* according to the MQTT specification - do not change! */
+#define MAX_PACKET_ID 65535 /* according to the MQTT specification - do not change! */
 
-#define MQTT_SOCKET_TIMEO       6000
+#define MQTT_SOCKET_TIMEO 6000
 
 #ifdef MQTT_USING_TLS
-#define MQTT_TLS_READ_BUFFER    4096
+#define MQTT_TLS_READ_BUFFER 4096
 #endif
 
-enum QoS { QOS0, QOS1, QOS2 } ALIGN(4);
+enum QoS
+{
+    QOS0,
+    QOS1,
+    QOS2
+} ALIGN(4);
 
 /* all failure return codes must be negative */
-enum returnCode { PAHO_BUFFER_OVERFLOW = -2, PAHO_FAILURE = -1, PAHO_SUCCESS = 0 };
+enum returnCode
+{
+    PAHO_BUFFER_OVERFLOW = -2,
+    PAHO_FAILURE = -1,
+    PAHO_SUCCESS = 0
+};
 
 typedef struct MQTTMessage
 {

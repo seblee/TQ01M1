@@ -297,7 +297,7 @@ uint8_t Read_Sensor(uint16_t *u16TH_Buff, uint8_t u8SN)
     else
     {
         Sensor_ErrorFlag = 0; //未收到传感器响应
-        rt_kprintf("Sensor Error!!\r\n");
+        // rt_kprintf("Sensor Error!!\r\n");
     }
     EXIT_CRITICAL_SECTION(); //开全局中断
 
@@ -441,7 +441,7 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
     }
     //		g_sys.status.ComSta.u16TH[0].Temp=285;
     //		g_sys.status.ComSta.u16TH[0].Temp=567;
-    rt_kprintf("u8CNT=%x,i=%x,u8SenFlag[0]= %x,u16TH_Sensor[0]= %x,[1] = %x,u8Err_CNT[0]=%x,Temp=%x,Hum=%x\n", u8CNT, i, u8SenFlag[0], u16TH_Sensor[0], u16TH_Sensor[1], u8Err_CNT[0], g_sys.status.ComSta.u16TH[0].Temp, g_sys.status.ComSta.u16TH[0].Hum);
+    // rt_kprintf("u8CNT=%x,i=%x,u8SenFlag[0]= %x,u16TH_Sensor[0]= %x,[1] = %x,u8Err_CNT[0]=%x,Temp=%x,Hum=%x\n", u8CNT, i, u8SenFlag[0], u16TH_Sensor[0], u16TH_Sensor[1], u8Err_CNT[0], g_sys.status.ComSta.u16TH[0].Temp, g_sys.status.ComSta.u16TH[0].Hum);
 
     return u8SenFlag[i];
 }

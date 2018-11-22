@@ -1017,6 +1017,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\components\dfs\filesystems\elmfat\option\ccsbcs.c</FilePath>
             </File>
+            <File>
+              <FileName>poll.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\dfs\src\poll.c</FilePath>
+            </File>
+            <File>
+              <FileName>select.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\dfs\src\select.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1201,6 +1211,11 @@
               <FileName>paho_mqtt_pipe.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\TQ01_net\paho_mqtt_pipe.c</FilePath>
+            </File>
+            <File>
+              <FileName>mqtt_client.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\TQ01_net\mqtt_client.c</FilePath>
             </File>
           </Files>
         </Group>

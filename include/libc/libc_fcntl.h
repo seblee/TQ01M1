@@ -47,6 +47,7 @@
 #endif
 
 #else
+#ifndef O_RDONLY
 #define O_RDONLY         00
 #define O_WRONLY         01
 #define O_RDWR           02
@@ -64,7 +65,7 @@
 #define O_DIRECTORY 0200000
 #define O_NOFOLLOW  0400000
 #define O_CLOEXEC  02000000
-
+#endif
 #define O_ASYNC      020000
 #define O_DIRECT     040000
 #define O_LARGEFILE 0100000
@@ -76,7 +77,7 @@
 #define O_SEARCH  O_PATH
 #define O_EXEC    O_PATH
 
-#define O_ACCMODE (03|O_SEARCH)
+//#define O_ACCMODE (03|O_SEARCH)
 
 #define F_DUPFD  0
 #define F_GETFD  1
@@ -97,6 +98,7 @@
 #define F_GETOWN_EX 16
 
 #define F_GETOWNER_UIDS 17
+
 #endif
 
 #endif

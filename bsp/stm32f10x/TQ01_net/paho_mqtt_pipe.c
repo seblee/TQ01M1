@@ -4,7 +4,7 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <dfs_posix.h>
-#include <sys/time.h>
+#include <time.h>
 
 #include <netdb.h>
 #include <sys/socket.h>
@@ -12,13 +12,14 @@
 
 #include "MQTTPacket.h"
 #include "paho_mqtt.h"
+#include <rtlibc.h>
 
 #define DBG_ENABLE
-#define DBG_SECTION_NAME    "MQTT"
+#define DBG_SECTION_NAME "MQTT"
 #ifdef MQTT_DEBUG
-#define DBG_LEVEL           DBG_LOG
+#define DBG_LEVEL DBG_LOG
 #else
-#define DBG_LEVEL           DBG_INFO
+#define DBG_LEVEL DBG_INFO
 #endif /* MQTT_DEBUG */
 #define DBG_COLOR
 #include <rtdbg.h>
@@ -61,12 +62,13 @@ static int mqtt_resolve_uri(MQTTClient *c, struct addrinfo **res)
     int rc = 0;
     int uri_len = 0, host_addr_len = 0, port_len = 0;
     char *ptr;
-    char port_str[6] = {0};      /* default port of mqtt(http) */
+    char port_str[6] = {0}; /* default port of mqtt(http) */
 
     const char *host_addr = 0;
     char *host_addr_new = RT_NULL;
     const char *uri = c->uri;
     uri_len = strlen(uri);
+    LOG_D(" c->uri:%s", c->uri);
 
     /* strip protocol(tcp or ssl) */
     if (strncmp(uri, "tcp://", 6) == 0)
@@ -88,7 +90,6 @@ static int mqtt_resolve_uri(MQTTClient *c, struct addrinfo **res)
         rc = -1;
         goto _exit;
     }
-
     /* ipv6 address */
     if (host_addr[0] == '[')
     {
@@ -231,9 +232,9 @@ static int net_connect(MQTTClient *c)
 {
     int rc = -1;
     struct addrinfo *addr_res = RT_NULL;
-
+#ifdef MQTT_USING_TLS
     int timeout = MQTT_SOCKET_TIMEO;
-
+#endif
     c->sock = -1;
     c->next_packetid = 0;
 
@@ -281,9 +282,9 @@ static int net_connect(MQTTClient *c)
         c->sock = c->tls_session->server_fd.fd;
 
         /* set recv timeout option */
-        setsockopt(c->sock, SOL_SOCKET, SO_RCVTIMEO, (void *) &timeout,
+        setsockopt(c->sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&timeout,
                    sizeof(timeout));
-        setsockopt(c->sock, SOL_SOCKET, SO_SNDTIMEO, (void *) &timeout,
+        setsockopt(c->sock, SOL_SOCKET, SO_SNDTIMEO, (void *)&timeout,
                    sizeof(timeout));
 
         rc = 0;
@@ -353,8 +354,9 @@ static int sendPacket(MQTTClient *c, int length)
 #endif
 
     rc = send(c->sock, c->buf, length, 0);
-
+#ifdef MQTT_USING_TLS
 _continue:
+#endif
     if (rc == length)
     {
         rc = 0;
@@ -367,7 +369,7 @@ _continue:
     return rc;
 }
 
-static int net_read(MQTTClient *c, unsigned char *buf,  int len, int timeout)
+static int net_read(MQTTClient *c, unsigned char *buf, int len, int timeout)
 {
     int bytes = 0;
     int rc;
@@ -404,8 +406,9 @@ static int net_read(MQTTClient *c, unsigned char *buf,  int len, int timeout)
         }
         else
             bytes += rc;
-
-_continue:
+#ifdef MQTT_USING_TLS
+    _continue:
+#endif
         if (bytes >= len)
         {
             break;
@@ -417,7 +420,7 @@ _continue:
             struct timeval interval;
 
             LOG_D("net_read %d:%d, timeout:%d", bytes, len, timeout);
-            timeout  = 0;
+            timeout = 0;
 
             interval.tv_sec = 1;
             interval.tv_usec = 0;
@@ -459,8 +462,7 @@ static int decodePacket(MQTTClient *c, int *value, int timeout)
             goto exit;
         *value += (i & 127) * multiplier;
         multiplier *= 128;
-    }
-    while ((i & 128) != 0);
+    } while ((i & 128) != 0);
 exit:
     return len;
 }
@@ -510,8 +512,8 @@ static int MQTTConnect(MQTTClient *c)
     if ((len = MQTTSerialize_connect(c->buf, c->buf_size, options)) <= 0)
         goto _exit;
 
-    if ((rc = sendPacket(c, len)) != 0)  // send the connect packet
-        goto _exit; // there was a problem
+    if ((rc = sendPacket(c, len)) != 0) // send the connect packet
+        goto _exit;                     // there was a problem
 
     {
         int res;
@@ -571,7 +573,7 @@ static int MQTTDisconnect(MQTTClient *c)
 
     len = MQTTSerialize_disconnect(c->buf, c->buf_size);
     if (len > 0)
-        rc = sendPacket(c, len);            // send the disconnect packet
+        rc = sendPacket(c, len); // send the disconnect packet
 
     c->isconnected = 0;
 
@@ -602,7 +604,7 @@ static int MQTTSubscribe(MQTTClient *c, const char *topicFilter, enum QoS qos)
     if (len <= 0)
         goto _exit;
     if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
-        goto _exit;             // there was a problem
+        goto _exit;                                // there was a problem
 
     {
         int res;
@@ -632,7 +634,7 @@ static int MQTTSubscribe(MQTTClient *c, const char *topicFilter, enum QoS qos)
         goto _exit;
     }
 
-    if (rc == SUBACK)      // wait for suback
+    if (rc == SUBACK) // wait for suback
     {
         int count = 0, grantedQoS = -1;
         unsigned short mypacketid;
@@ -681,7 +683,7 @@ static char isTopicMatched(char *topicFilter, MQTTString *topicName)
                 nextpos = ++curn + 1;
         }
         else if (*curf == '#')
-            curn = curn_end - 1;    // skip until end of string
+            curn = curn_end - 1; // skip until end of string
         curf++;
         curn++;
     };
@@ -698,7 +700,7 @@ static int deliverMessage(MQTTClient *c, MQTTString *topicName, MQTTMessage *mes
     for (i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
     {
         if (c->messageHandlers[i].topicFilter != 0 && (MQTTPacket_equals(topicName, (char *)c->messageHandlers[i].topicFilter) ||
-                isTopicMatched((char *)c->messageHandlers[i].topicFilter, topicName)))
+                                                       isTopicMatched((char *)c->messageHandlers[i].topicFilter, topicName)))
         {
             if (c->messageHandlers[i].callback != NULL)
             {
@@ -728,7 +730,6 @@ static int MQTT_cycle(MQTTClient *c)
 
     int len = 0,
         rc = PAHO_SUCCESS;
-
 
     if (packet_type == -1)
     {
@@ -776,7 +777,7 @@ static int MQTT_cycle(MQTTClient *c)
         else if ((len = MQTTSerialize_ack(c->buf, c->buf_size, PUBREL, 0, mypacketid)) <= 0)
             rc = PAHO_FAILURE;
         else if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the PUBREL packet
-            rc = PAHO_FAILURE; // there was a problem
+            rc = PAHO_FAILURE;                              // there was a problem
         if (rc == PAHO_FAILURE)
             goto exit; // there was a problem
         break;
@@ -797,13 +798,6 @@ static void paho_mqtt_thread(void *param)
     MQTTClient *c = (MQTTClient *)param;
     int i, rc, len;
     int rc_t = 0;
-
-    /* create publish pipe. */
-    if (pipe(c->pub_pipe) != 0)
-    {
-        LOG_E("creat pipe err");
-        goto _mqtt_exit;
-    }
 
 _mqtt_start:
     if (c->connect_callback)
@@ -827,13 +821,14 @@ _mqtt_start:
 
     LOG_I("MQTT server connect success");
 
-    for (i = 0; i < MAX_MESSAGE_HANDLERS; i++)
+    for (i = 0; i < 10; i++)
     {
         const char *topic = c->messageHandlers[i].topicFilter;
         enum QoS qos = c->messageHandlers[i].qos;
 
         if (topic == RT_NULL)
             continue;
+        LOG_I("Subscribe>>Qos:%d,Subscribe:%s", qos, topic);
 
         rc = MQTTSubscribe(c, topic, qos);
         LOG_I("Subscribe #%d %s %s!", i, topic, (rc < 0) || (rc == 0x80) ? ("fail") : ("OK"));
@@ -876,11 +871,9 @@ _mqtt_start:
 
         FD_ZERO(&readset);
         FD_SET(c->sock, &readset);
-        FD_SET(c->pub_pipe[0], &readset);
 
         /* int select(maxfdp1, readset, writeset, exceptset, timeout); */
-        res = select(((c->pub_pipe[0] > c->sock) ? c->pub_pipe[0] : c->sock) + 1,
-                     &readset, RT_NULL, RT_NULL, &timeout);
+        res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
         if (res == 0)
         {
             len = MQTTSerialize_pingreq(c->buf, c->buf_size);
@@ -917,54 +910,54 @@ _mqtt_start:
             //LOG_D("sock FD_ISSET");
             rc_t = MQTT_cycle(c);
             //LOG_D("sock FD_ISSET rc_t : %d", rc_t);
-            if (rc_t < 0)    goto _mqtt_disconnect;
+            if (rc_t < 0)
+                goto _mqtt_disconnect;
 
             continue;
         }
 
-        if (FD_ISSET(c->pub_pipe[0], &readset))
         {
-            MQTTMessage *message;
-            MQTTString topic = MQTTString_initializer;
+            // MQTTMessage *message;
+            // MQTTString topic = MQTTString_initializer;
 
-            //LOG_D("pub_sock FD_ISSET");
+            // //LOG_D("pub_sock FD_ISSET");
 
-            len = read(c->pub_pipe[0], c->readbuf, c->readbuf_size);
+            // len = read(c->pub_pipe[0], c->readbuf, c->readbuf_size);
 
-            if (len < sizeof(MQTTMessage))
-            {
-                c->readbuf[len] = '\0';
-                LOG_D("pub_sock recv %d byte: %s", len, c->readbuf);
+            // if (len < sizeof(MQTTMessage))
+            // {
+            //     c->readbuf[len] = '\0';
+            //     LOG_D("pub_sock recv %d byte: %s", len, c->readbuf);
 
-                if (strcmp((const char *)c->readbuf, "DISCONNECT") == 0)
-                {
-                    LOG_D("DISCONNECT");
-                    goto _mqtt_disconnect_exit;
-                }
+            //     if (strcmp((const char *)c->readbuf, "DISCONNECT") == 0)
+            //     {
+            //         LOG_D("DISCONNECT");
+            //         goto _mqtt_disconnect_exit;
+            //     }
 
-                continue;
-            }
+            //     continue;
+            // }
 
-            message = (MQTTMessage *)c->readbuf;
-            message->payload = c->readbuf + sizeof(MQTTMessage);
-            topic.cstring = (char *)c->readbuf + sizeof(MQTTMessage) + message->payloadlen;
-            //LOG_D("pub_sock topic:%s, payloadlen:%d", topic.cstring, message->payloadlen);
+            // message = (MQTTMessage *)c->readbuf;
+            // message->payload = c->readbuf + sizeof(MQTTMessage);
+            // topic.cstring = (char *)c->readbuf + sizeof(MQTTMessage) + message->payloadlen;
+            // //LOG_D("pub_sock topic:%s, payloadlen:%d", topic.cstring, message->payloadlen);
 
-            len = MQTTSerialize_publish(c->buf, c->buf_size, 0, message->qos, message->retained, message->id,
-                                        topic, (unsigned char *)message->payload, message->payloadlen);
-            if (len <= 0)
-            {
-                LOG_D("MQTTSerialize_publish len: %d", len);
-                goto _mqtt_disconnect;
-            }
+            // len = MQTTSerialize_publish(c->buf, c->buf_size, 0, message->qos, message->retained, message->id,
+            //                             topic, (unsigned char *)message->payload, message->payloadlen);
+            // if (len <= 0)
+            // {
+            //     LOG_D("MQTTSerialize_publish len: %d", len);
+            //     goto _mqtt_disconnect;
+            // }
 
-            if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
-            {
-                LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
-                goto _mqtt_disconnect;
-            }
+            // if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
+            // {
+            //     LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
+            //     goto _mqtt_disconnect;
+            // }
         } /* pbulish sock handler. */
-    } /* while (1) */
+    }     /* while (1) */
 
 _mqtt_disconnect:
     MQTTDisconnect(c);
@@ -979,14 +972,14 @@ _mqtt_restart:
     LOG_D("restart!");
     goto _mqtt_start;
 
-_mqtt_disconnect_exit:
-    MQTTDisconnect(c);
-    net_disconnect(c);
+    ////_mqtt_disconnect_exit:
+    //    MQTTDisconnect(c);
+    //    net_disconnect(c);
 
-_mqtt_exit:
-    LOG_D("thread exit");
+    ////_mqtt_exit:
+    //    LOG_D("thread exit");
 
-    return;
+    //    return;
 }
 
 int paho_mqtt_start(MQTTClient *client)
@@ -1002,7 +995,7 @@ int paho_mqtt_start(MQTTClient *client)
     {
         LOG_D("paho mqtt has already started!");
         return 0;
-    }    
+    }
 
     tid = rt_malloc(RT_ALIGN(sizeof(struct rt_thread), 8) + stack_size);
     if (!tid)
@@ -1017,7 +1010,7 @@ int paho_mqtt_start(MQTTClient *client)
                             paho_mqtt_thread, client, // fun, parameter
                             stack, stack_size,        // stack, size
                             priority, 2               //priority, tick
-                           );
+    );
 
     if (result == RT_EOK)
     {
