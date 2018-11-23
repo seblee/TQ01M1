@@ -32,20 +32,19 @@
 /* Private variables ---------------------------------------------------------*/
 
 /********topic dup qos restained**************/
-iot_topic_param_t iot_topics[MAX_MESSAGE_HANDLERS] = {
+iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS] = {
+    {TOPIC_WATER_NOTICE, 0, QOS1, 0},  /*{"TOPIC_WATER_NOTICE"}*/
+    {TOPIC_PARAMETER_SET, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_SET"}*/
+    {TOPIC_PARAMETER_GET, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_GET"}*/
+};
+/********topic dup qos restained**************/
+iot_topic_param_t iot_pub_topics[6] = {
     {TOPIC_PLATFORM_INIT, 0, QOS1, 0},   /*{"TOPIC_PLATFORM_INIT"}*/
-    {TOPIC_WATER_NOTICE, 0, QOS1, 0},    /*{"TOPIC_WATER_NOTICE"}*/
     {TOPIC_WATER_STATUS, 0, QOS1, 0},    /*{"TOPIC_WATER_STATUS"}*/
-    {TOPIC_PARAMETER_SET, 0, QOS1, 0},   /*{"TOPIC_PARAMETER_SET"}*/
-    {TOPIC_PARAMETER_GET, 0, QOS1, 0},   /*{"TOPIC_PARAMETER_GET"}*/
     {TOPIC_PARAMETER_PUT, 0, QOS1, 0},   /*{"TOPIC_PARAMETER_PUT"}*/
     {TOPIC_REALTIME_REPORT, 0, QOS1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
     {TOPIC_TIMING_REPORT, 0, QOS1, 0},   /*{"TOPIC_TIMING_REPORT"}*/
     {TOPIC_DEVICE_UPGRADE, 0, QOS1, 0},  /*{"TOPIC_DEVICE_UPGRADE"}*/
-    {TOPIC_DEVICE_MOVE, 0, QOS1, 0},     /*{"TOPIC_DEVICE_MOVE"}*/
-    {TOPIC_DEVICE_UPDATE, 0, QOS1, 0},   /*{"TOPIC_DEVICE_UPDATE"}*/
-    {TOPIC_DEVICE_ERR, 0, QOS1, 0},      /*{"TOPIC_DEVICE_ERR"}*/
-    {TOPIC_DEVICE_GET, 0, QOS1, 0},      /*{"TOPIC_DEVICE_GET"}*/
 };
 static MQTTClient client;
 extern sys_reg_st g_sys;
@@ -93,6 +92,7 @@ void net_thread_entry(void *parameter)
         SIM7600_DIR_WIFI;
         esp8266_at_socket_device_init();
     }
+    network_get_interval(&client.RealtimeInterval, &client.TimingInterval);
 
     // SIM7600_DIR_WIFI;
     // network_log("#### at_socket_device_init ####");
@@ -106,7 +106,7 @@ void net_thread_entry(void *parameter)
     }
     /* config MQTT context param */
 
-    mqtt_client_init(&client); 
+    mqtt_client_init(&client);
     rt_thread_delay(rt_tick_from_millisecond(5000));
     paho_mqtt_start(&client);
     is_started = 1;
@@ -383,7 +383,7 @@ void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
  * @Brief    : get interval time
  * @Version  : V1.0
 **/
-void network_get_interval(rt_uint16_t *real, rt_uint16_t *timing)
+void network_get_interval(unsigned int *real, unsigned int *timing)
 {
     //    *real = REALTIME_INTERVAL_DEFAULT;
     //    *timing = TIMING_INTERVAL_DEFAULT;

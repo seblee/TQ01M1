@@ -14,6 +14,9 @@
 #include "paho_mqtt.h"
 #include <rtlibc.h>
 
+#include "network.h"
+#include "mqtt_client.h"
+
 #define DBG_ENABLE
 #define DBG_SECTION_NAME "MQTT"
 #ifdef MQTT_DEBUG
@@ -41,6 +44,8 @@
 #error "MQTT using tls, please increase MQTT thread stack size up to 6K via menuconfig tool!"
 #endif
 #endif
+
+static int mq_client_publish(MQTTClient *c, _topic_pub_enmu_t pub_type);
 
 /*
  * resolve server address
@@ -821,7 +826,7 @@ _mqtt_start:
 
     LOG_I("MQTT server connect success");
 
-    for (i = 0; i < 10; i++)
+    for (i = 0; i < MAX_MESSAGE_HANDLERS; i++)
     {
         const char *topic = c->messageHandlers[i].topicFilter;
         enum QoS qos = c->messageHandlers[i].qos;
@@ -917,45 +922,18 @@ _mqtt_start:
         }
 
         {
-            // MQTTMessage *message;
-            // MQTTString topic = MQTTString_initializer;
+            len = mq_client_publish(c, PLATFORM_INIT);
+            if (len <= 0)
+            {
+                LOG_D("MQTTSerialize_publish len: %d", len);
+                goto _mqtt_disconnect;
+            }
 
-            // //LOG_D("pub_sock FD_ISSET");
-
-            // len = read(c->pub_pipe[0], c->readbuf, c->readbuf_size);
-
-            // if (len < sizeof(MQTTMessage))
-            // {
-            //     c->readbuf[len] = '\0';
-            //     LOG_D("pub_sock recv %d byte: %s", len, c->readbuf);
-
-            //     if (strcmp((const char *)c->readbuf, "DISCONNECT") == 0)
-            //     {
-            //         LOG_D("DISCONNECT");
-            //         goto _mqtt_disconnect_exit;
-            //     }
-
-            //     continue;
-            // }
-
-            // message = (MQTTMessage *)c->readbuf;
-            // message->payload = c->readbuf + sizeof(MQTTMessage);
-            // topic.cstring = (char *)c->readbuf + sizeof(MQTTMessage) + message->payloadlen;
-            // //LOG_D("pub_sock topic:%s, payloadlen:%d", topic.cstring, message->payloadlen);
-
-            // len = MQTTSerialize_publish(c->buf, c->buf_size, 0, message->qos, message->retained, message->id,
-            //                             topic, (unsigned char *)message->payload, message->payloadlen);
-            // if (len <= 0)
-            // {
-            //     LOG_D("MQTTSerialize_publish len: %d", len);
-            //     goto _mqtt_disconnect;
-            // }
-
-            // if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
-            // {
-            //     LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
-            //     goto _mqtt_disconnect;
-            // }
+            if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
+            {
+                LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
+                goto _mqtt_disconnect;
+            }
         } /* pbulish sock handler. */
     }     /* while (1) */
 
@@ -1107,5 +1085,49 @@ exit:
     if (data)
         rt_free(data);
 
+    return rc;
+}
+
+static int mq_client_publish(MQTTClient *c, _topic_pub_enmu_t pub_type)
+{
+    int rc = PAHO_FAILURE;
+    MQTTMessage message;
+    char *msg_str = RT_NULL;
+    MQTTString topic = MQTTString_initializer;
+    topic.cstring = (char *)iot_pub_topics[pub_type].topic_str;
+    if (!c->isconnected)
+        goto exit;
+    switch (pub_type)
+    {
+    case PLATFORM_INIT: /*{"TOPIC_PLATFORM_INIT"}*/
+        network_Serialize_init_json(&msg_str);
+        break;
+    case WATER_STATUS: /*{"TOPIC_WATER_STATUS"}*/
+        break;
+    case PARAMETER_PUT: /*{"TOPIC_PARAMETER_PUT"}*/
+        network_Serialize_para_json(&msg_str);
+        break;
+    case REALTIME_REPORT: /*{"TOPIC_REALTIME_REPORT"}*/
+        network_Serialize_report_json(&msg_str, pub_type);
+        break;
+    case TIMING_REPORT: /*{"TOPIC_TIMING_REPORT"}*/
+        network_Serialize_report_json(&msg_str, pub_type);
+        break;
+    case DEVICE_UPGRADE: /*{"TOPIC_DEVICE_UPGRADE"}*/
+        break;
+    default:
+        break;
+    }
+    if (msg_str == RT_NULL)
+        goto exit;
+    message.qos = QOS1;
+    message.retained = 0;
+    message.payload = (void *)msg_str;
+    message.payloadlen = strlen(message.payload);
+    rc = MQTTSerialize_publish(c->buf, c->buf_size, 0, message.qos, message.retained, message.id,
+                               topic, (unsigned char *)message.payload, message.payloadlen);
+
+exit:
+    rt_free(msg_str);
     return rc;
 }

@@ -202,5 +202,5 @@ HardFault_Handler    PROC
     ORR     lr, lr, #0x04
     BX      lr
     ENDP
-
+	NOP
     END

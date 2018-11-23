@@ -38,20 +38,21 @@ typedef enum
 
 typedef enum
 {
+    WATER_NOTICE = 0, /*{"TOPIC_WATER_NOTICE"}*/
+    PARAMETER_SET,    /*{"TOPIC_PARAMETER_SET"}*/
+    PARAMETER_GET,    /*{"TOPIC_PARAMETER_GET"}*/
+} _topic_sub_enmu_t;
+
+typedef enum
+{
     PLATFORM_INIT = 0, /*{"TOPIC_PLATFORM_INIT"}*/
-    WATER_NOTICE,      /*{"TOPIC_WATER_NOTICE"}*/
     WATER_STATUS,      /*{"TOPIC_WATER_STATUS"}*/
-    PARAMETER_SET,     /*{"TOPIC_PARAMETER_SET"}*/
-    PARAMETER_GET,     /*{"TOPIC_PARAMETER_GET"}*/
     PARAMETER_PUT,     /*{"TOPIC_PARAMETER_PUT"}*/
     REALTIME_REPORT,   /*{"TOPIC_REALTIME_REPORT"}*/
     TIMING_REPORT,     /*{"TOPIC_TIMING_REPORT"}*/
     DEVICE_UPGRADE,    /*{"TOPIC_DEVICE_UPGRADE"}*/
-    DEVICE_MOVE,       /*{"DEVICE_MOVE"}*/
-    DEVICE_UPDATE,     /*{"DEVICE_UPDATE"}*/
-    DEVICE_ERR,        /*{"DEVICE_ERR"}*/
-    DEVICE_GET,        /*{"DEVICE_GET"}*/
-} _topic_enmu_t;
+} _topic_pub_enmu_t;
+
 enum MQTT_QoS
 {
     MQTT_QOS0,
@@ -134,7 +135,7 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
 
 int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn);
 
-rt_err_t mqtt_client_subscribe(_topic_enmu_t subsc, iotx_device_info_pt iotx_dev_info);
+rt_err_t mqtt_client_subscribe(_topic_sub_enmu_t subsc, iotx_device_info_pt iotx_dev_info);
 
 rt_err_t mqtt_client_subscribe_topics(void);
 
@@ -145,14 +146,6 @@ unsigned short mqtt_client_packet_id(void);
 rt_err_t mqtt_client_ping(void);
 
 rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t restained, rt_uint8_t *msg, rt_uint16_t msg_len);
-
-rt_err_t mqtt_client_publish_topics(void);
-
-rt_err_t mqtt_client_publish_parameter(void);
-
-rt_err_t mqtt_client_find_topic(char *topic);
-
-rt_err_t mqtt_client_publish_report(_topic_enmu_t topic_type);
 
 rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len);
 

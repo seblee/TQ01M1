@@ -130,7 +130,9 @@ extern iotx_conn_info_t device_connect;
 
 extern MQTTPacket_connectData client_con;
 
-extern iot_topic_param_t iot_topics[MAX_MESSAGE_HANDLERS];
+extern iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS];
+
+extern iot_topic_param_t iot_pub_topics[6];
 
 extern SIMCOM_HANDLE g_SIMCOM_Handle;
 /* Private function prototypes -----------------------------------------------*/
@@ -148,7 +150,7 @@ rt_err_t network_water_notice_parse(const char *Str);
 
 void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type);
 
-void network_get_interval(rt_uint16_t *real, rt_uint16_t *timing);
+void network_get_interval(unsigned int *real, unsigned int *timing);
 
 rt_err_t network_parameter_get_parse(const char *Str);
 

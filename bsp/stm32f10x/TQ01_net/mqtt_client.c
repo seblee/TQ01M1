@@ -172,9 +172,9 @@ int mqtt_client_init(MQTTClient *client)
         for (i = 0; i < MAX_MESSAGE_HANDLERS; i++)
         {
 
-            client->messageHandlers[i].topicFilter = (char *)iot_topics[i].topic_str;
+            client->messageHandlers[i].topicFilter = (char *)iot_sub_topics[i].topic_str;
             client->messageHandlers[i].callback = mqtt_sub_callback;
-            client->messageHandlers[i].qos = iot_topics[i].qos;
+            client->messageHandlers[i].qos = iot_sub_topics[i].qos;
             LOG_D("Subscribe #%d>>Qos:%d,Subscribe:%s", i, client->messageHandlers[i].qos, client->messageHandlers[i].topicFilter);
         }
     }
@@ -314,131 +314,6 @@ unsigned short mqtt_client_packet_id(void)
 
 /**
  ****************************************************************************
- * @Function : rt_err_t mqtt_client_publish_parameter(void)
- * @File     : mqtt_client.c
- * @Program  : none
- * @Created  : 2018-09-21 by seblee
- * @Brief    : parameter report
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_publish_parameter(void)
-{
-    rt_err_t rc = -RT_ERROR;
-    char *msg_playload = RT_NULL; //need free
-
-    network_Serialize_para_json(&msg_playload);
-    if (msg_playload == RT_NULL)
-        goto exit;
-
-    /*****publish TOPIC_PLATFORM_INIT************/
-    rc = mqtt_client_publish(TOPIC_PARAMETER_PUT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
-    rt_free(msg_playload);
-    if (rc == RT_EOK)
-    {
-        // rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
-        if (rc == PUBACK)
-        {
-            // unsigned short mypacketid;
-            // unsigned char dup, type;
-            // if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
-            // {
-            //     mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
-            //     rc = RT_EOK;
-            // }
-            // else
-            // {
-            //     mqtt_log("PUBACK Deserialize err");
-            //     rc = -RT_ERROR;
-            //     goto exit;
-            // }
-        }
-        else
-            goto exit;
-    }
-    else
-        goto exit;
-exit:
-    return rc;
-}
-
-/**
- ****************************************************************************
- * @Function : rt_err_t mqtt_client_find_topic(char *topic)
- * @File     : mqtt_client.c
- * @Program  : topic:the putin topic
- * @Created  : 2018-09-25 by seblee
- * @Brief    : find the putin topic
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_find_topic(char *topic)
-{
-    rt_err_t rc = -RT_ERROR;
-    int i;
-    for (i = PLATFORM_INIT; i < DEVICE_GET + 1; i++)
-    {
-        if (rt_strstr(topic, iot_topics[i].topic_str))
-        {
-            rc = i;
-            mqtt_log("i:%d,topic:%s", i, iot_topics[i].topic_str);
-            break;
-        }
-    }
-    return rc;
-}
-
-/**
- ****************************************************************************
- * @Function : rt_err_t mqtt_client_publish_report(_topic_enmu_t topic_type)
- * @File     : mqtt_client.c
- * @Program  : topic_type:REALTIME_REPORT/TIMING_REPORT
- * @Created  : 2018-09-26 by seblee
- * @Brief    : publish report
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_publish_report(_topic_enmu_t topic_type)
-{
-    rt_err_t rc = -RT_ERROR;
-    char *msg_playload = RT_NULL; //need free
-    _topic_enmu_t type = topic_type;
-    network_Serialize_report_json(&msg_playload, type);
-    if (msg_playload == RT_NULL)
-        goto exit;
-
-    /*****publish TOPIC_PLATFORM_INIT************/
-    if (type == REALTIME_REPORT)
-        rc = mqtt_client_publish(TOPIC_REALTIME_REPORT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
-    else
-        rc = mqtt_client_publish(TOPIC_TIMING_REPORT, 0, 1, 0, (rt_uint8_t *)msg_playload, strlen(msg_playload));
-    rt_free(msg_playload);
-    if (rc == RT_EOK)
-    {
-        // rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
-        // if (rc == PUBACK)
-        // {
-        //     unsigned short mypacketid;
-        //     unsigned char dup, type;
-        //     if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
-        //     {
-        //         mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
-        //         rc = RT_EOK;
-        //     }
-        //     else
-        //     {
-        //         mqtt_log("PUBACK Deserialize err");
-        //         rc = -RT_ERROR;
-        //         goto exit;
-        //     }
-        // }
-        // else
-        //     goto exit;
-    }
-    else
-        goto exit;
-exit:
-    return rc;
-}
-/**
- ****************************************************************************
  * @Function : rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len)
  * @File     : mqtt_client.c
  * @Program  : *c:data buffer
@@ -472,7 +347,7 @@ rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len)
 
     mqtt_log("receivedTopic:%.*s", receivedTopic.lenstring.len, receivedTopic.lenstring.data);
     mqtt_log("message arrived:%.*s", payloadlen_in, payload_in);
-    rc = mqtt_client_find_topic(receivedTopic.lenstring.data);
+    //  rc = mqtt_client_find_topic(receivedTopic.lenstring.data);
     if (rc > 0)
     {
         mqtt_log("find_topic rc:%d", rc);

@@ -69,6 +69,8 @@ struct MQTTClient
     size_t buf_size, readbuf_size;
     unsigned char *buf, *readbuf;
     unsigned int keepAliveInterval;
+    unsigned int TimingInterval;
+    unsigned int RealtimeInterval;
     int isconnected;
     uint32_t tick_ping;
 
