@@ -105,6 +105,9 @@ void cpad_MBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
     NVIC_Init(&NVIC_InitStructure);
 
     CPAD_SLAVE_RS485_RECEIVE_MODE;
+
+    if (mnt_tx_fifo.buffer_ptr != RT_NULL)
+        rt_free(mnt_tx_fifo.buffer_ptr);
     fifo8_init(&mnt_tx_fifo, 1, MNT_RX_LEN);
 }
 

@@ -43,7 +43,7 @@ static void mbm_fsm_update(sys_reg_st*	gds_ptr,mbm_dev_st* mbm_dev_inst);
 //Master mode:HoldingRegister variables
 static uint16_t   usMRegHoldStart                         = M_REG_HOLDING_START;
 static uint16_t   usMRegHoldBuf[MB_MASTER_TOTAL_SLAVE_NUM][M_REG_HOLDING_NREGS];
-static mbm_dev_st mbm_dev_inst;
+//static mbm_dev_st mbm_dev_inst;
 
 
 /**

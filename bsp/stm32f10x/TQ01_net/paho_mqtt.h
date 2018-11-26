@@ -72,7 +72,10 @@ struct MQTTClient
     unsigned int TimingInterval;
     unsigned int RealtimeInterval;
     int isconnected;
+    int stateNow;
     uint32_t tick_ping;
+    uint32_t tick_timeing;
+    uint32_t tick_realtime;
 
     void (*connect_callback)(MQTTClient *);
     void (*online_callback)(MQTTClient *);

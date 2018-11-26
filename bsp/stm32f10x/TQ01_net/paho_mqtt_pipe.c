@@ -581,7 +581,7 @@ static int MQTTDisconnect(MQTTClient *c)
         rc = sendPacket(c, len); // send the disconnect packet
 
     c->isconnected = 0;
-
+    c->stateNow = 0;
     return rc;
 }
 
@@ -797,7 +797,16 @@ static int MQTT_cycle(MQTTClient *c)
 exit:
     return rc;
 }
-
+enum ClientSend
+{
+    SENDINIT,
+    SENDEDINIT,
+    SENDPARAMETER,
+    SENDPING,
+    SENDREALTIME,
+    SENDTIMING,
+};
+void list_mem(void);
 static void paho_mqtt_thread(void *param)
 {
     MQTTClient *c = (MQTTClient *)param;
@@ -852,7 +861,7 @@ _mqtt_start:
     {
         c->online_callback(c);
     }
-
+    c->stateNow = SENDEDINIT;
     c->tick_ping = rt_tick_get();
     while (1)
     {
@@ -860,20 +869,55 @@ _mqtt_start:
         rt_tick_t tick_now;
         fd_set readset;
         struct timeval timeout;
-
-        tick_now = rt_tick_get();
-        if (((tick_now - c->tick_ping) / RT_TICK_PER_SECOND) > (c->keepAliveInterval - 5))
+        LOG_E("[%d]timeout.tv_sec: %d ", rt_tick_get(), timeout.tv_sec);
+        list_mem();
+        if (c->stateNow == SENDINIT)
         {
             timeout.tv_sec = 1;
-            //LOG_D("tick close to ping.");
+        }
+        else if (c->stateNow == SENDEDINIT)
+        {
+            tick_now = rt_tick_get();
+            if (((tick_now - c->tick_ping) / RT_TICK_PER_SECOND) > (c->keepAliveInterval - 5))
+            {
+                timeout.tv_sec = 1;
+                //LOG_D("tick close to ping.");
+            }
+            else
+            {
+                timeout.tv_sec = c->keepAliveInterval - 10 - (tick_now - c->tick_ping) / RT_TICK_PER_SECOND;
+                //LOG_D("timeount for ping: %d", timeout.tv_sec);
+            }
+        }
+        else if (c->stateNow == SENDPARAMETER)
+        {
+            timeout.tv_sec = 1;
         }
         else
         {
-            timeout.tv_sec = c->keepAliveInterval - 10 - (tick_now - c->tick_ping) / RT_TICK_PER_SECOND;
-            //LOG_D("timeount for ping: %d", timeout.tv_sec);
-        }
-        timeout.tv_usec = 0;
+            long tv_sec_temp; /* seconds */
+            tick_now = rt_tick_get();
 
+            timeout.tv_sec = c->keepAliveInterval - 10 - (tick_now - c->tick_ping) / RT_TICK_PER_SECOND;
+            c->stateNow = SENDPING;
+            tv_sec_temp = c->TimingInterval - 10 - (tick_now - c->tick_timeing) / RT_TICK_PER_SECOND;
+            if (tv_sec_temp < timeout.tv_sec)
+            {
+                timeout.tv_sec = tv_sec_temp;
+                c->stateNow = SENDTIMING;
+            }
+            tv_sec_temp = c->RealtimeInterval - 10 - (tick_now - c->tick_realtime) / RT_TICK_PER_SECOND;
+            if (tv_sec_temp < timeout.tv_sec)
+            {
+                timeout.tv_sec = tv_sec_temp;
+                c->stateNow = SENDREALTIME;
+            }
+            if (timeout.tv_sec <= 5)
+                timeout.tv_sec = 1;
+            LOG_E("[%d]timeout.tv_sec: %d ", rt_tick_get(), timeout.tv_sec);
+        }
+        timeout.tv_sec = 1;
+        timeout.tv_usec = 0;
         FD_ZERO(&readset);
         FD_SET(c->sock, &readset);
 
@@ -881,35 +925,89 @@ _mqtt_start:
         res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
         if (res == 0)
         {
-            len = MQTTSerialize_pingreq(c->buf, c->buf_size);
-            rc = sendPacket(c, len);
-            if (rc != 0)
+            len = 0;
+            switch (c->stateNow)
             {
-                LOG_E("[%d] send ping rc: %d ", rt_tick_get(), rc);
+            case SENDPING:
+            case SENDEDINIT:
+            {
+                len = MQTTSerialize_pingreq(c->buf, c->buf_size);
+                rc = sendPacket(c, len);
+                if (rc != 0)
+                {
+                    LOG_E("[%d] send ping rc: %d ", rt_tick_get(), rc);
+                    goto _mqtt_disconnect;
+                }
+
+                /* wait Ping Response. */
+                timeout.tv_sec = 5;
+                timeout.tv_usec = 0;
+
+                FD_ZERO(&readset);
+                FD_SET(c->sock, &readset);
+
+                res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
+                if (res <= 0)
+                {
+                    LOG_E("[%d] wait Ping Response res: %d", rt_tick_get(), res);
+                    goto _mqtt_disconnect;
+                }
+                goto __receive_;
+            } /* res == 0: timeount for ping. */
+            // break;
+            case SENDINIT:
+                // len = mq_client_publish(c, PLATFORM_INIT);
+                len = 1;
+                break;
+            case SENDPARAMETER:
+                len = mq_client_publish(c, PARAMETER_PUT);
+                LOG_E("[%d] SENDPARAMETER res: %d", rt_tick_get(), res);
+                break;
+            case SENDREALTIME:
+                len = mq_client_publish(c, REALTIME_REPORT);
+                c->tick_realtime = rt_tick_get();
+                break;
+            case SENDTIMING:
+                len = mq_client_publish(c, TIMING_REPORT);
+                c->tick_timeing = rt_tick_get();
+                break;
+            default:
+                break;
+            }
+            if (len <= 0)
+            {
+                LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
                 goto _mqtt_disconnect;
             }
 
+            // if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
+            // {
+            //     LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
+            //     goto _mqtt_disconnect;
+            // }
+            list_mem();
             /* wait Ping Response. */
-            timeout.tv_sec = 5;
-            timeout.tv_usec = 0;
+            // timeout.tv_sec = 5;
+            // timeout.tv_usec = 0;
 
-            FD_ZERO(&readset);
-            FD_SET(c->sock, &readset);
+            // FD_ZERO(&readset);
+            // FD_SET(c->sock, &readset);
 
-            res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
-            if (res <= 0)
-            {
-                LOG_E("[%d] wait Ping Response res: %d", rt_tick_get(), res);
-                goto _mqtt_disconnect;
-            }
-        } /* res == 0: timeount for ping. */
+            // res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
+            // if (res <= 0)
+            // {
+            //     LOG_E("[%d] wait Ping Response res: %d", rt_tick_get(), res);
+            //     goto _mqtt_disconnect;
+            // }
+            //     c->stateNow++;
+        }
 
+    __receive_:
         if (res < 0)
         {
             LOG_E("select res: %d", res);
             goto _mqtt_disconnect;
         }
-
         if (FD_ISSET(c->sock, &readset))
         {
             //LOG_D("sock FD_ISSET");
@@ -921,21 +1019,7 @@ _mqtt_start:
             continue;
         }
 
-        {
-            len = mq_client_publish(c, PLATFORM_INIT);
-            if (len <= 0)
-            {
-                LOG_D("MQTTSerialize_publish len: %d", len);
-                goto _mqtt_disconnect;
-            }
-
-            if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
-            {
-                LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
-                goto _mqtt_disconnect;
-            }
-        } /* pbulish sock handler. */
-    }     /* while (1) */
+    } /* while (1) */
 
 _mqtt_disconnect:
     MQTTDisconnect(c);
@@ -1126,8 +1210,7 @@ static int mq_client_publish(MQTTClient *c, _topic_pub_enmu_t pub_type)
     message.payloadlen = strlen(message.payload);
     rc = MQTTSerialize_publish(c->buf, c->buf_size, 0, message.qos, message.retained, message.id,
                                topic, (unsigned char *)message.payload, message.payloadlen);
-
-exit:
     rt_free(msg_str);
+exit:
     return rc;
 }

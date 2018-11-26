@@ -289,7 +289,7 @@ int rt_application_init(void)
     result = rt_thread_init(&net_thread,
                             "net_test",
                             net_thread_entry,
-                            RT_NULL, 
+                            RT_NULL,
                             (rt_uint8_t *)&net_stack[0],
                             sizeof(net_stack),
                             NET_THREAD_PRIO,
@@ -299,7 +299,7 @@ int rt_application_init(void)
         rt_thread_startup(&net_thread);
     }
 
-    return 0; 
+    return 0;
 }
 
 void set_boot_flag(void)

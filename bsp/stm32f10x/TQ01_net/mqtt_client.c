@@ -48,6 +48,30 @@
 
 /*----------------------------------------------------------------------------*/
 
+static void mqtt_WATER_NOTICE_callback(MQTTClient *c, MessageData *msg_data)
+{
+    *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
+    LOG_D("mqtt sub callback: %.*s %.*s",
+          msg_data->topicName->lenstring.len,
+          msg_data->topicName->lenstring.data,
+          msg_data->message->payloadlen,
+          (char *)msg_data->message->payload);
+    if (network_water_notice_parse((const char *)msg_data->message->payload) == RT_EOK)
+        c->stateNow = 2;
+    return;
+}
+static void mqtt_PARAMETER_GET_callback(MQTTClient *c, MessageData *msg_data)
+{
+    *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
+    LOG_D("mqtt sub callback: %.*s %.*s",
+          msg_data->topicName->lenstring.len,
+          msg_data->topicName->lenstring.data,
+          msg_data->message->payloadlen,
+          (char *)msg_data->message->payload);
+    if (network_water_notice_parse((const char *)msg_data->message->payload) == RT_EOK)
+        c->stateNow = 2;
+    return;
+}
 static void mqtt_sub_callback(MQTTClient *c, MessageData *msg_data)
 {
     *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
@@ -93,6 +117,7 @@ int mqtt_client_init(MQTTClient *client)
 
     MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
     client->isconnected = 0;
+    client->stateNow = 0;
     /*******init client parameter*********/
     mqtt_log("mqtt_client_init");
     rt_memset(&device_info, 0, sizeof(iotx_device_info_t));
@@ -101,10 +126,10 @@ int mqtt_client_init(MQTTClient *client)
     rt_strncpy(device_info.device_secret, DEVICE_SECRET, strlen(DEVICE_SECRET));
     rt_sprintf(device_info.device_id, DEVICE_ID, strlen(DEVICE_ID));
     rt_snprintf(device_info.device_id, sizeof(device_connect.client_id), "rtthread%d", rt_tick_get());
-    LOG_D("product_key:%s", device_info.product_key);
-    LOG_D("device_name:%s", device_info.device_name);
-    LOG_D("device_secret:%s", device_info.device_secret);
-    LOG_D("device_id:%s", device_info.device_id);
+    // LOG_D("product_key:%s", device_info.product_key);
+    // LOG_D("device_name:%s", device_info.device_name);
+    // LOG_D("device_secret:%s", device_info.device_secret);
+    // LOG_D("device_id:%s", device_info.device_id);
     // mqtt_setup_connect_info(&device_connect, device_info_p);
 
     /* generate the random client ID */
@@ -114,9 +139,9 @@ int mqtt_client_init(MQTTClient *client)
     client_con.clientID.cstring = (char *)device_connect.client_id;
     client_con.username.cstring = (char *)device_connect.username;
     client_con.password.cstring = (char *)device_connect.password;
-    LOG_D("clientID:%s", client_con.clientID.cstring);
-    LOG_D("username:%s", client_con.username.cstring);
-    LOG_D("password:%s", client_con.password.cstring);
+    // LOG_D("clientID:%s", client_con.clientID.cstring);
+    // LOG_D("username:%s", client_con.username.cstring);
+    // LOG_D("password:%s", client_con.password.cstring);
 
     {
         char mqtt_uri[100] = {0};
@@ -138,13 +163,13 @@ int mqtt_client_init(MQTTClient *client)
     LOG_D("client->uri:%s", client->uri);
     /* config connect param */
     memcpy(&client->condata, &client_con, sizeof(client_con));
-    LOG_D("client->clientID:%s", client->condata.clientID);
-    LOG_D("client->username:%s", client->condata.username);
-    LOG_D("client->password:%s", client->condata.password);
+    // LOG_D("client->clientID:%s", client->condata.clientID);
+    // LOG_D("client->username:%s", client->condata.username);
+    // LOG_D("client->password:%s", client->condata.password);
 
-    LOG_D("clientID:%s", client_con.clientID.cstring);
-    LOG_D("username:%s", client_con.username.cstring);
-    LOG_D("password:%s", client_con.password.cstring);
+    // LOG_D("clientID:%s", client_con.clientID.cstring);
+    // LOG_D("username:%s", client_con.username.cstring);
+    // LOG_D("password:%s", client_con.password.cstring);
     /* config MQTT will param. */
     // client->condata.willFlag = 1;
     // client->condata.will.qos = 1;
@@ -168,15 +193,20 @@ int mqtt_client_init(MQTTClient *client)
 
     /* set subscribe table and event callback */
     {
-        rt_uint8_t i;
-        for (i = 0; i < MAX_MESSAGE_HANDLERS; i++)
-        {
+        client->messageHandlers[WATER_NOTICE].topicFilter =
+            (char *)iot_sub_topics[WATER_NOTICE].topic_str;
+        client->messageHandlers[WATER_NOTICE].callback = mqtt_WATER_NOTICE_callback;
+        client->messageHandlers[WATER_NOTICE].qos = iot_sub_topics[WATER_NOTICE].qos;
 
-            client->messageHandlers[i].topicFilter = (char *)iot_sub_topics[i].topic_str;
-            client->messageHandlers[i].callback = mqtt_sub_callback;
-            client->messageHandlers[i].qos = iot_sub_topics[i].qos;
-            LOG_D("Subscribe #%d>>Qos:%d,Subscribe:%s", i, client->messageHandlers[i].qos, client->messageHandlers[i].topicFilter);
-        }
+        client->messageHandlers[PARAMETER_SET].topicFilter =
+            (char *)iot_sub_topics[PARAMETER_SET].topic_str;
+        client->messageHandlers[PARAMETER_SET].callback = mqtt_sub_callback;
+        client->messageHandlers[PARAMETER_SET].qos = iot_sub_topics[PARAMETER_SET].qos;
+
+        client->messageHandlers[PARAMETER_GET].topicFilter =
+            (char *)iot_sub_topics[PARAMETER_GET].topic_str;
+        client->messageHandlers[PARAMETER_GET].callback = mqtt_PARAMETER_GET_callback;
+        client->messageHandlers[PARAMETER_GET].qos = iot_sub_topics[PARAMETER_GET].qos;
     }
 
     /* set default subscribe event callback */
@@ -198,9 +228,9 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
                 "deviceName%s"
                 "productKey%s",
                 device_info->device_id, device_info->device_name, device_info->product_key);
-    LOG_D("host_name:%s", conn->host_name);
-    LOG_D("username:%s", conn->username);
-    LOG_D("hmac_source:%s", hmac_source);
+    // LOG_D("host_name:%s", conn->host_name);
+    // LOG_D("username:%s", conn->username);
+    // LOG_D("hmac_source:%s", hmac_source);
     utils_hmac_md5(hmac_source, strlen(hmac_source),
                    guider_sign,
                    device_info->device_secret,

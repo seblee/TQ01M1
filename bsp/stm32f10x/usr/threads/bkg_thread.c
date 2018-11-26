@@ -81,6 +81,7 @@ void bkg_thread_entry(void *parameter)
 
         dog();
         rt_thread_delay(1000);
+        //   list_mem();
     }
 }
 

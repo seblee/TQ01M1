@@ -15,7 +15,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
- struct timeval
+ struct timeval 
  {
      long tv_sec;  /* seconds */
      long tv_usec; /* and microseconds */

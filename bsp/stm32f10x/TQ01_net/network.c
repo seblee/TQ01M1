@@ -74,30 +74,24 @@ int esp8266_at_socket_device_init(void);
 void net_thread_entry(void *parameter)
 {
     /**NetWork_DIR_Init**/
-    network_log("#### net_thread_entry start ####");
     NetWork_DIR_Init();
     struct tm ti;
     get_bulid_date_time(&ti);
     current_systime_set(&ti);
-    rt_thread_delay(rt_tick_from_millisecond(5000));
-    network_log("#### rt_tick_from_millisecond ####");
+    rt_thread_delay(rt_tick_from_millisecond(2000));
     if (g_sys.config.ComPara.u16NetworkPriority)
     {
-        network_log("####  _DIR_4G ####");
         SIM7600_DIR_4G;
     }
     else
     {
-        network_log("####  _DIR_WIFI ####");
         SIM7600_DIR_WIFI;
         esp8266_at_socket_device_init();
     }
     network_get_interval(&client.RealtimeInterval, &client.TimingInterval);
 
     // SIM7600_DIR_WIFI;
-    // network_log("#### at_socket_device_init ####");
     // esp8266_at_socket_device_init();
-    // network_log("#### at_socket_device_init ####");
 
     static int is_started = 0;
     if (is_started)
@@ -107,7 +101,7 @@ void net_thread_entry(void *parameter)
     /* config MQTT context param */
 
     mqtt_client_init(&client);
-    rt_thread_delay(rt_tick_from_millisecond(5000));
+    rt_thread_delay(rt_tick_from_millisecond(7000));
     paho_mqtt_start(&client);
     is_started = 1;
     return;
