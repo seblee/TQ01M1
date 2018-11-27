@@ -89,7 +89,7 @@ void net_thread_entry(void *parameter)
         esp8266_at_socket_device_init();
     }
     network_get_interval(&client.RealtimeInterval, &client.TimingInterval);
-
+    network_log("RealtimeInterval:%d, TimingInterval:%d", client.RealtimeInterval, client.TimingInterval);
     // SIM7600_DIR_WIFI;
     // esp8266_at_socket_device_init();
 
@@ -379,25 +379,26 @@ void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
 **/
 void network_get_interval(unsigned int *real, unsigned int *timing)
 {
-    //    *real = REALTIME_INTERVAL_DEFAULT;
-    //    *timing = TIMING_INTERVAL_DEFAULT;
-    //    cpad_eMBRegHoldingCB((unsigned char *)write_buffer, 165, 2, CPAD_MB_REG_READ);
-    //    rt_uint32_t interval_temp = (write_buffer[0] << 8) | write_buffer[1];
-    //    interval_temp *= 60;
-    //    if (interval_temp > TIMING_INTERVAL_MAX)
-    //        interval_temp = TIMING_INTERVAL_MAX;
-    //    if (interval_temp < TIMING_INTERVAL_MIN)
-    //        interval_temp = TIMING_INTERVAL_MIN;
-    //    *timing = interval_temp;
-    //    network_log("timing:%d", *timing);
+    *real = REALTIME_INTERVAL_DEFAULT;
+    *timing = TIMING_INTERVAL_DEFAULT;
+    rt_uint8_t temp_buf[6];
+    cpad_eMBRegHoldingCB((unsigned char *)temp_buf, 165, 2, CPAD_MB_REG_READ);
+    rt_uint32_t interval_temp = (temp_buf[0] << 8) | temp_buf[1];
+    interval_temp *= 60;
+    if (interval_temp > TIMING_INTERVAL_MAX)
+        interval_temp = TIMING_INTERVAL_MAX;
+    if (interval_temp < TIMING_INTERVAL_MIN)
+        interval_temp = TIMING_INTERVAL_MIN;
+    *timing = interval_temp;
+    network_log("timing:%d", *timing);
 
-    //    interval_temp = (write_buffer[2] << 8) | write_buffer[3];
-    //    if (interval_temp > REALTIME_INTERVAL_MAX)
-    //        interval_temp = REALTIME_INTERVAL_MAX;
-    //    if (interval_temp < REALTIME_INTERVAL_MIN)
-    //        interval_temp = REALTIME_INTERVAL_MIN;
-    //    *real = interval_temp;
-    //    network_log("real:%d", *real);
+    interval_temp = (temp_buf[2] << 8) | temp_buf[3];
+    if (interval_temp > REALTIME_INTERVAL_MAX)
+        interval_temp = REALTIME_INTERVAL_MAX;
+    if (interval_temp < REALTIME_INTERVAL_MIN)
+        interval_temp = REALTIME_INTERVAL_MIN;
+    *real = interval_temp;
+    network_log("real:%d", *real);
 }
 
 /**
@@ -528,89 +529,6 @@ rt_err_t network_parameter_set_parse(const char *Str)
     if (root)
         cJSON_Delete(root);
     return rc;
-}
-
-/**
- ****************************************************************************
- * @Function : rt_err_t network_get_register(void)
- * @File     : network.c
- * @Program  : none
- * @Created  : 2018-10-17 by seblee
- * @Brief    : 
- * @Version  : V1.0
-**/
-rt_err_t network_get_register(void)
-{
-    rt_err_t err;
-    //    char *rec = RT_NULL;
-    //    char guider_sign[256] = {0};
-    //    char request[512] = {0};
-
-    //    rt_snprintf(request, sizeof(request),
-    //                "deviceName%sproductKey%srandom567345",
-    //                REGISTER_DEVICE_NAME, REGISTER_PRODUCT_KEY);
-    //    network_log("scr:%s", request);
-    // //   utils_hmac_md5(request, strlen(request),
-    ////                   guider_sign,
-    ////                   REGISTER_PRODUCT_SECRET,
-    //                   strlen(REGISTER_PRODUCT_SECRET));
-    //    network_log("sign:%s", guider_sign);
-    //    rt_snprintf((char *)write_buffer, sizeof(write_buffer),
-    //                "productKey=%s&deviceName=%s&random=567345&sign=%s&signMethod=HmacMD5",
-    //                REGISTER_PRODUCT_KEY, REGISTER_DEVICE_NAME, guider_sign);
-    //    network_log("body:%s", write_buffer);
-
-    //    rt_snprintf(request, sizeof(request),
-    //                "POST %s HTTP/1.1\r\n"
-    //                "Host: %s\r\n"
-    //                "Content-Type: application/x-www-form-urlencoded\r\n"
-    //                "Content-Length: %d\r\n"
-    //                "\r\n"
-    //                "%s",
-    //                REGISTER_PATH, REGISTER_HOST, strlen((char *)write_buffer), write_buffer);
-    //    network_log("request:%s", request);
-
-    //    if (device_connect.style == IOT_WIFI_MODE)
-    //    {
-    //        err = at_wifi_https(write_device, REGISTER_HOST, REGISTER_PORT, request, &rec);
-    //        if (err == RT_EOK)
-    //        {
-    //            if (rec)
-    //            {
-    //                char *response = rt_strstr(rec, AT_WIFI_REMOTE_REC);
-    //                if (response)
-    //                {
-    //                    char *body = rt_strstr(response, "\r\n\r\n");
-    //                    if (body)
-    //                    {
-    //                        body += 4;
-    //                        network_register_parse((const char *)body, device_info_p);
-    //                    }
-    //                }
-    //                rt_free(rec);
-    //                rec = RT_NULL;
-    //            }
-    //        }
-    //    }
-    //    if (device_connect.style == IOT_4G_MODE)
-    //    {
-    //        err = at_4g_https(write_device, REGISTER_HOST, REGISTER_PORT, request, &rec);
-    //        if (err == RT_EOK)
-    //        {
-    //            if (rec)
-    //            {
-    //                char *body = rt_strstr(rec, "\r\n\r\n");
-    //                if (body)
-    //                {
-    //                    body += 4;
-    //                    network_register_parse((const char *)body, device_info_p);
-    //                }
-    //                rt_free(rec);
-    //                rec = RT_NULL;
-    //            }
-    //        }
-    //    }
-    return err;
 }
 
 /**

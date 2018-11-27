@@ -13,3 +13,6 @@
 [submodule "bsp/stm32f10x/at_device-latest"]
 	path = bsp/stm32f10x/at_device-latest
 	url = git@github.com:seblee/at_device.git
+[submodule "bsp/stm32f10x/packages/mbedtls-v2.6.0"]
+	path = bsp/stm32f10x/packages/mbedtls-v2.6.0
+	url = git@github.com:seblee/mbedtls.git

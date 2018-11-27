@@ -74,6 +74,8 @@ enum MQTT_QoS
 #define REGISTER_PATH "/auth/register/device"
 #define REGISTER_PORT 443
 
+#define IOT_SID_FLAG 0xA5A5
+#define IOT_SN_FLAG 0x0505
 /*****seblee *********/
 #ifdef DEVICE_SEBLEE
 #define DEVICE_NAME "HelloWorld"
@@ -151,6 +153,7 @@ rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len);
 
 rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, unsigned int msgId, enum msgTypes type);
 
+rt_err_t network_get_register(iotx_device_info_pt device_info_p);
 /*----------------------------------------------------------------------------*/
 
 #endif

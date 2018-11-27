@@ -15,7 +15,6 @@
 /* Private include -----------------------------------------------------------*/
 #include "mqtt_client.h"
 #include "utils_hmac.h"
-#include "transport.h"
 #include "paho_mqtt.h"
 /* Private typedef -----------------------------------------------------------*/
 
@@ -57,7 +56,7 @@ static void mqtt_WATER_NOTICE_callback(MQTTClient *c, MessageData *msg_data)
           msg_data->message->payloadlen,
           (char *)msg_data->message->payload);
     if (network_water_notice_parse((const char *)msg_data->message->payload) == RT_EOK)
-        c->stateNow = 2;
+        c->isQRcodegeted = 1;
     return;
 }
 static void mqtt_PARAMETER_GET_callback(MQTTClient *c, MessageData *msg_data)
@@ -69,7 +68,7 @@ static void mqtt_PARAMETER_GET_callback(MQTTClient *c, MessageData *msg_data)
           msg_data->message->payloadlen,
           (char *)msg_data->message->payload);
     if (network_water_notice_parse((const char *)msg_data->message->payload) == RT_EOK)
-        c->stateNow = 2;
+        c->isparameterPutted = 0;
     return;
 }
 static void mqtt_sub_callback(MQTTClient *c, MessageData *msg_data)
@@ -117,7 +116,8 @@ int mqtt_client_init(MQTTClient *client)
 
     MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
     client->isconnected = 0;
-    client->stateNow = 0;
+    client->isQRcodegeted = 0;
+    client->isparameterPutted = 0;
     /*******init client parameter*********/
     mqtt_log("mqtt_client_init");
     rt_memset(&device_info, 0, sizeof(iotx_device_info_t));
@@ -428,4 +428,62 @@ rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, unsigned int msg
         return RT_EOK;
     else
         return -RT_ERROR;
+}
+
+/**
+ ****************************************************************************
+ * @Function : rt_err_t network_get_register(iotx_device_info_pt device_info_p)
+ * @File     : network.c
+ * @Program  : none
+ * @Created  : 2018-10-17 by seblee
+ * @Brief    : 
+ * @Version  : V1.0
+**/
+// extern sys_reg_st g_sys;
+rt_err_t network_get_register(iotx_device_info_pt device_info_p)
+{
+    rt_err_t err;
+    char *rec = RT_NULL;
+    char guider_sign[256] = {0};
+    char request[512] = {0};
+    char body[512] = {0};
+    // iotx_device_info_pt device_info_p;
+    // device_info_p = g_sys.config.ComPara.device_info;
+    if (device_info_p->flag == IOT_SN_FLAG)
+    {
+    }
+    else if (device_info_p->flag == IOT_SID_FLAG)
+    {
+        return RT_EOK;
+    }
+    else
+    {
+        return -RT_ERROR;
+    }
+
+    rt_snprintf(request, sizeof(request),
+                "deviceName%sproductKey%srandom567345",
+                REGISTER_DEVICE_NAME, REGISTER_PRODUCT_KEY);
+    mqtt_log("scr:%s", request);
+    utils_hmac_md5(request, strlen(request),
+                   guider_sign,
+                   REGISTER_PRODUCT_SECRET,
+                   strlen(REGISTER_PRODUCT_SECRET));
+    mqtt_log("sign:%s", guider_sign);
+    rt_snprintf((char *)body, sizeof(body),
+                "productKey=%s&deviceName=%s&random=567345&sign=%s&signMethod=HmacMD5",
+                REGISTER_PRODUCT_KEY, REGISTER_DEVICE_NAME, guider_sign);
+    mqtt_log("body:%s", body);
+
+    rt_snprintf(request, sizeof(request),
+                "POST %s HTTP/1.1\r\n"
+                "Host: %s\r\n"
+                "Content-Type: application/x-www-form-urlencoded\r\n"
+                "Content-Length: %d\r\n"
+                "\r\n"
+                "%s",
+                REGISTER_PATH, REGISTER_HOST, strlen((char *)body), body);
+    mqtt_log("request:%s", request);
+
+    return err;
 }

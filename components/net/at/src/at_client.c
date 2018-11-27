@@ -879,9 +879,10 @@ int at_client_init(const char *dev_name,  rt_size_t recv_bufsz)
         open_result = rt_device_open(client->device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_DMA_RX);
         /* using interrupt mode when DMA mode not supported */
         if (open_result == -RT_EIO)
-        {
+        {  
+            LOG_E("AT client device_open RT_DEVICE_FLAG_INT_RX");                
             open_result = rt_device_open(client->device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);
-        }
+        }else  LOG_E("AT client device_open RT_DEVICE_FLAG_DMA_RX");     
         RT_ASSERT(open_result == RT_EOK);
 
         rt_device_set_rx_indicate(client->device, at_client_rx_ind);

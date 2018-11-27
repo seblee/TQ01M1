@@ -62,7 +62,7 @@ int open(const char *file, int flags, int mode)
         /* release the ref-count of fd */
         fd_put(d);
         fd_put(d);
-        
+
         rt_set_errno(result);
 
         return -1;
@@ -364,8 +364,8 @@ int fstat(int fildes, struct stat *buf)
         buf->st_mode |= DFS_S_IFDIR | DFS_S_IXUSR | DFS_S_IXGRP | DFS_S_IXOTH;
     }
 
-    buf->st_size    = d->size;
-    buf->st_mtime   = 0;
+    buf->st_size = d->size;
+    buf->st_mtime = 0;
     buf->st_blksize = 512;
 
     fd_put(d);
@@ -373,6 +373,50 @@ int fstat(int fildes, struct stat *buf)
     return DFS_STATUS_OK;
 }
 RTM_EXPORT(fstat);
+
+/**
+ * this function is a POSIX compliant version, which shall perform a variety of
+ * control functions on devices.
+ *
+ * @param fildes the file description
+ * @param cmd the specified command
+ * @param data represents the additional information that is needed by this
+ * specific device to perform the requested function.
+ *
+ * @return 0 on successful completion. Otherwise, -1 shall be returned and errno
+ * set to indicate the error.
+ */
+int fcntl(int fildes, int cmd, ...)
+{
+    int ret = -1;
+    struct dfs_fd *d;
+
+    /* get the fd */
+    d = fd_get(fildes);
+    if (d)
+    {
+        void *arg;
+        va_list ap;
+
+        va_start(ap, cmd);
+        arg = va_arg(ap, void *);
+        va_end(ap);
+
+        ret = dfs_file_ioctl(d, cmd, arg);
+        fd_put(d);
+    }
+    else
+        ret = -DFS_STATUS_EBADF;
+
+    if (ret < 0)
+    {
+        rt_set_errno(ret);
+        ret = -1;
+    }
+
+    return ret;
+}
+RTM_EXPORT(fcntl);
 
 /**
  * this function is a POSIX compliant version, which will return the 
@@ -497,7 +541,7 @@ DIR *opendir(const char *name)
     if (result >= 0)
     {
         /* open successfully */
-        t = (DIR *) rt_malloc(sizeof(DIR));
+        t = (DIR *)rt_malloc(sizeof(DIR));
         if (t == RT_NULL)
         {
             dfs_file_close(d);
@@ -545,8 +589,8 @@ struct dirent *readdir(DIR *d)
 
     if (d->num)
     {
-        struct dirent* dirent_ptr;
-        dirent_ptr = (struct dirent*)&d->buf[d->cur];
+        struct dirent *dirent_ptr;
+        dirent_ptr = (struct dirent *)&d->buf[d->cur];
         d->cur += dirent_ptr->d_reclen;
     }
 
@@ -554,7 +598,7 @@ struct dirent *readdir(DIR *d)
     {
         /* get a new entry */
         result = dfs_file_getdents(fd,
-                                   (struct dirent*)d->buf,
+                                   (struct dirent *)d->buf,
                                    sizeof(d->buf) - 1);
         if (result <= 0)
         {
@@ -570,7 +614,7 @@ struct dirent *readdir(DIR *d)
 
     fd_put(fd);
 
-    return (struct dirent *)(d->buf+d->cur);
+    return (struct dirent *)(d->buf + d->cur);
 }
 RTM_EXPORT(readdir);
 
@@ -618,7 +662,7 @@ void seekdir(DIR *d, off_t offset)
     {
         rt_set_errno(-DFS_STATUS_EBADF);
 
-        return ;
+        return;
     }
 
     /* seek to the offset position of directory */
@@ -643,7 +687,7 @@ void rewinddir(DIR *d)
     {
         rt_set_errno(-DFS_STATUS_EBADF);
 
-        return ;
+        return;
     }
 
     /* seek to the beginning of directory */

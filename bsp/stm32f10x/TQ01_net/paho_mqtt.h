@@ -31,7 +31,11 @@ enum QoS
     QOS1,
     QOS2
 } ALIGN(4);
-
+typedef enum
+{
+    HTTP_POST = 1,
+    HTTP_GET = 2,
+} http_method;
 /* all failure return codes must be negative */
 enum returnCode
 {
@@ -72,7 +76,8 @@ struct MQTTClient
     unsigned int TimingInterval;
     unsigned int RealtimeInterval;
     int isconnected;
-    int stateNow;
+    int isQRcodegeted;
+    int isparameterPutted;
     uint32_t tick_ping;
     uint32_t tick_timeing;
     uint32_t tick_realtime;
@@ -123,5 +128,11 @@ extern int paho_mqtt_start(MQTTClient *client);
  * @return the error code, 0 on subscribe successfully.
  */
 extern int MQTTPublish(MQTTClient *c, const char *topicName, MQTTMessage *message); /* copy */
+
+int eland_http_request(http_method method,
+                       char *request_uri, //uri
+                       char *host_name,   //host
+                       char *http_body,   //BODY
+                       char *response);   //response 指針
 
 #endif /* __PAHO_MQTT_H__ */

@@ -223,3 +223,17 @@ void get_bulid_date_time(struct tm *r)
     }
     r->tm_year -= 1900;
 }
+
+int gettimeofday(struct timeval *tp, void *ignore)
+{
+    time_t time; 
+    time = current_timestamp_get();
+
+    if (tp != RT_NULL)
+    {
+        tp->tv_sec = time;
+        tp->tv_usec = 0;
+    }
+
+    return time;
+}

@@ -130,6 +130,7 @@
 #define AT_CLIENT_NUM_MAX 1
 #define AT_USING_SOCKET
 //#define AT_USING_CLI
+// #define AT_PRINT_RAW_CMD
 #define AT_SW_VERSION_NUM 0x10200
 
 /* IoT - internet of things */
@@ -137,6 +138,7 @@
 #define PKG_USING_PAHOMQTT
 #define PAHOMQTT_PIPE_MODE
 #define PKG_USING_PAHOMQTT_EXAMPLE
+#define MQTT_USING_TLS
 #define RT_PKG_MQTT_THREAD_STACK_SIZE 6144
 #define PKG_PAHOMQTT_SUBSCRIBE_HANDLERS 3
 #define MQTT_DEBUG
@@ -155,6 +157,20 @@
 #define AT_DEVICE_WIFI_SSID "Cloudwater"
 #define AT_DEVICE_WIFI_PASSWORD "tqcd2018"
 #define PKG_USING_AT_DEVICE_LATEST_VERSION
+
+/* IoT Cloud */
+
+
+/* security packages */
+
+#define PKG_USING_MBEDTLS
+
+/* Select Root Certificate */
+
+#define MBEDTLS_AES_ROM_TABLES
+#define MBEDTLS_ECP_WINDOW_SIZE 2
+#define MBEDTLS_SSL_MAX_CONTENT_LEN 3584
+#define PKG_USING_MBEDTLS_V260
 /* SECTION: lwip, a lighwight TCP/IP protocol stack */
 /* #define RT_USING_LWIP */
 /* LwIP uses RT-Thread Memory Management */

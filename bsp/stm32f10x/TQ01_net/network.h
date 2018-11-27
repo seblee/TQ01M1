@@ -156,8 +156,6 @@ rt_err_t network_parameter_get_parse(const char *Str);
 
 rt_err_t network_parameter_set_parse(const char *Str);
 
-rt_err_t network_get_register(void);
-
 rt_err_t network_register_parse(const char *Str, iotx_device_info_t *device_info);
 /*----------------------------------------------------------------------------*/
 
