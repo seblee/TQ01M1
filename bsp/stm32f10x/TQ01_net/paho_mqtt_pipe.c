@@ -327,16 +327,13 @@ static int net_disconnect(MQTTClient *c)
         mbedtls_client_close(c->tls_session);
         c->sock = -1;
     }
-
-    return 0;
-#endif
-
+#else
     if (c->sock >= 0)
     {
         closesocket(c->sock);
         c->sock = -1;
     }
-
+#endif
     return 0;
 }
 
