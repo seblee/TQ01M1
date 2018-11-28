@@ -443,8 +443,7 @@ rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, unsigned int msg
 rt_err_t network_get_register(iotx_device_info_pt device_info_p)
 {
     rt_err_t err;
-    char *rec = RT_NULL;
-    char guider_sign[256] = {0};
+     char guider_sign[256] = {0};
     char request[512] = {0};
     char body[512] = {0};
     // iotx_device_info_pt device_info_p;
