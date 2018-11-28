@@ -33,118 +33,118 @@
 
 void vMBMasterPortSerialEnable(BOOL xRxEnable, BOOL xTxEnable)
 {
-	if (xRxEnable)
-	{
-		/* 485通信时，等待串口移位寄存器中的数据发送完成后，再去使能485的接收、失能485的发送*/
-		while (!USART_GetFlagStatus(USART1, USART_FLAG_TC))
-			;
-		MASTER_RS485_RECEIVE_MODE;
-		USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-	}
-	else
-	{
-		MASTER_RS485_SEND_MODE;
-		USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
-	}
-	if (xTxEnable)
-	{
-		USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
-	}
-	else
-	{
-		USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
-	}
+    if (xRxEnable)
+    {
+        /* 485通信时，等待串口移位寄存器中的数据发送完成后，再去使能485的接收、失能485的发送*/
+        while (!USART_GetFlagStatus(USART1, USART_FLAG_TC))
+            ;
+        MASTER_RS485_RECEIVE_MODE;
+        USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+    }
+    else
+    {
+        MASTER_RS485_SEND_MODE;
+        USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+    }
+    if (xTxEnable)
+    {
+        USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+    }
+    else
+    {
+        USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+    }
 }
 
 void vMBMasterPortClose(void)
 {
-	USART_ITConfig(USART1, USART_IT_TXE | USART_IT_RXNE, DISABLE);
-	USART_Cmd(USART1, DISABLE);
+    USART_ITConfig(USART1, USART_IT_TXE | USART_IT_RXNE, DISABLE);
+    USART_Cmd(USART1, DISABLE);
 }
 //默认一个主机 串口1 波特率可设置  奇偶检验可设置
 BOOL xMBMasterPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
-							 eMBParity eParity)
+                             eMBParity eParity)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	USART_InitTypeDef USART_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-	//======================时钟初始化=======================================
-	//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB , ENABLE);
-	//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	//======================IO初始化=======================================
-	//USART1_TX
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	//USART1_RX
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	//配置485发送和接收模式
-	//    TODO   暂时先写A0 等之后组网测试时再修改
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	//======================串口初始化=======================================
-	USART_InitStructure.USART_BaudRate = ulBaudRate;
-	//设置校验模式
-	switch (eParity)
-	{
-	case MB_PAR_NONE: //无校验
-		USART_InitStructure.USART_Parity = USART_Parity_No;
-		USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-		break;
-	case MB_PAR_ODD: //奇校验
-		USART_InitStructure.USART_Parity = USART_Parity_Odd;
-		USART_InitStructure.USART_WordLength = USART_WordLength_9b;
-		break;
-	case MB_PAR_EVEN: //偶校验
-		USART_InitStructure.USART_Parity = USART_Parity_Even;
-		USART_InitStructure.USART_WordLength = USART_WordLength_9b;
-		break;
-	default:
-		return FALSE;
-	}
+    GPIO_InitTypeDef GPIO_InitStructure;
+    USART_InitTypeDef USART_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    //======================时钟初始化=======================================
+    //	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB , ENABLE);
+    //	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+    //======================IO初始化=======================================
+    //USART1_TX
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    //USART1_RX
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    //配置485发送和接收模式
+    //    TODO   暂时先写A0 等之后组网测试时再修改
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    //======================串口初始化=======================================
+    USART_InitStructure.USART_BaudRate = ulBaudRate;
+    //设置校验模式
+    switch (eParity)
+    {
+    case MB_PAR_NONE: //无校验
+        USART_InitStructure.USART_Parity = USART_Parity_No;
+        USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+        break;
+    case MB_PAR_ODD: //奇校验
+        USART_InitStructure.USART_Parity = USART_Parity_Odd;
+        USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+        break;
+    case MB_PAR_EVEN: //偶校验
+        USART_InitStructure.USART_Parity = USART_Parity_Even;
+        USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+        break;
+    default:
+        return FALSE;
+    }
 
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	if (ucPORT != UPORT_MBMASTER)
-		return FALSE;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    if (ucPORT != UPORT_MBMASTER)
+        return FALSE;
 
-	ENTER_CRITICAL_SECTION(); //关全局中断
+    ENTER_CRITICAL_SECTION(); //关全局中断
 
-	USART_Init(USART1, &USART_InitStructure);
-	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-	USART_Cmd(USART1, ENABLE);
+    USART_Init(USART1, &USART_InitStructure);
+    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+    USART_Cmd(USART1, ENABLE);
 
-	//=====================中断初始化======================================
-	//设置NVIC优先级分组为Group2：0-3抢占式优先级，0-3的响应式优先级
-	//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    //=====================中断初始化======================================
+    //设置NVIC优先级分组为Group2：0-3抢占式优先级，0-3的响应式优先级
+    //	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 
-	EXIT_CRITICAL_SECTION(); //开全局中断
+    EXIT_CRITICAL_SECTION(); //开全局中断
 
-	return TRUE;
+    return TRUE;
 }
 
 BOOL xMBMasterPortSerialPutByte(CHAR ucByte)
 {
-	USART_SendData(USART1, ucByte);
-	return TRUE;
+    USART_SendData(USART1, ucByte);
+    return TRUE;
 }
 
 BOOL xMBMasterPortSerialGetByte(CHAR *pucByte)
 {
-	*pucByte = USART_ReceiveData(USART1);
-	return TRUE;
+    *pucByte = USART_ReceiveData(USART1);
+    return TRUE;
 }
 
 ///*

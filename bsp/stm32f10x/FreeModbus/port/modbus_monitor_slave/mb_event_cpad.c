@@ -124,7 +124,7 @@ void cpad_MBPoll(void)
             }
             else
             {
-                rt_kprintf("MNT:check erro = %d,rec_cnt=%d \n", crc, cpad_slave_inst.rec_cnt);
+                rt_kprintf("MNT:check erro = %x,rec_cnt=%x \n", crc, cpad_slave_inst.rec_cnt);
             }
         }
         //rx enbale
@@ -237,8 +237,8 @@ void Cpad_Send(uint8_t u8RW, uint16_t u16Addr, uint8_t u8Num, uint16_t u16Offset
     uint8_t cmd;
     uint16_t addr, nreg;
     eMBErrorCode errcode = MB_ENOERR;
-
-    errcode = errcode;
+    
+    errcode=errcode;
     cpad_slave_inst.rxbuf[0] = (uint8_t)(T5_HEAD >> 8);
     cpad_slave_inst.rxbuf[1] = (uint8_t)(T5_HEAD);
     if (u8RW == T5_WRITE) //写命令

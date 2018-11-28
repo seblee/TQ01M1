@@ -14,6 +14,8 @@
 #define K_FACTOR_HI_PRESS 174
 #define K_FACTOR_LO_PRESS 232
 
+#define K_FACTOR_UV 44
+
 extern sys_reg_st g_sys;
 
 const uint16_t ntc_lookup_tab[NTC_TEMP_SCALE] = {
@@ -102,6 +104,7 @@ uint16_t get_current_hum()
 //}
 
 //k_factor has 3-valid-digitals integer
+static int16_t calc_hi_press_ai(uint16_t adc_value, uint16_t k_factor, int16_t cali);
 static int16_t calc_hi_press_ai(uint16_t adc_value, uint16_t k_factor, int16_t cali)
 {
     int32_t ret_val = 0;
@@ -120,7 +123,7 @@ static int16_t Calc_UV_ai(uint16_t adc_value, uint16_t k_factor, int16_t cali)
     int32_t ret_val = 0;
     //As Vo/Vcc*100 = K*P+10, Vadc*4/Vcc*100 = K*P+10. Vadc = 3.3/4096 * N.
     //(((3.3/4096)*N)*4)/Vcc*100 = K*P ;
-    ret_val = ((3.3 * adc_value * 100 * 4) / (4096 * 5) - 10) * 1000 / k_factor + (int16_t)(cali); //unit is BAR(aka. 0.1MPaG)
+    ret_val = ((3.3 * adc_value * 100 * 4) / (4096 * 5) - 2) * 1000 * 10 / k_factor + (int16_t)(cali); //unit is BAR(aka. 0.1MPaG)
     if (ret_val <= 0)
     {
         ret_val = ABNORMAL_VALUE;
@@ -219,7 +222,7 @@ void ai_sts_update(sys_reg_st *gds_sys_ptr)
 
     if ((ain_mask_bitmap & (0x0001 << AI_SENSOR1)) != 0)
     {
-        gds_sys_ptr->status.ComSta.u16Ain[AI_SENSOR1] = calc_hi_press_ai(u16ADCRemapValue[AI_SENSOR1], K_FACTOR_HI_PRESS, gds_sys_ptr->config.general.ai_cali[AI_SENSOR1]);
+        gds_sys_ptr->status.ComSta.u16Ain[AI_SENSOR1] = Calc_UV_ai(u16ADCRemapValue[AI_SENSOR1], K_FACTOR_UV, gds_sys_ptr->config.general.ai_cali[AI_SENSOR1]);
     }
 
     //		rt_kprintf("ain[0] = %d,ain[1] = %d,ain[2] = %d,ain[3] = %d,ain[4] = %d\n",gds_sys_ptr->status.ComSta.u16Ain[0],gds_sys_ptr->status.ComSta.u16Ain[1],gds_sys_ptr->status.ComSta.u16Ain[2],gds_sys_ptr->status.ComSta.u16Ain[3],gds_sys_ptr->status.ComSta.u16Ain[4]);

@@ -36,6 +36,10 @@ typedef enum
 #define EE_FLAG_OK 0x01
 #define EE_FLAG_ERROR 0x02
 
+//特殊地址
+#define EE_WATER_MODE 46
+#define EE_WATER_FLOW 47
+
 alarm_acl_conf_st g_alarm_acl_inst[MAX_ALARM_ACL_NUM]; //alarm check list declairation
 sys_reg_st g_sys;                                      //global parameter declairation
 local_reg_st l_sys;                                    //local status declairation
@@ -58,7 +62,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     /*{8, &g_sys.config.dev_mask.din_bitmap_polarity[0], 0, 0xffff, 0xE24, 3, 1, NULL},*/ // DI极性
     {9, &g_sys.config.dev_mask.din_bitmap_polarity[1], 0, 0xffff, 0x00, 3, 1, NULL},
     {10, &g_sys.config.dev_mask.ain, 0, 0xffff, 0x001F, 3, 1, NULL},
-    {11, &g_sys.config.dev_mask.din[0], 0, 0xFFFF, 0x7FFF, 3, 1, NULL}, // DI屏蔽位
+    {11, &g_sys.config.dev_mask.din[0], 0, 0xFFFF, 0x3E7F, 3, 1, NULL}, // DI屏蔽位
     {12, &g_sys.config.dev_mask.din[1], 0, 0xffff, 0x0000, 3, 1, NULL},
     {13, &g_sys.config.dev_mask.aout, 0, 0x003f, 0x0001, 3, 1, NULL},
     {14, &g_sys.config.dev_mask.mb_comp, 0, 0xFFFF, 0x01, 3, 1, NULL},
@@ -93,8 +97,8 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {43, &g_sys.config.ComPara.u16Sterilize_Time[0], 1, 600, 5, 2, 1, NULL},
     {44, &g_sys.config.ComPara.u16Sterilize_Interval[0], 1, 10000, 480, 2, 1, NULL},
     {45, &g_sys.config.ComPara.u16Water_Ctrl, 0, 0xFFFF, 0x0000, 2, 1, NULL},
-    {46, &g_sys.config.ComPara.u16Water_Mode, 0, 3, 0, 2, 1, NULL},
-    {47, &g_sys.config.ComPara.u16Water_Flow, 0, 65500, 1000, 2, 1, NULL},
+    {EE_WATER_MODE, &g_sys.config.ComPara.u16Water_Mode, 0, 3, 0, 2, 1, NULL},
+    {EE_WATER_FLOW, &g_sys.config.ComPara.u16Water_Flow, 0, 65500, 1000, 2, 1, NULL},
     {48, &g_sys.config.ComPara.u16NormalWater_Temp, 0, 400, 230, 2, 1, NULL},
     {49, &g_sys.config.ComPara.u16HotWater_Temp, 0, 1000, 500, 2, 1, NULL},
     {50, &g_sys.config.ComPara.u16WaterSource_Mode, 0, 1, 0, 2, 1, NULL},
@@ -135,9 +139,9 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {85, NULL, 0, 3600, 0, 2, 1, NULL},
     {86, &g_sys.config.ComPara.u16ColdWater_Mode, 0, 1, 0, 2, 1, NULL},
     {87, &g_sys.config.ComPara.u16ColdWater_StartTemp, 50, 400, 150, 2, 1, NULL},
-    {88, &g_sys.config.ComPara.u16ColdWater_StopTemp, 10, 300, 50, 2, 1, NULL},
-    {89, NULL, 0, 3600, 0, 2, 1, NULL},
-    {90, &g_sys.config.ComPara.u16NetworkPriority, 0, 1, 0, 2, 1, NULL},
+    {88, &g_sys.config.ComPara.u16ColdWater_StopTemp, 10, 300, 70, 2, 1, NULL},
+    {89, &g_sys.config.ComPara.u16HeatFan_StartTemp, 0, 1000, 600, 2, 1, NULL},
+    {90, &g_sys.config.ComPara.u16HeatFan_StopTemp, 0, 1000, 400, 2, 1, NULL},
     {91, &g_sys.config.ComPara.u16FILTER_ELEMENT_Type, 0, 1, 0, 2, 1, NULL},
     {92, &g_sys.config.alarm[ACL_FILTER_ELEMENT_1_OT].alarm_param, 100, 65535, 22000, 2, 1, NULL},
     {93, &g_sys.config.alarm[ACL_FILTER_ELEMENT_2_OT].alarm_param, 100, 65535, 22000, 2, 1, NULL},
@@ -154,6 +158,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {104, NULL, 0, 3600, 0, 2, 1, NULL},
     {105, NULL, 0, 3600, 0, 2, 1, NULL},
 #ifdef SYS_HMI_VJL
+
 #else
     {106, NULL, 0, 3600, 0, 0, 1, NULL},
     {107, NULL, 0, 3600, 0, 0, 1, NULL},
@@ -170,85 +175,85 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {118, NULL, 0, 3600, 0, 2, 1, NULL},
     {119, NULL, 0, 3600, 0, 2, 1, NULL},
     {120, NULL, 0, 3600, 0, 2, 1, NULL},
-    {121, NULL, 0, 3600, 0, 2, 1, NULL},
-    {122, NULL, 0, 3600, 0, 2, 1, NULL},
+    {121, NULL, 0, 3600, 0, 0, 1, NULL},
+    {122, NULL, 0, 3600, 0, 0, 1, NULL},
     {123, NULL, 0, 3600, 0, 2, 1, NULL},
     {124, NULL, 0, 3600, 0, 2, 1, NULL},
     {125, NULL, 0, 3600, 0, 2, 1, NULL},
     {126, NULL, 0, 3600, 0, 2, 1, NULL},
-    {127, NULL, 0, 3600, 0, 2, 1, NULL},
+    {127, NULL, 0, 3600, 0, 0, 1, NULL},
     {128, NULL, 0, 3600, 0, 2, 1, NULL},
     {129, NULL, 0, 3600, 0, 2, 1, NULL},
     {130, NULL, 0, 3600, 0, 2, 1, NULL},
-    {131, NULL, 0, 3600, 0, 2, 1, NULL},
-    {132, NULL, 0, 3600, 0, 2, 1, NULL},
+    {131, NULL, 0, 3600, 0, 0, 1, NULL},
+    {132, NULL, 0, 3600, 0, 0, 1, NULL},
     {133, NULL, 0, 3600, 0, 2, 1, NULL},
     {134, NULL, 0, 3600, 0, 2, 1, NULL},
     {135, NULL, 0, 3600, 0, 2, 1, NULL},
     {136, NULL, 0, 3600, 0, 2, 1, NULL},
-    {137, NULL, 0, 3600, 0, 2, 1, NULL},
+    {137, NULL, 0, 3600, 0, 0, 1, NULL},
     {138, NULL, 0, 3600, 0, 2, 1, NULL},
     {139, NULL, 0, 3600, 0, 2, 1, NULL},
     {140, NULL, 0, 3600, 0, 2, 1, NULL},
-    {141, NULL, 0, 3600, 0, 2, 1, NULL},
-    {142, NULL, 0, 3600, 0, 2, 1, NULL},
+    {141, NULL, 0, 3600, 0, 0, 1, NULL},
+    {142, NULL, 0, 3600, 0, 0, 1, NULL},
     {143, NULL, 0, 3600, 0, 2, 1, NULL},
     {144, NULL, 0, 3600, 0, 2, 1, NULL},
     {145, NULL, 0, 3600, 0, 2, 1, NULL},
     {146, NULL, 0, 3600, 0, 2, 1, NULL},
-    {147, NULL, 0, 3600, 0, 2, 1, NULL},
+    {147, NULL, 0, 3600, 0, 0, 1, NULL},
     {148, NULL, 0, 3600, 0, 2, 1, NULL},
     {149, NULL, 0, 3600, 0, 2, 1, NULL},
     {150, NULL, 0, 3600, 0, 2, 1, NULL},
-    {151, NULL, 0, 3600, 0, 2, 1, NULL},
-    {152, NULL, 0, 3600, 0, 2, 1, NULL},
+    {151, NULL, 0, 3600, 0, 0, 1, NULL},
+    {152, NULL, 0, 3600, 0, 0, 1, NULL},
     {153, NULL, 0, 3600, 0, 2, 1, NULL},
     {154, NULL, 0, 3600, 0, 2, 1, NULL},
     {155, NULL, 0, 3600, 0, 2, 1, NULL},
     {156, NULL, 0, 3600, 0, 2, 1, NULL},
-    {157, NULL, 0, 3600, 0, 2, 1, NULL},
+    {157, NULL, 0, 3600, 0, 0, 1, NULL},
     {158, NULL, 0, 3600, 0, 2, 1, NULL},
     {159, NULL, 0, 3600, 0, 2, 1, NULL},
     {160, NULL, 0, 3600, 0, 2, 1, NULL},
-    {161, NULL, 0, 3600, 0, 2, 1, NULL},
-    {162, NULL, 0, 3600, 0, 2, 1, NULL},
+    {161, NULL, 0, 3600, 0, 0, 1, NULL},
+    {162, NULL, 0, 3600, 0, 0, 1, NULL},
     {163, NULL, 0, 3600, 0, 2, 1, NULL},
     {164, NULL, 0, 3600, 0, 2, 1, NULL},
     {165, NULL, 0, 3600, 0, 2, 1, NULL},
     {166, NULL, 0, 3600, 0, 2, 1, NULL},
-    {167, NULL, 0, 3600, 0, 2, 1, NULL},
+    {167, NULL, 0, 3600, 0, 0, 1, NULL},
     {168, NULL, 0, 3600, 0, 2, 1, NULL},
     {169, NULL, 0, 3600, 0, 2, 1, NULL},
     {170, NULL, 0, 3600, 0, 2, 1, NULL},
-    {171, NULL, 0, 3600, 0, 2, 1, NULL},
-    {172, NULL, 0, 3600, 0, 2, 1, NULL},
+    {171, NULL, 0, 3600, 0, 0, 1, NULL},
+    {172, NULL, 0, 3600, 0, 0, 1, NULL},
     {173, NULL, 0, 3600, 0, 2, 1, NULL},
     {174, NULL, 0, 3600, 0, 2, 1, NULL},
     {175, NULL, 0, 3600, 0, 2, 1, NULL},
     {176, NULL, 0, 3600, 0, 2, 1, NULL},
-    {177, NULL, 0, 3600, 0, 2, 1, NULL},
+    {177, NULL, 0, 3600, 0, 0, 1, NULL},
     {178, NULL, 0, 3600, 0, 2, 1, NULL},
-    {179, NULL, 0, 3600, 0, 2, 1, NULL},
-    {180, NULL, 0, 3600, 0, 2, 1, NULL},
-    {181, NULL, 0, 3600, 0, 2, 1, NULL},
-    {182, NULL, 0, 3600, 0, 2, 1, NULL},
-    {183, NULL, 0, 3600, 0, 2, 1, NULL},
-    {184, NULL, 0, 3600, 0, 2, 1, NULL},
-    {185, NULL, 0, 3600, 0, 2, 1, NULL},
-    {186, NULL, 0, 3600, 0, 2, 1, NULL},
-    {187, NULL, 0, 3600, 0, 2, 1, NULL},
-    {188, NULL, 0, 3600, 0, 2, 1, NULL},
-    {189, NULL, 0, 3600, 0, 2, 1, NULL},
-    {190, NULL, 0, 3600, 0, 2, 1, NULL},
-    {191, NULL, 0, 3600, 0, 2, 1, NULL},
-    {192, NULL, 0, 3600, 0, 2, 1, NULL},
-    {193, NULL, 0, 3600, 0, 2, 1, NULL},
-    {194, NULL, 0, 3600, 0, 2, 1, NULL},
-    {195, NULL, 0, 3600, 0, 2, 1, NULL},
-    {196, NULL, 0, 3600, 0, 2, 1, NULL},
-    {197, NULL, 0, 3600, 0, 2, 1, NULL},
-    {198, NULL, 0, 3600, 0, 2, 1, NULL},
-    {199, NULL, 0, 3600, 0, 2, 1, NULL},
+    {179, &g_sys.config.ComPara.Net_Conf.u16Net_Sel, 0, 0xFFFF, 0, 2, 1, NULL},
+    {180, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[0], 0, 0xFFFF, 0, 2, 1, NULL},
+    {181, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[1], 0, 0xFFFF, 0, 2, 1, NULL},
+    {182, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[2], 0, 0xFFFF, 0, 2, 1, NULL},
+    {183, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[3], 0, 0xFFFF, 0, 2, 1, NULL},
+    {184, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[4], 0, 0xFFFF, 0, 2, 1, NULL},
+    {185, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[5], 0, 0xFFFF, 0, 2, 1, NULL},
+    {186, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[6], 0, 0xFFFF, 0, 2, 1, NULL},
+    {187, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[7], 0, 0xFFFF, 0, 2, 1, NULL},
+    {188, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[8], 0, 0xFFFF, 0, 2, 1, NULL},
+    {189, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[9], 0, 0xFFFF, 0, 2, 1, NULL},
+    {190, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[0], 0, 0xFFFF, 0, 2, 1, NULL},
+    {191, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[1], 0, 0xFFFF, 0, 2, 1, NULL},
+    {192, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[2], 0, 0xFFFF, 0, 2, 1, NULL},
+    {193, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[3], 0, 0xFFFF, 0, 2, 1, NULL},
+    {194, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[4], 0, 0xFFFF, 0, 2, 1, NULL},
+    {195, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[5], 0, 0xFFFF, 0, 2, 1, NULL},
+    {196, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[6], 0, 0xFFFF, 0, 2, 1, NULL},
+    {197, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[7], 0, 0xFFFF, 0, 2, 1, NULL},
+    {198, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[8], 0, 0xFFFF, 0, 2, 1, NULL},
+    {199, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[9], 0, 0xFFFF, 0, 2, 1, NULL},
     /***********************************************************************************/
     {200, &g_sys.config.ComPara.device_info[0], 0, 0xffff, 0, 2, 1, NULL},
     {201, &g_sys.config.ComPara.device_info[1], 0, 0xffff, 0, 2, 1, NULL},
@@ -561,16 +566,14 @@ uint16_t save_conf_reg(uint8_t addr_sel)
                 if (conf_reg[i] != test_reg[i])
                 {
                     err_cnt++;
+                    rt_kprintf("\ni = %d,conf_reg=%d,test_reg=%d,err_cnt=%d\n", i, conf_reg[i], test_reg[i], err_cnt);
                 }
             }
             if (err_cnt == 0)
             {
                 chk_res = checksum_u16(conf_reg, CONF_REG_MAP_NUM); //set parameter checksum
                 I2C_EE_BufWrite((uint8_t *)&chk_res, ee_save_addr + (CONF_REG_MAP_NUM * 2), 2);
-                //
-                //								rt_kprintf("\nchk_res_addr = %d",ee_save_addr+(CONF_REG_MAP_NUM*2));
-                //								rt_kprintf("\nchk_res = %d",chk_res);
-
+                rt_kprintf("\nchk_res_addr = %d,,nchk_res=%d\n", ee_save_addr + (CONF_REG_MAP_NUM * 2), chk_res);
                 I2C_EE_BufWrite(&ee_flag, STS_EE_ADDR, 1); //set eeprom program flag
             }
             else
@@ -1127,14 +1130,13 @@ uint16 reg_map_write(uint16 reg_addr, uint16 *wr_data, uint8_t wr_cnt, uint16 Us
         ee_rd_data = *(conf_reg_map_inst[reg_addr + i].reg_ptr);     //buffer legacy reg data
         ee_wr_data = *(wr_data + i);                                 //buffer current write data
         *(conf_reg_map_inst[reg_addr + i].reg_ptr) = *(wr_data + i); //write data to designated register
-                                                                     //						g_sys.status.general.TEST|=0x10;
-        var_log("ee_rd_data=%d,ee_wr_data=%X\n,", ee_rd_data, ee_wr_data);
-        //空调写标识
-        //				if(User_ID == USER_CPAD)
-        //				{
-        ////			g_sys.status.general.TEST|=0x20;
-        //						AC_Conf_Write(reg_addr,2);
-        //				}
+        //						g_sys.status.general.TEST|=0x10;
+        //		var_log("ee_rd_data=%d,ee_wr_data=%X\n,", ee_rd_data, ee_wr_data);
+        //写EEPROM参数
+        if ((reg_addr == EE_WATER_MODE) || (reg_addr == EE_WATER_FLOW))
+        {
+            return err_code;
+        }
 
         eeprom_tripple_write(i + reg_addr, ee_wr_data, ee_rd_data); //数据写入EEPROM
         //event_Recrd

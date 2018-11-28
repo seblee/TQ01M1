@@ -49,8 +49,10 @@ enum
 };
 #define DO_FAN_LOW_BPOS DO_FAN_BPOS //风机低档
 #define DO_UV2_BPOS DO_RSV1_BPOS    //紫外灯2
-#define DO_WP2_BPOS DO_RSV2_BPOS    //出水泵2
-#define DO_DV2_BPOS DO_RSV3_BPOS    //出水阀2
+//L  双按键出水
+#define DO_WP2_BPOS DO_RSV2_BPOS //出水泵2
+#define DO_DV2_BPOS DO_RSV3_BPOS //出水阀2
+#define DO_HEAT_FAN_BPOS DO_RSV2_BPOS //扇热风机
 
 //application delay
 #define MODBUS_MASTER_THREAD_DELAY 500
@@ -81,9 +83,9 @@ enum
     AI_NTC4,
     AI_MAX_CNT
 };
-
-#define AI_SENSOR_NUM 1 //传感器数量
-#define AI_NTC_NUM 4    //NTC数量
+#define AI_SENSOR_ERR AI_MAX_CNT + 1 //传感器故障
+#define AI_SENSOR_NUM 1              //传感器数量
+#define AI_NTC_NUM 4                 //NTC数量
 
 enum
 {
@@ -649,9 +651,17 @@ typedef struct sys_status_map
     int16_t length;
 } sys_status_map_st;
 
+typedef struct
+{
+    uint16_t u16Net_Sel;           //wifi-4G选择
+    uint16_t u16Wifi_Name[10];     //wifi名称/ASIIC
+    uint16_t u16Wifi_Password[10]; //wifi密码/ASIIC
+} Net_Conf_st;
+
 //空气制水机参数
 typedef struct
 {
+    Net_Conf_st Net_Conf;              //网络配置
     uint16_t u16SN_Code[4];            //SN码
     uint16_t u16M_Type;                //设备类型
     uint16_t u16Power_Mode;            //开关机
@@ -680,7 +690,7 @@ typedef struct
     uint16_t u16TPower_On;             //定时开机时间
     uint16_t u16TPower_Off;            //定时关机时间
     uint16_t u16Rsv1[3];               //
-    uint16_t u16FILTER_ELEMENT_Type;   //滤网告警类型
+    uint16_t u16FILTER_ELEMENT_Type;   //滤芯告警类型:0-流量L;1-时间h
     uint16_t u16Clear_RT;              //清除部件时间
     uint16_t u16Clear_ALARM;           //清除告警
     uint16_t u16Set_Time[2];           //设置系统时间
@@ -690,6 +700,10 @@ typedef struct
     uint16_t u16ColdWater_Mode;        //冰水模式
     uint16_t u16ColdWater_StartTemp;   //制冰水温度
     uint16_t u16ColdWater_StopTemp;    //制冰水停止温度
+    uint16_t u16HeatFan_StartTemp;     //热风机启动温度
+    uint16_t u16HeatFan_StopTemp;      //热风机停止温度
+    uint16_t u16Null;                  //null
+    //		uint16_t      u16Test[10];//null
     uint16_t u16NetworkPriority;       //网络优先
     uint16_t device_info[100];         //三元组信息
 } ComPara_Conf_st;

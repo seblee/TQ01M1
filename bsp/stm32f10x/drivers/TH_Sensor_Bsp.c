@@ -284,15 +284,15 @@ uint8_t Read_Sensor(uint16_t *u16TH_Buff, uint8_t u8SN)
             }
             u16TH_Buff[0] = (uint16_t)i16Temprature; //温度
             u16TH_Buff[1] = (uint16_t)u16Humi;       //湿度
-                                                     //			rt_kprintf("\r\nTemprature:  %.1f  ℃\r\n",i16Temprature); //显示温度
-                                                     //			rt_kprintf("Humi:  %.1f  %%RH\r\n",u16Humi);//显示湿度
+                                                     // rt_kprintf("\r\nTemprature:  %.1f  ℃\r\n",i16Temprature); //显示温度
+                                                     // rt_kprintf("Humi:  %.1f  %%RH\r\n",u16Humi);//显示湿度
         }
         else
         {
             Sensor_AnswerFlag |= 0x10;
-            //			rt_kprintf("Humi_H=%d,Humi_L=%d,Temp_H=%d,Temp_L=%d,Temp_CAL=%d,temp=%d,\n",Humi_H,Humi_L,Temp_H,Temp_L,Temp_CAL,temp);
+            // rt_kprintf("Humi_H=%d,Humi_L=%d,Temp_H=%d,Temp_L=%d,Temp_CAL=%d,temp=%d,\n",Humi_H,Humi_L,Temp_H,Temp_L,Temp_CAL,temp);
         }
-        //		rt_kprintf("Sensor_AnswerFlag =%x\r\n",Sensor_AnswerFlag);//
+        // rt_kprintf("Sensor_AnswerFlag =%x\r\n",Sensor_AnswerFlag);//
     }
     else
     {
@@ -335,9 +335,7 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
         u8CNT = 0x00;
     }
     //		i=u8CNT%AM_SENSOR_NUM;
-    i = u8CNT % 6;
-    //		//两次读取间隔至少2S
-    //		Delay_ms(1500);//延时1500ms
+    i = u8CNT % 6; //两次读取间隔至少2S
     if (i != 0)
     {
         return 0;
@@ -391,6 +389,7 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
         gds_ptr->status.status_remap[MBM_COM_STS_REG_NO] &= ~(0x0001 << 0);
         AM_Init(); //AM Sensor init
         i = 0;
+        u8Offset_CNT = 0;
     }
     else if (u8Err_CNT[i] == 0)
     //		else
@@ -399,12 +398,13 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
         {
             if (u16TH_Buff.Hum <= 999)
             {
-                i16Offset_Buff[0] = (int16_t)u16TH_Buff.Temp - (int16_t)u16LastTH[0];
-                i16Offset_Buff[1] = (int16_t)u16TH_Buff.Hum - (int16_t)u16LastTH[1];
-                if (((abs(i16Offset_Buff[0]) > TEMP_OFFSET) || (abs(i16Offset_Buff[1]) > HUM_OFFSET)) && (u8Offset_CNT >= JUMP_OFFSET))
-                {
-                }
-                else
+                //					i16Offset_Buff[0]=(int16_t)u16TH_Buff.Temp-(int16_t)u16LastTH[0];
+                //					i16Offset_Buff[1]=(int16_t)u16TH_Buff.Hum-(int16_t)u16LastTH[1];
+                //					if(((abs(i16Offset_Buff[0])>TEMP_OFFSET)||(abs(i16Offset_Buff[1])>HUM_OFFSET))&&(u8Offset_CNT>=JUMP_OFFSET))
+                //					{
+                //
+                //					}
+                //					else
                 {
                     u8TH_CNT[i]++;
                     if (u8TH_CNT[i] >= 0xFF)

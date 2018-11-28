@@ -81,7 +81,6 @@ void bkg_thread_entry(void *parameter)
 
         dog();
         rt_thread_delay(1000);
-        //   list_mem();
     }
 }
 
@@ -680,8 +679,9 @@ static void run_time_process(void)
 {
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
-    time_t now;
+    //		time_t now;
     uint16_t i;
+    static uint16_t u16Sec = 0;
 
     for (i = 0; i < DO_FILLTER_DUMMY_BPOS; i++)
     {
@@ -734,9 +734,13 @@ static void run_time_process(void)
         }
     }
 
-    get_local_time(&now);
-    if ((now % FIXED_SAVETIME) == 0) //每15分钟保存一次
+    //		get_local_time(&now);
+    //		if((now%FIXED_SAVETIME) == 0)//每15分钟保存一次
+    u16Sec++;
+    //		rt_kprintf("adc_value=%d\n", u16Sec);
+    if ((u16Sec % FIXED_SAVETIME) == 0) //每15分钟保存一次
     {
+        u16Sec = 0;
         I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Runtime, STS_REG_EE1_ADDR, sizeof(g_sys.status.ComSta.u16Runtime)); //when, fan is working update eeprom every minite
         //累计流量
         I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], STS_REG_EE1_ADDR + sizeof(g_sys.status.ComSta.u16Runtime), 4); //u16Cumulative_Water,

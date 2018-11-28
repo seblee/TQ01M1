@@ -983,8 +983,9 @@ static uint16_t acl00(alarm_acl_status_st *acl_ptr)
     {
         return (ALARM_ACL_CLEARED);
     }
-
-    if ((g_sys.config.ComPara.u16Water_Mode) && (g_sys.config.ComPara.u16Water_Flow))
+    //		if(sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) != 0)
+    //		if((g_sys.config.ComPara.u16Water_Mode)&&(g_sys.config.ComPara.u16Water_Flow))
+    if (((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_NORMAL_ICE) || (l_sys.OutWater_Key & WATER_NORMAL_ICE_2)) //常温水/冰水
     {
         if (g_sys.status.ComSta.u16Cur_Water < 1) //无水流量
         {
@@ -1000,7 +1001,7 @@ static uint16_t acl00(alarm_acl_status_st *acl_ptr)
         data = 0;
         u8Delay = 0;
     }
-    if (u8Delay > 30)
+    if (u8Delay > 5)
     {
         data = 1;
     }
@@ -1121,6 +1122,20 @@ static uint16_t acl03(alarm_acl_status_st *acl_ptr)
         }
     }
 
+    if ((g_sys.config.dev_mask.ain) & (0x01 << AI_NTC4))
+    {
+        meter = g_sys.status.ain[AI_NTC4];
+        if (compare_calc(meter, min, max, OUT_MIN_MAX_TYPE))
+        {
+            sys_set_remap_status(SENSOR_STS_REG_NO, AI_NTC4, 1);
+            req = 1;
+        }
+        else
+        {
+            sys_set_remap_status(SENSOR_STS_REG_NO, AI_NTC4, 0);
+        }
+    }
+
     acl_ptr->alram_value = g_sys.status.status_remap[SENSOR_STS_REG_NO];
     return (req);
 }
@@ -1213,13 +1228,13 @@ static uint16_t acl06(alarm_acl_status_st *acl_ptr)
         meter = g_sys.status.ComSta.u16TH[0].Hum;
         if (compare_calc(meter, min, max, OUT_MIN_MAX_TYPE))
         {
-            sys_set_remap_status(SENSOR_STS_REG_NO, AI_NTC3 + 1, 1);
+            sys_set_remap_status(SENSOR_STS_REG_NO, AI_SENSOR_ERR, 1);
             req = 1;
         }
         else
         {
 
-            sys_set_remap_status(SENSOR_STS_REG_NO, AI_NTC3 + 1, 0);
+            sys_set_remap_status(SENSOR_STS_REG_NO, AI_SENSOR_ERR, 0);
         }
     }
     acl_ptr->alram_value = g_sys.status.status_remap[SENSOR_STS_REG_NO];

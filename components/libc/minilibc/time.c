@@ -1,4 +1,3 @@
-//#include <../components/libc/minilibc/sys/time.h>
 #include <time.h>
 /* days per month -- nonleap! */
 const short __spm[13] =

@@ -11,7 +11,7 @@ enum
     DI_DRINK_DOWN_BPOS,
     DI_DRINK_MIDDLE_BPOS,
     DI_DRINK_UP_BPOS,
-    DI_DRINK_MU_BPOS,
+    DI_DRINK_MU_BPOS, //制冷水位
     DI_HI_PRESS1_BPOS,
     DI_HI_PRESS2_BPOS,
     DI_Cold_1_BPOS,
@@ -37,7 +37,6 @@ enum
 
 #define SLE1_READ GPIO_ReadInputDataBit(SLE_GPIO, SLE1_PIN)
 #define SLE2_READ GPIO_ReadInputDataBit(SLE_GPIO, SLE2_PIN)
-
 enum
 {
     Com_Pad = 0x01,

@@ -21,8 +21,6 @@ typedef enum
 } eMBErrorCode;
 /* -----------------------Slave Defines -------------------------------------*/
 
-#define MCPAD_REG_HOLDING_WRITE_NREGS 5 //????+
-
 #define CPAD_MB_REG_READ 0x03
 #define CPAD_MB_REG_SINGLE_WRITE 0x06
 #define CPAD_MB_REG_MULTIPLE_WRITE 0x10

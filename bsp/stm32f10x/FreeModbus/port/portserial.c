@@ -272,75 +272,75 @@ BOOL xMBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 	GPIO_PinRemapConfig(GPIO_FullRemap_USART3, ENABLE);
 
-	//======================IO初始化=========================================
-	//UART3_TX
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_InitStructure.GPIO_Pin = UART3_GPIO_TX;
-	GPIO_Init(UART3_GPIO, &GPIO_InitStructure);
-	//UART3_RX
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_InitStructure.GPIO_Pin = UART3_GPIO_RX;
-	GPIO_Init(UART3_GPIO, &GPIO_InitStructure);
-	//配置485发送和接收模式
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Pin = UART3_DIR_GPIO_PIN;
-	GPIO_Init(UART3_DIR_GPIO, &GPIO_InitStructure);
-	//======================串口初始化=======================================
-	USART_InitStructure.USART_BaudRate = ulBaudRate;
-	//设置校验模式
-	switch (eParity)
-	{
-	case MB_PAR_NONE: //无校验
-		USART_InitStructure.USART_Parity = USART_Parity_No;
-		USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-		break;
-	case MB_PAR_ODD: //奇校验
-		USART_InitStructure.USART_Parity = USART_Parity_Odd;
-		USART_InitStructure.USART_WordLength = USART_WordLength_9b;
-		break;
-	case MB_PAR_EVEN: //偶校验
-		USART_InitStructure.USART_Parity = USART_Parity_Even;
-		USART_InitStructure.USART_WordLength = USART_WordLength_9b;
-		break;
-	default:
-		return FALSE;
-	}
+    //======================IO初始化=========================================
+    //UART3_TX
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Pin = UART3_GPIO_TX;
+    GPIO_Init(UART3_GPIO, &GPIO_InitStructure);
+    //UART3_RX
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Pin = UART3_GPIO_RX;
+    GPIO_Init(UART3_GPIO, &GPIO_InitStructure);
+    //配置485发送和接收模式
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Pin = UART3_DIR_GPIO_PIN;
+    GPIO_Init(UART3_DIR_GPIO, &GPIO_InitStructure);
+    //======================串口初始化=======================================
+    USART_InitStructure.USART_BaudRate = ulBaudRate;
+    //设置校验模式
+    switch (eParity)
+    {
+    case MB_PAR_NONE: //无校验
+        USART_InitStructure.USART_Parity = USART_Parity_No;
+        USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+        break;
+    case MB_PAR_ODD: //奇校验
+        USART_InitStructure.USART_Parity = USART_Parity_Odd;
+        USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+        break;
+    case MB_PAR_EVEN: //偶校验
+        USART_InitStructure.USART_Parity = USART_Parity_Even;
+        USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+        break;
+    default:
+        return FALSE;
+    }
 
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
-	ENTER_CRITICAL_SECTION(); //关全局中断
+    ENTER_CRITICAL_SECTION(); //关全局中断
 
-	USART_Init(USART3, &USART_InitStructure);
-	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-	USART_Cmd(USART3, ENABLE);
+    USART_Init(USART3, &USART_InitStructure);
+    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+    USART_Cmd(USART3, ENABLE);
 
-	//=====================中断初始化======================================
-	//设置NVIC优先级分组为Group2：0-3抢占式优先级，0-3的响应式优先级
-	//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+    //=====================中断初始化======================================
+    //设置NVIC优先级分组为Group2：0-3抢占式优先级，0-3的响应式优先级
+    //	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 
-	EXIT_CRITICAL_SECTION(); //开全局中断
+    EXIT_CRITICAL_SECTION(); //开全局中断
 
-	return TRUE;
+    return TRUE;
 }
 
 BOOL xMBPortSerialPutByte(CHAR ucByte)
 {
-	USART_SendData(USART3, ucByte);
-	return TRUE;
+    USART_SendData(USART3, ucByte);
+    return TRUE;
 }
 
 BOOL xMBPortSerialGetByte(CHAR *pucByte)
 {
-	*pucByte = USART_ReceiveData(USART3);
-	return TRUE;
+    *pucByte = USART_ReceiveData(USART3);
+    return TRUE;
 }
 
 /*******************************************************************************
@@ -501,23 +501,23 @@ static void prvvUARTTxReadyISR(void)
 	pxMBFrameCBTransmitterEmpty();
 }
 
-/*
-* Create an interrupt handler for the receive interrupt for your target
-* processor. This function should then call pxMBFrameCBByteReceived( ). The
-* protocol stack will then call xMBPortSerialGetByte( ) to retrieve the
-* character.
-*/
+/* 
+ * Create an interrupt handler for the receive interrupt for your target
+ * processor. This function should then call pxMBFrameCBByteReceived( ). The
+ * protocol stack will then call xMBPortSerialGetByte( ) to retrieve the
+ * character.
+ */
 static void prvvUARTRxISR(void)
 {
-	pxMBFrameCBByteReceived();
+    pxMBFrameCBByteReceived();
 }
 /*******************************************************************************
-* Function Name  : UART4_IRQHandler
-* Description    : This function handles UART4 global interrupt request.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+ * Function Name  : USART3_IRQHandler
+ * Description    : This function handles USART3 global interrupt request.
+ * Input          : None
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
 void UART4_IRQHandler(void)
 {
 	extern volatile uint8_t rx1_cnt;
@@ -540,3 +540,4 @@ void UART4_IRQHandler(void)
 	}
 	rt_interrupt_leave();
 }
+

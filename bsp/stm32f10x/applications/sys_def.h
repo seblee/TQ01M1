@@ -19,32 +19,32 @@ typedef unsigned long uint32;
 typedef long int32;
 typedef uint32_t time_t;
 
-#define SYS_HMI_TQ 1 //天泉
-//#define SYS_HMI_TQ_T10  1        //天泉
-//#define	SYS_HMI_VJL		1		//威金利
+#define SYS_DEBUG 1
 
-#define DEBUG_TIMEOUT_MAX 2000 //上电DEBUG_TIMEOUT_MAX时间后关闭调试串口
+#define DEBUG_TIMEOUT_MAX 5000 //上电DEBUG_TIMEOUT_MAX时间后关闭调试串口
 #define DEBUG_TIMEOUT_NA 0xffff
 #define DEBUG_ON_FLAG 0
 #define DEBUG_OFF_FLAG 123
 
-#define SYS_DEBUG
+#define SYS_HMI_TQ 1 //天泉
+//#define SYS_HMI_TQ_T10  1        //天泉
+//#define	SYS_HMI_VJL		1		//威金利
 
 #ifdef SYS_HMI_TQ
 #define CONF_REG_MAP_NUM 300
 #define CONF_REG_SID_START 200
 #define CONF_REG_SID_NUM 100
-#define SOFTWARE_VER 0x120B
+#define SOFTWARE_VER 0x120D
 
 #elif SYS_HMI_TQ_T10
 #define CONF_REG_MAP_NUM 300
 #define CONF_REG_SID_START 200
 #define CONF_REG_SID_NUM 100
-#define SOFTWARE_VER 0x1001
+#define SOFTWARE_VER 0x1002
 
 #elif SYS_HMI_VJL
 #define CONF_REG_MAP_NUM 106
-#define SOFTWARE_VER 0x110A
+#define SOFTWARE_VER 0x110C
 #endif
 
 #define STATUS_REG_MAP_NUM 40

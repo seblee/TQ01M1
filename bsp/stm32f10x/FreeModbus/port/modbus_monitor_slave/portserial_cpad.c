@@ -30,7 +30,7 @@
 #include "dio_bsp.h"
 
 /* ----------------------- Start implementation -----------------------------*/
-static fifo8_cb_td mnt_tx_fifo;
+static fifo8_cb_td mnt_tx_fifo = {0};
 
 uint8_t Monitor_isr_flag;
 extern cpad_slave_st cpad_slave_inst;
@@ -105,10 +105,16 @@ void cpad_MBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
     NVIC_Init(&NVIC_InitStructure);
 
     CPAD_SLAVE_RS485_RECEIVE_MODE;
-
     if (mnt_tx_fifo.buffer_ptr != RT_NULL)
-        rt_free(mnt_tx_fifo.buffer_ptr);
-    fifo8_init(&mnt_tx_fifo, 1, MNT_RX_LEN);
+    {
+        fifo8_reset(&mnt_tx_fifo);
+    }
+    else
+    {
+        fifo8_init(&mnt_tx_fifo, 1, MNT_RX_LEN);
+    }
+
+    return;
 }
 
 void cpad_xMBPortSerialPutByte(uint8_t *ucbyte, uint16_t len)
@@ -159,7 +165,7 @@ uint8_t CpadPortSerialReceiveFSM_MBS(void)
             if (cpad_slave_inst.rec_cnt < MNT_RX_LEN)
             {
                 cpad_slave_inst.rxbuf[cpad_slave_inst.rec_cnt++] = rec_data;
-                if (cpad_slave_inst.rxbuf[1] != CPAD_MB_REG_MULTIPLE_WRITE)
+                if (cpad_slave_inst.rxbuf[1] != CPAD_MB_REG_MULTIPLE_WRITE) //写单个寄存器
                 {
                     if (cpad_slave_inst.rec_cnt >= MNT_CMD_LEN)
                     {

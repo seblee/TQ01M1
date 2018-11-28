@@ -125,10 +125,32 @@ const reg_table_st modbus_slave_reg_table[] = {
 	{0, 104}, //
 	{0, 105}, //
 
-	{1, 0}, //
+	{0, 179}, //
+	{0, 180}, //
+	{0, 181}, //
+	{0, 182}, //
+	{0, 183}, //
+	{0, 184}, //
+	{0, 185}, //
+	{0, 186}, //
+	{0, 187}, //
+	{0, 188}, //
+
+	{0, 189}, //
+	{0, 190}, //
+	{0, 191}, //
+	{0, 192}, //
+	{0, 193}, //
+	{0, 194}, //
+	{0, 195}, //
+	{0, 196}, //
+	{0, 197}, //
+	{0, 198}, //
+
+	{1, 0}, //ADDR-90
 	{1, 1}, //
-	{1, 2}, //
-	{1, 3}, //
+	{1, 2}, //系统状态
+	{1, 3}, //数字输入0
 	{1, 4}, //
 	{1, 5}, //
 	{1, 6}, //
@@ -139,7 +161,7 @@ const reg_table_st modbus_slave_reg_table[] = {
 	{1, 10}, //
 	{1, 11}, //
 	{1, 12}, //
-	{1, 13}, //
+	{1, 13}, //当前出水流量
 	{1, 14}, //
 	{1, 15}, //
 	{1, 16}, //
@@ -238,7 +260,7 @@ void modbus_slave_thread_entry(void *parameter)
 	//		com_change_inst.baudrate  =  g_sys.config.general.surv_baudrate;
 	//		com_change_inst.com_addr = g_sys.config.general.surv_addr;
 	//		eStatus = eMBInit(MB_RTU,(UCHAR)g_sys.config.general.surv_addr, UPORT_MONITOR, Get_Baudrate(com_change_inst.baudrate),  MB_PAR_NONE);
-	eStatus = eMBInit(MB_RTU, 1, UPORT_SLAVE, 9600, MB_PAR_NONE);
+	eStatus = eMBInit(MB_RTU, 1, UPORT_SLAVE, 19200, MB_PAR_NONE);
 	if (eStatus != MB_ENOERR)
 	{
 		rt_kprintf("MB_SLAVE init failed\n");
@@ -388,7 +410,7 @@ eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegist
 
 void mbs_sts_update(void) // 更新本地变量到协议栈寄存器中
 {
-	char i = 0;
+	unsigned char i = 0;
 	const reg_table_st *pt = modbus_slave_reg_table;
 	extern conf_reg_map_st conf_reg_map_inst[];
 	extern sts_reg_map_st status_reg_map_inst[];

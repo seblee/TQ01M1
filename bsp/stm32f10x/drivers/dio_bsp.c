@@ -6,13 +6,14 @@
 #include "led_bsp.h"
 #include "local_status.h"
 
-#define DI_MAX_CNT 15
+#define DI_MAX_CNT 16
 //#define DIN_MASK_MASK         0x003f
 //#define DIN_MASK_MASK1        0xffff //屏蔽
-#define DIN_POLARITY_MASK 0xffc0
-#define DI_BUF_DEPTH 600
-#define DI_UPDATE_PERIOD 1000
-#define SAMPLE_INTERVAL 6
+//#define DIN_POLARITY_MASK     0xffc0
+//#define DI_BUF_DEPTH 					600
+//#define	DI_UPDATE_PERIOD			1000
+#define DI_BUF_DEPTH 50
+#define SAMPLE_INTERVAL 10
 
 //RT_TIMER_TICK_PER_SECOND
 typedef struct
@@ -61,7 +62,7 @@ const pin_map_st in_pin_map_inst[Pin_Map_In] = //数字输入Pin_Map
         {GPIO_Pin_13, GPIOB}, //DI13
         {GPIO_Pin_12, GPIOB}, //DI14
         {GPIO_Pin_0, GPIOE},  //DI15
-                              //		{GPIO_Pin_12, 	GPIOA},		//DI16
+        {GPIO_Pin_0, GPIOD},  //DI16
 };
 #define Pin_Map_Out 21
 const pin_map_st out_pin_map_inst[Pin_Map_Out] = //数字输出Pin_Map
@@ -196,7 +197,7 @@ static void drv_dio_bsp_init(void)
   * @param  none
   * @retval none
   */
-//数字输入初始化函数?
+//数字输入初始化函数�
 static void dio_reg_init(void)
 {
     uint16_t i;
@@ -383,7 +384,7 @@ static void stimer_di_timeout(void *parameter)
   * @param  none
   * @retval none
   */
-//数字输入定时器，每6ms周期对数字输入进行采样
+//数字输入定时器，每10ms周期对数字输入进行采样
 static uint16_t drv_di_timer_init(void)
 {
     rt_timer_t stimer_dio;

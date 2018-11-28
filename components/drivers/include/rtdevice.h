@@ -27,14 +27,6 @@
 #define __RT_DEVICE_H__
 
 #include <rtthread.h>
-//#include "ipc/ringbuffer.h"
-//#include "ipc/completion.h"
-//#include "ipc/dataqueue.h"
-//#include "ipc/workqueue.h"
-//#include "ipc/waitqueue.h"
-//#include "ipc/pipe.h"
-//#include "ipc/poll.h"
-//#include "ipc/ringblk_buf.h"
 
 #define RT_DEVICE(device)            ((rt_device_t)device)
 
