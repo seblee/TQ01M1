@@ -18,8 +18,7 @@
 #include "sys_conf.h"
 #include <rtthread.h>
 #include "board.h"
-#include "MQTTPacket.h"
-#include "SIMCOM.h"
+#include "MQTTPacket.h" 
 
 #include "paho_mqtt.h"
 /* Private define ------------------------------------------------------------*/
@@ -133,8 +132,7 @@ extern MQTTPacket_connectData client_con;
 extern iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS];
 
 extern iot_topic_param_t iot_pub_topics[6];
-
-extern SIMCOM_HANDLE g_SIMCOM_Handle;
+ 
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/

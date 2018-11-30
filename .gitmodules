@@ -4,12 +4,6 @@
 [submodule "bsp/stm32f10x/cJSON"]
 	path = bsp/stm32f10x/cJSON
 	url = git@github.com:seblee/cJSON.git
-[submodule "bsp/stm32f10x/sim7600/SIM_COM"]
-	path = bsp/stm32f10x/sim7600/SIM_COM
-	url = git@github.com:seblee/SIM_COM.git
-[submodule "bsp/stm32f10x/sim7600/ESP8266_AT_stm32"]
-	path = bsp/stm32f10x/sim7600/ESP8266_AT_stm32
-	url = git@github.com:seblee/ESP8266_AT_stm32.git
 [submodule "bsp/stm32f10x/at_device-latest"]
 	path = bsp/stm32f10x/at_device-latest
 	url = git@github.com:seblee/at_device.git

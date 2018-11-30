@@ -1250,31 +1250,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>SIM_COM</GroupName>
-          <Files>
-            <File>
-              <FileName>SIMCOM_AT.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\sim7600\SIM_COM\SIMCOM_AT.c</FilePath>
-            </File>
-            <File>
-              <FileName>SIMCOM_GSM.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\sim7600\SIM_COM\SIMCOM_GSM.c</FilePath>
-            </File>
-            <File>
-              <FileName>SIMCOM_USER.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\sim7600\SIM_COM\SIMCOM_USER.c</FilePath>
-            </File>
-            <File>
-              <FileName>SIMCOM_GPRS.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\sim7600\SIM_COM\SIMCOM_GPRS.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>AT</GroupName>
           <Files>
             <File>
