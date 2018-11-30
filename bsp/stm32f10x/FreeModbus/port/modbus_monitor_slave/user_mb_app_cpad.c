@@ -323,6 +323,11 @@ cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, uint
                         rt_kprintf("modbus multiple write complete.\n");
                         save_conf_reg(0); //写入保持寄存器中同时跟新到内存和flash保存  // 写入寄存器和EEPROM中。
                         // }
+                        if ((usAddress - CONFIG_REG_MAP_OFFSET) == EE_WIFI_PASSWORD) //设置WIFI密码标志
+                        {
+                            g_sys.config.ComPara.Net_Conf.u16Net_WifiSet = WIFI_SET;
+                            RAM_Write_Reg(EE_WIFI_SET, g_sys.config.ComPara.Net_Conf.u16Net_WifiSet, 1);
+                        }
                     }
                 }
                 else

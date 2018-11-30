@@ -50,8 +50,8 @@ enum
 #define DO_FAN_LOW_BPOS DO_FAN_BPOS //风机低档
 #define DO_UV2_BPOS DO_RSV1_BPOS    //紫外灯2
 //L  双按键出水
-#define DO_WP2_BPOS DO_RSV2_BPOS //出水泵2
-#define DO_DV2_BPOS DO_RSV3_BPOS //出水阀2
+#define DO_WP2_BPOS DO_RSV2_BPOS      //出水泵2
+#define DO_DV2_BPOS DO_RSV3_BPOS      //出水阀2
 #define DO_HEAT_FAN_BPOS DO_RSV2_BPOS //扇热风机
 
 //application delay
@@ -654,9 +654,11 @@ typedef struct sys_status_map
 typedef struct
 {
     uint16_t u16Net_Sel;           //wifi-4G选择
+    uint16_t u16Net_WifiSet;       //wifi已经设置
     uint16_t u16Wifi_Name[10];     //wifi名称/ASIIC
     uint16_t u16Wifi_Password[10]; //wifi密码/ASIIC
 } Net_Conf_st;
+#define WIFI_SET 0x5AA5
 
 //空气制水机参数
 typedef struct
@@ -703,8 +705,6 @@ typedef struct
     uint16_t u16HeatFan_StartTemp;     //热风机启动温度
     uint16_t u16HeatFan_StopTemp;      //热风机停止温度
     uint16_t u16Null;                  //null
-    //		uint16_t      u16Test[10];//null
-    uint16_t u16NetworkPriority;       //网络优先
     uint16_t device_info[100];         //三元组信息
 } ComPara_Conf_st;
 

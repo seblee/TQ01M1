@@ -51,7 +51,7 @@ extern sys_reg_st g_sys;
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-
+rt_err_t network_Conversion_wifi_parpmeter(Net_Conf_st *src, Net_Conf_st *dst);
 /*----------------------------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,6 +71,7 @@ void NetWork_DIR_Init(void)
     SIM7600_DIR_WIFI;
 }
 int esp8266_at_socket_device_init(void);
+int sim7600_at_socket_device_init(void);
 void net_thread_entry(void *parameter)
 {
     /**NetWork_DIR_Init**/
@@ -79,19 +80,32 @@ void net_thread_entry(void *parameter)
     get_bulid_date_time(&ti);
     current_systime_set(&ti);
     rt_thread_delay(rt_tick_from_millisecond(2000));
-    if (g_sys.config.ComPara.u16NetworkPriority)
+
+    if (g_sys.config.ComPara.Net_Conf.u16Net_Sel)
     {
         SIM7600_DIR_4G;
+        sim7600_at_socket_device_init();
     }
     else
     {
         SIM7600_DIR_WIFI;
         esp8266_at_socket_device_init();
     }
+
+    Net_Conf_st temp;
+    network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
     network_get_interval(&client.RealtimeInterval, &client.TimingInterval);
     network_log("RealtimeInterval:%d, TimingInterval:%d", client.RealtimeInterval, client.TimingInterval);
-    // SIM7600_DIR_WIFI;
-    // esp8266_at_socket_device_init();
+
+    network_log("u16Net_Sel:%d", g_sys.config.ComPara.Net_Conf.u16Net_Sel);
+    network_log("u16Net_WifiSet:0x%04X", g_sys.config.ComPara.Net_Conf.u16Net_WifiSet);
+
+    network_log("u16Wifi_Name len:%d ssid:%s",
+                strlen((const char *)temp.u16Wifi_Name),
+                temp.u16Wifi_Name);
+    network_log("u16Wifi_Key len:%d key:%s",
+                strlen((const char *)temp.u16Wifi_Password),
+                temp.u16Wifi_Password);
 
     static int is_started = 0;
     if (is_started)
@@ -101,6 +115,11 @@ void net_thread_entry(void *parameter)
     /* config MQTT context param */
 
     mqtt_client_init(&client);
+    rt_thread_delay(rt_tick_from_millisecond(7000));
+    rt_thread_delay(rt_tick_from_millisecond(7000));
+    rt_thread_delay(rt_tick_from_millisecond(7000));
+    rt_thread_delay(rt_tick_from_millisecond(7000));
+    rt_thread_delay(rt_tick_from_millisecond(7000));
     rt_thread_delay(rt_tick_from_millisecond(7000));
     paho_mqtt_start(&client);
     is_started = 1;
@@ -618,4 +637,20 @@ exit:
     if (root)
         cJSON_Delete(root);
     return rc;
+}
+
+rt_err_t network_Conversion_wifi_parpmeter(Net_Conf_st *src, Net_Conf_st *dst)
+{
+    int i;
+    for (i = 0; i < sizeof(src->u16Wifi_Name); i++)
+    {
+        dst->u16Wifi_Name[i] = src->u16Wifi_Name[i] << 8;
+        dst->u16Wifi_Name[i] |= src->u16Wifi_Name[i] >> 8;
+    }
+    for (i = 0; i < sizeof(src->u16Wifi_Password); i++)
+    {
+        dst->u16Wifi_Password[i] = src->u16Wifi_Password[i] << 8;
+        dst->u16Wifi_Password[i] |= src->u16Wifi_Password[i] >> 8;
+    }
+    return 0;
 }

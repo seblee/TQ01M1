@@ -36,10 +36,6 @@ typedef enum
 #define EE_FLAG_OK 0x01
 #define EE_FLAG_ERROR 0x02
 
-//特殊地址
-#define EE_WATER_MODE 46
-#define EE_WATER_FLOW 47
-
 alarm_acl_conf_st g_alarm_acl_inst[MAX_ALARM_ACL_NUM]; //alarm check list declairation
 sys_reg_st g_sys;                                      //global parameter declairation
 local_reg_st l_sys;                                    //local status declairation
@@ -58,8 +54,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {5, &g_sys.config.general.alarm_bypass_en, 0, 1, 0, 3, 1, NULL},
     {6, &g_sys.config.general.testing_mode_en, 0, 1, 0, 4, 1, NULL},
     {7, &g_sys.config.general.power_mode_mb_en, 0, 1, 1, 3, 1, NULL},
-    {8, &g_sys.config.dev_mask.din_bitmap_polarity[0], 0, 0xFFFF, 0x3E5B, 3, 1, NULL},    // DI极性
-    /*{8, &g_sys.config.dev_mask.din_bitmap_polarity[0], 0, 0xffff, 0xE24, 3, 1, NULL},*/ // DI极性
+    {8, &g_sys.config.dev_mask.din_bitmap_polarity[0], 0, 0xFFFF, 0x3E5B, 3, 1, NULL}, // DI极性
     {9, &g_sys.config.dev_mask.din_bitmap_polarity[1], 0, 0xffff, 0x00, 3, 1, NULL},
     {10, &g_sys.config.dev_mask.ain, 0, 0xffff, 0x001F, 3, 1, NULL},
     {11, &g_sys.config.dev_mask.din[0], 0, 0xFFFF, 0x3E7F, 3, 1, NULL}, // DI屏蔽位
@@ -232,7 +227,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {175, NULL, 0, 3600, 0, 2, 1, NULL},
     {176, NULL, 0, 3600, 0, 2, 1, NULL},
     {177, NULL, 0, 3600, 0, 0, 1, NULL},
-    {178, NULL, 0, 3600, 0, 2, 1, NULL},
+    {178, &g_sys.config.ComPara.Net_Conf.u16Net_WifiSet, 0, 0xFFFF, 0, 2, 1, NULL},
     {179, &g_sys.config.ComPara.Net_Conf.u16Net_Sel, 0, 0xFFFF, 0, 2, 1, NULL},
     {180, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[0], 0, 0xFFFF, 0, 2, 1, NULL},
     {181, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[1], 0, 0xFFFF, 0, 2, 1, NULL},
@@ -244,7 +239,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {187, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[7], 0, 0xFFFF, 0, 2, 1, NULL},
     {188, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[8], 0, 0xFFFF, 0, 2, 1, NULL},
     {189, &g_sys.config.ComPara.Net_Conf.u16Wifi_Name[9], 0, 0xFFFF, 0, 2, 1, NULL},
-    {190, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[0], 0, 0xFFFF, 0, 2, 1, NULL},
+    {EE_WIFI_PASSWORD, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[0], 0, 0xFFFF, 0, 2, 1, NULL},
     {191, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[1], 0, 0xFFFF, 0, 2, 1, NULL},
     {192, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[2], 0, 0xFFFF, 0, 2, 1, NULL},
     {193, &g_sys.config.ComPara.Net_Conf.u16Wifi_Password[3], 0, 0xFFFF, 0, 2, 1, NULL},

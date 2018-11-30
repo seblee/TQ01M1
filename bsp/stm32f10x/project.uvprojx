@@ -1337,6 +1337,11 @@
               <FileType>1</FileType>
               <FilePath>.\at_device-latest\at_socket_esp8266.c</FilePath>
             </File>
+            <File>
+              <FileName>at_socket_sim7600.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\at_device-latest\at_socket_sim7600.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
