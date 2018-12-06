@@ -64,8 +64,8 @@ enum MQTT_QoS
     MQTT_SUBFAIL = 0x80
 };
 /* Private define ------------------------------------------------------------*/
-//#define DEVICE_TQ
-#define DEVICE_SEBLEE
+#define DEVICE_TQ
+//#define DEVICE_SEBLEE
 // #define DEVICE_HIGHTLEVEL
 
 #define DEVICE_ID "cdtest0041"
@@ -86,9 +86,31 @@ enum MQTT_QoS
 #define DEVICE_SECRET "nhqxFILHW4AyWD5fggtMb7O3A6I6sX4n"
 #elif defined DEVICE_TQ
 /***********TQ************/
+// #define cdtest004
+// #define TQ_CD_4G_TEST_01
+#define TQ_CD_4G_TEST_02
+// #define TQ_CD_4G_TEST_03
+#ifdef cdtest004
 #define DEVICE_NAME "cdtest004"
 #define PRODUCT_KEY "a1JOOi3mNEf"
 #define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
+#elif defined TQ_CD_4G_TEST_01
+#define DEVICE_NAME "TQ_CD_4G_TEST_01"
+#define PRODUCT_KEY "a1JOOi3mNEf"
+#define DEVICE_SECRET "HSMjLg1GSaoq8OvMhCF5SE8S0Eqmf1Qa"
+#elif defined TQ_CD_4G_TEST_02
+#define DEVICE_NAME "TQ_CD_4G_TEST_02"
+#define PRODUCT_KEY "a1JOOi3mNEf"
+#define DEVICE_SECRET "msnexcvovNpMNAYqyqaedujhilhp11mk"
+#elif defined TQ_CD_4G_TEST_03
+#define DEVICE_NAME "TQ_CD_4G_TEST_03"
+#define PRODUCT_KEY "a1JOOi3mNEf"
+#define DEVICE_SECRET "sCWvwMQZmbUKGqzgEqNcqE8HqemriOvB"
+
+#define DEVICE_NAME "cdtest004"
+#define PRODUCT_KEY "a1JOOi3mNEf"
+#define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
+#endif
 #elif defined DEVICE_HIGHTLEVEL
 /***highLevel***/
 #define DEVICE_NAME "TQ_Client01"
@@ -136,7 +158,12 @@ enum MQTT_QoS
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-
+extern rt_uint32_t inform_count;
+extern rt_uint32_t plaform_init_count;
+extern rt_uint32_t parameter_put_count;
+extern rt_uint32_t realtime_count;
+extern rt_uint32_t timing_count;
+extern rt_uint32_t ping_count;
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
@@ -144,23 +171,7 @@ int mqtt_client_init(MQTTClient *client);
 
 void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info);
 
-int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn);
-
-rt_err_t mqtt_client_subscribe(_topic_sub_enmu_t subsc, iotx_device_info_pt iotx_dev_info);
-
-rt_err_t mqtt_client_subscribe_topics(void);
-
-rt_err_t mqtt_packet_read_operation(void);
-
 unsigned short mqtt_client_packet_id(void);
-
-rt_err_t mqtt_client_ping(void);
-
-rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t restained, rt_uint8_t *msg, rt_uint16_t msg_len);
-
-rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len);
-
-rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, unsigned int msgId, enum msgTypes type);
 
 rt_err_t network_get_register(iotx_device_info_pt device_info_p);
 /*----------------------------------------------------------------------------*/

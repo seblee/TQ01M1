@@ -953,6 +953,7 @@ _mqtt_start:
                     LOG_E("[%d] wait Ping Response res: %d", rt_tick_get(), res);
                     goto _mqtt_disconnect;
                 }
+                ping_count++;
                 goto __receive_;
             } /* res == 0: timeount for ping. */
             // break;
@@ -999,12 +1000,30 @@ _mqtt_start:
                 LOG_E("[%d] wait publish Response res: %d", rt_tick_get(), res);
                 goto _mqtt_disconnect;
             }
-            if (sendState == SENDINFORM)
+            switch (sendState)
             {
-                c->isInformed = 1;
-                c->isparameterPutted = 1;
-                c->isQRcodegeted = 1;
+            case SENDINFORM:
+                inform_count++;
+                break;
+
+            case SENDINIT:
+                plaform_init_count++;
+                break;
+            case SENDPARAMETER:
+                parameter_put_count++;
+                break;
+            case SENDREALTIME:
+                realtime_count++;
+                break;
+            case SENDTIMING:
+                timing_count++;
+                break;
+            default:
+                break;
             }
+
+            if (sendState == SENDINFORM)
+                c->isInformed = 1;
             if (sendState == SENDPARAMETER)
                 c->isparameterPutted = 1;
             sendState++;

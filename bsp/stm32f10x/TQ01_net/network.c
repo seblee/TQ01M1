@@ -23,9 +23,15 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
+
+//#define CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
 #ifndef network_log
 #define network_log(N, ...) rt_kprintf("####[network %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif /* at_log(...) */
+#else
+#define network_log(...)
+#endif /* ! CONFIG_DEBUG */
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -82,34 +88,35 @@ void net_thread_entry(void *parameter)
     struct tm ti;
     get_bulid_date_time(&ti);
     current_systime_set(&ti);
-    rt_thread_delay(rt_tick_from_millisecond(2000));
+    rt_thread_delay(rt_tick_from_millisecond(3000));
 
-    if (g_sys.config.ComPara.Net_Conf.u16Net_Sel)
-    {
-        SIM7600_DIR_4G;
-        sim7600_at_socket_device_init();
-    }
-    else
-    {
-        SIM7600_DIR_WIFI;
-        esp8266_at_socket_device_init();
-    }
+    // if (g_sys.config.ComPara.Net_Conf.u16Net_Sel)
+    // {
+    //     SIM7600_DIR_4G;
+    //     sim7600_at_socket_device_init();
+    // }
+    // else
+    // {
+    //     SIM7600_DIR_WIFI;
+    //     esp8266_at_socket_device_init();
+    // }
+    SIM7600_DIR_4G;
+    sim7600_at_socket_device_init();
 
-    Net_Conf_st temp;
-    network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
+    // Net_Conf_st temp;
+    // network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
+    // worknet_log("u16Net_Sel:%d", g_sys.config.ComPara.Net_Conf.u16Net_Sel);
+    // worknet_log("u16Net_WifiSet:0x%04X", g_sys.config.ComPara.Net_Conf.u16Net_WifiSet);
+
+    // worknet_log("u16Wifi_Name len:%d ssid:%s",
+    //             strlen((const char *)temp.u16Wifi_Name),
+    //             temp.u16Wifi_Name);
+    // network_log("u16Wifi_Key len:%d key:%s",
+    //             strlen((const char *)temp.u16Wifi_Password),
+    //             temp.u16Wifi_Password);
+
     network_get_interval(&client.RealtimeInterval, &client.TimingInterval);
     network_log("RealtimeInterval:%d, TimingInterval:%d", client.RealtimeInterval, client.TimingInterval);
-
-    network_log("u16Net_Sel:%d", g_sys.config.ComPara.Net_Conf.u16Net_Sel);
-    network_log("u16Net_WifiSet:0x%04X", g_sys.config.ComPara.Net_Conf.u16Net_WifiSet);
-
-    network_log("u16Wifi_Name len:%d ssid:%s",
-                strlen((const char *)temp.u16Wifi_Name),
-                temp.u16Wifi_Name);
-    network_log("u16Wifi_Key len:%d key:%s",
-                strlen((const char *)temp.u16Wifi_Password),
-                temp.u16Wifi_Password);
-
     static int is_started = 0;
     if (is_started)
     {

@@ -46,6 +46,7 @@ void power_loss_delay(void)
 	* @param  none
 	* @retval none
   */
+void mqtt_client_out_put_record(void);
 void bkg_thread_entry(void *parameter)
 {
     //初始化温湿度曲线记录
@@ -81,6 +82,8 @@ void bkg_thread_entry(void *parameter)
 
         dog();
         rt_thread_delay(1000);
+
+        mqtt_client_out_put_record();
     }
 }
 
