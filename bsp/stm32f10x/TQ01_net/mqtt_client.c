@@ -59,6 +59,16 @@ static void mqtt_WATER_NOTICE_callback(MQTTClient *c, MessageData *msg_data)
         c->isQRcodegeted = 1;
     return;
 }
+static void mqtt_PARAMETER_SET_callback(MQTTClient *c, MessageData *msg_data)
+{
+    *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
+    LOG_D("mqtt sub callback: %.*s %.*s",
+          msg_data->topicName->lenstring.len,
+          msg_data->topicName->lenstring.data,
+          msg_data->message->payloadlen,
+          (char *)msg_data->message->payload);
+    network_parameter_set_parse((const char *)msg_data->message->payload);
+}
 static void mqtt_PARAMETER_GET_callback(MQTTClient *c, MessageData *msg_data)
 {
     *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
@@ -67,7 +77,7 @@ static void mqtt_PARAMETER_GET_callback(MQTTClient *c, MessageData *msg_data)
           msg_data->topicName->lenstring.data,
           msg_data->message->payloadlen,
           (char *)msg_data->message->payload);
-    if (network_water_notice_parse((const char *)msg_data->message->payload) == RT_EOK)
+    if (network_parameter_get_parse((const char *)msg_data->message->payload) == RT_EOK)
         c->isparameterPutted = 0;
     return;
 }
@@ -200,13 +210,18 @@ int mqtt_client_init(MQTTClient *client)
 
         client->messageHandlers[PARAMETER_SET].topicFilter =
             (char *)iot_sub_topics[PARAMETER_SET].topic_str;
-        client->messageHandlers[PARAMETER_SET].callback = mqtt_sub_callback;
+        client->messageHandlers[PARAMETER_SET].callback = mqtt_PARAMETER_SET_callback;
         client->messageHandlers[PARAMETER_SET].qos = iot_sub_topics[PARAMETER_SET].qos;
 
         client->messageHandlers[PARAMETER_GET].topicFilter =
             (char *)iot_sub_topics[PARAMETER_GET].topic_str;
         client->messageHandlers[PARAMETER_GET].callback = mqtt_PARAMETER_GET_callback;
         client->messageHandlers[PARAMETER_GET].qos = iot_sub_topics[PARAMETER_GET].qos;
+
+        client->messageHandlers[OTA_UPGRADE].topicFilter =
+            (char *)iot_sub_topics[OTA_UPGRADE].topic_str;
+        client->messageHandlers[OTA_UPGRADE].callback = mqtt_sub_callback;
+        client->messageHandlers[OTA_UPGRADE].qos = iot_sub_topics[OTA_UPGRADE].qos;
     }
 
     /* set default subscribe event callback */
@@ -443,25 +458,28 @@ rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, unsigned int msg
 rt_err_t network_get_register(iotx_device_info_pt device_info_p)
 {
     rt_err_t err;
-     char guider_sign[256] = {0};
+    char guider_sign[256] = {0};
     char request[512] = {0};
     char body[512] = {0};
     // iotx_device_info_pt device_info_p;
     // device_info_p = g_sys.config.ComPara.device_info;
-    if (device_info_p->flag == IOT_SN_FLAG)
+    if (device_info_p)
     {
-    }
-    else if (device_info_p->flag == IOT_SID_FLAG)
-    {
-        return RT_EOK;
-    }
-    else
-    {
-        return -RT_ERROR;
+        if (device_info_p->flag == IOT_SN_FLAG)
+        {
+        }
+        else if (device_info_p->flag == IOT_SID_FLAG)
+        {
+            return RT_EOK;
+        }
+        else
+        {
+            return -RT_ERROR;
+        }
     }
 
     rt_snprintf(request, sizeof(request),
-                "deviceName%sproductKey%srandom567345",
+                "deviceName%sproductKey%srandom29382",
                 REGISTER_DEVICE_NAME, REGISTER_PRODUCT_KEY);
     mqtt_log("scr:%s", request);
     utils_hmac_md5(request, strlen(request),
@@ -470,7 +488,7 @@ rt_err_t network_get_register(iotx_device_info_pt device_info_p)
                    strlen(REGISTER_PRODUCT_SECRET));
     mqtt_log("sign:%s", guider_sign);
     rt_snprintf((char *)body, sizeof(body),
-                "productKey=%s&deviceName=%s&random=567345&sign=%s&signMethod=HmacMD5",
+                "productKey=%s&deviceName=%s&random=29382&sign=%s&signMethod=HmacMD5",
                 REGISTER_PRODUCT_KEY, REGISTER_DEVICE_NAME, guider_sign);
     mqtt_log("body:%s", body);
 

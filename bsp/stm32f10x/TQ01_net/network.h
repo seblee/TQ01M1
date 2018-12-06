@@ -18,7 +18,7 @@
 #include "sys_conf.h"
 #include <rtthread.h>
 #include "board.h"
-#include "MQTTPacket.h" 
+#include "MQTTPacket.h"
 
 #include "paho_mqtt.h"
 /* Private define ------------------------------------------------------------*/
@@ -131,8 +131,8 @@ extern MQTTPacket_connectData client_con;
 
 extern iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS];
 
-extern iot_topic_param_t iot_pub_topics[6];
- 
+extern iot_topic_param_t iot_pub_topics[8];
+
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
@@ -141,6 +141,8 @@ rt_uint32_t network_send_message(rt_device_t dev, const char *senddata, rt_uint8
 rt_int32_t network_read_message(rt_device_t dev, rt_uint8_t *data, rt_int16_t len, rt_int32_t timeout);
 
 void network_Serialize_init_json(char **datapoint);
+
+void network_Serialize_inform_json(char **datapoint);
 
 void network_Serialize_para_json(char **datapoint);
 

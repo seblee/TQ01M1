@@ -72,12 +72,13 @@ struct MQTTClient
     unsigned int next_packetid, command_timeout_ms;
     size_t buf_size, readbuf_size;
     unsigned char *buf, *readbuf;
+    int isconnected;
+    int isInformed;
+    int isQRcodegeted;
+    int isparameterPutted;
     unsigned int keepAliveInterval;
     unsigned int TimingInterval;
     unsigned int RealtimeInterval;
-    int isconnected;
-    int isQRcodegeted;
-    int isparameterPutted;
     uint32_t tick_ping;
     uint32_t tick_timeing;
     uint32_t tick_realtime;

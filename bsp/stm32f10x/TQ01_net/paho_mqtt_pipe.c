@@ -185,6 +185,7 @@ static int mqtt_resolve_uri(MQTTClient *c, struct addrinfo **res)
             rc = -1;
             goto _exit;
         }
+        (*res)->ai_family = AF_INET;
     }
 
 _exit:
@@ -300,6 +301,7 @@ static int net_connect(MQTTClient *c)
     if ((c->sock = socket(addr_res->ai_family, SOCK_STREAM, 0)) == -1)
     {
         LOG_E("create socket error!");
+        rc = -1;
         goto _exit;
     }
 
@@ -580,6 +582,7 @@ static int MQTTDisconnect(MQTTClient *c)
     c->isconnected = 0;
     c->isQRcodegeted = 0;
     c->isparameterPutted = 0;
+    c->isInformed = 0;
     return rc;
 }
 
@@ -797,6 +800,7 @@ exit:
 }
 enum ClientSend
 {
+    SENDINFORM,
     SENDINIT,
     SENDEDINIT,
     SENDPARAMETER,
@@ -867,41 +871,49 @@ _mqtt_start:
         fd_set readset;
         struct timeval timeout;
 
-        if (c->isQRcodegeted)
+        if (c->isInformed)
         {
-            if (c->isparameterPutted)
+            if (c->isQRcodegeted)
             {
-                long tv_sec_temp; /* seconds */
-                tick_now = rt_tick_get();
+                if (c->isparameterPutted)
+                {
+                    long tv_sec_temp; /* seconds */
+                    tick_now = rt_tick_get();
 
-                timeout.tv_sec = c->keepAliveInterval - 10 - (tick_now - c->tick_ping) / RT_TICK_PER_SECOND;
-                sendState = SENDPING;
-                tv_sec_temp = c->TimingInterval - (tick_now - c->tick_timeing) / RT_TICK_PER_SECOND;
-                if (tv_sec_temp < timeout.tv_sec)
-                {
-                    timeout.tv_sec = tv_sec_temp;
-                    sendState = SENDTIMING;
+                    timeout.tv_sec = c->keepAliveInterval - 10 - (tick_now - c->tick_ping) / RT_TICK_PER_SECOND;
+                    sendState = SENDPING;
+                    tv_sec_temp = c->TimingInterval - (tick_now - c->tick_timeing) / RT_TICK_PER_SECOND;
+                    if (tv_sec_temp < timeout.tv_sec)
+                    {
+                        timeout.tv_sec = tv_sec_temp;
+                        sendState = SENDTIMING;
+                    }
+                    tv_sec_temp = c->RealtimeInterval - (tick_now - c->tick_realtime) / RT_TICK_PER_SECOND;
+                    if (tv_sec_temp < timeout.tv_sec)
+                    {
+                        timeout.tv_sec = tv_sec_temp;
+                        sendState = SENDREALTIME;
+                    }
+                    if (timeout.tv_sec <= 5)
+                        timeout.tv_sec = 1;
+                    LOG_E("[%d]timeout.tv_sec: %d ", rt_tick_get(), timeout.tv_sec);
                 }
-                tv_sec_temp = c->RealtimeInterval - (tick_now - c->tick_realtime) / RT_TICK_PER_SECOND;
-                if (tv_sec_temp < timeout.tv_sec)
+                else
                 {
-                    timeout.tv_sec = tv_sec_temp;
-                    sendState = SENDREALTIME;
-                }
-                if (timeout.tv_sec <= 5)
                     timeout.tv_sec = 1;
-                LOG_E("[%d]timeout.tv_sec: %d ", rt_tick_get(), timeout.tv_sec);
+                    sendState = SENDPARAMETER;
+                }
             }
             else
             {
                 timeout.tv_sec = 1;
-                sendState = SENDPARAMETER;
+                sendState = SENDINIT;
             }
         }
         else
         {
             timeout.tv_sec = 1;
-            sendState = SENDINIT;
+            sendState = SENDINFORM;
         }
 
         FD_ZERO(&readset);
@@ -914,6 +926,9 @@ _mqtt_start:
             len = 0;
             switch (sendState)
             {
+            case SENDINFORM:
+                len = mq_client_publish(c, OTA_INFORM);
+                break;
             case SENDPING:
             case SENDEDINIT:
             {
@@ -983,6 +998,12 @@ _mqtt_start:
             {
                 LOG_E("[%d] wait publish Response res: %d", rt_tick_get(), res);
                 goto _mqtt_disconnect;
+            }
+            if (sendState == SENDINFORM)
+            {
+                c->isInformed = 1;
+                c->isparameterPutted = 1;
+                c->isQRcodegeted = 1;
             }
             if (sendState == SENDPARAMETER)
                 c->isparameterPutted = 1;
@@ -1170,6 +1191,9 @@ static int mq_client_publish(MQTTClient *c, _topic_pub_enmu_t pub_type)
         goto exit;
     switch (pub_type)
     {
+    case OTA_INFORM: /*{"IOT_OTA_INFORM"}*/
+        network_Serialize_inform_json(&msg_str);
+        break;
     case PLATFORM_INIT: /*{"TOPIC_PLATFORM_INIT"}*/
         network_Serialize_init_json(&msg_str);
         break;

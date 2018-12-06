@@ -41,6 +41,7 @@ typedef enum
     WATER_NOTICE = 0, /*{"TOPIC_WATER_NOTICE"}*/
     PARAMETER_SET,    /*{"TOPIC_PARAMETER_SET"}*/
     PARAMETER_GET,    /*{"TOPIC_PARAMETER_GET"}*/
+    OTA_UPGRADE,      /*{"IOT_OTA_UPGRADE"}*/
 } _topic_sub_enmu_t;
 
 typedef enum
@@ -51,6 +52,8 @@ typedef enum
     REALTIME_REPORT,   /*{"TOPIC_REALTIME_REPORT"}*/
     TIMING_REPORT,     /*{"TOPIC_TIMING_REPORT"}*/
     DEVICE_UPGRADE,    /*{"TOPIC_DEVICE_UPGRADE"}*/
+    OTA_INFORM,        /*{"IOT_OTA_INFORM"}*/
+    OTA_PROGRESS,      /*{"IOT_OTA_PROGRESS"}*/
 } _topic_pub_enmu_t;
 
 enum MQTT_QoS
@@ -61,8 +64,8 @@ enum MQTT_QoS
     MQTT_SUBFAIL = 0x80
 };
 /* Private define ------------------------------------------------------------*/
-#define DEVICE_TQ
-//#define DEVICE_SEBLEE
+//#define DEVICE_TQ
+#define DEVICE_SEBLEE
 // #define DEVICE_HIGHTLEVEL
 
 #define DEVICE_ID "cdtest0041"
@@ -78,9 +81,9 @@ enum MQTT_QoS
 #define IOT_SN_FLAG 0x0505
 /*****seblee *********/
 #ifdef DEVICE_SEBLEE
-#define DEVICE_NAME "HelloWorld"
+#define DEVICE_NAME "TQ_Client01"
 #define PRODUCT_KEY "rl0bGtKFCYA"
-#define DEVICE_SECRET "gfp06h1QZxZXefWEEYweaMnsLxJU3lvp"
+#define DEVICE_SECRET "nhqxFILHW4AyWD5fggtMb7O3A6I6sX4n"
 #elif defined DEVICE_TQ
 /***********TQ************/
 #define DEVICE_NAME "cdtest004"
@@ -108,6 +111,9 @@ enum MQTT_QoS
 #define TOPIC_DEVICE_UPDATE "/" PRODUCT_KEY "/" DEVICE_NAME "/update"                               /*{"DEVICE_UPDATE"}*/
 #define TOPIC_DEVICE_ERR "/" PRODUCT_KEY "/" DEVICE_NAME "/update/error"                            /*{"DEVICE_ERR"}*/
 #define TOPIC_DEVICE_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/get"                                     /*{"DEVICE_GET"}*/
+#define IOT_OTA_UPGRADE "/ota/device/upgrade/" PRODUCT_KEY "/" DEVICE_NAME                          /*{"IOT_OTA_UPGRADE"}*/
+#define IOT_OTA_INFORM "/ota/device/inform/" PRODUCT_KEY "/" DEVICE_NAME                            /*{"IOT_OTA_INFORM"}*/
+#define IOT_OTA_PROGRESS "/ota/device/progress/" PRODUCT_KEY "/" DEVICE_NAME                        /*{"IOT_OTA_PROGRESS"}*/
 #else
 /***highLevel***/
 #define TOPIC_PLATFORM_INIT "/" PRODUCT_KEY "/" DEVICE_NAME "/user/pay/client2Cloud/init"                /*{"TOPIC_PLATFORM_INIT"}*/
@@ -123,6 +129,9 @@ enum MQTT_QoS
 #define TOPIC_DEVICE_UPDATE "/" PRODUCT_KEY "/" DEVICE_NAME "/user/update"                               /*{"DEVICE_UPDATE"}*/
 #define TOPIC_DEVICE_ERR "/" PRODUCT_KEY "/" DEVICE_NAME "/user/update/error"                            /*{"DEVICE_ERR"}*/
 #define TOPIC_DEVICE_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/user/get"                                     /*{"DEVICE_GET"}*/
+#define IOT_OTA_UPGRADE "/ota/device/upgrade/" PRODUCT_KEY "/" DEVICE_NAME                               /*{"IOT_OTA_UPGRADE"}*/
+#define IOT_OTA_INFORM "/ota/device/inform/" PRODUCT_KEY "/" DEVICE_NAME                                 /*{"IOT_OTA_INFORM"}*/
+#define IOT_OTA_PROGRESS "/ota/device/progress/" PRODUCT_KEY "/" DEVICE_NAME                             /*{"IOT_OTA_PROGRESS"}*/
 #endif
 /* Private macro -------------------------------------------------------------*/
 

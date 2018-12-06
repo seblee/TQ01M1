@@ -36,15 +36,18 @@ iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS] = {
     {TOPIC_WATER_NOTICE, 0, QOS1, 0},  /*{"TOPIC_WATER_NOTICE"}*/
     {TOPIC_PARAMETER_SET, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_SET"}*/
     {TOPIC_PARAMETER_GET, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_GET"}*/
+    {IOT_OTA_UPGRADE, 0, QOS1, 0},     /*{"IOT_OTA_UPGRADE"}*/
 };
 /********topic dup qos restained**************/
-iot_topic_param_t iot_pub_topics[6] = {
+iot_topic_param_t iot_pub_topics[8] = {
     {TOPIC_PLATFORM_INIT, 0, QOS1, 0},   /*{"TOPIC_PLATFORM_INIT"}*/
     {TOPIC_WATER_STATUS, 0, QOS1, 0},    /*{"TOPIC_WATER_STATUS"}*/
     {TOPIC_PARAMETER_PUT, 0, QOS1, 0},   /*{"TOPIC_PARAMETER_PUT"}*/
     {TOPIC_REALTIME_REPORT, 0, QOS1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
     {TOPIC_TIMING_REPORT, 0, QOS1, 0},   /*{"TOPIC_TIMING_REPORT"}*/
     {TOPIC_DEVICE_UPGRADE, 0, QOS1, 0},  /*{"TOPIC_DEVICE_UPGRADE"}*/
+    {IOT_OTA_INFORM, 0, QOS1, 0},        /*{"IOT_OTA_INFORM"}*/
+    {IOT_OTA_PROGRESS, 0, QOS1, 0},      /*{"IOT_OTA_PROGRESS"}*/
 };
 static MQTTClient client;
 extern sys_reg_st g_sys;
@@ -113,7 +116,7 @@ void net_thread_entry(void *parameter)
         return;
     }
     /* config MQTT context param */
-
+    network_get_register(NULL);
     mqtt_client_init(&client);
     rt_thread_delay(rt_tick_from_millisecond(7000));
     rt_thread_delay(rt_tick_from_millisecond(7000));
@@ -173,6 +176,50 @@ void network_Serialize_init_json(char **datapoint)
     network_log("MD5=%s", sign_hex);
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    if (*datapoint)
+        network_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
+}
+/**
+ ****************************************************************************
+ * @Function : void network_Serialize_inform_json(char**datapoint)
+ * @File     : network.c
+ * @Program  : **datapoint:buff of json serialized
+ * @Created  : 2018-12-05 by seblee
+ * @Brief    : serialize json
+ * @Version  : V1.0
+**/
+void network_Serialize_inform_json(char **datapoint)
+{
+
+    /* declare a few. */
+    cJSON *root = NULL, *result, *JS_paprms;
+
+    /* Our "Video" datatype: */
+    root = cJSON_CreateObject();
+    if (!root)
+    {
+        network_log("get root faild !\n");
+        goto __exit;
+    }
+
+    result = cJSON_AddStringToObject(root, "id", "1");
+    if (result == NULL)
+        network_log("JSON add err");
+
+    JS_paprms = cJSON_CreateObject();
+    if (!JS_paprms)
+    {
+        network_log("construct JS_paprms faild !\n");
+        goto __exit;
+    }
+    result = cJSON_AddStringToObject(JS_paprms, "version", "0.0.2");
+    if (result == NULL)
+        network_log("JSON add err");
+    cJSON_AddItemToObject(root, "params", JS_paprms);
+
+    *datapoint = cJSON_PrintUnformatted(root);
+__exit:
     cJSON_Delete(root);
     if (*datapoint)
         network_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);

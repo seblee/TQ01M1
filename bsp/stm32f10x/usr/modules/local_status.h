@@ -155,6 +155,7 @@ typedef struct
     uint8_t ChildLock_Key;      //童锁
     uint8_t ChildLock_Cnt[2];   //童锁计数器
     uint16_t u16Uart_Timeout;   //串口重启
+    uint16_t NetStates;   //联网状态(bit0:wifi↔AP bit1:M1↔internet bit2:MQTT is OK)
 } local_reg_st;
 
 enum
