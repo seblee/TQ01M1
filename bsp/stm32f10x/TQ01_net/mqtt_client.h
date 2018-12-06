@@ -144,23 +144,7 @@ int mqtt_client_init(MQTTClient *client);
 
 void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info);
 
-int mqtt_client_connect(rt_device_t dev, MQTTPacket_connectData *conn);
-
-rt_err_t mqtt_client_subscribe(_topic_sub_enmu_t subsc, iotx_device_info_pt iotx_dev_info);
-
-rt_err_t mqtt_client_subscribe_topics(void);
-
-rt_err_t mqtt_packet_read_operation(void);
-
 unsigned short mqtt_client_packet_id(void);
-
-rt_err_t mqtt_client_ping(void);
-
-rt_err_t mqtt_client_publish(char *topic, rt_uint8_t dup, int qos, rt_uint8_t restained, rt_uint8_t *msg, rt_uint16_t msg_len);
-
-rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len);
-
-rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, unsigned int msgId, enum msgTypes type);
 
 rt_err_t network_get_register(iotx_device_info_pt device_info_p);
 /*----------------------------------------------------------------------------*/

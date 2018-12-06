@@ -1105,7 +1105,7 @@ void rt_kprintf(const char *fmt, ...)
 		
 		if(l_sys.debug_flag == DEBUG_OFF_FLAG)
 		{
-				return;
+			//	return;
 		}
 
     va_start(args, fmt);

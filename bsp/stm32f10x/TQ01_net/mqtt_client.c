@@ -19,9 +19,14 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
+#define CONFIG_DEBUG
+#ifdef CONFIG_DEBUG
 #ifndef mqtt_log
 #define mqtt_log(N, ...) rt_kprintf("####[MQTT %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif /* mqtt_log(...) */
+#else
+#define mqtt_log(...)
+#endif /* ! CONFIG_DEBUG */
 
 #define DBG_ENABLE
 #define DBG_SECTION_NAME "mqtt"
@@ -273,75 +278,6 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
 
 /**
  ****************************************************************************
- * @Function : rt_err_t mqtt_packet_read_operation(void)
- * @File     : mqtt_client.c
- * @Program  : none
- * @Created  : 2018-09-17 by seblee
- * @Brief    : read mqtt packet and operation
- * @Version  : V1.0
-**/
-rt_err_t mqtt_packet_read_operation(void)
-{
-    rt_err_t rc = -1;
-    // rc = MQTTPacket_read(read_buffer, MSG_LEN_MAX, transport_getdata);
-    if (rc > 0)
-    {
-        switch (rc)
-        {
-        // case CONNECT:
-        //     break;
-        case CONNACK:
-            mqtt_log("packet type:CONNACK");
-            break;
-        case PUBLISH:
-            mqtt_log("packet type:PUBLISH");
-            // mqtt_client_receive_publish((const char *)read_buffer, MSG_LEN_MAX);
-            break;
-        case PUBACK:
-        {
-            //            unsigned short mypacketid;
-            //            unsigned char dup, type;
-            // if (MQTTDeserialize_ack(&type, &dup, &mypacketid, read_buffer, MSG_LEN_MAX) == 1)
-            //     mqtt_log("PUBACK,type:%d,dup:%d,packetid:%d", type, dup, mypacketid);
-            // else
-            //     mqtt_log("PUBACK Deserialize err");
-        }
-        break;
-        case PUBREC:
-            mqtt_log("packet type:PUBREC");
-            break;
-        case PUBREL:
-            mqtt_log("packet type:PUBREL");
-            break;
-        case PUBCOMP:
-            mqtt_log("packet type:PUBCOMP");
-            break;
-        // case SUBSCRIBE:
-        //     break;
-        case SUBACK:
-            mqtt_log("packet type:SUBACK");
-            break;
-        // case UNSUBSCRIBE:
-        //     break;
-        case UNSUBACK:
-            mqtt_log("packet type:UNSUBACK");
-            break;
-        // case PINGREQ:
-        //     break;
-        case PINGRESP:
-            mqtt_log("packet type:PINGRESP");
-            break;
-        case DISCONNECT:
-            mqtt_log("packet type:DISCONNECT");
-            break;
-        default:
-            break;
-        }
-    }
-    return rc;
-}
-/**
- ****************************************************************************
  * @Function : int mqtt_client_packet_id(void)
  * @File     : mqtt_client.c
  * @Program  : none
@@ -355,94 +291,6 @@ unsigned short mqtt_client_packet_id(void)
     if (id < 1)
         id = 1;
     return id++;
-}
-
-/**
- ****************************************************************************
- * @Function : rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len)
- * @File     : mqtt_client.c
- * @Program  : *c:data buffer
- * @Created  : 2018-09-28 by seblee
- * @Brief    : operation received publish data
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_receive_publish(const char *c, rt_uint16_t len)
-{
-    rt_err_t rc = -1, result;
-    unsigned char *p = (unsigned char *)c;
-    rt_uint16_t length = len;
-    unsigned char dup;
-    int qos;
-    unsigned char retained;
-    unsigned short msgid;
-    int payloadlen_in;
-    unsigned char *payload_in;
-    MQTTString receivedTopic;
-
-    rc = MQTTDeserialize_publish(&dup, &qos, &retained, &msgid, &receivedTopic,
-                                 &payload_in, &payloadlen_in, p, length);
-    mqtt_log("mqtt received msgid:%d,dup:%d,qos:%d", msgid, dup, qos);
-    //    if (qos == MQTT_QOS0)
-    //    {
-    //    }
-    //    else if (qos == MQTT_QOS1)
-    //        result = mqtt_client_MQTTPuback(write_buffer, MSG_LEN_MAX, msgid, PUBACK);
-    //    else if (qos == MQTT_QOS2)
-    //        result = mqtt_client_MQTTPuback(write_buffer, MSG_LEN_MAX, msgid, PUBREC);
-
-    mqtt_log("receivedTopic:%.*s", receivedTopic.lenstring.len, receivedTopic.lenstring.data);
-    mqtt_log("message arrived:%.*s", payloadlen_in, payload_in);
-    //  rc = mqtt_client_find_topic(receivedTopic.lenstring.data);
-    if (rc > 0)
-    {
-        mqtt_log("find_topic rc:%d", rc);
-        switch (rc)
-        {
-        case WATER_NOTICE:
-            network_water_notice_parse((const char *)payload_in);
-            break;
-        case PARAMETER_SET:
-            network_parameter_set_parse((const char *)payload_in);
-            break;
-        case PARAMETER_GET:
-            network_parameter_get_parse((const char *)payload_in);
-            break;
-        default:
-            break;
-        }
-    }
-    return result;
-}
-
-/**
- ****************************************************************************
- * @Function : rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, enum msgTypes type)
- * @File     : mqtt_client.c
- * @Program  : none
- * @Created  : 2018-09-28 by seblee
- * @Brief    : 
- * @Version  : V1.0
-**/
-rt_err_t mqtt_client_MQTTPuback(rt_uint8_t *c, rt_uint16_t len, unsigned int msgId, enum msgTypes type)
-{
-    rt_err_t rc, lenth = len;
-    if (type == PUBACK)
-        len = MQTTSerialize_ack((rt_uint8_t *)c, lenth, PUBACK, 0, msgId);
-    else if (type == PUBREC)
-        len = MQTTSerialize_ack((rt_uint8_t *)c, lenth, PUBREC, 0, msgId);
-    else if (type == PUBREL)
-        len = MQTTSerialize_ack((rt_uint8_t *)c, lenth, PUBREL, 0, msgId);
-    else
-        return -RT_EIO;
-
-    if (len <= 0)
-        return -RT_ERROR;
-    // rc = transport_sendPacketBuffer(0, c, len);
-    mqtt_log("Puback packet:%d,send:%d,msgId:%d", len, rc, msgId);
-    if (rc == len)
-        return RT_EOK;
-    else
-        return -RT_ERROR;
 }
 
 /**
