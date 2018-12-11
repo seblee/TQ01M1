@@ -378,7 +378,11 @@ rt_err_t network_get_register(iotx_device_info_pt device_info_p)
 void mqtt_client_out_put_record(void)
 {
     static rt_uint32_t run_time = 0;
+    rt_uint32_t total;
+    rt_uint32_t used;
+    rt_uint32_t max_used;
+    rt_memory_info(&total, &used, &max_used);
 
-    LOG_D("count:realtime:%d,timing:%d,ping:%d,connect:%d,online:%d,offline:%d,inform:%d,plaform_init:%d,parameter_put:%d,run_time:%d",
-          realtime_count, timing_count, ping_count, connect_count, online_count, offline_count, inform_count, plaform_init_count, parameter_put_count, run_time++);
+    LOG_D("count:realtime:%d,timing:%d,ping:%d,connect:%d,online:%d,offline:%d,plaform_init:%d,parameter_put:%d,run_time:%d,total:%d,used:%d,max_used:%d",
+          realtime_count, timing_count, ping_count, connect_count, online_count, offline_count, plaform_init_count, parameter_put_count, run_time++, total, used, max_used);
 }

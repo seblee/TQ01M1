@@ -509,15 +509,24 @@ static int MQTTConnect(MQTTClient *c)
     MQTTPacket_connectData *options = &c->condata;
 
     if (c->isconnected) /* don't send connect packet again if we are already connected */
+    {
+        LOG_E("%s c-> is not connected", __FUNCTION__);
         goto _exit;
+    }
 
     c->keepAliveInterval = options->keepAliveInterval;
 
     if ((len = MQTTSerialize_connect(c->buf, c->buf_size, options)) <= 0)
+    {
+        LOG_E("%s MQTTSerialize_connect fail", __FUNCTION__);
         goto _exit;
+    }
 
     if ((rc = sendPacket(c, len)) != 0) // send the connect packet
-        goto _exit;                     // there was a problem
+    {
+        LOG_E("%s sendPacket fail", __FUNCTION__);
+        goto _exit;
+    }
 
     {
         int res;
@@ -832,7 +841,7 @@ _mqtt_start:
     if (rc != 0)
     {
         LOG_E("MQTT connect error(%d): %s", rc, MQTTSerialize_connack_string(rc));
-        goto _mqtt_restart;
+        goto _mqtt_disconnect;
     }
 
     LOG_I("MQTT server connect success");
@@ -1067,7 +1076,6 @@ _mqtt_restart:
 
     ////_mqtt_exit:
     //    LOG_D("thread exit");
-
     //    return;
 }
 
