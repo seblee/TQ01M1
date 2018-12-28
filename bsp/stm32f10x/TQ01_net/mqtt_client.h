@@ -86,9 +86,9 @@ enum MQTT_QoS
 #define DEVICE_SECRET "nhqxFILHW4AyWD5fggtMb7O3A6I6sX4n"
 #elif defined DEVICE_TQ
 /***********TQ************/
-// #define cdtest004
+#define cdtest004
 // #define TQ_CD_4G_TEST_01
-#define TQ_CD_4G_TEST_02
+// #define TQ_CD_4G_TEST_02
 // #define TQ_CD_4G_TEST_03
 #ifdef cdtest004
 #define DEVICE_NAME "cdtest004"
@@ -107,9 +107,6 @@ enum MQTT_QoS
 #define PRODUCT_KEY "a1JOOi3mNEf"
 #define DEVICE_SECRET "sCWvwMQZmbUKGqzgEqNcqE8HqemriOvB"
 
-#define DEVICE_NAME "cdtest004"
-#define PRODUCT_KEY "a1JOOi3mNEf"
-#define DEVICE_SECRET "WjzDAlsux7gBMfF31M9CSZ9LKmutISPe"
 #endif
 #elif defined DEVICE_HIGHTLEVEL
 /***highLevel***/
