@@ -48,6 +48,7 @@ enum
     MONITOR_SLAVE_THREAD_PRIO,
     MODBUS_MASTER_THREAD_PRIO,
     NET_THREAD_PRIO,
+    MODULE_CTR_THREAD_PRIO,
     //		TCOM_THREAD_PRIO,
     //		TEAM_THREAD_PRIO,
     MBM_FSM_THREAD_PRIO,
@@ -73,6 +74,7 @@ static rt_uint8_t cpad_stack[512];
 static rt_uint8_t bkg_stack[512];
 static rt_uint8_t testcase_stack[512];
 static rt_uint8_t net_stack[4096];
+static rt_uint8_t moduleCtr_stack[512];
 
 static struct rt_thread modbus_master_thread;
 static struct rt_thread modbus_slave_thread;
@@ -85,6 +87,7 @@ static struct rt_thread cpad_thread;
 static struct rt_thread bkg_thread;
 static struct rt_thread testcase_thread;
 static struct rt_thread net_thread;
+static struct rt_thread moduleCtr_thread;
 
 void set_boot_flag(void);
 
@@ -280,6 +283,19 @@ int rt_application_init(void)
     if (result == RT_EOK)
     {
         rt_thread_startup(&testcase_thread);
+    }
+
+    result = rt_thread_init(&moduleCtr_thread,
+                            "module",
+                            modul_control_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&moduleCtr_stack[0],
+                            sizeof(moduleCtr_stack),
+                            MODULE_CTR_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&moduleCtr_thread);
     }
 
     result = rt_thread_init(&net_thread,
