@@ -156,12 +156,12 @@ void network_Serialize_init_json(char **datapoint)
         sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
         sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
     }
-    network_log("MD5=%s", sign_hex);
+    // network_log("MD5=%s", sign_hex);
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
-        network_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
+        network_log("JSON len:%d", strlen(*datapoint));
 }
 /**
  ****************************************************************************
@@ -205,7 +205,7 @@ void network_Serialize_inform_json(char **datapoint)
 __exit:
     cJSON_Delete(root);
     if (*datapoint)
-        network_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
+        network_log("JSON len:%d", strlen(*datapoint));
 }
 
 /**
@@ -263,24 +263,24 @@ void network_Serialize_para_json(char **datapoint)
                 DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str, Timestamp_str);
 
     utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
-    network_log("MD5");
-    rt_kprintf("MD5(%.400s", sign_Cache);
-    rt_kprintf("%s)\r\n", sign_Cache + 400);
+    // network_log("MD5");
+    // rt_kprintf("MD5(%.400s", sign_Cache);
+    // rt_kprintf("%s)\r\n", sign_Cache + 400);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
     for (i = 0; i < 16; ++i)
     {
         sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
         sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
     }
-    network_log("MD5=%s", sign_hex);
-    cJSON_AddItemToObject(root,  "Sign", cJSON_CreateString(sign_hex));
+    // network_log("MD5=%s", sign_hex);
+    cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
     {
-        network_log("JSON len:%d,string:%s", strlen(*datapoint));
-        rt_kprintf("string:%.400s", *datapoint);
-        rt_kprintf("%s\r\n", *datapoint + 400);
+        network_log("JSON len:%d", strlen(*datapoint));
+        // rt_kprintf("string:%.400s", *datapoint);
+        // rt_kprintf("%s\r\n", *datapoint + 400);
     }
 }
 /**
@@ -410,12 +410,11 @@ void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
         sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
         sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
     }
-    network_log("MD5=%s", sign_hex);
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
-        network_log("JSON len:%d,string:%s", strlen(*datapoint), *datapoint);
+        network_log("JSON len:%d", strlen(*datapoint));
 }
 /**
  ****************************************************************************
