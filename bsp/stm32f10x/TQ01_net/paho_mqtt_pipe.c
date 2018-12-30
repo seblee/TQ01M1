@@ -17,6 +17,8 @@
 #include "network.h"
 #include "mqtt_client.h"
 
+#include "modul_ctr.h"
+
 #define DBG_ENABLE
 #define DBG_SECTION_NAME "MQTT"
 #ifdef MQTT_DEBUG
@@ -825,6 +827,14 @@ static void paho_mqtt_thread(void *param)
     int rc_t = 0;
 
 _mqtt_start:
+
+    if (module_state(RT_NULL) < MODULE_READY)
+    {
+        LOG_W("module is not ready");
+        rt_thread_delay(rt_tick_from_millisecond(5000));
+        goto _mqtt_start;
+    }
+
     if (c->connect_callback)
     {
         c->connect_callback(c);
@@ -905,29 +915,32 @@ _mqtt_start:
                     }
                     if (timeout.tv_sec <= 5)
                         timeout.tv_sec = 1;
-                    LOG_E("[%d]timeout.tv_sec: %d ", rt_tick_get(), timeout.tv_sec);
+                    LOG_I("[%d]timeout.tv_sec: %d ", rt_tick_get(), timeout.tv_sec);
                 }
                 else
                 {
                     timeout.tv_sec = 1;
                     sendState = SENDPARAMETER;
+                    LOG_I("send SENDPARAMETER after timeout.tv_sec: %d ", timeout.tv_sec);
                 }
             }
             else
             {
                 timeout.tv_sec = 1;
                 sendState = SENDINIT;
+                LOG_I("send SENDINIT after timeout.tv_sec: %d ", timeout.tv_sec);
             }
         }
         else
         {
             timeout.tv_sec = 1;
             sendState = SENDINFORM;
+            LOG_I("send SENDINFORM after timeout.tv_sec: %d ", timeout.tv_sec);
         }
 
         FD_ZERO(&readset);
         FD_SET(c->sock, &readset);
-
+        timeout.tv_usec = 0;
         /* int select(maxfdp1, readset, writeset, exceptset, timeout); */
         res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
         if (res == 0)
@@ -970,7 +983,7 @@ _mqtt_start:
                 break;
             case SENDPARAMETER:
                 len = mq_client_publish(c, PARAMETER_PUT);
-                LOG_E("[%d] SENDPARAMETER res: %d", rt_tick_get(), len);
+                LOG_I("[%d] SENDPARAMETER res: %d", rt_tick_get(), len);
                 break;
             case SENDREALTIME:
                 len = mq_client_publish(c, REALTIME_REPORT);
@@ -985,13 +998,13 @@ _mqtt_start:
             }
             if (len <= 0)
             {
-                LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
+                LOG_I("MQTTSerialize_publish sendPacket rc: %d", rc);
                 goto _mqtt_disconnect;
             }
 
             if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
             {
-                LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
+                LOG_I("MQTTSerialize_publish sendPacket rc: %d", rc);
                 goto _mqtt_disconnect;
             }
 

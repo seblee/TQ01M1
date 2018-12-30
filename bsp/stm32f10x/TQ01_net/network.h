@@ -46,8 +46,8 @@
 #define SIM7600_DIR_PORT UART3_DIR_GPIO
 #define SIM7600_DIR_PIN UART3_DIR_GPIO_PIN
 
-#define SIM7600_DIR_WIFI GPIO_SetBits(SIM7600_DIR_PORT, SIM7600_DIR_PIN)
-#define SIM7600_DIR_4G GPIO_ResetBits(SIM7600_DIR_PORT, SIM7600_DIR_PIN)
+#define DIR_8266 GPIO_SetBits(SIM7600_DIR_PORT, SIM7600_DIR_PIN)
+#define DIR_7600 GPIO_ResetBits(SIM7600_DIR_PORT, SIM7600_DIR_PIN)
 
 #define aliyun_domain "%s.iot-as-mqtt.cn-shanghai.aliyuncs.com"
 #define aliyun_iot_port 1883

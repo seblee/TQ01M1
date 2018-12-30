@@ -285,19 +285,6 @@ int rt_application_init(void)
         rt_thread_startup(&testcase_thread);
     }
 
-    result = rt_thread_init(&moduleCtr_thread,
-                            "module",
-                            modul_control_thread_entry,
-                            RT_NULL,
-                            (rt_uint8_t *)&moduleCtr_stack[0],
-                            sizeof(moduleCtr_stack),
-                            MODULE_CTR_THREAD_PRIO,
-                            5);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&moduleCtr_thread);
-    }
-
     result = rt_thread_init(&net_thread,
                             "net_test",
                             net_thread_entry,
@@ -309,6 +296,19 @@ int rt_application_init(void)
     if (result == RT_EOK)
     {
         rt_thread_startup(&net_thread);
+    }
+
+    result = rt_thread_init(&moduleCtr_thread,
+                            "module",
+                            modul_control_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&moduleCtr_stack[0],
+                            sizeof(moduleCtr_stack),
+                            MODULE_CTR_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&moduleCtr_thread);
     }
 
     return 0;

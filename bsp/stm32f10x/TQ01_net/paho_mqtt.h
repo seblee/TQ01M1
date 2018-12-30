@@ -30,7 +30,7 @@ enum QoS
     QOS0,
     QOS1,
     QOS2
-} ALIGN(4);
+} __align(4);
 typedef enum
 {
     HTTP_POST = 1,

@@ -320,14 +320,14 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
     static uint8_t u8Err_CNT[AM_SENSOR_NUM] = {0};
     static uint16_t u16TH_Ave[AM_SENSOR_NUM][2][TH_AVE_NUM] = {0};
     static uint8_t u8Offset_CNT = 0;
-    static uint16_t u16LastTH[2] = {0};
+    // static uint16_t u16LastTH[2] = {0};
 
     uint8_t i = 0, j = 0, k = 0;            //收到起始标志位
     uint8_t u8SenFlag[AM_SENSOR_NUM] = {0}; //收到起始标志位
     Com_tnh_st u16TH_Buff = {0};
     uint16_t u16TH_Sum[AM_SENSOR_NUM][2] = {0};
     uint8_t u8TH_Cnt[AM_SENSOR_NUM][2] = {0};
-    int16_t i16Offset_Buff[2] = {0};
+    // int16_t i16Offset_Buff[2] = {0};
 
     u8CNT++;
     if (u8CNT >= 0xFF)
@@ -413,8 +413,8 @@ uint8_t AM_Sensor_update(sys_reg_st *gds_ptr)
                     }
                     j = u8TH_CNT[i] % TH_AVE_NUM;
 
-                    u16LastTH[0] = u16TH_Buff.Temp;
-                    u16LastTH[1] = u16TH_Buff.Hum;
+                    // u16LastTH[0] = u16TH_Buff.Temp;
+                    // u16LastTH[1] = u16TH_Buff.Hum;
                     u16TH_Ave[i][0][j] = u16TH_Buff.Temp;
                     u16TH_Ave[i][1][j] = u16TH_Buff.Hum;
                 }

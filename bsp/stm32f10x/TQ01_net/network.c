@@ -71,7 +71,7 @@ void NetWork_DIR_Init(void)
     GPIO_InitStructure.GPIO_Pin = SIM7600_DIR_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(SIM7600_DIR_PORT, &GPIO_InitStructure);
-    SIM7600_DIR_WIFI;
+    DIR_8266;
 }
 int esp8266_at_socket_device_init(void);
 int sim7600_at_socket_device_init(void);
@@ -83,17 +83,6 @@ void net_thread_entry(void *parameter)
     get_bulid_date_time(&ti);
     current_systime_set(&ti);
     rt_thread_delay(rt_tick_from_millisecond(2000));
-
-    if (g_sys.config.ComPara.Net_Conf.u16Net_Sel)
-    {
-        SIM7600_DIR_4G;
-        sim7600_at_socket_device_init();
-    }
-    else
-    {
-        SIM7600_DIR_WIFI;
-        esp8266_at_socket_device_init();
-    }
 
     Net_Conf_st temp;
     network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
@@ -118,12 +107,6 @@ void net_thread_entry(void *parameter)
     /* config MQTT context param */
     network_get_register(NULL);
     mqtt_client_init(&client);
-    rt_thread_delay(rt_tick_from_millisecond(7000));
-    rt_thread_delay(rt_tick_from_millisecond(7000));
-    rt_thread_delay(rt_tick_from_millisecond(7000));
-    rt_thread_delay(rt_tick_from_millisecond(7000));
-    rt_thread_delay(rt_tick_from_millisecond(7000));
-    rt_thread_delay(rt_tick_from_millisecond(7000));
     paho_mqtt_start(&client);
     is_started = 1;
     return;
@@ -290,7 +273,7 @@ void network_Serialize_para_json(char **datapoint)
         sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
     }
     network_log("MD5=%s", sign_hex);
-    cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
+    cJSON_AddItemToObject(root,  "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)

@@ -64,8 +64,8 @@ enum MQTT_QoS
     MQTT_SUBFAIL = 0x80
 };
 /* Private define ------------------------------------------------------------*/
-//#define DEVICE_TQ
-#define DEVICE_SEBLEE
+#define DEVICE_TQ
+//#define DEVICE_SEBLEE
 // #define DEVICE_HIGHTLEVEL
 
 #define DEVICE_ID "cdtest0041"

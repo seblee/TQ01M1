@@ -33,8 +33,8 @@ fifo8_cb_td mbm_data_fifo;
 static uint16_t mbm_dev_poll(uint16_t mb_comp_mask, uint16_t des_bitmap, mbm_dev_st *mbm_dev_inst);
 static uint16_t mbm_dev_init(mbm_dev_st *mbm_dev_inst);
 static uint16_t mbm_reg_update(mbm_dev_st *mbm_dev_inst);
-static void mbm_fsm_init(mbm_dev_st *mbm_dev_inst);
-static void mbm_fsm_update(sys_reg_st *gds_ptr, mbm_dev_st *mbm_dev_inst);
+//static void mbm_fsm_init(mbm_dev_st *mbm_dev_inst);
+//static void mbm_fsm_update(sys_reg_st *gds_ptr, mbm_dev_st *mbm_dev_inst);
 
 /*-----------------------Master mode use these variables----------------------*/
 //Master mode:HoldingRegister variables
@@ -50,7 +50,7 @@ static uint16_t usMRegHoldBuf[MB_MASTER_TOTAL_SLAVE_NUM][M_REG_HOLDING_NREGS];
 
 //  mbm_send _data
 
-static void mbm_fifo_init(UCHAR ucMB_Number)
+  void mbm_fifo_init(UCHAR ucMB_Number)
 {
     uint8_t block_size;
     //		uint8_t Buff2=0;
@@ -437,7 +437,7 @@ static void mbm_send_fun(mbm_data_st *send_data)
   * @param  mbm_dev_inst: modbus master device data struct.
   * @retval none
   */
-static void mbm_fsm_update(sys_reg_st *gds_ptr, mbm_dev_st *mbm_dev_inst)
+  void mbm_fsm_update(sys_reg_st *gds_ptr, mbm_dev_st *mbm_dev_inst)
 {
     uint16_t mbm_fsm_cstate;
     uint8_t i, len;
@@ -519,7 +519,7 @@ static void mbm_fsm_update(sys_reg_st *gds_ptr, mbm_dev_st *mbm_dev_inst)
   * @param  mbm_dev_inst: modbus master device data struct.
   * @retval none
   */
-static void mbm_fsm_init(mbm_dev_st *mbm_dev_inst)
+   void mbm_fsm_init(mbm_dev_st *mbm_dev_inst)
 {
     mbm_dev_inst->bitmap.poll = 0;
     mbm_dev_inst->bitmap.init = 0;
