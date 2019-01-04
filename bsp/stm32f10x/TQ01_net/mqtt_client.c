@@ -124,10 +124,13 @@ static void mqtt_offline_callback(MQTTClient *c)
     LOG_D("inter mqtt_offline_callback!");
 }
 
+extern sys_reg_st g_sys;
+void list_mem(void);
 int mqtt_client_init(MQTTClient *client)
 {
-    iotx_device_info_t device_info;
+    rt_err_t rc = RT_EOK;
     iotx_conn_info_t device_connect;
+    iotx_device_info_pt device_info_p = rt_malloc(sizeof(iotx_device_info_t) + 1);
 
     MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
     client->isconnected = 0;
@@ -135,28 +138,34 @@ int mqtt_client_init(MQTTClient *client)
     client->isparameterPutted = 0;
     /*******init client parameter*********/
     mqtt_log("mqtt_client_init");
-    rt_memset(&device_info, 0, sizeof(iotx_device_info_t));
-    rt_strncpy(device_info.product_key, PRODUCT_KEY, strlen(PRODUCT_KEY));
-    rt_strncpy(device_info.device_name, DEVICE_NAME, strlen(DEVICE_NAME));
-    rt_strncpy(device_info.device_secret, DEVICE_SECRET, strlen(DEVICE_SECRET));
-    rt_sprintf(device_info.device_id, DEVICE_ID, strlen(DEVICE_ID));
-    rt_snprintf(device_info.device_id, sizeof(device_connect.client_id), "rtthread%d", rt_tick_get());
-    // LOG_D("product_key:%s", device_info.product_key);
-    // LOG_D("device_name:%s", device_info.device_name);
-    // LOG_D("device_secret:%s", device_info.device_secret);
-    // LOG_D("device_id:%s", device_info.device_id);
-    // mqtt_setup_connect_info(&device_connect, device_info_p);
 
+    if (!device_info_p)
+    {
+        LOG_E("no memory for device_info_p buffer!");
+        rc = -RT_ENOMEM;
+        goto _exit;
+    }
+    Conversion_modbus_2_ram((rt_uint8_t *)device_info_p, (rt_uint8_t *)g_sys.config.ComPara.device_info, sizeof(iotx_device_info_t));
+
+    rt_snprintf(device_info_p->device_id, sizeof(device_connect.client_id), "rtthread%d", rt_tick_get());
+    LOG_D("product_key:%s", device_info_p->product_key);
+    LOG_D("device_name:%s", device_info_p->device_name);
+    LOG_D("device_secret:%s", device_info_p->device_secret);
+    LOG_D("device_id:%s", device_info_p->device_id);
     /* generate the random client ID */
-    mqtt_setup_connect_info(&device_connect, &device_info);
-
+    rc = mqtt_setup_connect_info(&device_connect, device_info_p);
+    //rc =   mqtt_setup_connect_info(&device_connect, &device_info);
+    if (rc != RT_EOK)
+    {
+        goto _exit;
+    }
     client_con.keepAliveInterval = 60;
     client_con.clientID.cstring = (char *)device_connect.client_id;
     client_con.username.cstring = (char *)device_connect.username;
     client_con.password.cstring = (char *)device_connect.password;
-    // LOG_D("clientID:%s", client_con.clientID.cstring);
-    // LOG_D("username:%s", client_con.username.cstring);
-    // LOG_D("password:%s", client_con.password.cstring);
+    LOG_D("clientID:%s", client_con.clientID.cstring);
+    LOG_D("username:%s", client_con.username.cstring);
+    LOG_D("password:%s", client_con.password.cstring);
 
     {
         char mqtt_uri[100] = {0};
@@ -167,7 +176,8 @@ int mqtt_client_init(MQTTClient *client)
         char *uri_p = rt_malloc(strlen(mqtt_uri) + 1);
         if (!uri_p)
         {
-            LOG_D("no memory for MQTT client buffer!");
+            LOG_E("no memory for client uri buffer!");
+            rc = -RT_ENOMEM;
             goto _exit;
         }
         rt_memset(uri_p, 0, strlen(mqtt_uri) + 1);
@@ -178,13 +188,13 @@ int mqtt_client_init(MQTTClient *client)
     LOG_D("client->uri:%s", client->uri);
     /* config connect param */
     memcpy(&client->condata, &client_con, sizeof(client_con));
-    // LOG_D("client->clientID:%s", client->condata.clientID);
-    // LOG_D("client->username:%s", client->condata.username);
-    // LOG_D("client->password:%s", client->condata.password);
+    LOG_D("client->clientID:%s", client->condata.clientID);
+    LOG_D("client->username:%s", client->condata.username);
+    LOG_D("client->password:%s", client->condata.password);
 
-    // LOG_D("clientID:%s", client_con.clientID.cstring);
-    // LOG_D("username:%s", client_con.username.cstring);
-    // LOG_D("password:%s", client_con.password.cstring);
+    LOG_D("clientID:%s", client_con.clientID.cstring);
+    LOG_D("username:%s", client_con.username.cstring);
+    LOG_D("password:%s", client_con.password.cstring);
     /* config MQTT will param. */
     // client->condata.willFlag = 1;
     // client->condata.will.qos = 1;
@@ -196,9 +206,11 @@ int mqtt_client_init(MQTTClient *client)
     client->buf_size = client->readbuf_size = 1024;
     client->buf = rt_malloc(client->buf_size);
     client->readbuf = rt_malloc(client->readbuf_size);
+    list_mem();
     if (!(client->buf && client->readbuf))
     {
-        LOG_D("no memory for MQTT client buffer!");
+        LOG_E("no memory for MQTT client buffer!");
+        rc = -RT_ENOMEM;
         goto _exit;
     }
     /* set event callback function */
@@ -233,12 +245,23 @@ int mqtt_client_init(MQTTClient *client)
     client->defaultMessageHandler = mqtt_sub_default_callback;
 
 _exit:
-    return 0;
+    if (device_info_p)
+        rt_free(device_info_p);
+
+    return rc;
 }
-void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info)
+rt_err_t mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info)
 {
+    rt_err_t rc = RT_EOK;
     char guider_sign[GUIDER_SIGN_LEN] = {0};
     char hmac_source[512] = {0};
+
+    if (device_info->flag != IOT_SID_FLAG)
+    {
+        LOG_E("device_info->flag:0x%04X", device_info->flag);
+        rc = -RT_ERROR;
+        goto __exit;
+    }
 
     conn->port = aliyun_iot_port;
     rt_snprintf(conn->host_name, sizeof(conn->host_name), aliyun_domain, device_info->product_key);
@@ -274,6 +297,10 @@ void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_
                 "|",
                 device_info->device_id, SECURE_TCP, MD5_METHOD);
     LOG_D("client_id:%s", conn->client_id);
+__exit:
+    LOG_D("rc:%d", rc);
+
+    return rc;
 }
 
 /**
@@ -302,15 +329,14 @@ unsigned short mqtt_client_packet_id(void)
  * @Brief    : 
  * @Version  : V1.0
 **/
-// extern sys_reg_st g_sys;
+
 rt_err_t network_get_register(iotx_device_info_pt device_info_p)
 {
     rt_err_t err;
     char guider_sign[256] = {0};
     char request[512] = {0};
     char body[512] = {0};
-    // iotx_device_info_pt device_info_p;
-    // device_info_p = g_sys.config.ComPara.device_info;
+
     if (device_info_p)
     {
         if (device_info_p->flag == IOT_SN_FLAG)

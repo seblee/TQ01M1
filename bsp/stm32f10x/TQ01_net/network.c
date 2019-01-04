@@ -54,7 +54,7 @@ extern sys_reg_st g_sys;
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-rt_err_t network_Conversion_wifi_parpmeter(Net_Conf_st *src, Net_Conf_st *dst);
+
 /*----------------------------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,8 +75,11 @@ void NetWork_DIR_Init(void)
 }
 int esp8266_at_socket_device_init(void);
 int sim7600_at_socket_device_init(void);
+int module_thread_start(void *parameter);
 void net_thread_entry(void *parameter)
 {
+    rt_err_t result;
+
     /**NetWork_DIR_Init**/
     NetWork_DIR_Init();
     struct tm ti;
@@ -85,7 +88,7 @@ void net_thread_entry(void *parameter)
     rt_thread_delay(rt_tick_from_millisecond(2000));
 
     Net_Conf_st temp;
-    network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
+    result = network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
     network_get_interval(&client.RealtimeInterval, &client.TimingInterval);
     network_log("RealtimeInterval:%d, TimingInterval:%d", client.RealtimeInterval, client.TimingInterval);
 
@@ -106,9 +109,17 @@ void net_thread_entry(void *parameter)
     }
     /* config MQTT context param */
     network_get_register(NULL);
-    mqtt_client_init(&client);
+
+    result = mqtt_client_init(&client);
+
+    if (result != RT_EOK)
+        goto _exit;
+    module_thread_start(&g_sys.config.ComPara.Net_Conf);
     paho_mqtt_start(&client);
     is_started = 1;
+_exit:
+    network_log("result:%d", result);
+
     return;
 }
 //INIT_APP_EXPORT(net_thread_entry);
@@ -233,7 +244,7 @@ void network_Serialize_para_json(char **datapoint)
     msgid = mqtt_client_packet_id();
     /* Our "Video" datatype: */
     root = cJSON_CreateObject();
-
+    //汉字
     cJSON_AddStringToObject(root, "MCode", "007");
     rt_snprintf(StrCache, 10, "%d", msgid);
     cJSON_AddStringToObject(root, "RequestNo", StrCache);
@@ -427,26 +438,23 @@ void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
 **/
 void network_get_interval(unsigned int *real, unsigned int *timing)
 {
-    *real = REALTIME_INTERVAL_DEFAULT;
-    *timing = TIMING_INTERVAL_DEFAULT;
-    rt_uint8_t temp_buf[6];
-    cpad_eMBRegHoldingCB((unsigned char *)temp_buf, 165, 2, CPAD_MB_REG_READ);
-    rt_uint32_t interval_temp = (temp_buf[0] << 8) | temp_buf[1];
-    interval_temp *= 60;
+    // *real = REALTIME_INTERVAL_DEFAULT;
+    // *timing = TIMING_INTERVAL_DEFAULT;
+
+    rt_uint32_t interval_temp = g_sys.config.Platform.Fixed_Report * 60;
     if (interval_temp > TIMING_INTERVAL_MAX)
         interval_temp = TIMING_INTERVAL_MAX;
     if (interval_temp < TIMING_INTERVAL_MIN)
         interval_temp = TIMING_INTERVAL_MIN;
     *timing = interval_temp;
-    network_log("timing:%d", *timing);
 
-    interval_temp = (temp_buf[2] << 8) | temp_buf[3];
+    interval_temp = g_sys.config.Platform.Real_Report;
     if (interval_temp > REALTIME_INTERVAL_MAX)
         interval_temp = REALTIME_INTERVAL_MAX;
     if (interval_temp < REALTIME_INTERVAL_MIN)
         interval_temp = REALTIME_INTERVAL_MIN;
     *real = interval_temp;
-    network_log("real:%d", *real);
+    network_log("real:%d timing:%d", *real, *timing);
 }
 
 /**
@@ -671,6 +679,8 @@ exit:
 rt_err_t network_Conversion_wifi_parpmeter(Net_Conf_st *src, Net_Conf_st *dst)
 {
     int i;
+    rt_memcpy(dst, src, sizeof(Net_Conf_st));
+
     for (i = 0; i < sizeof(src->u16Wifi_Name); i++)
     {
         dst->u16Wifi_Name[i] = src->u16Wifi_Name[i] << 8;
@@ -680,6 +690,17 @@ rt_err_t network_Conversion_wifi_parpmeter(Net_Conf_st *src, Net_Conf_st *dst)
     {
         dst->u16Wifi_Password[i] = src->u16Wifi_Password[i] << 8;
         dst->u16Wifi_Password[i] |= src->u16Wifi_Password[i] >> 8;
+    }
+    return 0;
+}
+rt_err_t Conversion_modbus_2_ram(rt_uint8_t *dst, rt_uint8_t *src, rt_uint16_t len)
+{
+    int i;
+
+    for (i = 0; i < (len / 2); i++)
+    {
+        *(dst + 2 * i) = *(src + 2 * i + 1);
+        *(dst + 2 * i + 1) = *(src + 2 * i);
     }
     return 0;
 }

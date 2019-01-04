@@ -142,7 +142,7 @@ enum MQTT_QoS
 /* Private functions ---------------------------------------------------------*/
 int mqtt_client_init(MQTTClient *client);
 
-void mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info);
+rt_err_t mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info);
 
 unsigned short mqtt_client_packet_id(void);
 

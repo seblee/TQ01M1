@@ -121,10 +121,6 @@ extern rt_uint8_t read_buffer[MSG_LEN_MAX];
 
 extern rt_mq_t rx_mq;
 
-extern iotx_device_info_t device_info;
-
-extern iotx_device_info_pt device_info_p;
-
 extern iotx_conn_info_t device_connect;
 
 extern MQTTPacket_connectData client_con;
@@ -157,6 +153,10 @@ rt_err_t network_parameter_get_parse(const char *Str);
 rt_err_t network_parameter_set_parse(const char *Str);
 
 rt_err_t network_register_parse(const char *Str, iotx_device_info_t *device_info);
+
+rt_err_t network_Conversion_wifi_parpmeter(Net_Conf_st *src, Net_Conf_st *dst);
+
+rt_err_t Conversion_modbus_2_ram(rt_uint8_t *dst, rt_uint8_t *src, rt_uint16_t len);
 /*----------------------------------------------------------------------------*/
 
 #endif

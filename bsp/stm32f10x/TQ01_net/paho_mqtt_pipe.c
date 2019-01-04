@@ -828,11 +828,11 @@ static void paho_mqtt_thread(void *param)
 
 _mqtt_start:
 
-    if (module_state(RT_NULL) < MODULE_READY)
+    if (module_state(RT_NULL) != MODULE_READY)
     {
         LOG_W("module is not ready");
         rt_thread_delay(rt_tick_from_millisecond(5000));
-        goto _mqtt_start;
+        goto _net_disconnect;
     }
 
     if (c->connect_callback)
@@ -898,9 +898,10 @@ _mqtt_start:
                 {
                     long tv_sec_temp; /* seconds */
                     tick_now = rt_tick_get();
-
                     timeout.tv_sec = c->keepAliveInterval - 10 - (tick_now - c->tick_ping) / RT_TICK_PER_SECOND;
                     sendState = SENDPING;
+                    /**get interval time right now**/
+                    network_get_interval(&c->RealtimeInterval, &c->TimingInterval);
                     tv_sec_temp = c->TimingInterval - (tick_now - c->tick_timeing) / RT_TICK_PER_SECOND;
                     if (tv_sec_temp < timeout.tv_sec)
                     {
@@ -1045,6 +1046,11 @@ _mqtt_start:
             continue;
         }
 
+        if (module_state(RT_NULL) != MODULE_READY)
+        {
+            LOG_W("module is need restart");
+            goto _mqtt_disconnect;
+        }
     } /* while (1) */
 
 _mqtt_disconnect:
@@ -1054,19 +1060,26 @@ _mqtt_restart:
     {
         c->offline_callback(c);
     }
-
+_net_disconnect:
     net_disconnect(c);
+    if (module_state(RT_NULL) == MODULE_REINIT)
+    {
+        LOG_W("module is need restart");
+        rt_sem_release(module_setup_sem);
+    }
     rt_thread_delay(RT_TICK_PER_SECOND * 5);
     LOG_D("restart!");
     goto _mqtt_start;
 
-    ////_mqtt_disconnect_exit:
-    //    MQTTDisconnect(c);
-    //    net_disconnect(c);
+    goto _mqtt_disconnect_exit;
+_mqtt_disconnect_exit:
+    MQTTDisconnect(c);
+    net_disconnect(c);
 
-    ////_mqtt_exit:
-    //    LOG_D("thread exit");
-    //    return;
+    goto _mqtt_exit;
+_mqtt_exit:
+    LOG_D("thread exit");
+    return;
 }
 
 int paho_mqtt_start(MQTTClient *client)

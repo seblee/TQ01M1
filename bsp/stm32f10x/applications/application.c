@@ -65,7 +65,7 @@ enum
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t modbus_master_stack[512];
 static rt_uint8_t modbus_slave_stack[512];
-static rt_uint8_t monitor_slave_stack[1536];
+static rt_uint8_t monitor_slave_stack[1792];
 static rt_uint8_t mbm_fsm_stack[512];
 static rt_uint8_t di_stack[256];
 static rt_uint8_t daq_stack[512];
@@ -73,8 +73,7 @@ static rt_uint8_t core_stack[512];
 static rt_uint8_t cpad_stack[512];
 static rt_uint8_t bkg_stack[512];
 static rt_uint8_t testcase_stack[512];
-static rt_uint8_t net_stack[4096];
-static rt_uint8_t moduleCtr_stack[512];
+static rt_uint8_t net_stack[3072];
 
 static struct rt_thread modbus_master_thread;
 static struct rt_thread modbus_slave_thread;
@@ -87,7 +86,6 @@ static struct rt_thread cpad_thread;
 static struct rt_thread bkg_thread;
 static struct rt_thread testcase_thread;
 static struct rt_thread net_thread;
-static struct rt_thread moduleCtr_thread;
 
 void set_boot_flag(void);
 
@@ -298,18 +296,18 @@ int rt_application_init(void)
         rt_thread_startup(&net_thread);
     }
 
-    result = rt_thread_init(&moduleCtr_thread,
-                            "module",
-                            modul_control_thread_entry,
-                            RT_NULL,
-                            (rt_uint8_t *)&moduleCtr_stack[0],
-                            sizeof(moduleCtr_stack),
-                            MODULE_CTR_THREAD_PRIO,
-                            5);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&moduleCtr_thread);
-    }
+    // result = rt_thread_init(&moduleCtr_thread,
+    //                         "module",
+    //                         modul_control_thread_entry,
+    //                         RT_NULL,
+    //                         (rt_uint8_t *)&moduleCtr_stack[0],
+    //                         sizeof(moduleCtr_stack),
+    //                         MODULE_CTR_THREAD_PRIO,
+    //                         5);
+    // if (result == RT_EOK)
+    // {
+    //     rt_thread_startup(&moduleCtr_thread);
+    // }
 
     return 0;
 }
