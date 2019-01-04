@@ -828,7 +828,8 @@ static void paho_mqtt_thread(void *param)
 
 _mqtt_start:
 
-    if (module_state(RT_NULL) != MODULE_READY)
+    if ((module_state(RT_NULL) != MODULE_4G_READY) &&
+        (module_state(RT_NULL) != MODULE_WIFI_READY))
     {
         LOG_W("module is not ready");
         rt_thread_delay(rt_tick_from_millisecond(5000));
@@ -1045,8 +1046,8 @@ _mqtt_start:
 
             continue;
         }
-
-        if (module_state(RT_NULL) != MODULE_READY)
+        if ((module_state(RT_NULL) != MODULE_4G_READY) &&
+            (module_state(RT_NULL) != MODULE_WIFI_READY))
         {
             LOG_W("module is need restart");
             goto _mqtt_disconnect;
