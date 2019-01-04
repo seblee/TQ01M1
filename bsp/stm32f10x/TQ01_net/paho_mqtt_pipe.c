@@ -1255,9 +1255,3 @@ static int mq_client_publish(MQTTClient *c, _topic_pub_enmu_t pub_type)
 exit:
     return rc;
 }
-
-//int eland_http_request(char *uri,      //host
-//                       char *request,  //BODY
-//                       char *response) //response 指針
-//{
-//}

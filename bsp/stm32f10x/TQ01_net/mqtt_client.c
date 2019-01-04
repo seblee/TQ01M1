@@ -126,25 +126,23 @@ static void mqtt_offline_callback(MQTTClient *c)
 
 extern sys_reg_st g_sys;
 void list_mem(void);
-int mqtt_client_init(MQTTClient *client)
+int mqtt_client_init(MQTTClient *client, iotx_device_info_pt device_info_p)
 {
     rt_err_t rc = RT_EOK;
     iotx_conn_info_t device_connect;
-    iotx_device_info_pt device_info_p = rt_malloc(sizeof(iotx_device_info_t) + 1);
-
     MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
+
+    /* parameter check */
+    RT_ASSERT(client != RT_NULL);
+    RT_ASSERT(device_info_p != RT_NULL);
+
     client->isconnected = 0;
     client->isQRcodegeted = 0;
     client->isparameterPutted = 0;
     /*******init client parameter*********/
     mqtt_log("mqtt_client_init");
 
-    if (!device_info_p)
-    {
-        LOG_E("no memory for device_info_p buffer!");
-        rc = -RT_ENOMEM;
-        goto _exit;
-    }
+    rt_memset(device_info_p, 0, sizeof(iotx_device_info_t));
     Conversion_modbus_2_ram((rt_uint8_t *)device_info_p, (rt_uint8_t *)g_sys.config.ComPara.device_info, sizeof(iotx_device_info_t));
 
     rt_snprintf(device_info_p->device_id, sizeof(device_connect.client_id), "rtthread%d", rt_tick_get());
@@ -192,9 +190,6 @@ int mqtt_client_init(MQTTClient *client)
     LOG_D("client->username:%s", client->condata.username);
     LOG_D("client->password:%s", client->condata.password);
 
-    LOG_D("clientID:%s", client_con.clientID.cstring);
-    LOG_D("username:%s", client_con.username.cstring);
-    LOG_D("password:%s", client_con.password.cstring);
     /* config MQTT will param. */
     // client->condata.willFlag = 1;
     // client->condata.will.qos = 1;
@@ -206,7 +201,7 @@ int mqtt_client_init(MQTTClient *client)
     client->buf_size = client->readbuf_size = 1024;
     client->buf = rt_malloc(client->buf_size);
     client->readbuf = rt_malloc(client->readbuf_size);
-    list_mem();
+
     if (!(client->buf && client->readbuf))
     {
         LOG_E("no memory for MQTT client buffer!");
@@ -220,21 +215,64 @@ int mqtt_client_init(MQTTClient *client)
 
     /* set subscribe table and event callback */
     {
+        char *topic_str_p = RT_NULL;
+        rt_size_t length;
+        length = strlen(TOPIC_WATER_NOTICE) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for WATER_NOTICE buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, TOPIC_WATER_NOTICE, device_info_p->product_key, device_info_p->device_name);
+        iot_sub_topics[WATER_NOTICE].topic_str = topic_str_p;
         client->messageHandlers[WATER_NOTICE].topicFilter =
             (char *)iot_sub_topics[WATER_NOTICE].topic_str;
         client->messageHandlers[WATER_NOTICE].callback = mqtt_WATER_NOTICE_callback;
         client->messageHandlers[WATER_NOTICE].qos = iot_sub_topics[WATER_NOTICE].qos;
+        LOG_D("topic_str:%s", iot_sub_topics[WATER_NOTICE].topic_str);
 
+        length = strlen(TOPIC_PARAMETER_SET) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for PARAMETER_SET buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, TOPIC_PARAMETER_SET, device_info_p->product_key, device_info_p->device_name);
+        iot_sub_topics[PARAMETER_SET].topic_str = topic_str_p;
         client->messageHandlers[PARAMETER_SET].topicFilter =
             (char *)iot_sub_topics[PARAMETER_SET].topic_str;
         client->messageHandlers[PARAMETER_SET].callback = mqtt_PARAMETER_SET_callback;
         client->messageHandlers[PARAMETER_SET].qos = iot_sub_topics[PARAMETER_SET].qos;
 
+        length = strlen(TOPIC_PARAMETER_GET) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for PARAMETER_GET buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, TOPIC_PARAMETER_GET, device_info_p->product_key, device_info_p->device_name);
+        iot_sub_topics[PARAMETER_GET].topic_str = topic_str_p;
         client->messageHandlers[PARAMETER_GET].topicFilter =
             (char *)iot_sub_topics[PARAMETER_GET].topic_str;
         client->messageHandlers[PARAMETER_GET].callback = mqtt_PARAMETER_GET_callback;
         client->messageHandlers[PARAMETER_GET].qos = iot_sub_topics[PARAMETER_GET].qos;
 
+        length = strlen(IOT_OTA_UPGRADE) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for OTA_UPGRADE buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, IOT_OTA_UPGRADE, device_info_p->product_key, device_info_p->device_name);
+        iot_sub_topics[OTA_UPGRADE].topic_str = topic_str_p;
         client->messageHandlers[OTA_UPGRADE].topicFilter =
             (char *)iot_sub_topics[OTA_UPGRADE].topic_str;
         client->messageHandlers[OTA_UPGRADE].callback = mqtt_sub_callback;
@@ -244,10 +282,100 @@ int mqtt_client_init(MQTTClient *client)
     /* set default subscribe event callback */
     client->defaultMessageHandler = mqtt_sub_default_callback;
 
-_exit:
-    if (device_info_p)
-        rt_free(device_info_p);
+    /* set publish table and event callback */
+    {
+        char *topic_str_p = RT_NULL;
+        rt_size_t length;
+        length = strlen(TOPIC_PLATFORM_INIT) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for PLATFORM_INIT buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, TOPIC_PLATFORM_INIT, device_info_p->product_key, device_info_p->device_name);
+        iot_pub_topics[PLATFORM_INIT].topic_str = topic_str_p;
 
+        length = strlen(TOPIC_WATER_STATUS) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for WATER_STATUS buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, TOPIC_WATER_STATUS, device_info_p->product_key, device_info_p->device_name);
+        iot_pub_topics[WATER_STATUS].topic_str = topic_str_p;
+
+        length = strlen(TOPIC_PARAMETER_PUT) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for PARAMETER_PUT buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, TOPIC_PARAMETER_PUT, device_info_p->product_key, device_info_p->device_name);
+        iot_pub_topics[PARAMETER_PUT].topic_str = topic_str_p;
+
+        length = strlen(TOPIC_REALTIME_REPORT) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for REALTIME_REPORT buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, TOPIC_REALTIME_REPORT, device_info_p->product_key, device_info_p->device_name);
+        iot_pub_topics[REALTIME_REPORT].topic_str = topic_str_p;
+
+        length = strlen(TOPIC_TIMING_REPORT) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for TIMING_REPORT buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, TOPIC_TIMING_REPORT, device_info_p->product_key, device_info_p->device_name);
+        iot_pub_topics[TIMING_REPORT].topic_str = topic_str_p;
+
+        length = strlen(TOPIC_DEVICE_UPGRADE) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for DEVICE_UPGRADE buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, TOPIC_DEVICE_UPGRADE, device_info_p->product_key, device_info_p->device_name);
+        iot_pub_topics[DEVICE_UPGRADE].topic_str = topic_str_p;
+
+        length = strlen(IOT_OTA_INFORM) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for OTA_INFORM buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, IOT_OTA_INFORM, device_info_p->product_key, device_info_p->device_name);
+        iot_pub_topics[OTA_INFORM].topic_str = topic_str_p;
+
+        length = strlen(IOT_OTA_PROGRESS) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
+        topic_str_p = rt_calloc(length + 1, 1);
+        if (!topic_str_p)
+        {
+            LOG_E("no memory for OTA_PROGRESS buffer!");
+            rc = -RT_ENOMEM;
+            goto _exit;
+        }
+        rt_snprintf(topic_str_p, length, IOT_OTA_PROGRESS, device_info_p->product_key, device_info_p->device_name);
+        iot_pub_topics[OTA_PROGRESS].topic_str = topic_str_p;
+    }
+
+_exit:
     return rc;
 }
 rt_err_t mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *device_info)

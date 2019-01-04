@@ -27,30 +27,33 @@
 #define network_log(N, ...) rt_kprintf("####[network %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif /* at_log(...) */
 
+#define DEVICE_NAME device_info.device_name
+#define PRODUCT_KEY device_info.product_key
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 
 /********topic dup qos restained**************/
 iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS] = {
-    {TOPIC_WATER_NOTICE, 0, QOS1, 0},  /*{"TOPIC_WATER_NOTICE"}*/
-    {TOPIC_PARAMETER_SET, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_SET"}*/
-    {TOPIC_PARAMETER_GET, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_GET"}*/
-    {IOT_OTA_UPGRADE, 0, QOS1, 0},     /*{"IOT_OTA_UPGRADE"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_NOTICE"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_SET"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_GET"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_UPGRADE"}*/
 };
 /********topic dup qos restained**************/
 iot_topic_param_t iot_pub_topics[8] = {
-    {TOPIC_PLATFORM_INIT, 0, QOS1, 0},   /*{"TOPIC_PLATFORM_INIT"}*/
-    {TOPIC_WATER_STATUS, 0, QOS1, 0},    /*{"TOPIC_WATER_STATUS"}*/
-    {TOPIC_PARAMETER_PUT, 0, QOS1, 0},   /*{"TOPIC_PARAMETER_PUT"}*/
-    {TOPIC_REALTIME_REPORT, 0, QOS1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
-    {TOPIC_TIMING_REPORT, 0, QOS1, 0},   /*{"TOPIC_TIMING_REPORT"}*/
-    {TOPIC_DEVICE_UPGRADE, 0, QOS1, 0},  /*{"TOPIC_DEVICE_UPGRADE"}*/
-    {IOT_OTA_INFORM, 0, QOS1, 0},        /*{"IOT_OTA_INFORM"}*/
-    {IOT_OTA_PROGRESS, 0, QOS1, 0},      /*{"IOT_OTA_PROGRESS"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PLATFORM_INIT"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_STATUS"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_PUT"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_TIMING_REPORT"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_DEVICE_UPGRADE"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_INFORM"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_PROGRESS"}*/
 };
 static MQTTClient client;
 extern sys_reg_st g_sys;
+static iotx_device_info_t device_info;
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
@@ -110,7 +113,7 @@ void net_thread_entry(void *parameter)
     /* config MQTT context param */
     network_get_register(NULL);
 
-    result = mqtt_client_init(&client);
+    result = mqtt_client_init(&client, &device_info);
 
     if (result != RT_EOK)
         goto _exit;
@@ -454,7 +457,7 @@ void network_get_interval(unsigned int *real, unsigned int *timing)
     if (interval_temp < REALTIME_INTERVAL_MIN)
         interval_temp = REALTIME_INTERVAL_MIN;
     *real = interval_temp;
-    network_log("real:%d timing:%d", *real, *timing);
+    // network_log("real:%d timing:%d", *real, *timing);
 }
 
 /**
