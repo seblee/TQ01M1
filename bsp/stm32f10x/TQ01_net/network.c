@@ -74,7 +74,7 @@ void NetWork_DIR_Init(void)
     GPIO_InitStructure.GPIO_Pin = SIM7600_DIR_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(SIM7600_DIR_PORT, &GPIO_InitStructure);
-    DIR_8266;
+    DIR_8266();
 }
 int esp8266_at_socket_device_init(void);
 int sim7600_at_socket_device_init(void);

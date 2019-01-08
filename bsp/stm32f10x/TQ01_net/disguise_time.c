@@ -226,7 +226,7 @@ void get_bulid_date_time(struct tm *r)
 
 int gettimeofday(struct timeval *tp, void *ignore)
 {
-    time_t time; 
+    time_t time;
     time = current_timestamp_get();
 
     if (tp != RT_NULL)
