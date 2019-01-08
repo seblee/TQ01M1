@@ -819,7 +819,6 @@ enum ClientSend
     SENDREALTIME,
     SENDTIMING,
 } sendState = SENDINIT;
-void list_mem(void);
 static void paho_mqtt_thread(void *param)
 {
     MQTTClient *c = (MQTTClient *)param;
@@ -1006,7 +1005,7 @@ _mqtt_start:
 
             if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
             {
-                LOG_I("MQTTSerialize_publish sendPacket rc: %d", rc);
+                LOG_E("MQTTSerialize_publish sendPacket rc: %d", rc);
                 goto _mqtt_disconnect;
             }
 

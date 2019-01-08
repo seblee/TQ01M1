@@ -125,7 +125,6 @@ static void mqtt_offline_callback(MQTTClient *c)
 }
 
 extern sys_reg_st g_sys;
-void list_mem(void);
 int mqtt_client_init(MQTTClient *client, iotx_device_info_pt device_info_p)
 {
     rt_err_t rc = RT_EOK;
