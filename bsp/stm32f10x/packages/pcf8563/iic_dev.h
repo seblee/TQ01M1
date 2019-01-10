@@ -94,8 +94,8 @@
 ******************************************************************************/
 
 #if _USER_DELAY_CLK == 1 //定义了则使用
-
-#define IIC_Delay() rt_thread_delay(2) //要改变请修改delay_us()中的数值即可
+#include "Delay.h"
+#define IIC_Delay() Delay_us(2) //要改变请修改delay_us()中的数值即可
 
 #endif
 

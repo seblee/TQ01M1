@@ -51,22 +51,8 @@ rt_err_t rt_rtc_control(rt_device_t dev, rt_uint8_t cmd, void *args) //modified 
     {
         time = (rt_time_t *)args;
 
-        /* Enable PWR and BKP clocks */
-        RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-
-        /* Allow access to BKP Domain */
-        PWR_BackupAccessCmd(ENABLE);
-
-        /* Wait until last write operation on RTC registers has finished */
-        RTC_WaitForLastTask();
-
         /* Change the current time */
-        RTC_SetCounter(*time);
-
-        /* Wait until last write operation on RTC registers has finished */
-        RTC_WaitForLastTask();
-
-        BKP_WriteBackupRegister(BKP_DR1, 0xA5A5);
+        pcf8563_SetCounter(*time);
     }
     break;
     }
@@ -210,7 +196,7 @@ void set_date(uint32_t year, uint32_t month, uint32_t day)
     }
 }
 FINSH_FUNCTION_EXPORT(set_date, set date.e.g
-                      : set_date(2010, 2, 28))
+                      : set_date(2019, 1, 9))
 
 void set_time(uint32_t hour, uint32_t minute, uint32_t second)
 {
@@ -239,7 +225,7 @@ void set_time(uint32_t hour, uint32_t minute, uint32_t second)
     }
 }
 FINSH_FUNCTION_EXPORT(set_time, set time.e.g
-                      : set_time(23, 59, 59))
+                      : set_time(17, 37, 00))
 
 void list_date(void)
 {
@@ -259,6 +245,7 @@ void Rtc_sts_update(sys_reg_st *gds_sys_ptr)
     struct tm *ti;
 
     time(&now);
+    now += 28800;
     ti = localtime(&now);
 
     gds_sys_ptr->status.ComSta.Sys_Time.Year = ti->tm_year + 1900;
@@ -270,9 +257,7 @@ void Rtc_sts_update(sys_reg_st *gds_sys_ptr)
     gds_sys_ptr->status.ComSta.Sys_Time.Weekday = ti->tm_wday;
 
     gds_sys_ptr->status.ComSta.Sys_Time.u32Systime = now;
-    //		  rt_kprintf("now= %d\n",now);
-    //	  rt_kprintf("Year= %d,Mon= %d,Day= %d\n",ti->tm_year+1900,ti->tm_mon,ti->tm_mday);
-    //    rt_kprintf("Hour= %d,Min= %d,Sec= %d\n",ti->tm_hour,ti->tm_min,ti->tm_sec);
+    // rt_kprintf("%04d-%02d-%02d %02d:%02d:%02d %d now= %d\n", ti->tm_year + 1900, ti->tm_mon + 1, ti->tm_mday, ti->tm_hour, ti->tm_min, ti->tm_sec, ti->tm_wday, now);
 
     return;
 }

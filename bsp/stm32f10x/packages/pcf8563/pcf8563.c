@@ -67,11 +67,19 @@
 /**************************************************************************************************************
 										 Global variable definition
 **************************************************************************************************************/
-unsigned char buffer[4];
+#define DBG_ENABLE
+#define DBG_SECTION_NAME "rtc.pcf8563"
+#define DBG_LEVEL DBG_LOG
+#define DBG_COLOR
 
+#include <rtdbg.h>
+#ifndef LOG_D
+#error "Please update the 'rtdbg.h' file to GitHub latest version (https://github.com/RT-Thread/rt-thread/blob/master/include/rtdbg.h)"
+#endif
 /**************************************************************************************************************
 											Function definition
 **************************************************************************************************************/
+unsigned char buffer[10];
 /**
   *****************************************************************************
   * @Func   : 将BIN转换为BCD
@@ -140,39 +148,36 @@ int PCF8563_Config(void)
     rt_thread_delay(100); //延时一段时间
 
     if (PCF8563_Check())
-        rt_kprintf("PCF8563 Error\r\n"); //PCF8563检测结果：错误或损坏
+        LOG_W("PCF8563 Error"); //PCF8563检测结果：错误或损坏
     else
-        rt_kprintf("PCF8563 Normal\r\n"); //PCF8563检测结果：正常
+        LOG_W("PCF8563 Normal"); //PCF8563检测结果：正常
 
-    PCF8563_Date_Structure.RTC_Years = 17;   //初始化年
-    PCF8563_Date_Structure.RTC_Months = 9;   //初始化月
-    PCF8563_Date_Structure.RTC_WeekDays = 3; //初始化周
-    PCF8563_Date_Structure.RTC_Days = 13;    //初始化日
+    PCF8563_Date_Structure.RTC_Years = 19;    //初始化年
+    PCF8563_Date_Structure.RTC_Months = 01;   //初始化月
+    PCF8563_Date_Structure.RTC_WeekDays = 03; //初始化周
+    PCF8563_Date_Structure.RTC_Days = 9;      //初始化日
 
-    PC8563F_Time_Structure.RTC_Hours = 9;    //初始化时
-    PC8563F_Time_Structure.RTC_Minutes = 10; //初始化分
-    PC8563F_Time_Structure.RTC_Seconds = 11; //初始化秒
+    PC8563F_Time_Structure.RTC_Hours = 05;   //初始化时
+    PC8563F_Time_Structure.RTC_Minutes = 06; //初始化分
+    PC8563F_Time_Structure.RTC_Seconds = 07; //初始化秒
 
-    PCF8563_SetMode(PCF_Mode_Normal);                         //设置模式
-    PCF8563_Stop();                                           //PCF8563停止
-    PCF8563_SetDate(PCF_Format_BIN, &PCF8563_Date_Structure); //设置日期
-    PCF8563_SetTime(PCF_Format_BIN, &PC8563F_Time_Structure); //设置时间
-    PCF8563_Start();                                          //PCF8563启动
+    PCF8563_SetMode(PCF_Mode_Normal); //设置模式
+    PCF8563_Stop();                   //PCF8563停止
+    // PCF8563_SetDate(PCF_Format_BIN, &PCF8563_Date_Structure); //设置日期
+    // PCF8563_SetTime(PCF_Format_BIN, &PC8563F_Time_Structure); //设置时间
+    PCF8563_Start(); //PCF8563启动
 
-    //    while (1)
-    //    {
-    //        PCF8563_GetDate(PCF_Format_BCD, &PCF8563_Date_Structure); //获取日期
-    //        PCF8563_GetTime(PCF_Format_BCD, &PC8563F_Time_Structure); //获取时间
+    PCF8563_GetTime(PCF_Format_BCD, &PC8563F_Time_Structure); //获取时间
+    PCF8563_GetDate(PCF_Format_BCD, &PCF8563_Date_Structure); //获取日期
 
-    //        rt_kprintf("Time: 20%x-%x-%x %x:%x:%x\r\n",
-    //                   PCF8563_Date_Structure.RTC_Years,    //显示年
-    //                   PCF8563_Date_Structure.RTC_Months,   //显示月
-    //                   PCF8563_Date_Structure.RTC_Days,     //显示日
-    //                   PC8563F_Time_Structure.RTC_Hours,    //显示时
-    //                   PC8563F_Time_Structure.RTC_Minutes,  //显示分
-    //                   PC8563F_Time_Structure.RTC_Seconds); //显示秒
-    //        rt_thread_delay(1600);
-    //    }
+    LOG_I("Time: 20%02x-%02x-%02x %02x:%02x:%02x",
+          PCF8563_Date_Structure.RTC_Years,    //显示年
+          PCF8563_Date_Structure.RTC_Months,   //显示月
+          PCF8563_Date_Structure.RTC_Days,     //显示日
+          PC8563F_Time_Structure.RTC_Hours,    //显示时
+          PC8563F_Time_Structure.RTC_Minutes,  //显示分
+          PC8563F_Time_Structure.RTC_Seconds); //显示秒
+
     return 0;
 }
 /**
@@ -228,6 +233,7 @@ unsigned char PCF8563_Check(void)
         PCF8563_Write_Byte(PCF8563_Address_Timer_VAL, Time_Count); //恢复现场
         PCF8563_Write_Byte(PCF8563_Address_Timer, PCF_Timer_Open); //启动定时器
     }
+    LOG_I("%02x-----%02x", test_value, PCF8563_Check_Data); //PCF8563检测结果：错误或损坏
 
     if (test_value != PCF8563_Check_Data) //如果读出值与写入值不同，则器件错误或损坏
     {
@@ -852,7 +858,7 @@ void PCF8563_SetTime(unsigned char PCF_Format, _PCF8563_Time_Typedef *PCF_DataSt
 **/
 void PCF8563_GetTime(unsigned char PCF_Format, _PCF8563_Time_Typedef *PCF_DataStruct)
 {
-
+    rt_memset(buffer, 0, sizeof(buffer));
     //读取寄存器数值
     PCF8563_Read_nByte(PCF8563_Address_Seconds, 3, buffer);
 
@@ -1133,14 +1139,15 @@ void PCF8563_GetAlarm(unsigned char PCF_Format, _PCF8563_Alarm_Typedef *PCF_Data
 }
 #include "time.h"
 #include <stdio.h>
+/**read time**/
 int pcf8563_GetCounter(void)
 {
     _PCF8563_Register_Typedef PCF8563_Register;
     PCF8563_GetRegister(PCF_Format_BIN, &PCF8563_Register);
 
     struct tm ti;
-    ti.tm_year = PCF8563_Register.Years;
-    ti.tm_mon = PCF8563_Register.Months_Century;
+    ti.tm_year = PCF8563_Register.Years + 2000 - 1900;
+    ti.tm_mon = PCF8563_Register.Months_Century - 1;
     ti.tm_mday = PCF8563_Register.Days;
     ti.tm_hour = PCF8563_Register.Hours;
     ti.tm_min = PCF8563_Register.Minutes;
@@ -1149,6 +1156,35 @@ int pcf8563_GetCounter(void)
     now = mktime(&ti);
 
     return now;
+}
+
+int pcf8563_SetCounter(rt_uint32_t now)
+{
+    struct tm *ti;
+    _PCF8563_Register_Typedef PCF8563_Register;
+
+    ti = localtime((const time_t *)&now);
+    PCF8563_Register.Years = (ti->tm_year + 1900) % 100;
+    PCF8563_Register.Months_Century = ti->tm_mon + 1;
+    PCF8563_Register.WeekDays = ti->tm_wday;
+    PCF8563_Register.Days = ti->tm_mday;
+    PCF8563_Register.Hours = ti->tm_hour;
+    PCF8563_Register.Minutes = ti->tm_min;
+    PCF8563_Register.Seconds = ti->tm_sec;
+
+    PCF8563_Register.Years = RTC_BinToBcd2(PCF8563_Register.Years);
+    PCF8563_Register.Months_Century = RTC_BinToBcd2(PCF8563_Register.Months_Century);
+    PCF8563_Register.WeekDays = RTC_BinToBcd2(PCF8563_Register.WeekDays);
+    PCF8563_Register.Days = RTC_BinToBcd2(PCF8563_Register.Days);
+    PCF8563_Register.Hours = RTC_BinToBcd2(PCF8563_Register.Hours);
+    PCF8563_Register.Minutes = RTC_BinToBcd2(PCF8563_Register.Minutes);
+    PCF8563_Register.Seconds = RTC_BinToBcd2(PCF8563_Register.Seconds);
+
+    PCF8563_SetMode(PCF_Mode_Normal); //设置模式
+    PCF8563_Stop();                   //PCF8563停止
+    PCF8563_Write_nByte(PCF8563_Address_Seconds, 7, &PCF8563_Register.Seconds);
+    PCF8563_Start();
+    return 0;
 }
 
 /************************************************ END OF FILE ************************************************/

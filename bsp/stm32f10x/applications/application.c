@@ -244,19 +244,6 @@ int rt_application_init(void)
         rt_thread_startup(&cpad_thread);
     }
 
-    //    result = rt_thread_init(&tcom_thread,
-    //                            "tcom",
-    //                            tcom_thread_entry,
-    //                            RT_NULL,
-    //                            (rt_uint8_t*)&tcom_stack[0],
-    //                            sizeof(tcom_stack),
-    //                            TCOM_THREAD_PRIO,
-    //                            5);
-    //    if (result == RT_EOK)
-    //    {
-    //        rt_thread_startup(&tcom_thread);
-    //    }
-
     result = rt_thread_init(&bkg_thread,
                             "background",
                             bkg_thread_entry,
@@ -295,19 +282,6 @@ int rt_application_init(void)
     {
         rt_thread_startup(&net_thread);
     }
-
-    // result = rt_thread_init(&moduleCtr_thread,
-    //                         "module",
-    //                         modul_control_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&moduleCtr_stack[0],
-    //                         sizeof(moduleCtr_stack),
-    //                         MODULE_CTR_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&moduleCtr_thread);
-    // }
 
     return 0;
 }

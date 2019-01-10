@@ -583,11 +583,6 @@
               <FileType>1</FileType>
               <FilePath>.\drivers\TH_Sensor_Bsp.c</FilePath>
             </File>
-            <File>
-              <FileName>Moter.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\drivers\Moter.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

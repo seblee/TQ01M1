@@ -49,7 +49,7 @@ void assert_failed(u8 *file, u32 line)
     rt_kprintf("       line  %d\r\n", line);
 
     //while (1) ;
-} 
+}
 /**
  * This function will startup RT-Thread RTOS.
  */

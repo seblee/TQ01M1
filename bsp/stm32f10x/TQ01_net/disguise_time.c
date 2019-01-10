@@ -34,29 +34,6 @@ rt_mutex_t time_mutex;
 
 /**
  ****************************************************************************
- * @Function :   void current_timestamp_tick(void)
- * @File     : rtc_bsp.c
- * @Program  : none
- * @Created  : 2018-09-25 by seblee
- * @Brief    : current_timestamp += 1
- * @Version  : V1.0
-**/
-void current_timestamp_tick(void)
-{
-    rt_err_t rc;
-    if (time_mutex == RT_NULL)
-        time_mutex = rt_mutex_create("timestamp_mutex", RT_IPC_FLAG_FIFO);
-
-    rc = rt_mutex_take(time_mutex, RT_WAITING_FOREVER);
-    if (rc != RT_EOK)
-    {
-        return;
-    }
-    current_timestamp += 1;
-    rc = rt_mutex_release(time_mutex);
-}
-/**
- ****************************************************************************
  * @Function : void current_timestamp_set(time_t value)
  * @File     : rtc_bsp.c
  * @Program  : valut current time
@@ -87,6 +64,7 @@ static void current_timestamp_set(time_t value)
  * @Brief    : get current timestamp
  * @Version  : V1.0
 **/
+extern sys_reg_st g_sys;
 static time_t current_timestamp_get(void)
 {
     time_t rc;
@@ -96,7 +74,7 @@ static time_t current_timestamp_get(void)
     }
 
     rt_mutex_take(time_mutex, RT_WAITING_FOREVER);
-    rc = current_timestamp;
+    rc = g_sys.status.ComSta.Sys_Time.u32Systime;
     rt_mutex_release(time_mutex);
     return rc;
 }

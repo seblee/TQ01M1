@@ -79,31 +79,22 @@ void NetWork_DIR_Init(void)
 int esp8266_at_socket_device_init(void);
 int sim7600_at_socket_device_init(void);
 int module_thread_start(void *parameter);
+
 void net_thread_entry(void *parameter)
 {
-    rt_err_t result;
+    rt_err_t result = RT_EOK;
 
     /**NetWork_DIR_Init**/
     NetWork_DIR_Init();
-    struct tm ti;
-    get_bulid_date_time(&ti);
-    current_systime_set(&ti);
+
     rt_thread_delay(rt_tick_from_millisecond(2000));
 
-    Net_Conf_st temp;
-    result = network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
+    // result = network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
     network_get_interval(&client.RealtimeInterval, &client.TimingInterval);
     network_log("RealtimeInterval:%d, TimingInterval:%d", client.RealtimeInterval, client.TimingInterval);
 
     network_log("u16Net_Sel:%d", g_sys.config.ComPara.Net_Conf.u16Net_Sel);
     network_log("u16Net_WifiSet:0x%04X", g_sys.config.ComPara.Net_Conf.u16Net_WifiSet);
-
-    network_log("u16Wifi_Name len:%d ssid:%s",
-                strlen((const char *)temp.u16Wifi_Name),
-                temp.u16Wifi_Name);
-    network_log("u16Wifi_Key len:%d key:%s",
-                strlen((const char *)temp.u16Wifi_Password),
-                temp.u16Wifi_Password);
 
     static int is_started = 0;
     if (is_started)
@@ -111,7 +102,6 @@ void net_thread_entry(void *parameter)
         return;
     }
     /* config MQTT context param */
-    network_get_register(NULL);
 
     result = mqtt_client_init(&client, &device_info);
 
@@ -159,9 +149,15 @@ void network_Serialize_init_json(char **datapoint)
     result = cJSON_AddStringToObject(root, "RequestNo", RequestNoStr);
     result = cJSON_AddStringToObject(root, "ProductKey", PRODUCT_KEY);
     result = cJSON_AddStringToObject(root, "DeviceName", DEVICE_NAME);
-    result = cJSON_AddStringToObject(root, "Timestamp", "20180720115800");
+    struct tm ti;
+    char Timestamp_str[15] = {0};
+    current_systime_get(&ti);
+    rt_snprintf(Timestamp_str, sizeof(Timestamp_str), "%04d%02d%02d%02d%02d%02d",
+                ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
 
-    rt_snprintf(sign_hex, sizeof(sign_hex), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%s&Timestamp=20180720115800&Key=123456", DEVICE_NAME, PRODUCT_KEY, RequestNoStr);
+    result = cJSON_AddStringToObject(root, "Timestamp", Timestamp_str);
+
+    rt_snprintf(sign_hex, sizeof(sign_hex), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%s&Timestamp=%s&Key=123456", DEVICE_NAME, PRODUCT_KEY, RequestNoStr, Timestamp_str);
     utils_md5((const unsigned char *)sign_hex, strlen(sign_hex), sign);
     network_log("MD5(%s)", sign_hex);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
@@ -255,7 +251,7 @@ void network_Serialize_para_json(char **datapoint)
     char Timestamp_str[15] = {0};
     current_systime_get(&ti);
     rt_snprintf(Timestamp_str, sizeof(Timestamp_str), "%04d%02d%02d%02d%02d%02d",
-                ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
+                ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
 
     cJSON_AddStringToObject(root, "Timestamp", Timestamp_str);
     cJSON_AddStringToObject(root, "Settingversion", Timestamp_str);
@@ -377,7 +373,7 @@ void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
     char Timestamp_str[15] = {0};
     current_systime_get(&ti);
     rt_snprintf(Timestamp_str, sizeof(Timestamp_str), "%04d%02d%02d%02d%02d%02d",
-                ti.tm_year + 1900, ti.tm_mon, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
+                ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
 
     cJSON_AddStringToObject(root, "Timestamp", Timestamp_str);
     if (topic_type == REALTIME_REPORT)

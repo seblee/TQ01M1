@@ -57,27 +57,27 @@ void bkg_thread_entry(void *parameter)
     while (1)
     {
         led_toggle();
-        //			team_tab_cooldown();
-        //			team_timer();
+        // team_tab_cooldown();
+        // team_timer();
         sys_comp_cooldown();
         run_time_process();
-        //      check_team_config();
-        //			analog_dummy_out();
-        //			ec_fan_diff_req();
-        //			ec_fan_suc_temp();
-        //			user_eventlog_add();
-        //			user_alarmlog_add();
+        // check_team_config();
+        // analog_dummy_out();
+        // ec_fan_diff_req();
+        // ec_fan_suc_temp();
+        // user_eventlog_add();
+        // user_alarmlog_add();
         temp_hum_calc();
 
-        //			work_mode_manage();
-        //			add_hum_temp_log();
+        // work_mode_manage();
+        // add_hum_temp_log();
         sys_running_mode_update();
         sys_debug_timeout();
         Set_Systime();
         Rtc_sts_update(&g_sys);
         // test mode
         test_mode_init_data();
-        //			power_loss_delay();
+        // power_loss_delay();
 
         dog();
         rt_thread_delay(1000);
@@ -90,8 +90,8 @@ static void temp_hum_calc(void)
     g_sys.status.sys_tem_hum.return_air_hum = get_current_hum();
     g_sys.status.sys_tem_hum.return_air_temp = get_current_temp();
 
-    //			rt_kprintf("g_sys.status.sys_tem_hum.return_air_hum = %d\n",g_sys.status.sys_tem_hum.return_air_hum);
-    //			rt_kprintf("g_sys.status.sys_tem_hum.return_air_temp = %d\n",g_sys.status.sys_tem_hum.return_air_temp);
+    // rt_kprintf("g_sys.status.sys_tem_hum.return_air_hum = %d\n",g_sys.status.sys_tem_hum.return_air_hum);
+    // rt_kprintf("g_sys.status.sys_tem_hum.return_air_temp = %d\n",g_sys.status.sys_tem_hum.return_air_temp);
 }
 
 //测试模式
@@ -107,9 +107,9 @@ static void test_mode_init_data(void)
     static uint32_t u32Sterilize_Interval = 0;
     static uint16_t u16Sterilize_Time = 0;
 
-    //		//TEST mode
-    //		g_sys.config.ComPara.u16Manual_Test_En=2;
-    //		g_sys.config.ComPara.u16Test_Mode_Type=TEST_UR;
+    // //TEST mode
+    // g_sys.config.ComPara.u16Manual_Test_En=2;
+    // g_sys.config.ComPara.u16Test_Mode_Type=TEST_UR;
     if (g_sys.config.ComPara.u16Manual_Test_En != TEST_MODE_ENABLE)
     {
         g_sys.config.ComPara.u16Test_Mode_Type = TEST_UNABLE;
@@ -402,231 +402,8 @@ static void test_mode_init_data(void)
         u16Sterilize_Time = 0;
         break;
     }
-    //		if(g_sys.config.ComPara.u16Test_Mode_En == TEST_ALL_OUT)
-    //		{
-    //				g_sys.config.dev_mask.ain =0xffff;
-    //				g_sys.config.dev_mask.din[0] = 0x7fff;
-    //				g_sys.config.dev_mask.din[1] = 0xffff;
-    //				g_sys.config.dev_mask.aout = 0xffff;
-    //        g_sys.config.dev_mask.mb_comp = 0x01;
-    //        g_sys.config.dev_mask.dout = 0xffff;
-    //
-    //				l_sys.bitmap[BITMAP_MANUAL] = 0xffff;
-    //			  l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 50;
-    //			  l_sys.ao_list[AO_EC_COMPRESSOR][BITMAP_MANUAL] = 50;
-    //			  l_sys.ao_list[AO_WATER_VALVE][BITMAP_MANUAL] = 50;
-    //			  l_sys.ao_list[AO_PREV_1][BITMAP_MANUAL] = 50;
-    //			  l_sys.ao_list[AO_PREV_2][BITMAP_MANUAL] = 50;
-    //		}
     return;
 }
-
-//static void ec_fan_timer_init(void)
-//{
-//	g_sys.status.flow_diff_timer = g_sys.config.fan.flow_diff_delay;
-//	g_sys.status.return_air_status.timer= 0;
-//}
-//static void ec_fan_timer_run(void)
-//{
-//		if(g_sys.status.return_air_status.timer>0)
-//		{
-//			 g_sys.status.return_air_status.timer --;
-//		}
-//		else
-//		{
-//				g_sys.status.return_air_status.timer = 0;
-//		}
-//		if(g_sys.status.flow_diff_timer>0)
-//		{
-//			 g_sys.status.flow_diff_timer --;
-//		}
-//		else
-//		{
-//				g_sys.status.flow_diff_timer = 0;
-//		}
-//}
-//static void ec_fan_diff_req(void)
-//{
-//		extern sys_reg_st		g_sys;
-//		extern local_reg_st 	l_sys;
-////		extern team_local_st team_local_inst;
-//		int16_t ec_fan_diff_tmp;
-//		static uint16_t timer_cd = 0;
-//		uint16_t set_diff=0,diff_deaszone=0,fan_step=0,diff_delay=0;
-//
-////		if(((team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS]&(0x0001<<TEAM_STS_CONFD_BPOS))==0)||
-////		(g_sys.config.team.team_en == 0)||(g_sys.config.team.addr >(team_local_inst.team_config[TEAM_CONF_CNT]&0x00ff)))
-////		{
-////				set_diff = g_sys.config.fan.set_flow_diff;
-////				diff_deaszone = g_sys.config.fan.flow_diff_deadzone;
-////				fan_step = g_sys.config.fan.flow_diff_step;
-////				diff_delay =  g_sys.config.fan.flow_diff_delay;
-////		}
-////		else
-////		{
-////				set_diff = team_local_inst.team_config[TEAM_CONF_FAN_SET_FLOW_DIFF];
-////				diff_deaszone = team_local_inst.team_config[TEAM_CONF_FAN_FLOW_DIFF_DEADZONE];
-////				fan_step = team_local_inst.team_config[TEAM_CONF_FAN_FLOW_DIFF_STEP];
-////				diff_delay = team_local_inst.team_config[TEAM_CONF_FAN_FLOW_DIFF_DELAY];
-////		}
-//
-//
-//		if(((g_sys.config.dev_mask.ain) & (0x01<<AI_AIR_FLOW_DIFF))&&(g_sys.config.fan.mode == FAN_MODE_PRESS_DIFF)
-//			&&(g_sys.status.ain[AI_AIR_FLOW_DIFF]!=0x7fff))
-//		{
-//				if(timer_cd != 0)
-//				{
-//						timer_cd--;
-//						ec_fan_diff_tmp = l_sys.ec_fan_diff_reg;
-//				}
-//				else
-//				{
-//						timer_cd = diff_delay;
-//						if(g_sys.status.ain[AI_AIR_FLOW_DIFF] > ( set_diff + diff_deaszone))
-//						{
-//								ec_fan_diff_tmp = l_sys.ec_fan_diff_reg - fan_step;
-//						}
-//						else if(g_sys.status.ain[AI_AIR_FLOW_DIFF] < (set_diff - diff_deaszone))
-//						{
-//								ec_fan_diff_tmp = l_sys.ec_fan_diff_reg + fan_step;
-//						}
-//						else
-//						{
-//								ec_fan_diff_tmp = l_sys.ec_fan_diff_reg;
-//						}
-//				}
-//
-//				l_sys.ec_fan_diff_reg = lim_min_max((int16_t)(g_sys.config.fan.min_speed - g_sys.config.fan.set_speed),(int16_t)(g_sys.config.fan.max_speed - g_sys.config.fan.set_speed),ec_fan_diff_tmp);
-//		}
-//		else
-//		{
-//				l_sys.ec_fan_diff_reg = 0;
-//		}
-//}
-
-//enum
-//{
-//		FSM_SUC_TEMP_IDLE,
-//		FSM_SUC_TEMP_DECRESS
-//};
-
-//static void ec_fan_suc_temp(void)
-//{
-//		extern sys_reg_st		g_sys;
-//		extern local_reg_st 	l_sys;
-//		int16_t suc_temp_reg;
-//		static uint16_t timer_cd = 0;
-//		static uint16_t suc_temp_fsm = FSM_SUC_TEMP_IDLE;
-//
-//		if(((g_sys.config.dev_mask.ain) & (0x01<<AI_COMP_RETURN1))&&((g_sys.config.general.cool_type == COOL_TYPE_MODULE_WIND)||(g_sys.config.general.cool_type == COOL_TYPE_COLUMN_WIND)))
-//		{
-//				if(timer_cd != 0)
-//				{
-//						timer_cd--;
-//						suc_temp_reg = l_sys.ec_fan_suc_temp;
-//				}
-//				else
-//				{
-//						timer_cd = g_sys.config.fan.suc_temp_delay;
-//						switch(suc_temp_fsm)
-//						{
-//								case FSM_SUC_TEMP_IDLE:
-//								{
-//										if(g_sys.status.ain[AI_COMP_RETURN1] > g_sys.config.fan.target_suc_temp)
-//										{
-//												suc_temp_fsm = FSM_SUC_TEMP_DECRESS;
-//												suc_temp_reg = -g_sys.config.fan.suc_temp_step;
-//										}
-//										else
-//										{
-//												suc_temp_fsm = FSM_SUC_TEMP_IDLE;
-//												suc_temp_reg = 0;
-//										}
-//										break;
-//								}
-//								case FSM_SUC_TEMP_DECRESS:
-//								{
-//										if(g_sys.status.ain[AI_COMP_RETURN1] <= (g_sys.config.fan.target_suc_temp-g_sys.config.fan.suc_temp_deadzone))
-//										{
-//												suc_temp_fsm = FSM_SUC_TEMP_IDLE;
-//												suc_temp_reg = 0;
-//										}
-//										else
-//										{
-//												suc_temp_fsm = FSM_SUC_TEMP_DECRESS;
-//												suc_temp_reg = l_sys.ec_fan_suc_temp - g_sys.config.fan.suc_temp_step;
-//										}
-//										break;
-//								}
-//								default:
-//								{
-//										suc_temp_fsm = FSM_SUC_TEMP_IDLE;
-//										suc_temp_reg = 0;
-//										break;
-//								}
-//						}
-//				}
-//				l_sys.ec_fan_suc_temp = lim_min_max((int16_t)(g_sys.config.fan.min_speed - g_sys.config.fan.set_speed),(int16_t)(g_sys.config.fan.max_speed - g_sys.config.fan.set_speed),suc_temp_reg);
-//		}
-//		else
-//		{
-//				l_sys.ec_fan_suc_temp = 0;
-//		}
-//}
-
-//static void analog_dummy_out(void)
-//{
-//		extern local_reg_st	l_sys;
-//		if((g_sys.config.ext_fan_inst.ext_fan_cnt ==2)&&(g_sys.config.general.cool_type != COOL_TYPE_MODULE_WATER))
-//		{
-//				if(sys_get_do_sts(DO_COMP1_BPOS) == 1)
-//				{
-//					l_sys.ao_list[AO_PREV_1][BITMAP_REQ] = g_sys.config.ext_fan_inst.ext_fan1_set_speed;
-//				}
-//				else
-//				{
-//						l_sys.ao_list[AO_PREV_1][BITMAP_REQ] = 0;
-//				}
-//				if(sys_get_do_sts(DO_COMP2_BPOS) == 1)
-//				{
-//						l_sys.ao_list[AO_PREV_2][BITMAP_REQ] = g_sys.config.ext_fan_inst.ext_fan2_set_speed;
-//				}
-//				else
-//				{
-//						l_sys.ao_list[AO_PREV_2][BITMAP_REQ] = 0;
-//				}
-//		}
-//		else if((g_sys.config.ext_fan_inst.ext_fan_cnt ==1)&&(g_sys.config.general.cool_type != COOL_TYPE_MODULE_WATER))
-//		{
-//				l_sys.ao_list[AO_PREV_2][BITMAP_REQ] = 0;
-//				if(sys_get_do_sts(DO_COMP1_BPOS) == 1)
-//				{
-//						l_sys.ao_list[AO_PREV_1][BITMAP_REQ] = g_sys.config.ext_fan_inst.ext_fan1_set_speed;
-//				}
-//				else
-//				{
-//						l_sys.ao_list[AO_PREV_1][BITMAP_REQ] = 0;
-//				}
-//		}
-//		else
-//		{
-//				l_sys.ao_list[AO_PREV_2][BITMAP_REQ] = 0;
-//				l_sys.ao_list[AO_PREV_1][BITMAP_REQ] = 0;
-//		}
-//}
-
-//static void team_tab_cooldown(void)
-//{
-//		extern team_local_st team_local_inst;
-//		uint16_t i;
-//		for(i = 0;i < TEAM_MAX_SLAVE_NUM; i++)
-//		{
-//				if(team_local_inst.team_table[i][TEAM_TAB_TIMEOUT] > 0)
-//				{
-//						team_local_inst.team_table[i][TEAM_TAB_TIMEOUT]--;
-//				}
-//		}
-//}
 
 /**
   * @brief 	system components runtime counter 

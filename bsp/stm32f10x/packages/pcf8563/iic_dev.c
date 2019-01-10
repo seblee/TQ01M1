@@ -157,6 +157,36 @@ void IIC_Ack(unsigned char a)
 
 #endif /* end __USER_DELAY_CLK */
 }
+/******************************************************************************
+* Function Name --> 主机等待接收slave ACK
+* Description   --> none
+* Input         --> 
+* Output        --> none
+* Reaturn       --> none 
+******************************************************************************/
+unsigned char IIC_Wait_Ack(void)
+{
+    unsigned char i = 0;
+    IIC_SDA_IN(); //设置成输入
+    IIC_SDA = 1;  //放上应答信号电平
+    IIC_Delay();
+    IIC_SCL = 1; //为SCL下降做准备
+    IIC_Delay();
+    IIC_SDA_IN(); //设置成输入
+
+    //---等待应答信号
+    while (IN_SDA)
+    {
+        i++;
+        if (i > 250)
+        {
+            IIC_Stop();
+            return 1;
+        }
+    }
+    IIC_SCL = 0; //为SCL下降做准备
+    return 0;
+}
 
 /******************************************************************************
 * Function Name --> 向IIC总线发送一个字节数据
@@ -210,7 +240,13 @@ unsigned char IIC_Write_Byte(unsigned char dat)
     IIC_SCL = 1; //为SCL下降做准备
 
 #endif /* end __USER_DELAY_CLK */
-
+    while (IN_SDA)
+    {
+        i++;
+        IIC_Delay();
+        if (i > 250)
+            break;
+    }
     iic_ack |= IN_SDA; //读入应答位
     IIC_SCL = 0;
     return iic_ack; //返回应答信号
