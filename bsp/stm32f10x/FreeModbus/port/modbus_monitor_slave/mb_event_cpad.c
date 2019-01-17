@@ -149,8 +149,8 @@ void Analysis_protocol_T5(void)
     rt_kprintf("cmd = %x,addr = %x,nreg = %d,cmd_value = %d\n", cmd, addr, nreg, cmd_value);
     if (cmd == T5_READ)
     {
-        //				cmd_value=(cpad_slave_inst.rxbuf[7]<<8) + cpad_slave_inst.rxbuf[8];
-        //				errcode = cpad_eMBRegHoldingCB(&cpad_slave_inst.rxbuf[7],addr,nreg,cmd);
+        // cmd_value=(cpad_slave_inst.rxbuf[7]<<8) + cpad_slave_inst.rxbuf[8];
+        // errcode = cpad_eMBRegHoldingCB(&cpad_slave_inst.rxbuf[7],addr,nreg,cmd);
         if (addr == (WATER_MODE_ADDR + CONFIG_REG_MAP_OFFSET))
         {
             g_sys.config.ComPara.u16Water_Mode = cmd_value;
@@ -158,7 +158,7 @@ void Analysis_protocol_T5(void)
             {
                 if (errcode == MB_ENOERR)
                 {
-                    //								RAM_Write_Reg(WATER_FLOW_ADDR,0xF000,1);
+                    // RAM_Write_Reg(WATER_FLOW_ADDR,0xF000,1);
                     g_sys.config.ComPara.u16Water_Flow = 0xF000;
                 }
             }
@@ -237,8 +237,8 @@ void Cpad_Send(uint8_t u8RW, uint16_t u16Addr, uint8_t u8Num, uint16_t u16Offset
     uint8_t cmd;
     uint16_t addr, nreg;
     eMBErrorCode errcode = MB_ENOERR;
-    
-    errcode=errcode;
+
+    errcode = errcode;
     cpad_slave_inst.rxbuf[0] = (uint8_t)(T5_HEAD >> 8);
     cpad_slave_inst.rxbuf[1] = (uint8_t)(T5_HEAD);
     if (u8RW == T5_WRITE) //写命令

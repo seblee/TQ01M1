@@ -23,9 +23,19 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
-#ifndef network_log
-#define network_log(N, ...) rt_kprintf("####[network %s:%4d] " N "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
-#endif /* at_log(...) */
+#define DBG_ENABLE
+#define DBG_SECTION_NAME "network"
+#ifdef MQTT_DEBUG
+#define DBG_LEVEL DBG_LOG
+#else
+#define DBG_LEVEL DBG_INFO
+#endif /* MQTT_DEBUG */
+#define DBG_COLOR
+#include <rtdbg.h>
+
+#ifndef LOG_D
+#error "Please update the 'rtdbg.h' file to GitHub latest version (https://github.com/RT-Thread/rt-thread/blob/master/include/rtdbg.h)"
+#endif
 
 #define DEVICE_NAME device_info.device_name
 #define PRODUCT_KEY device_info.product_key
@@ -91,10 +101,10 @@ void net_thread_entry(void *parameter)
 
     // result = network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
     network_get_interval(&client.RealtimeInterval, &client.TimingInterval);
-    network_log("RealtimeInterval:%d, TimingInterval:%d", client.RealtimeInterval, client.TimingInterval);
+    LOG_D("[%d] RealtimeInterval:%d, TimingInterval:%d", rt_tick_get(), client.RealtimeInterval, client.TimingInterval);
 
-    network_log("u16Net_Sel:%d", g_sys.config.ComPara.Net_Conf.u16Net_Sel);
-    network_log("u16Net_WifiSet:0x%04X", g_sys.config.ComPara.Net_Conf.u16Net_WifiSet);
+    LOG_D("[%d] u16Net_Sel:%d", rt_tick_get(), g_sys.config.ComPara.Net_Conf.u16Net_Sel);
+    LOG_D("[%d] u16Net_WifiSet:0x%04X", rt_tick_get(), g_sys.config.ComPara.Net_Conf.u16Net_WifiSet);
 
     static int is_started = 0;
     if (is_started)
@@ -111,7 +121,7 @@ void net_thread_entry(void *parameter)
     paho_mqtt_start(&client);
     is_started = 1;
 _exit:
-    network_log("result:%d", result);
+    LOG_D("[%d] result:%d", rt_tick_get(), result);
 
     return;
 }
@@ -143,7 +153,7 @@ void network_Serialize_init_json(char **datapoint)
 
     result = cJSON_AddStringToObject(root, "MCode", "001");
     if (result == NULL)
-        network_log("JSON add err");
+        LOG_D("JSON add err");
 
     rt_snprintf(RequestNoStr, sizeof(RequestNoStr), "%d", msgid);
     result = cJSON_AddStringToObject(root, "RequestNo", RequestNoStr);
@@ -159,19 +169,19 @@ void network_Serialize_init_json(char **datapoint)
 
     rt_snprintf(sign_hex, sizeof(sign_hex), "DeviceName=%s&MCode=001&ProductKey=%s&RequestNo=%s&Timestamp=%s&Key=123456", DEVICE_NAME, PRODUCT_KEY, RequestNoStr, Timestamp_str);
     utils_md5((const unsigned char *)sign_hex, strlen(sign_hex), sign);
-    network_log("MD5(%s)", sign_hex);
+    // LOG_D("[%d] MD5(%s)", rt_tick_get(), sign_hex);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
     for (i = 0; i < 16; ++i)
     {
         sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
         sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
     }
-    // network_log("MD5=%s", sign_hex);
+    // LOG_D("[%d] MD5=%s", sign_hex);
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
-        network_log("JSON len:%d", strlen(*datapoint));
+        LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
 }
 /**
  ****************************************************************************
@@ -192,30 +202,30 @@ void network_Serialize_inform_json(char **datapoint)
     root = cJSON_CreateObject();
     if (!root)
     {
-        network_log("get root faild !\n");
+        LOG_D("[%d] get root faild !\n");
         goto __exit;
     }
 
     result = cJSON_AddStringToObject(root, "id", "1");
     if (result == NULL)
-        network_log("JSON add err");
+        LOG_D("[%d] JSON add err", rt_tick_get());
 
     JS_paprms = cJSON_CreateObject();
     if (!JS_paprms)
     {
-        network_log("construct JS_paprms faild !\n");
+        LOG_D("[%d] construct JS_paprms faild !", rt_tick_get());
         goto __exit;
     }
     result = cJSON_AddStringToObject(JS_paprms, "version", "0.0.2");
     if (result == NULL)
-        network_log("JSON add err");
+        LOG_D("[%d] JSON add err", rt_tick_get());
     cJSON_AddItemToObject(root, "params", JS_paprms);
 
     *datapoint = cJSON_PrintUnformatted(root);
 __exit:
     cJSON_Delete(root);
     if (*datapoint)
-        network_log("JSON len:%d", strlen(*datapoint));
+        LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
 }
 
 /**
@@ -273,7 +283,7 @@ void network_Serialize_para_json(char **datapoint)
                 DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str, Timestamp_str);
 
     utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
-    // network_log("MD5");
+    // LOG_D("[%d] MD5");
     // rt_kprintf("MD5(%.400s", sign_Cache);
     // rt_kprintf("%s)\r\n", sign_Cache + 400);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
@@ -282,13 +292,13 @@ void network_Serialize_para_json(char **datapoint)
         sign_hex[i * 2] = utils_hb2hex(sign[i] >> 4);
         sign_hex[i * 2 + 1] = utils_hb2hex(sign[i]);
     }
-    // network_log("MD5=%s", sign_hex);
+    // LOG_D("[%d] MD5=%s", sign_hex);
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
     {
-        network_log("JSON len:%d", strlen(*datapoint));
+        LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
         // rt_kprintf("string:%.400s", *datapoint);
         // rt_kprintf("%s\r\n", *datapoint + 400);
     }
@@ -306,11 +316,10 @@ rt_err_t network_water_notice_parse(const char *Str)
 {
     rt_err_t rc;
     cJSON *root = RT_NULL;
-    network_log("Str:%s", Str);
     root = cJSON_Parse(Str);
     if (!root)
     {
-        network_log("get root faild !\n");
+        LOG_E("[%d] get root faild !", rt_tick_get());
         rc = -1;
     }
     else
@@ -318,17 +327,16 @@ rt_err_t network_water_notice_parse(const char *Str)
         cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
         if (!js_MCode)
         {
-            network_log("get MCode faild !\n");
+            LOG_E("[%d] get MCode faild !", rt_tick_get());
             rc = -1;
             goto exit;
         }
         int MCode_value = 0;
         sscanf(js_MCode->valuestring, "%d", &MCode_value);
-        network_log("MCode_value:%d !\n", MCode_value);
+        LOG_D("[%d] MCode_value:%d !\n", rt_tick_get(), MCode_value);
         if (MCode_value == MCode_QRCODE_GENERATE)
         {
-            network_log("get QRCode !!!");
-            //          iot_state = IOT_PARAM_REPORT;
+            LOG_D("[%d] get QRCode !!!", rt_tick_get());
         }
         rc = RT_EOK;
     }
@@ -413,7 +421,7 @@ void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
         rt_snprintf(sign_Cache, sizeof(sign_Cache), "DeviceName=%s&MCode=009&ProductKey=%s&RequestNo=%d&Statusaddrstart=500&Statusleng=50&Statusmsg=%s&Timestamp=%s&Key=123456", DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str);
 
     utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
-    // network_log("MD5(%s)", sign_Cache);
+    // LOG_D("[%d] MD5(%s)", rt_tick_get(), sign_Cache);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
     for (i = 0; i < 16; ++i)
     {
@@ -424,7 +432,7 @@ void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     if (*datapoint)
-        network_log("JSON len:%d", strlen(*datapoint));
+        LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
 }
 /**
  ****************************************************************************
@@ -453,7 +461,7 @@ void network_get_interval(unsigned int *real, unsigned int *timing)
     if (interval_temp < REALTIME_INTERVAL_MIN)
         interval_temp = REALTIME_INTERVAL_MIN;
     *real = interval_temp;
-    // network_log("real:%d timing:%d", *real, *timing);
+    // LOG_D("[%d] real:%d timing:%d", *real, *timing);
 }
 
 /**
@@ -470,21 +478,21 @@ rt_err_t network_parameter_get_parse(const char *Str)
     rt_err_t rc;
     int MCode_value;
     cJSON *root = RT_NULL;
-    network_log("Str:%s", Str);
+    LOG_D("[%d] Str:%s", rt_tick_get(), Str);
     root = cJSON_Parse(Str);
     if (!root)
     {
-        network_log("get root faild !\n");
+        LOG_E("[%d] get root faild !\n");
         rc = -1;
     }
     else
     {
         cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
         sscanf(js_MCode->valuestring, "%d", &MCode_value);
-        network_log("MCode_value:%d !\n", MCode_value);
+        LOG_D("[%d] MCode_value:%d !", rt_tick_get(), MCode_value);
         if (MCode_value == MCode_PARAMETER_GET)
         {
-            network_log("get PARAMETER_GET !!!");
+            LOG_D("[%d] get PARAMETER_GET !!!", rt_tick_get());
             //      _iot_state_t pub_msg = IOT_PARAM_REPORT;
             //    rt_mq_send(publish_mq, &pub_msg, sizeof(_iot_state_t));
         }
@@ -509,56 +517,56 @@ rt_err_t network_parameter_set_parse(const char *Str)
     rt_err_t rc;
     int MCode_value;
     cJSON *root = RT_NULL;
-    network_log("Str:%s", Str);
+    LOG_D("[%d] Str:%s", rt_tick_get(), Str);
     root = cJSON_Parse(Str);
     if (!root)
     {
-        network_log("get root faild !\n");
+        LOG_E("[%d] get root faild !", rt_tick_get());
         rc = -1;
     }
     else
     {
         cJSON *js_MCode = cJSON_GetObjectItem(root, "MCode");
         sscanf(js_MCode->valuestring, "%d", &MCode_value);
-        network_log("MCode_value:%d !\n", MCode_value);
+        LOG_D("[%d] MCode_value:%d !", rt_tick_get(), MCode_value);
         if (MCode_value == MCode_PARAMETER_SET)
         {
-            network_log("get PARAMETER_SET !!!");
+            LOG_D("[%d] get PARAMETER_SET !!!", rt_tick_get());
             int Setaddrstart;
             cJSON *js_Setaddrstart = cJSON_GetObjectItem(root, "Setaddrstart");
             if (js_Setaddrstart == RT_NULL)
             {
                 rc = -RT_ERROR;
-                network_log("get js_Setaddrstart err !!!");
+                LOG_E("[%d] get js_Setaddrstart err !!!", rt_tick_get());
             }
             sscanf(js_Setaddrstart->valuestring, "%d", &Setaddrstart);
-            network_log("get Setaddrstart:%d", Setaddrstart);
+            LOG_D("[%d] get Setaddrstart:%d", rt_tick_get(), Setaddrstart);
             int Settingleng;
             cJSON *js_Settingleng = cJSON_GetObjectItem(root, "Settingleng");
             if (js_Settingleng == RT_NULL)
             {
                 rc = -RT_ERROR;
-                network_log("get js_Settingleng err !!!");
+                LOG_E("[%d] get js_Settingleng err !!!", rt_tick_get());
             }
             sscanf(js_Settingleng->valuestring, "%d", &Settingleng);
-            network_log("get Settingleng:%d", Settingleng);
+            LOG_D("[%d] get Settingleng:%d", rt_tick_get(), Settingleng);
             cJSON *js_Settingmsg = cJSON_GetObjectItem(root, "Settingmsg");
             if (js_Settingmsg == RT_NULL)
             {
                 rc = -RT_ERROR;
-                network_log("get js_Settingmsg err !!!");
+                LOG_E("[%d] get js_Settingmsg err !!!", rt_tick_get());
             }
             char *Settingmsg_str = rt_calloc(Settingleng * 4 + 1, sizeof(rt_uint8_t));
             if (Settingmsg_str == RT_NULL)
             {
                 rc = -RT_ERROR;
-                network_log("get Settingmsg_str err !!!");
+                LOG_E("[%d] get Settingmsg_str err !!!", rt_tick_get());
             }
             int Settingmsg_data;
             if ((js_Settingmsg != RT_NULL) && (Settingmsg_str != RT_NULL))
             {
                 rt_strncpy(Settingmsg_str, js_Settingmsg->valuestring, Settingleng * 4);
-                network_log("get Settingmsg_str:%s", Settingmsg_str);
+                LOG_E("[%d] get Settingmsg_str:%s", rt_tick_get(), Settingmsg_str);
                 int i;
                 unsigned char *Settingmsg_data_buf = rt_calloc(Settingleng * 2, sizeof(rt_uint8_t));
 
@@ -599,11 +607,11 @@ rt_err_t network_register_parse(const char *Str, iotx_device_info_t *dev_info)
 {
     rt_err_t rc;
     cJSON *root = RT_NULL;
-    network_log("Str:%s", Str);
+    LOG_D("[%d] Str:%s", rt_tick_get(), Str);
     root = cJSON_Parse(Str);
     if (!root)
     {
-        network_log("get root faild !\n");
+        LOG_E("[%d] get root faild !", rt_tick_get());
         rc = -RT_ERROR;
     }
     else
@@ -612,46 +620,46 @@ rt_err_t network_register_parse(const char *Str, iotx_device_info_t *dev_info)
         if (js_Code == RT_NULL)
         {
             rc = -RT_ERROR;
-            network_log("get js_Code err !!!");
+            LOG_E("[%d] get js_Code err !!!", rt_tick_get());
             goto exit;
         }
-        network_log("code:%d !", js_Code->valueint);
+        LOG_D("[%d] code:%d !", js_Code->valueint);
         cJSON *js_Message = cJSON_GetObjectItem(root, "message");
         if (js_Message == RT_NULL)
         {
             rc = -RT_ERROR;
-            network_log("get js_Message err !!!");
+            LOG_E("[%d] get js_Message err !!!", rt_tick_get());
             goto exit;
         }
-        network_log("message:%s !", js_Message->valuestring);
+        LOG_D("[%d] message:%s !", rt_tick_get(), js_Message->valuestring);
         if (js_Code->valueint == 200)
         {
             cJSON *js_Data = cJSON_GetObjectItem(root, "data");
             if (js_Data == RT_NULL)
             {
                 rc = -RT_ERROR;
-                network_log("get js_Data err !!!");
+                LOG_E("[%d] get js_Data err !!!", rt_tick_get());
                 goto exit;
             }
             cJSON *js_deviceName = cJSON_GetObjectItem(js_Data, "deviceName");
             if (js_deviceName == RT_NULL)
             {
                 rc = -RT_ERROR;
-                network_log("get js_deviceName err !!!");
+                LOG_E("[%d] get js_deviceName err !!!", rt_tick_get());
                 goto exit;
             }
             cJSON *js_deviceSecret = cJSON_GetObjectItem(js_Data, "deviceSecret");
             if (js_deviceSecret == RT_NULL)
             {
                 rc = -RT_ERROR;
-                network_log("get js_deviceSecret err !!!");
+                LOG_E("[%d] get js_deviceSecret err !!!", rt_tick_get());
                 goto exit;
             }
             cJSON *js_productKey = cJSON_GetObjectItem(js_Data, "productKey");
             if (js_productKey == RT_NULL)
             {
                 rc = -RT_ERROR;
-                network_log("get js_productKey err !!!");
+                LOG_E("[%d] get js_productKey err !!!", rt_tick_get());
                 goto exit;
             }
             rt_memset(dev_info, 0, sizeof(iotx_device_info_t));
@@ -660,10 +668,10 @@ rt_err_t network_register_parse(const char *Str, iotx_device_info_t *dev_info)
             rt_snprintf(dev_info->device_secret, sizeof(dev_info->device_secret), "%s", js_deviceSecret->valuestring);
             rt_snprintf(dev_info->device_id, sizeof(dev_info->device_id), "%s", DEVICE_ID);
 
-            network_log("device_id:%s", dev_info->device_id);
-            network_log("device_name:%s", dev_info->device_name);
-            network_log("product_key:%s", dev_info->product_key);
-            network_log("device_secret:%s", dev_info->device_secret);
+            LOG_D("[%d] device_id:%s", rt_tick_get(), dev_info->device_id);
+            LOG_D("[%d] device_name:%s", rt_tick_get(), dev_info->device_name);
+            LOG_D("[%d] product_key:%s", rt_tick_get(), dev_info->product_key);
+            LOG_D("[%d] device_secret:%s", rt_tick_get(), dev_info->device_secret);
             dev_info->flag = DEVICE_INFO_FLAG;
         }
         else

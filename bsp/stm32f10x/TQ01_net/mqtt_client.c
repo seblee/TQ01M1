@@ -55,11 +55,11 @@
 static void mqtt_WATER_NOTICE_callback(MQTTClient *c, MessageData *msg_data)
 {
     *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
-    LOG_D("mqtt sub callback: %.*s %.*s",
-          msg_data->topicName->lenstring.len,
-          msg_data->topicName->lenstring.data,
-          msg_data->message->payloadlen,
-          (char *)msg_data->message->payload);
+    // LOG_D("mqtt sub callback: %.*s %.*s",
+    //       msg_data->topicName->lenstring.len,
+    //       msg_data->topicName->lenstring.data,
+    //       msg_data->message->payloadlen,
+    //       (char *)msg_data->message->payload);
     if (network_water_notice_parse((const char *)msg_data->message->payload) == RT_EOK)
         c->isQRcodegeted = 1;
     return;
@@ -67,21 +67,21 @@ static void mqtt_WATER_NOTICE_callback(MQTTClient *c, MessageData *msg_data)
 static void mqtt_PARAMETER_SET_callback(MQTTClient *c, MessageData *msg_data)
 {
     *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
-    LOG_D("mqtt sub callback: %.*s %.*s",
-          msg_data->topicName->lenstring.len,
-          msg_data->topicName->lenstring.data,
-          msg_data->message->payloadlen,
-          (char *)msg_data->message->payload);
+    // LOG_D("mqtt sub callback: %.*s %.*s",
+    //       msg_data->topicName->lenstring.len,
+    //       msg_data->topicName->lenstring.data,
+    //       msg_data->message->payloadlen,
+    //       (char *)msg_data->message->payload);
     network_parameter_set_parse((const char *)msg_data->message->payload);
 }
 static void mqtt_PARAMETER_GET_callback(MQTTClient *c, MessageData *msg_data)
 {
     *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
-    LOG_D("mqtt sub callback: %.*s %.*s",
-          msg_data->topicName->lenstring.len,
-          msg_data->topicName->lenstring.data,
-          msg_data->message->payloadlen,
-          (char *)msg_data->message->payload);
+    // LOG_D("mqtt sub callback: %.*s %.*s",
+    //       msg_data->topicName->lenstring.len,
+    //       msg_data->topicName->lenstring.data,
+    //       msg_data->message->payloadlen,
+    //       (char *)msg_data->message->payload);
     if (network_parameter_get_parse((const char *)msg_data->message->payload) == RT_EOK)
         c->isparameterPutted = 0;
     return;
@@ -89,12 +89,11 @@ static void mqtt_PARAMETER_GET_callback(MQTTClient *c, MessageData *msg_data)
 static void mqtt_sub_callback(MQTTClient *c, MessageData *msg_data)
 {
     *((char *)msg_data->message->payload + msg_data->message->payloadlen) = '\0';
-    LOG_D("mqtt sub callback: %.*s %.*s",
-          msg_data->topicName->lenstring.len,
-          msg_data->topicName->lenstring.data,
-          msg_data->message->payloadlen,
-          (char *)msg_data->message->payload);
-
+    // LOG_D("mqtt sub callback: %.*s %.*s",
+    //       msg_data->topicName->lenstring.len,
+    //       msg_data->topicName->lenstring.data,
+    //       msg_data->message->payloadlen,
+    //       (char *)msg_data->message->payload);
     return;
 }
 
@@ -122,6 +121,9 @@ static void mqtt_online_callback(MQTTClient *c)
 static void mqtt_offline_callback(MQTTClient *c)
 {
     LOG_D("inter mqtt_offline_callback!");
+    rt_uint32_t total, used, max_used;
+    rt_memory_info(&total, &used, &max_used);
+    LOG_I("total:%d,used:%d,max_used:%d", total, used, max_used);
 }
 
 extern sys_reg_st g_sys;

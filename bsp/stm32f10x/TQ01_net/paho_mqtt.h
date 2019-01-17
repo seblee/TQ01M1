@@ -39,6 +39,7 @@ typedef enum
 /* all failure return codes must be negative */
 enum returnCode
 {
+    PAHO_ERROR = -3,
     PAHO_BUFFER_OVERFLOW = -2,
     PAHO_FAILURE = -1,
     PAHO_SUCCESS = 0

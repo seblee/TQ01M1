@@ -170,7 +170,7 @@ int PCF8563_Config(void)
     PCF8563_GetTime(PCF_Format_BCD, &PC8563F_Time_Structure); //获取时间
     PCF8563_GetDate(PCF_Format_BCD, &PCF8563_Date_Structure); //获取日期
 
-    LOG_I("Time: 20%02x-%02x-%02x %02x:%02x:%02x",
+    LOG_I("Greenwich Time: 20%02x-%02x-%02x %02x:%02x:%02x",
           PCF8563_Date_Structure.RTC_Years,    //显示年
           PCF8563_Date_Structure.RTC_Months,   //显示月
           PCF8563_Date_Structure.RTC_Days,     //显示日

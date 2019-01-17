@@ -20,7 +20,7 @@
 #include "modul_ctr.h"
 
 #define DBG_ENABLE
-#define DBG_SECTION_NAME "MQTT"
+#define DBG_SECTION_NAME "paho"
 #ifdef MQTT_DEBUG
 #define DBG_LEVEL DBG_LOG
 #else
@@ -48,6 +48,7 @@
 #endif
 
 static int mq_client_publish(MQTTClient *c, _topic_pub_enmu_t pub_type);
+static int MQTT_cycle(MQTTClient *c);
 
 /*
  * resolve server address
@@ -87,7 +88,7 @@ static int mqtt_resolve_uri(MQTTClient *c, struct addrinfo **res)
         host_addr = uri + 6;
 
 #ifndef MQTT_USING_TLS
-        LOG_W("Warning: tls uri, please enable mqtt tls support!");
+        LOG_W("[%d] Warning: tls uri, please enable mqtt tls support!", rt_tick_get());
         rc = -1;
         goto _exit;
 #endif
@@ -183,7 +184,7 @@ static int mqtt_resolve_uri(MQTTClient *c, struct addrinfo **res)
         ret = getaddrinfo(host_addr_new, port_str, &hint, res);
         if (ret != 0)
         {
-            LOG_E("getaddrinfo err: %d '%s'", ret, host_addr_new);
+            LOG_E("[%d] getaddrinfo err: %d '%s'", rt_tick_get(), ret, host_addr_new);
             rc = -1;
             goto _exit;
         }
@@ -211,7 +212,7 @@ static int mqtt_open_tls(MQTTClient *c)
     c->tls_session = (MbedTLSSession *)rt_malloc(sizeof(MbedTLSSession));
     if (c->tls_session == RT_NULL)
     {
-        LOG_E("open tls failed, no memory for tls_session buffer malloc");
+        LOG_E("[%d] open tls failed, no memory for tls_session buffer malloc", rt_tick_get());
         return -RT_ENOMEM;
     }
     memset(c->tls_session, 0x0, sizeof(MbedTLSSession));
@@ -220,7 +221,7 @@ static int mqtt_open_tls(MQTTClient *c)
     c->tls_session->buffer = rt_malloc(c->tls_session->buffer_len);
     if (c->tls_session->buffer == RT_NULL)
     {
-        LOG_E("open tls failed, no memory for tls_session buffer malloc");
+        LOG_E("[%d] open tls failed, no memory for tls_session buffer malloc", rt_tick_get());
         rt_free(c->tls_session);
         c->tls_session = RT_NULL;
         return -RT_ENOMEM;
@@ -228,7 +229,7 @@ static int mqtt_open_tls(MQTTClient *c)
 
     if ((tls_ret = mbedtls_client_init(c->tls_session, (void *)pers, strlen(pers))) < 0)
     {
-        LOG_E("mbedtls_client_init err return : -0x%x", -tls_ret);
+        LOG_E("[%d] mbedtls_client_init err return : -0x%x", rt_tick_get(), -tls_ret);
         return -RT_ERROR;
     }
 
@@ -251,7 +252,7 @@ static int net_connect(MQTTClient *c)
     {
         if (mqtt_open_tls(c) < 0)
         {
-            LOG_E("mqtt_open_tls err!");
+            LOG_E("[%d] mqtt_open_tls err!", rt_tick_get());
             return -RT_ERROR;
         }
     }
@@ -264,7 +265,7 @@ static int net_connect(MQTTClient *c)
     rc = mqtt_resolve_uri(c, &addr_res);
     if (rc < 0 || addr_res == RT_NULL)
     {
-        LOG_E("resolve uri err");
+        LOG_E("[%d] resolve uri err", rt_tick_get());
         goto _exit;
     }
 
@@ -275,13 +276,13 @@ static int net_connect(MQTTClient *c)
 
         if ((tls_ret = mbedtls_client_context(c->tls_session)) < 0)
         {
-            LOG_E("mbedtls_client_context err return : -0x%x", -tls_ret);
+            LOG_E("[%d] mbedtls_client_context err return : -0x%x", rt_tick_get(), -tls_ret);
             return -RT_ERROR;
         }
 
         if ((tls_ret = mbedtls_client_connect(c->tls_session)) < 0)
         {
-            LOG_E("mbedtls_client_connect err return : -0x%x", -tls_ret);
+            LOG_E("[%d] mbedtls_client_connect err return : -0x%x", rt_tick_get(), -tls_ret);
             rc = -RT_ERROR;
             goto _exit;
         }
@@ -302,14 +303,16 @@ static int net_connect(MQTTClient *c)
 
     if ((c->sock = socket(addr_res->ai_family, SOCK_STREAM, 0)) == -1)
     {
-        LOG_E("create socket error!");
+        LOG_E("[%d] create socket error!", rt_tick_get());
         rc = -1;
+        _module_state_t state = MODULE_REINIT;
+        module_state(&state);
         goto _exit;
     }
 
     if ((rc = connect(c->sock, addr_res->ai_addr, addr_res->ai_addrlen)) == -1)
     {
-        LOG_E("connect err!");
+        LOG_E("[%d] connect err!", rt_tick_get());
         rc = -2;
         goto _exit;
     }
@@ -425,7 +428,7 @@ static int net_read(MQTTClient *c, unsigned char *buf, int len, int timeout)
             fd_set readset;
             struct timeval interval;
 
-            LOG_D("net_read %d:%d, timeout:%d", bytes, len, timeout);
+            LOG_D("net_read %d:%d, timeout:%d", rt_tick_get(), bytes, len, timeout);
             timeout = 0;
 
             interval.tv_sec = 1;
@@ -438,7 +441,7 @@ static int net_read(MQTTClient *c, unsigned char *buf, int len, int timeout)
         }
         else
         {
-            LOG_D("net_read %d:%d, break!", bytes, len);
+            LOG_D("net_read %d:%d, break!", rt_tick_get(), bytes, len);
             break;
         }
     }
@@ -512,7 +515,7 @@ static int MQTTConnect(MQTTClient *c)
 
     if (c->isconnected) /* don't send connect packet again if we are already connected */
     {
-        LOG_E("%s c-> is not connected", __FUNCTION__);
+        LOG_E("[%d] %s c-> is not connected", rt_tick_get(), __FUNCTION__);
         goto _exit;
     }
 
@@ -520,13 +523,13 @@ static int MQTTConnect(MQTTClient *c)
 
     if ((len = MQTTSerialize_connect(c->buf, c->buf_size, options)) <= 0)
     {
-        LOG_E("%s MQTTSerialize_connect fail", __FUNCTION__);
+        LOG_E("[%d] %s MQTTSerialize_connect fail", rt_tick_get(), __FUNCTION__);
         goto _exit;
     }
 
     if ((rc = sendPacket(c, len)) != 0) // send the connect packet
     {
-        LOG_E("%s sendPacket fail", __FUNCTION__);
+        LOG_E("[%d] %s sendPacket fail", rt_tick_get(), __FUNCTION__);
         goto _exit;
     }
 
@@ -545,7 +548,7 @@ static int MQTTConnect(MQTTClient *c)
 
         if (res <= 0)
         {
-            LOG_E("%s wait resp fail, res:%d errno:%d", __FUNCTION__, res, errno);
+            LOG_E("[%d] %s wait resp fail, res:%d errno:%d", rt_tick_get(), __FUNCTION__, res, errno);
             rc = -1;
             goto _exit;
         }
@@ -554,7 +557,7 @@ static int MQTTConnect(MQTTClient *c)
     rc = MQTTPacket_readPacket(c);
     if (rc < 0)
     {
-        LOG_E("%s MQTTPacket_readPacket fail", __FUNCTION__);
+        LOG_E("[%d] %s MQTTPacket_readPacket fail", rt_tick_get(), __FUNCTION__);
         goto _exit;
     }
 
@@ -616,8 +619,8 @@ static int MQTTSubscribe(MQTTClient *c, const char *topicFilter, enum QoS qos)
 
     if (!c->isconnected)
         goto _exit;
-
-    len = MQTTSerialize_subscribe(c->buf, c->buf_size, 0, getNextPacketId(c), 1, &topic, &qos_sub);
+    c->next_packetid = getNextPacketId(c);
+    len = MQTTSerialize_subscribe(c->buf, c->buf_size, 0, c->next_packetid, 1, &topic, &qos_sub);
     if (len <= 0)
         goto _exit;
     if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
@@ -638,35 +641,12 @@ static int MQTTSubscribe(MQTTClient *c, const char *topicFilter, enum QoS qos)
 
         if (res <= 0)
         {
-            LOG_E("%s wait resp fail, res:%d errno:%d", __FUNCTION__, res, errno);
+            LOG_E("[%d] %s wait resp fail, res:%d errno:%d", rt_tick_get(), __FUNCTION__, res, errno);
             rc = -1;
             goto _exit;
         }
     }
-
-    rc = MQTTPacket_readPacket(c);
-    if (rc < 0)
-    {
-        LOG_E("MQTTPacket_readPacket MQTTConnect fail");
-        goto _exit;
-    }
-
-    if (rc == SUBACK) // wait for suback
-    {
-        int count = 0, grantedQoS = -1;
-        unsigned short mypacketid;
-
-        if (MQTTDeserialize_suback(&mypacketid, 1, &count, &grantedQoS, c->readbuf, c->readbuf_size) == 1)
-            rc = grantedQoS; // 0, 1, 2 or 0x80
-
-        if (rc != 0x80)
-        {
-            rc = 0;
-        }
-    }
-    else
-        rc = PAHO_FAILURE;
-
+    rc = MQTT_cycle(c);
 _exit:
     return rc;
 }
@@ -750,7 +730,8 @@ static int MQTT_cycle(MQTTClient *c)
 
     if (packet_type == -1)
     {
-        rc = PAHO_FAILURE;
+        rc = PAHO_ERROR;
+        LOG_E("[%d] MQTTPacket_readPacket MQTTConnect fail", rt_tick_get());
         goto exit;
     }
 
@@ -758,8 +739,21 @@ static int MQTT_cycle(MQTTClient *c)
     {
     case CONNACK:
     case PUBACK:
-    case SUBACK:
         break;
+    case SUBACK:
+    {
+        int count = 0, grantedQoS = -1;
+        unsigned short mypacketid;
+
+        if (MQTTDeserialize_suback(&mypacketid, 1, &count, &grantedQoS, c->readbuf, c->readbuf_size) == 1)
+            rc = grantedQoS; // 0, 1, 2 or 0x80
+
+        if (rc != 0x80)
+        {
+            rc = 0;
+        }
+    }
+    break;
     case PUBLISH:
     {
         MQTTString topicName;
@@ -822,15 +816,14 @@ enum ClientSend
 static void paho_mqtt_thread(void *param)
 {
     MQTTClient *c = (MQTTClient *)param;
-    int i, rc, len;
-    int rc_t = 0;
+    int i, rc, len, rc_t = 0;
 
 _mqtt_start:
 
     if ((module_state(RT_NULL) != MODULE_4G_READY) &&
         (module_state(RT_NULL) != MODULE_WIFI_READY))
     {
-        LOG_W("module is not ready");
+        LOG_W("[%d] module is not ready", rt_tick_get());
         rt_thread_delay(rt_tick_from_millisecond(5000));
         goto _net_disconnect;
     }
@@ -843,18 +836,18 @@ _mqtt_start:
     rc = net_connect(c);
     if (rc != 0)
     {
-        LOG_E("Net connect error(%d)", rc);
+        LOG_E("[%d] Net connect error(%d)", rt_tick_get(), rc);
         goto _mqtt_restart;
     }
 
     rc = MQTTConnect(c);
     if (rc != 0)
     {
-        LOG_E("MQTT connect error(%d): %s", rc, MQTTSerialize_connack_string(rc));
+        LOG_E("[%d] MQTT connect error(%d): %s", rt_tick_get(), rc, MQTTSerialize_connack_string(rc));
         goto _mqtt_disconnect;
     }
 
-    LOG_I("MQTT server connect success");
+    LOG_I("[%d] MQTT server connect success", rt_tick_get());
 
     for (i = 0; i < MAX_MESSAGE_HANDLERS; i++)
     {
@@ -872,7 +865,7 @@ _mqtt_start:
         {
             if (rc == 0x80)
             {
-                LOG_E("QoS config err!");
+                LOG_E("[%d] QoS config err!", rt_tick_get());
             }
             goto _mqtt_disconnect;
         }
@@ -916,32 +909,35 @@ _mqtt_start:
                     }
                     if (timeout.tv_sec <= 5)
                         timeout.tv_sec = 1;
-                    LOG_I("[%d]timeout.tv_sec: %d ", rt_tick_get(), timeout.tv_sec);
                 }
                 else
                 {
                     timeout.tv_sec = 1;
                     sendState = SENDPARAMETER;
-                    LOG_I("send SENDPARAMETER after timeout.tv_sec: %d ", timeout.tv_sec);
                 }
             }
             else
             {
-                timeout.tv_sec = 1;
-                sendState = SENDINIT;
-                LOG_I("send SENDINIT after timeout.tv_sec: %d ", timeout.tv_sec);
+                if (sendState == SENDEDINIT)
+                    timeout.tv_sec = 5;
+                else
+                {
+                    timeout.tv_sec = 1;
+                    sendState = SENDINIT;
+                }
             }
         }
         else
         {
             timeout.tv_sec = 1;
             sendState = SENDINFORM;
-            LOG_I("send SENDINFORM after timeout.tv_sec: %d ", timeout.tv_sec);
         }
 
         FD_ZERO(&readset);
         FD_SET(c->sock, &readset);
         timeout.tv_usec = 0;
+        LOG_I("[%d] State:%d timeout.tv_sec: %d ", rt_tick_get(), sendState, timeout.tv_sec);
+
         /* int select(maxfdp1, readset, writeset, exceptset, timeout); */
         res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
         if (res == 0)
@@ -953,7 +949,6 @@ _mqtt_start:
                 len = mq_client_publish(c, OTA_INFORM);
                 break;
             case SENDPING:
-            case SENDEDINIT:
             {
                 len = MQTTSerialize_pingreq(c->buf, c->buf_size);
                 rc = sendPacket(c, len);
@@ -979,14 +974,18 @@ _mqtt_start:
                 goto __receive_;
             } /* res == 0: timeount for ping. */
             // break;
+            case SENDEDINIT:
             case SENDINIT:
                 len = mq_client_publish(c, PLATFORM_INIT);
                 break;
             case SENDPARAMETER:
                 len = mq_client_publish(c, PARAMETER_PUT);
                 LOG_I("[%d] SENDPARAMETER res: %d", rt_tick_get(), len);
+                c->isQRcodegeted = 0;
                 break;
             case SENDREALTIME:
+                // goto _mqtt_disconnect;
+
                 len = mq_client_publish(c, REALTIME_REPORT);
                 c->tick_realtime = rt_tick_get();
                 break;
@@ -999,13 +998,13 @@ _mqtt_start:
             }
             if (len <= 0)
             {
-                LOG_I("MQTTSerialize_publish sendPacket rc: %d", rc);
+                LOG_I("[%d] MQTTSerialize_publish sendPacket rc: %d", rt_tick_get(), rc);
                 goto _mqtt_disconnect;
             }
 
             if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
             {
-                LOG_E("MQTTSerialize_publish sendPacket rc: %d", rc);
+                LOG_E("[%d] MQTTSerialize_publish sendPacket rc: %d", rt_tick_get(), rc);
                 goto _mqtt_disconnect;
             }
 
@@ -1024,23 +1023,24 @@ _mqtt_start:
             }
             if (sendState == SENDINFORM)
                 c->isInformed = 1;
-            if (sendState == SENDPARAMETER)
-                c->isparameterPutted = 1;
-            sendState++;
+            // if (sendState == SENDPARAMETER)
+            //     c->isparameterPutted = 1;
+            if (sendState != SENDEDINIT)
+                sendState++;
         }
 
     __receive_:
         if (res < 0)
         {
-            LOG_E("select res: %d", res);
+            LOG_E("[%d] select res: %d", rt_tick_get(), res);
             goto _mqtt_disconnect;
         }
         if (FD_ISSET(c->sock, &readset))
         {
             //LOG_D("sock FD_ISSET");
-            rc_t = MQTT_cycle(c);
-            //LOG_D("sock FD_ISSET rc_t : %d", rc_t);
-            if (rc_t < 0)
+            rc = MQTT_cycle(c);
+            //LOG_D("[%d] sock FD_ISSET rc : %d, rt_tick_get(), rc);
+            if (rc < 0)
                 goto _mqtt_disconnect;
 
             continue;
@@ -1048,7 +1048,7 @@ _mqtt_start:
         if ((module_state(RT_NULL) != MODULE_4G_READY) &&
             (module_state(RT_NULL) != MODULE_WIFI_READY))
         {
-            LOG_W("module is need restart");
+            LOG_W("[%d] module is need restart", rt_tick_get());
             goto _mqtt_disconnect;
         }
     } /* while (1) */
@@ -1064,7 +1064,7 @@ _net_disconnect:
     net_disconnect(c);
     if (module_state(RT_NULL) == MODULE_REINIT)
     {
-        LOG_W("module is need restart");
+        LOG_W("[%d] module is need restart", rt_tick_get());
         rt_sem_release(module_setup_sem);
     }
     rt_thread_delay(RT_TICK_PER_SECOND * 5);
@@ -1100,7 +1100,7 @@ int paho_mqtt_start(MQTTClient *client)
     tid = rt_malloc(RT_ALIGN(sizeof(struct rt_thread), 8) + stack_size);
     if (!tid)
     {
-        LOG_E("no memory for thread: MQTT");
+        LOG_E("[%d] no memory for thread: MQTT");
         return -1;
     }
 
@@ -1146,7 +1146,7 @@ int MQTT_CMD(MQTTClient *c, const char *cmd)
     cmd_len = strlen(cmd) + 1;
     if (cmd_len >= sizeof(MQTTMessage))
     {
-        LOG_E("cmd too loog %d:", cmd_len, sizeof(MQTTMessage));
+        LOG_E("[%d] cmd too loog %d:", rt_tick_get(), cmd_len, sizeof(MQTTMessage));
         goto _exit;
     }
 
@@ -1245,11 +1245,13 @@ static int mq_client_publish(MQTTClient *c, _topic_pub_enmu_t pub_type)
     }
     if (msg_str == RT_NULL)
         goto exit;
-    message.qos = QOS1;
-    message.retained = 0;
+    message.qos = iot_pub_topics[pub_type].qos;
+    message.retained = iot_pub_topics[pub_type].restained;
+    message.dup = iot_pub_topics[pub_type].dup;
     message.payload = (void *)msg_str;
     message.payloadlen = strlen(message.payload);
-    rc = MQTTSerialize_publish(c->buf, c->buf_size, 0, message.qos, message.retained, message.id,
+    message.id = getNextPacketId(c);
+    rc = MQTTSerialize_publish(c->buf, c->buf_size, message.dup, message.qos, message.retained, message.id,
                                topic, (unsigned char *)message.payload, message.payloadlen);
     rt_free(msg_str);
 exit:
