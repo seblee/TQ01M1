@@ -5,30 +5,30 @@
 #include "dio_bsp.h"
 #include "pwm_bsp.h"
 
-//ÊÖ¶¯¿ØÖÆÄ£Ê½±ÈÌØÎ»²Ù×÷º¯Êı
+//æ‰‹åŠ¨æ§åˆ¶æ¨¡å¼æ¯”ç‰¹ä½æ“ä½œå‡½æ•°
 static void manual_ao_op(uint8_t component_bpos, int16_t value)
 {
-		extern local_reg_st l_sys;
+    extern local_reg_st l_sys;
 
-		l_sys.ao_list[component_bpos][BITMAP_MANUAL] = value;
+    l_sys.ao_list[component_bpos][BITMAP_MANUAL] = value;
 }
 
-//×îÖÕÊı×ÖÊä³ö±ÈÌØÎ»²Ù×÷º¯Êı
+//æœ€ç»ˆæ•°å­—è¾“å‡ºæ¯”ç‰¹ä½æ“ä½œå‡½æ•°
 static void final_ao_op(uint8_t component_bpos, int16_t value)
 {
-		extern local_reg_st l_sys;
+    extern local_reg_st l_sys;
 
-		l_sys.ao_list[component_bpos][BITMAP_FINAL] = value;
+    l_sys.ao_list[component_bpos][BITMAP_FINAL] = value;
 }
 
-////PWM¿ØÖÆÄ£Ê½²Ù×÷º¯Êı
+////PWMæ§åˆ¶æ¨¡å¼æ“ä½œå‡½æ•°
 //static void manual_pwm_op(uint8_t component_bpos, int16_t value)
 //{
 //		extern local_reg_st l_sys;
 //		l_sys.pwm_list[component_bpos][BITMAP_MANUAL] = value;
 //}
 
-////×îÖÕPWMÊä³ö²Ù×÷º¯Êı
+////æœ€ç»ˆPWMè¾“å‡ºæ“ä½œå‡½æ•°
 //static void final_pwm_op(uint8_t component_bpos, int16_t value)
 //{
 //		extern local_reg_st l_sys;
@@ -36,86 +36,85 @@ static void final_ao_op(uint8_t component_bpos, int16_t value)
 //		l_sys.pwm_list[component_bpos][BITMAP_FINAL] = value;
 //}
 
-
 /**
   * @brief 	output control module dout and system status update 
 	* @param  none
 	* @retval none
   */
-//Êı×ÖÊä³öÖ´ĞĞº¯Êı
+//æ•°å­—è¾“å‡ºæ‰§è¡Œå‡½æ•°
 static void oc_do_update(uint32_t new_bitmap)
-{		
-		extern sys_reg_st		g_sys;
-		extern local_reg_st	l_sys;
-		uint32_t xor_bitmap,old_bitmap;
-		uint16_t i;
-		old_bitmap = g_sys.status.dout_bitmap[0]|((uint32_t)g_sys.status.dout_bitmap[1]<<16);
-		xor_bitmap = new_bitmap ^ old_bitmap;		
-//	  rt_kprintf("g_sys.status.dout_bitmap= %x,old_bitmap= %x,xor_bitmap=%x,new_bitmap=%x\n",g_sys.status.dout_bitmap,old_bitmap,xor_bitmap,new_bitmap);
-		if(xor_bitmap != 0)																					//if output bitmap changed
-		{
-				for(i=0;i<32;i++)
-				{
-						if(((xor_bitmap>>i)&0x00000001) != 0)										//do status change
-						{
-								if(((new_bitmap>>i)&0x00000001) != 0)
-								{
-										dio_set_do(i+1,Bit_SET);
-								}
-								else
-								{
-										dio_set_do(i+1,Bit_RESET);
-								}
-						}
-						else																											//do status no change, continue for loop
-						{
-								continue;
-						}
-				}						
-				g_sys.status.dout_bitmap[0] = new_bitmap;		//update system dout bitmap
-				g_sys.status.dout_bitmap[1] = new_bitmap>>16;		//update system dout bitmap
-				g_sys.status.ComSta.u16Dout_bitmap[0] = g_sys.status.dout_bitmap[0];		//update system dout bitmap				
-				g_sys.status.ComSta.u16Dout_bitmap[1] = g_sys.status.dout_bitmap[1];		//update system dout bitmap			
-		}
-		else																															//output bitmap unchange
-		{
-				;
-		}
-		authen_expire_cd();
-		
-//		uint16_t xor_bitmap,old_bitmap;
-//		uint16_t i;
-//		old_bitmap = g_sys.status.dout_bitmap[0];
-//		xor_bitmap = new_bitmap ^ old_bitmap;		
-////	  rt_kprintf("g_sys.status.dout_bitmap= %x,old_bitmap= %x,xor_bitmap=%x,new_bitmap=%x\n",g_sys.status.dout_bitmap,old_bitmap,xor_bitmap,new_bitmap);
-//		if(xor_bitmap != 0)																					//if output bitmap changed
-//		{
-//				for(i=0;i<16;i++)
-//				{
-//						if(((xor_bitmap>>i)&0x0001) != 0)										//do status change
-//						{
-//								if(((new_bitmap>>i)&0x0001) != 0)
-//								{
-//										dio_set_do(i+1,Bit_SET);
-//								}
-//								else
-//								{
-//										dio_set_do(i+1,Bit_RESET);
-//								}
-//						}
-//						else																											//do status no change, continue for loop
-//						{
-//								continue;
-//						}
-//				}						
-//				g_sys.status.dout_bitmap = new_bitmap;		//update system dout bitmap
-//				g_sys.status.ComSta.u16Dout_bitmap = new_bitmap;		//update system dout bitmap				
-//		}
-//		else																															//output bitmap unchange
-//		{
-//				;
-//		}
-//		authen_expire_cd();
+{
+    extern sys_reg_st g_sys;
+    extern local_reg_st l_sys;
+    uint32_t xor_bitmap, old_bitmap;
+    uint16_t i;
+    old_bitmap = g_sys.status.dout_bitmap[0] | ((uint32_t)g_sys.status.dout_bitmap[1] << 16);
+    xor_bitmap = new_bitmap ^ old_bitmap;
+    //	  rt_kprintf("g_sys.status.dout_bitmap= %x,old_bitmap= %x,xor_bitmap=%x,new_bitmap=%x\n",g_sys.status.dout_bitmap,old_bitmap,xor_bitmap,new_bitmap);
+    if (xor_bitmap != 0) //if output bitmap changed
+    {
+        for (i = 0; i < 32; i++)
+        {
+            if (((xor_bitmap >> i) & 0x00000001) != 0) //do status change
+            {
+                if (((new_bitmap >> i) & 0x00000001) != 0)
+                {
+                    dio_set_do(i + 1, Bit_SET);
+                }
+                else
+                {
+                    dio_set_do(i + 1, Bit_RESET);
+                }
+            }
+            else //do status no change, continue for loop
+            {
+                continue;
+            }
+        }
+        g_sys.status.dout_bitmap[0] = new_bitmap;                            //update system dout bitmap
+        g_sys.status.dout_bitmap[1] = new_bitmap >> 16;                      //update system dout bitmap
+        g_sys.status.ComSta.u16Dout_bitmap[0] = g_sys.status.dout_bitmap[0]; //update system dout bitmap
+        g_sys.status.ComSta.u16Dout_bitmap[1] = g_sys.status.dout_bitmap[1]; //update system dout bitmap
+    }
+    else //output bitmap unchange
+    {
+        ;
+    }
+    authen_expire_cd();
+
+    //		uint16_t xor_bitmap,old_bitmap;
+    //		uint16_t i;
+    //		old_bitmap = g_sys.status.dout_bitmap[0];
+    //		xor_bitmap = new_bitmap ^ old_bitmap;
+    ////	  rt_kprintf("g_sys.status.dout_bitmap= %x,old_bitmap= %x,xor_bitmap=%x,new_bitmap=%x\n",g_sys.status.dout_bitmap,old_bitmap,xor_bitmap,new_bitmap);
+    //		if(xor_bitmap != 0)																					//if output bitmap changed
+    //		{
+    //				for(i=0;i<16;i++)
+    //				{
+    //						if(((xor_bitmap>>i)&0x0001) != 0)										//do status change
+    //						{
+    //								if(((new_bitmap>>i)&0x0001) != 0)
+    //								{
+    //										dio_set_do(i+1,Bit_SET);
+    //								}
+    //								else
+    //								{
+    //										dio_set_do(i+1,Bit_RESET);
+    //								}
+    //						}
+    //						else																											//do status no change, continue for loop
+    //						{
+    //								continue;
+    //						}
+    //				}
+    //				g_sys.status.dout_bitmap = new_bitmap;		//update system dout bitmap
+    //				g_sys.status.ComSta.u16Dout_bitmap = new_bitmap;		//update system dout bitmap
+    //		}
+    //		else																															//output bitmap unchange
+    //		{
+    //				;
+    //		}
+    //		authen_expire_cd();
 }
 
 /**
@@ -123,139 +122,136 @@ static void oc_do_update(uint32_t new_bitmap)
 	* @param  none
 	* @retval final output bitmap
   */
-//Êı×ÖÊä³öÖÙ²Ãº¯Êı
+//æ•°å­—è¾“å‡ºä»²è£å‡½æ•°
 static uint32_t oc_arbitration(void)
-{		
-		extern sys_reg_st			g_sys;
-		extern local_reg_st 	l_sys;
-		uint16_t cat_bitmap;
-		uint16_t sys_bitmap;
-		uint16_t alarm_bitmap,bitmap_mask,bitmap_mask_reg,bitmap_mask_reset;
-		uint16_t target_bitmap;
-		uint16_t final_bitmap;
-		uint8_t u8i;
-		uint32_t u32Bit_Final;		
-		
-		for(u8i=0;u8i<=1;u8i++)
-		{
-				bitmap_mask_reset = 0;
-				alarm_bitmap = l_sys.bitmap[u8i][BITMAP_ALARM];
-				bitmap_mask = l_sys.bitmap[u8i][BITMAP_MASK];
-			
-				cat_bitmap = l_sys.bitmap[u8i][BITMAP_REQ];
-				
-				if((g_sys.config.ComPara.u16Manual_Test_En == 0)&&(g_sys.config.ComPara.u16Test_Mode_Type == 0))//if diagnose enable, output manual, else out put concatenated bitmap
-				{
-						target_bitmap = cat_bitmap;
-						l_sys.bitmap[u8i][BITMAP_MANUAL] = l_sys.bitmap[u8i][BITMAP_FINAL];
-				}
-				else
-				{
-						target_bitmap = l_sys.bitmap[u8i][BITMAP_MANUAL];
-				}                   
-				
-				bitmap_mask_reg = (g_sys.config.general.alarm_bypass_en == 0)? bitmap_mask : bitmap_mask_reset; //bitmap mask selection, if alarm_bypass_en set, output reset bitmap
-		//		rt_kprintf("alarm_bitmap = %X,bitmap_mask = %X,bitmap_mask_reg = %X\n",alarm_bitmap,bitmap_mask,bitmap_mask_reg);		
+{
+    extern sys_reg_st g_sys;
+    extern local_reg_st l_sys;
+    uint16_t cat_bitmap;
+    uint16_t sys_bitmap;
+    uint16_t alarm_bitmap, bitmap_mask, bitmap_mask_reg, bitmap_mask_reset;
+    uint16_t target_bitmap;
+    uint16_t final_bitmap;
+    uint8_t u8i;
+    uint32_t u32Bit_Final;
 
-				sys_bitmap = (target_bitmap & ~bitmap_mask_reg) | (alarm_bitmap & bitmap_mask_reg);		//sys_out_bitmap output		
-				
-				final_bitmap = (g_sys.config.ComPara.u16Test_Mode_Type == 0)? sys_bitmap : l_sys.bitmap[u8i][BITMAP_MANUAL];	//final bitmap selection, if test mode enable, output manual, otherwise sys_bitmap
-				
-				l_sys.bitmap[u8i][BITMAP_FINAL]= final_bitmap & g_sys.config.dev_mask.dout[u8i];
-		//		rt_kprintf("target_bitmap = %X,bitmap_mask_reg = %X,sys_bitmap = %X,final_bitmap = %X,l_sys = %X\n",target_bitmap,bitmap_mask_reg,sys_bitmap,final_bitmap,l_sys.bitmap[BITMAP_FINAL]);		
-//				return l_sys.bitmap[0][BITMAP_FINAL];					
-		}
-		
-		u32Bit_Final=l_sys.bitmap[0][BITMAP_FINAL]|((uint32_t)l_sys.bitmap[1][BITMAP_FINAL]<<16);//Êä³ö
-		return u32Bit_Final;
+    for (u8i = 0; u8i <= 1; u8i++)
+    {
+        bitmap_mask_reset = 0;
+        alarm_bitmap = l_sys.bitmap[u8i][BITMAP_ALARM];
+        bitmap_mask = l_sys.bitmap[u8i][BITMAP_MASK];
+
+        cat_bitmap = l_sys.bitmap[u8i][BITMAP_REQ];
+
+        if ((g_sys.config.ComPara.u16Manual_Test_En == 0) && (g_sys.config.ComPara.u16Test_Mode_Type == 0)) //if diagnose enable, output manual, else out put concatenated bitmap
+        {
+            target_bitmap = cat_bitmap;
+            l_sys.bitmap[u8i][BITMAP_MANUAL] = l_sys.bitmap[u8i][BITMAP_FINAL];
+        }
+        else
+        {
+            target_bitmap = l_sys.bitmap[u8i][BITMAP_MANUAL];
+        }
+
+        bitmap_mask_reg = (g_sys.config.general.alarm_bypass_en == 0) ? bitmap_mask : bitmap_mask_reset; //bitmap mask selection, if alarm_bypass_en set, output reset bitmap
+                                                                                                         //		rt_kprintf("alarm_bitmap = %X,bitmap_mask = %X,bitmap_mask_reg = %X\n",alarm_bitmap,bitmap_mask,bitmap_mask_reg);
+
+        sys_bitmap = (target_bitmap & ~bitmap_mask_reg) | (alarm_bitmap & bitmap_mask_reg); //sys_out_bitmap output
+
+        final_bitmap = (g_sys.config.ComPara.u16Test_Mode_Type == 0) ? sys_bitmap : l_sys.bitmap[u8i][BITMAP_MANUAL]; //final bitmap selection, if test mode enable, output manual, otherwise sys_bitmap
+
+        l_sys.bitmap[u8i][BITMAP_FINAL] = final_bitmap & g_sys.config.dev_mask.dout[u8i];
+        //		rt_kprintf("target_bitmap = %X,bitmap_mask_reg = %X,sys_bitmap = %X,final_bitmap = %X,l_sys = %X\n",target_bitmap,bitmap_mask_reg,sys_bitmap,final_bitmap,l_sys.bitmap[BITMAP_FINAL]);
+        //				return l_sys.bitmap[0][BITMAP_FINAL];
+    }
+
+    u32Bit_Final = l_sys.bitmap[0][BITMAP_FINAL] | ((uint32_t)l_sys.bitmap[1][BITMAP_FINAL] << 16); //è¾“å‡º
+    return u32Bit_Final;
 }
 
-//Ä£ÄâÊä³öÖÙ²Ãº¯Êı
+//æ¨¡æ‹Ÿè¾“å‡ºä»²è£å‡½æ•°
 static void oc_ao_arbitration(void)
 {
-		extern sys_reg_st			g_sys;
-		extern local_reg_st 	l_sys;
-		uint16_t i;
-		
-		if((g_sys.config.ComPara.u16Manual_Test_En == 0)&&(g_sys.config.ComPara.u16Test_Mode_Type == 0))//if diagnose enable, output manual, else out put concatenated bitmap
-		{
-				for(i=0;i<AO_REAL_CNT;i++)
-				{
-						manual_ao_op(i,g_sys.status.aout[i]);	
-						final_ao_op(i,l_sys.ao_list[i][BITMAP_REQ]);
-				}
-		}
-		else
-		{
-				for(i=0;i<AO_REAL_CNT;i++)
-				{
-						final_ao_op(i,l_sys.ao_list[i][BITMAP_MANUAL]);
-				}
-		}
+    extern sys_reg_st g_sys;
+    extern local_reg_st l_sys;
+    uint16_t i;
+
+    if ((g_sys.config.ComPara.u16Manual_Test_En == 0) && (g_sys.config.ComPara.u16Test_Mode_Type == 0)) //if diagnose enable, output manual, else out put concatenated bitmap
+    {
+        for (i = 0; i < AO_REAL_CNT; i++)
+        {
+            manual_ao_op(i, g_sys.status.aout[i]);
+            final_ao_op(i, l_sys.ao_list[i][BITMAP_REQ]);
+        }
+    }
+    else
+    {
+        for (i = 0; i < AO_REAL_CNT; i++)
+        {
+            final_ao_op(i, l_sys.ao_list[i][BITMAP_MANUAL]);
+        }
+    }
 }
-//Ä£ÄâÊä³öÖ´ĞĞº¯Êı
+//æ¨¡æ‹Ÿè¾“å‡ºæ‰§è¡Œå‡½æ•°
 static void oc_ao_update(void)
 {
-//		extern sys_reg_st			g_sys;
-//		extern local_reg_st 	l_sys;
-//		uint16_t i;
-////		//TEST
-////		pwm_set_ao(1,50);		
-//		for(i=0;i<AO_MAX_CNT;i++)
-//		{
-//				if(g_sys.config.dev_mask.aout&(0x0001<<i))
-//				{
-//					if(g_sys.status.aout[i] != l_sys.ao_list[i][BITMAP_FINAL])
-//					{
-//							g_sys.status.aout[i] = l_sys.ao_list[i][BITMAP_FINAL];
-////							if(AO_EC_FAN==i)
-////							{
-////									pwm_set_ao(i+1,((g_sys.status.aout[i]*g_sys.config.fan.fan_k)/100));
-////							}
-////							else
-//							{
-//									pwm_set_ao(i+1,g_sys.status.aout[i]);
-//							}
-//					}
-//				}
-//				else
-//				{
-//					if(g_sys.status.aout[i] != 0)
-//					{
-//							g_sys.status.aout[i] = 0;
-//							pwm_set_ao(i+1,0);
-//					}
-//				}
-//		}
-		extern sys_reg_st			g_sys;
-		extern local_reg_st 	l_sys;
-		uint16_t i;
-//		//TEST
-//		pwm_set_ao(1,50);		
-		for(i=0;i<AO_REAL_CNT;i++)
-		{
-				if(g_sys.config.dev_mask.aout&(0x0001<<i))
-				{
-					if(g_sys.status.ComSta.u16AO[i] != l_sys.ao_list[i][BITMAP_FINAL])
-					{
-							g_sys.status.ComSta.u16AO[i] = l_sys.ao_list[i][BITMAP_FINAL];
-						
-							pwm_set_ao(i+1,g_sys.status.ComSta.u16AO[i]);
-					}
-				}
-				else
-				{
-					if(g_sys.status.ComSta.u16AO[i] != 0)
-					{
-							g_sys.status.ComSta.u16AO[i] = 0;
-							pwm_set_ao(i+1,0);
-					}
-				}
-		}
-		
+    //		extern sys_reg_st			g_sys;
+    //		extern local_reg_st 	l_sys;
+    //		uint16_t i;
+    ////		//TEST
+    ////		pwm_set_ao(1,50);
+    //		for(i=0;i<AO_MAX_CNT;i++)
+    //		{
+    //				if(g_sys.config.dev_mask.aout&(0x0001<<i))
+    //				{
+    //					if(g_sys.status.aout[i] != l_sys.ao_list[i][BITMAP_FINAL])
+    //					{
+    //							g_sys.status.aout[i] = l_sys.ao_list[i][BITMAP_FINAL];
+    ////							if(AO_EC_FAN==i)
+    ////							{
+    ////									pwm_set_ao(i+1,((g_sys.status.aout[i]*g_sys.config.fan.fan_k)/100));
+    ////							}
+    ////							else
+    //							{
+    //									pwm_set_ao(i+1,g_sys.status.aout[i]);
+    //							}
+    //					}
+    //				}
+    //				else
+    //				{
+    //					if(g_sys.status.aout[i] != 0)
+    //					{
+    //							g_sys.status.aout[i] = 0;
+    //							pwm_set_ao(i+1,0);
+    //					}
+    //				}
+    //		}
+    extern sys_reg_st g_sys;
+    extern local_reg_st l_sys;
+    uint16_t i;
+    //		//TEST
+    //		pwm_set_ao(1,50);
+    for (i = 0; i < AO_REAL_CNT; i++)
+    {
+        if (g_sys.config.dev_mask.aout & (0x0001 << i))
+        {
+            if (g_sys.status.ComSta.u16AO[i] != l_sys.ao_list[i][BITMAP_FINAL])
+            {
+                g_sys.status.ComSta.u16AO[i] = l_sys.ao_list[i][BITMAP_FINAL];
+
+                pwm_set_ao(i + 1, g_sys.status.ComSta.u16AO[i]);
+            }
+        }
+        else
+        {
+            if (g_sys.status.ComSta.u16AO[i] != 0)
+            {
+                g_sys.status.ComSta.u16AO[i] = 0;
+                pwm_set_ao(i + 1, 0);
+            }
+        }
+    }
 }
-
-
 
 /**
   * @brief 	update system output reffering to local bitmaps
@@ -264,17 +260,17 @@ static void oc_ao_update(void)
   */
 void oc_update(void)
 {
-		uint32_t final_bitmap;
-    //Êı×ÖÊä³öÖÙ²ÃÅĞ¾ö
-		final_bitmap = oc_arbitration();
-    //Êı×ÖÊä³öÖ´ĞĞ
-		oc_do_update(final_bitmap);
-    //Ä£ÄâÊä³öÖÙ²Ã
-		oc_ao_arbitration();
-    //Ä£ÄâÊä³öÖ´ĞĞ
-		oc_ao_update();
-//    //PWMÊä³öÖÙ²Ã
-//    oc_pwm_arbitration();
-//    //PWMÊä³öÖ´ĞĞ
-//    oc_pwm_update();
+    uint32_t final_bitmap;
+    //æ•°å­—è¾“å‡ºä»²è£åˆ¤å†³
+    final_bitmap = oc_arbitration();
+    //æ•°å­—è¾“å‡ºæ‰§è¡Œ
+    oc_do_update(final_bitmap);
+    //æ¨¡æ‹Ÿè¾“å‡ºä»²è£
+    oc_ao_arbitration();
+    //æ¨¡æ‹Ÿè¾“å‡ºæ‰§è¡Œ
+    oc_ao_update();
+    //    //PWMè¾“å‡ºä»²è£
+    //    oc_pwm_arbitration();
+    //    //PWMè¾“å‡ºæ‰§è¡Œ
+    //    oc_pwm_update();
 }

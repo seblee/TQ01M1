@@ -3,14 +3,14 @@
 
 //EEV_Pack eevPack[MAX_EEVNUM];
 
-///***********Àø´ÅÊıĞò±í¡¨***********/ //ËÄÏà°ËÅÄA-AB-B-BC-C-CD-D-DA
-//uint16_t eev1_table[stepMAX] = {0x0800,0x0840,0x0040,0x0060,0x0020,0x0120,0x0100,0x0900};		//é¡ºæ—¶åŠ±ç£æ˜¯å¼€é˜€ï¼Œåä¹‹æ˜¯å…³é˜€	
+///***********åŠ±ç£æ•°åºè¡¨ã€ƒ***********/ //å››ç›¸å…«æ‹A-AB-B-BC-C-CD-D-DA
+//uint16_t eev1_table[stepMAX] = {0x0800,0x0840,0x0040,0x0060,0x0020,0x0120,0x0100,0x0900};		//é¡ºæ—¶åŠ±ç£æ˜¯å¼€é˜€ï¼Œåä¹‹æ˜¯å…³é˜€
 ////uint16_t eev2_table[stepMAX] = {0x0040,0x0060,0x0020,0x0030,0x0010,0x0018,0x0008,0x0048};
 
 //static void eevHWcfgSt_Init(void)
 //{
 //	uint8_t i = 0;
-//	eevPack[EEV1].eevHardWareCfg.eevRcc = RCC_EEV1;				//EEV1Ïà¹ØÒı½Å³õÊ¼»¯
+//	eevPack[EEV1].eevHardWareCfg.eevRcc = RCC_EEV1;				//EEV1ç›¸å…³å¼•è„šåˆå§‹åŒ–
 //	eevPack[EEV1].eevHardWareCfg.eevPort_A = GPIO_PORT_EEV1_A;
 //	eevPack[EEV1].eevHardWareCfg.eevApin = GPIO_PIN_EEV1_A;
 //	eevPack[EEV1].eevHardWareCfg.eevPort_B = GPIO_PORT_EEV1_B;
@@ -20,15 +20,15 @@
 //	eevPack[EEV1].eevHardWareCfg.eevPort_D = GPIO_PORT_EEV1_D;
 //	eevPack[EEV1].eevHardWareCfg.eevDpin = GPIO_PIN_EEV1_D;
 //	eevPack[EEV1].eevHardWareCfg.eev_maskbit = EEV1_MASKBIT;
-//	
-////	eevPack[EEV2].eevHardWareCfg.eevRcc = RCC_EEV2;				//EEV2Ïà¹ØÒı½Å³õÊ¼»¯
+//
+////	eevPack[EEV2].eevHardWareCfg.eevRcc = RCC_EEV2;				//EEV2ç›¸å…³å¼•è„šåˆå§‹åŒ–
 ////	eevPack[EEV2].eevHardWareCfg.eevPort = GPIO_PORT_EEV2;
 ////	eevPack[EEV2].eevHardWareCfg.eevApin = GPIO_PIN_EEV2_A;
 ////	eevPack[EEV2].eevHardWareCfg.eevBpin = GPIO_PIN_EEV2_B;
 ////	eevPack[EEV2].eevHardWareCfg.eevCpin = GPIO_PIN_EEV2_C;
 ////	eevPack[EEV2].eevHardWareCfg.eevDpin = GPIO_PIN_EEV2_D;
 ////	eevPack[EEV2].eevHardWareCfg.eev_maskbit = EEV2_MASKBIT;
-//	
+//
 //	for(i = 0;i < stepMAX;i++)
 //	{
 //		eevPack[EEV1].eevHardWareCfg.eev_table[i] = eev1_table[i];
@@ -46,10 +46,10 @@
 ////	GPIO_InitStruct.GPIO_Speed =GPIO_Speed_50MHz;
 ////	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL ;
 ////    GPIO_Init(ptr->eevPort, &GPIO_InitStruct);
-////	GPIO_ResetBits(ptr->eevPort, (ptr->eevApin | ptr->eevBpin | ptr->eevCpin | ptr->eevDpin));	
-//		GPIO_InitTypeDef  GPIO_InitStructure; 
-//		RCC_APB2PeriphClockCmd(ptr->eevRcc,ENABLE);	
-//	
+////	GPIO_ResetBits(ptr->eevPort, (ptr->eevApin | ptr->eevBpin | ptr->eevCpin | ptr->eevDpin));
+//		GPIO_InitTypeDef  GPIO_InitStructure;
+//		RCC_APB2PeriphClockCmd(ptr->eevRcc,ENABLE);
+//
 //		GPIO_InitStructure.GPIO_Pin =  ptr->eevApin;
 //		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 //		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -64,16 +64,16 @@
 //		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 //		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 //		GPIO_Init(ptr->eevPort_C, &GPIO_InitStructure);
-//		
+//
 //		GPIO_InitStructure.GPIO_Pin =  ptr->eevApin;
 //		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 //		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 //		GPIO_Init(ptr->eevPort_D, &GPIO_InitStructure);
 
-//	  GPIO_ResetBits(ptr->eevPort_A, ptr->eevApin);	
-//	  GPIO_ResetBits(ptr->eevPort_B, ptr->eevBpin);	
-//	  GPIO_ResetBits(ptr->eevPort_C, ptr->eevCpin);	
-//	  GPIO_ResetBits(ptr->eevPort_D, ptr->eevDpin);			
+//	  GPIO_ResetBits(ptr->eevPort_A, ptr->eevApin);
+//	  GPIO_ResetBits(ptr->eevPort_B, ptr->eevBpin);
+//	  GPIO_ResetBits(ptr->eevPort_C, ptr->eevCpin);
+//	  GPIO_ResetBits(ptr->eevPort_D, ptr->eevDpin);
 //}
 
 //static void eevMovInfoSt_Init(uint8_t index)
@@ -93,7 +93,7 @@
 //	extern sys_reg_st g_sys;
 //	if((status == RUN) && (steps != 0) && (index < MAX_EEVNUM) && (dir != DIRNULL))
 //	{
-//		if((steps <= g_sys.config.Moter.excAllOpenSteps)&&(eevPack[index].eevMoveInfo.movPluse<=1))			//´óÓÚ²½Êı»òÃ¦
+//		if((steps <= g_sys.config.Moter.excAllOpenSteps)&&(eevPack[index].eevMoveInfo.movPluse<=1))			//å¤§äºæ­¥æ•°æˆ–å¿™
 //		{
 //			eevPack[index].eevMoveInfo.now_status= status;
 //			eevPack[index].eevMoveInfo.now_dir = dir;
@@ -105,22 +105,22 @@
 //				return FALSE;
 //		}
 //	}
-//	else         
+//	else
 //	{
 //		eevPack[index].eevMoveInfo.now_status= STOP;
 //		eevPack[index].eevMoveInfo.now_dir = DIRNULL;
 //		eevPack[index].eevMoveInfo.movPluse = 0;
 //	}
-//	return TRUE;	
+//	return TRUE;
 //}
-////EEV¶¯×÷ÊÇ·ñÍê³É
+////EEVåŠ¨ä½œæ˜¯å¦å®Œæˆ
 //uint8_t GetEevMovInfo(uint8_t index)
 //{
 //	if(eevPack[index].eevMoveInfo.movPluse<1)
 //	{
-//			return FALSE;			
+//			return FALSE;
 //	}
-//	return TRUE;	
+//	return TRUE;
 //}
 
 //void eev_init(void)
@@ -141,8 +141,8 @@
 //	static uint8_t StepReal = 0;
 //	uint16_t porTmp = 0;
 //	uint8_t Step_Temp = STEP_OFFSET;
-//	
-//	if(eevPtr->eevMoveInfo.last_status != eevPtr->eevMoveInfo.now_status)		
+//
+//	if(eevPtr->eevMoveInfo.last_status != eevPtr->eevMoveInfo.now_status)
 //	{
 //		eevPtr->eevMoveInfo.last_status = eevPtr->eevMoveInfo.now_status;
 //		eevPtr->eevMoveInfo.exc_holdCnt = MAX_EXCHOLD_CNT;
@@ -157,7 +157,7 @@
 //		}
 //	}
 //	if(eevPtr->eevMoveInfo.exc_holdCnt != 0)						//åœ¨ç»“æŸç›¸ã€åœæ­¢ç›¸ã€æŠ˜è¿”ç›¸å‡è¦è¿›è¡ŒåŠ±ç£ä¿æŒï¼Œä»¥å…å¤±æ­¥
-//	{		
+//	{
 //		eevPtr->eevMoveInfo.exc_holdCnt--;
 //		porTmp = GPIO_ReadOutputData(eevPtr->eevHardWareCfg.eevPort);
 //		porTmp &= eevPtr->eevHardWareCfg.eev_maskbit;
@@ -168,7 +168,7 @@
 //	}
 //	else
 //	{
-//		if(eevPtr->eevMoveInfo.now_status == STOP)		
+//		if(eevPtr->eevMoveInfo.now_status == STOP)
 //		{
 //			porTmp = GPIO_ReadOutputData(eevPtr->eevHardWareCfg.eevPort);
 //			porTmp &= eevPtr->eevHardWareCfg.eev_maskbit;
@@ -180,7 +180,7 @@
 //			eevPtr->eevMoveInfo.finalPluse = eevPtr->eevMoveInfo.curPluse;
 //		}
 //		else
-//		if(eevPtr->eevMoveInfo.now_status == RUN)     
+//		if(eevPtr->eevMoveInfo.now_status == RUN)
 //		{
 //			eevPtr->eevMoveInfo.last_status = eevPtr->eevMoveInfo.now_status;
 //			eevPtr->eevMoveInfo.last_dir = eevPtr->eevMoveInfo.now_dir;
@@ -209,41 +209,41 @@
 ////						stepIndex = stepDA;
 ////					}
 ////					else
-////					{ 
+////					{
 ////						stepIndex--;
-////					}		
+////					}
 ////				}
 ////				if(stepIndex < stepMAX)
 ////				{
 ////					porTmp = GPIO_ReadOutputData(eevPtr->eevHardWareCfg.eevPort);
 ////					porTmp &= eevPtr->eevHardWareCfg.eev_maskbit;
 ////					porTmp |= eevPtr->eevHardWareCfg.eev_table[stepIndex];
-////					GPIO_Write(eevPtr->eevHardWareCfg.eevPort,porTmp);   
+////					GPIO_Write(eevPtr->eevHardWareCfg.eevPort,porTmp);
 ////				}
 ////				else
 ////				{
 ////					stepIndex = stepA;
 ////				}
-////				eevPtr->eevMoveInfo.beatIndex = stepIndex; 		
+////				eevPtr->eevMoveInfo.beatIndex = stepIndex;
 ////			}
 ////			else
 ////			{
 ////				eevPtr->eevMoveInfo.now_status = STOP;
-////				eevPtr->eevMoveInfo.finalPluse = eevPtr->eevMoveInfo.curPluse;		
+////				eevPtr->eevMoveInfo.finalPluse = eevPtr->eevMoveInfo.curPluse;
 ////			}
-////			g_sys.status.Test_Buff[6]=eevPtr->eevMoveInfo.movPluse;		
+////			g_sys.status.Test_Buff[6]=eevPtr->eevMoveInfo.movPluse;
 
 //			if(eevPtr->eevMoveInfo.movPluse >0)
 //			{
 //				if(eevPtr->eevMoveInfo.movPluse==1)
 //				{
-//					Step_Temp=1;						
+//					Step_Temp=1;
 //				}
 //				else
 //				{
-//					Step_Temp=STEP_OFFSET;	
+//					Step_Temp=STEP_OFFSET;
 //				}
-//				
+//
 //				eevPtr->eevMoveInfo.movPluse-=Step_Temp;
 //				if(eevPtr->eevMoveInfo.now_dir == DIROPEN)       //é˜€å¢åŠ çš„æ–¹å‘
 //				{
@@ -264,42 +264,42 @@
 //					}
 //					else
 //					{
-//						eevPtr->eevMoveInfo.curPluse=0;						
+//						eevPtr->eevMoveInfo.curPluse=0;
 //					}
 //					if(stepIndex == stepA)
 //					{
 //						stepIndex = stepDA;
 //					}
 //					else
-//					{ 
+//					{
 //						stepIndex--;
-//					}		
+//					}
 //				}
 //				if(stepIndex < stepMAX)
 //				{
 //					porTmp = GPIO_ReadOutputData(eevPtr->eevHardWareCfg.eevPort);
 //					porTmp &= eevPtr->eevHardWareCfg.eev_maskbit;
 //					porTmp |= eevPtr->eevHardWareCfg.eev_table[stepIndex];
-//					GPIO_Write(eevPtr->eevHardWareCfg.eevPort,porTmp);   
+//					GPIO_Write(eevPtr->eevHardWareCfg.eevPort,porTmp);
 //				}
 //				else
 //				{
 //					stepIndex = stepA;
 //				}
-//				eevPtr->eevMoveInfo.beatIndex = stepIndex; 		
+//				eevPtr->eevMoveInfo.beatIndex = stepIndex;
 //			}
 //			else
 //			{
 //				eevPtr->eevMoveInfo.now_status = STOP;
-//				eevPtr->eevMoveInfo.finalPluse = eevPtr->eevMoveInfo.curPluse;		
+//				eevPtr->eevMoveInfo.finalPluse = eevPtr->eevMoveInfo.curPluse;
 //			}
-////				eevPtr->eevMoveInfo.finalPluse = eevPtr->eevMoveInfo.curPluse;		
-////			g_sys.status.Test_Buff[6]=eevPtr->eevMoveInfo.movPluse;		
+////				eevPtr->eevMoveInfo.finalPluse = eevPtr->eevMoveInfo.curPluse;
+////			g_sys.status.Test_Buff[6]=eevPtr->eevMoveInfo.movPluse;
 //		}
 //	}
 //}
 
-//uint16_t getBeatIndex(uint8_t index)							//»ñÈ¡µ±Ç°Ëù´¦µÄÅÄÊı(0-7)
+//uint16_t getBeatIndex(uint8_t index)							//è·å–å½“å‰æ‰€å¤„çš„æ‹æ•°(0-7)
 //{
 //	extern sys_reg_st	g_sys;
 //	uint16_t ret = ABNORMAL_VALUE;
@@ -313,7 +313,7 @@
 //	return ret;								//@ g_sys.status.valve.valve_phase
 //}
 
-//uint16_t getFinalPluse(uint8_t index)						//»ñÈ¡µ±Ç°ËùÔÚµÄÂö³åÊı
+//uint16_t getFinalPluse(uint8_t index)						//è·å–å½“å‰æ‰€åœ¨çš„è„‰å†²æ•°
 //{
 //	extern sys_reg_st	g_sys;
 //	uint16_t ret = ABNORMAL_VALUE;
@@ -331,7 +331,7 @@
 //	return ret;								//@ g_sys.status.valve.valve_steps_cur
 //}
 
-//uint16_t getOpenValveDegree(uint8_t index)						//»ñÈ¡µ±Ç°µÄ·§¿ª¶È
+//uint16_t getOpenValveDegree(uint8_t index)						//è·å–å½“å‰çš„é˜€å¼€åº¦
 //{
 //	extern sys_reg_st	g_sys;
 //	uint16_t ret = ABNORMAL_VALUE;
@@ -341,10 +341,10 @@
 //		{
 //			if(eevPack[index].eevMoveInfo.finalPluse != ABNORMAL_VALUE)
 //			{
-//				ret = eevPack[index].eevMoveInfo.finalPluse * 100/ g_sys.config.general.excAllOpenSteps;		//À©´ó100 ±¶
+//				ret = eevPack[index].eevMoveInfo.finalPluse * 100/ g_sys.config.general.excAllOpenSteps;		//æ‰©å¤§100 å€
 //			}
-//		}		
-//	}	
+//		}
+//	}
 //	return ret;								//@g_sys.status.valve.valve_opening_cur
 //}
 
@@ -361,7 +361,7 @@
 //	uint16_t timPeriod = 0;
 //	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 //	NVIC_InitTypeDef NVIC_InitStructure;
-//	
+//
 //	/* TIM14 clock enable */
 //	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM14, ENABLE);
 
@@ -373,11 +373,11 @@
 //	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 //	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 //	TIM_TimeBaseInit(EEV1_TIMER, &TIM_TimeBaseStructure);
-//	
+//
 //	TIM_ClearITPendingBit(EEV1_TIMER, TIM_IT_Update);
 //	TIM_ITConfig(EEV1_TIMER, TIM_IT_Update, ENABLE);
 //	TIM_Cmd(EEV1_TIMER, ENABLE);
-//	
+//
 //	NVIC_InitStructure.NVIC_IRQChannel = TIM14_IRQn;
 //	NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
 //	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -389,7 +389,7 @@
 ////	uint16_t timPeriod = 0;
 ////	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 ////	NVIC_InitTypeDef NVIC_InitStructure;
-////	
+////
 ////	/* TIM15 clock enable */
 ////	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
 
@@ -401,11 +401,11 @@
 ////	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 ////	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 ////	TIM_TimeBaseInit(EEV2_TIMER, &TIM_TimeBaseStructure);
-////	
+////
 ////	TIM_ClearITPendingBit(EEV2_TIMER, TIM_IT_Update);
 ////	TIM_ITConfig(EEV2_TIMER, TIM_IT_Update, ENABLE);
 ////	TIM_Cmd(EEV2_TIMER, ENABLE);
-////	
+////
 ////	NVIC_InitStructure.NVIC_IRQChannel = TIM15_IRQn;
 ////	NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
 ////	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -417,7 +417,7 @@
 //	extern sys_reg_st	g_sys;
 //	if(TIM_GetITStatus(EEV1_TIMER,TIM_IT_Update) != RESET)
 //	{
-//		if((g_sys.config.dev_mask.eev & (0x01 << EEV1)) != 0)	
+//		if((g_sys.config.dev_mask.eev & (0x01 << EEV1)) != 0)
 //		{
 //			eev_run(&eevPack[EEV1]);
 //		}
@@ -430,11 +430,10 @@
 ////	extern sys_reg_st	g_sys;
 ////	if(TIM_GetITStatus(EEV2_TIMER,TIM_IT_Update) != RESET)
 ////	{
-////		if((g_sys.config.dev_mask.eev & (0x01 << EEV2)) != 0)	
+////		if((g_sys.config.dev_mask.eev & (0x01 << EEV2)) != 0)
 ////		{
 ////			eev_run(&eevPack[EEV2]);
 ////		}
 ////		TIM_ClearITPendingBit(EEV2_TIMER,TIM_IT_Update);
 ////	}
 ////}
-

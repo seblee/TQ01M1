@@ -3,20 +3,20 @@
 
 #include "stm32f10x.h"
 #include "sys_conf.h"
-#define MAX_EXCHOLD_CNT		3u
+#define MAX_EXCHOLD_CNT 3u
 
-#define EEV1_MASKBIT		0xf69f
-#define EEV2_MASKBIT		0xff87
+#define EEV1_MASKBIT 0xf69f
+#define EEV2_MASKBIT 0xff87
 
-#define RCC_EEV1        	RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOE
-#define GPIO_PORT_EEV1_A  	GPIOE
-#define GPIO_PIN_EEV1_A		GPIO_Pin_2
-#define GPIO_PORT_EEV1_B  	GPIOE
-#define GPIO_PIN_EEV1_B		GPIO_Pin_2
-#define GPIO_PORT_EEV1_C  	GPIOB
-#define GPIO_PIN_EEV1_C		GPIO_Pin_9
-#define GPIO_PORT_EEV1_D  	GPIOB
-#define GPIO_PIN_EEV1_D		GPIO_Pin_8
+#define RCC_EEV1 RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOE
+#define GPIO_PORT_EEV1_A GPIOE
+#define GPIO_PIN_EEV1_A GPIO_Pin_2
+#define GPIO_PORT_EEV1_B GPIOE
+#define GPIO_PIN_EEV1_B GPIO_Pin_2
+#define GPIO_PORT_EEV1_C GPIOB
+#define GPIO_PIN_EEV1_C GPIO_Pin_9
+#define GPIO_PORT_EEV1_D GPIOB
+#define GPIO_PIN_EEV1_D GPIO_Pin_8
 
 //#define RCC_EEV2        	RCC_AHBPeriph_GPIOB
 //#define GPIO_PORT_EEV2  	GPIOB
@@ -25,38 +25,38 @@
 //#define GPIO_PIN_EEV2_C		GPIO_Pin_4
 //#define GPIO_PIN_EEV2_D		GPIO_Pin_3
 
-#define EEV1_TIMER			TIM14
-#define EEV1_IRQHandler		TIM14_IRQHandler
+#define EEV1_TIMER TIM14
+#define EEV1_IRQHandler TIM14_IRQHandler
 //#define EEV2_TIMER			TIM15
 //#define EEV2_IRQHandler		TIM15_IRQHandler
 
 enum
 {
-	DIRNULL = 0,    	//????
-	DIROPEN,         	//??
-	DIRCLOSE			//??
+    DIRNULL = 0, //????
+    DIROPEN,     //??
+    DIRCLOSE     //??
 };
 
 enum
 {
-	STOP = 0,
-	RUN
+    STOP = 0,
+    RUN
 };
 
 enum
 {
-	stepA  = 0,						//????
-	stepAB,
-	stepB ,
-	stepBC,
-	stepC ,
-	stepCD,
-	stepD ,
-	stepDA,
-	stepMAX
+    stepA = 0, //????
+    stepAB,
+    stepB,
+    stepBC,
+    stepC,
+    stepCD,
+    stepD,
+    stepDA,
+    stepMAX
 };
 
-#define STEP_OFFSET		2
+#define STEP_OFFSET 2
 //enum
 //{
 //	stepA  = 0,						//????
@@ -70,88 +70,87 @@ enum
 //	stepMAX
 //};
 #pragma pack(1)
-struct eevHWcfg							//eev????
+struct eevHWcfg //eev????
 {
-	uint32_t eevRcc;					
-	GPIO_TypeDef * eevPort_A;
-	GPIO_TypeDef * eevPort_B;
-	GPIO_TypeDef * eevPort_C;
-	GPIO_TypeDef * eevPort_D;
-	uint16_t eevApin;
-	uint16_t eevBpin;
-	uint16_t eevCpin;
-	uint16_t eevDpin;
-	uint16_t eev_maskbit;			
-	uint16_t eev_table[stepMAX];
+    uint32_t eevRcc;
+    GPIO_TypeDef *eevPort_A;
+    GPIO_TypeDef *eevPort_B;
+    GPIO_TypeDef *eevPort_C;
+    GPIO_TypeDef *eevPort_D;
+    uint16_t eevApin;
+    uint16_t eevBpin;
+    uint16_t eevCpin;
+    uint16_t eevDpin;
+    uint16_t eev_maskbit;
+    uint16_t eev_table[stepMAX];
 };
 
-struct eevMovSts						//???????
+struct eevMovSts //???????
 {
-	uint8_t last_dir;					//???????
-	uint8_t now_dir;					//??
-	uint8_t last_status;				//??????(??????????)
-	uint8_t now_status;					//??
-	uint8_t beatIndex;					//?????(????)
-	uint16_t curPluse;					//??????
-	uint16_t movPluse;					//???????
-	uint16_t finalPluse;                //??????,???????
-	uint8_t exc_holdCnt;
+    uint8_t last_dir;    //???????
+    uint8_t now_dir;     //??
+    uint8_t last_status; //??????(??????????)
+    uint8_t now_status;  //??
+    uint8_t beatIndex;   //?????(????)
+    uint16_t curPluse;   //??????
+    uint16_t movPluse;   //???????
+    uint16_t finalPluse; //??????,???????
+    uint8_t exc_holdCnt;
 };
 
 typedef struct eev_pack
-{	
-	struct eevHWcfg eevHardWareCfg;
-	struct eevMovSts eevMoveInfo;
-}EEV_Pack;    
+{
+    struct eevHWcfg eevHardWareCfg;
+    struct eevMovSts eevMoveInfo;
+} EEV_Pack;
 #pragma pack()
 
-
-enum		//øÿ÷∆◊¥Ã¨
+enum //ÊéßÂà∂Áä∂ÊÄÅ
 {
-	STATUS_INIT = 0,		     //≥ı ºªØ
-	STATUS_CLOSE,        //πÿ±’
-	STATUS_OFF,         //¥˝ª˙
-	STATUS_POS,         //∂®Œª
-	STATUS_WAIT,        //µ»¥˝
-    STATUS_PRE_ADJUST,  //‘§µ˜Ω⁄
-	STATUS_ON,			//‘À––
-	STATUS_HOLD
+    STATUS_INIT = 0,   //ÂàùÂßãÂåñ
+    STATUS_CLOSE,      //ÂÖ≥Èó≠
+    STATUS_OFF,        //ÂæÖÊú∫
+    STATUS_POS,        //ÂÆö‰Ωç
+    STATUS_WAIT,       //Á≠âÂæÖ
+    STATUS_PRE_ADJUST, //È¢ÑË∞ÉËäÇ
+    STATUS_ON,         //ËøêË°å
+    STATUS_HOLD
 };
 
-//≤…ºØ»°—˘
+//ÈááÈõÜÂèñÊ†∑
 enum
 {
-	GET_ZERO=0,
-	GET_ONE,
-	GET_TWO,
-	GET_AVG
-};
-
-enum
-{
-	EEV1 = 0,
-//	EEV2,
-	MAX_EEVNUM
+    GET_ZERO = 0,
+    GET_ONE,
+    GET_TWO,
+    GET_AVG
 };
 
 enum
 {
-	VALVE_OFF = 0,
-	VALVE_ON
+    EEV1 = 0,
+    //	EEV2,
+    MAX_EEVNUM
 };
 
 enum
 {
-	NO_ACTION = 0,
-	FORCE_CLOSE_VALVE,    		//«ø÷∆πÿ±’∑ß√≈
-	VALVE_OPEN_FIXED_POS		//∑ßø™∆Ù÷¡πÃ∂®Œª÷√
-};    //@2017-08-21 
+    VALVE_OFF = 0,
+    VALVE_ON
+};
+
+enum
+{
+    NO_ACTION = 0,
+    FORCE_CLOSE_VALVE,   //Âº∫Âà∂ÂÖ≥Èó≠ÈòÄÈó®
+    VALVE_OPEN_FIXED_POS //ÈòÄÂºÄÂêØËá≥Âõ∫ÂÆö‰ΩçÁΩÆ
+};                       //@2017-08-21
 
 extern EEV_Pack eevPack[MAX_EEVNUM];
 extern void eev_init(void);
 extern void eev1_timerInit(uint8_t ppsVal);
 extern void eev2_timerInit(uint8_t ppsVal);
-extern uint8_t setEevMovInfo(uint16_t dir,uint16_t steps,uint16_t status,uint8_t index);
+extern uint8_t setEevMovInfo(uint16_t dir, uint16_t steps, uint16_t status, uint8_t index);
 
 extern uint16_t getBeatIndex(uint8_t index);
 extern uint16_t getFinalPluse(uint8_t index);
@@ -159,7 +158,3 @@ extern uint16_t getOpenValveDegree(uint8_t index);
 extern uint16_t getPluseNumofOpenValve(uint16_t valve);
 extern uint8_t GetEevMovInfo(uint8_t index);
 #endif /* __MOTER_H */
-
-
-
-

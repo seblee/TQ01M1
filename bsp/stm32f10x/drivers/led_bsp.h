@@ -21,39 +21,39 @@ void drv_led_init(void);
 void led_on(uint32_t led);
 void led_off(uint32_t led);
 
-
-#define nWs 64                //WS2811级联数量
+#define nWs 64 //WS2811绾ц仈鏁伴噺
 enum
 {
-	OTHER=0,
-	RED,	
+    OTHER = 0,
+    RED,
 };
 
 //#define   A_SET_DATA     GPIOB->ODR |= 0x8000;    //PB15= 1
 //#define   A_CLR_DATA     GPIOB->ODR &= 0x7FFF;    //PB15= 0
-//反向驱动
-#define   A_SET_DATA     GPIOB->ODR &= 0x7FFF;    //PB15= 0
-#define   A_CLR_DATA     GPIOB->ODR |= 0x8000;    //PB15= 1
+//鍙嶅悜椹卞姩
+#define A_SET_DATA GPIOB->ODR &= 0x7FFF; //PB15= 0
+#define A_CLR_DATA GPIOB->ODR |= 0x8000; //PB15= 1
 extern void Led_Gpio_Init(void);
 extern void LED_Test(uint8_t Type);
 
-typedef struct {
+typedef struct
+{
     uint8_t red;
     uint8_t green;
     uint8_t blue;
-}Color_st;
+} Color_st;
 
-typedef struct 
+typedef struct
 {
-		uint16_t 	Temp;
-		Color_st	Color;
-}Temp_Color_st;
+    uint16_t Temp;
+    Color_st Color;
+} Temp_Color_st;
 
 void LED_SPI_LowLevel_Init(void);
 void LED_SPI_WriteByte(uint16_t Data);
 void LED_SPI_SendBits(uint8_t bits);
 void LED_SPI_SendPixel(Color_st pixel);
 ErrorStatus LED_SPI_Update(Color_st buffer[], uint32_t length);
-void PixelRound(uint8_t r,uint8_t g,uint8_t b,uint16_t pluse);
+void PixelRound(uint8_t r, uint8_t g, uint8_t b, uint16_t pluse);
 
 #endif

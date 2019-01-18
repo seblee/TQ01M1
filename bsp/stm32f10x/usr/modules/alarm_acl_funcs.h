@@ -4,15 +4,7 @@
 #include "stm32f10x_gpio.h"
 #include "sys_conf.h"
 
-//º¯ÊýÖ¸Õë´ø²ÎÊý
-//º¯Êý²ÎÊýÀàÐÍ
-
-
-
-
-
-
-
-
+//å‡½æ•°æŒ‡é’ˆå¸¦å‚æ•°
+//å‡½æ•°å‚æ•°ç±»åž‹
 
 #endif //__ALARM_ACL_H__

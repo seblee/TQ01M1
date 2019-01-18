@@ -3,26 +3,25 @@
 #include "stm32f10x_iwdg.h"
 #include "watchdog_bsp.h"
 
-// mode  0--ÔËĞĞ×´Ì¬ÏÂµÄÊ±¼ä   1--sleep ÏÂµÄÊ±¼ä
+// mode  0--è¿è¡ŒçŠ¶æ€ä¸‹çš„æ—¶é—´   1--sleep ä¸‹çš„æ—¶é—´
 void watchdog_init(void)
 {
-    //RCC_LSICmd(ENABLE);//´ò¿ªLSI
-    //while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY)==RESET);//µÈ´ıÖ±µ½LSIÎÈ¶¨
- 
+    //RCC_LSICmd(ENABLE);//æ‰“å¼€LSI
+    //while(RCC_GetFlagStatus(RCC_FLAG_LSIRDY)==RESET);//ç­‰å¾…ç›´åˆ°LSIç¨³å®š
+
     /* Enable write access to IWDG_PR and IWDG_RLR registers */
-	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
-	/* IWDG counter clock: 40KHz(LSI)       128·ÖÆµ Ò»¸öÖÜÆÚ3.2ms*/
-	IWDG_SetPrescaler(IWDG_Prescaler_128);
-	/* Set counter reload value to 300  1s */
-	IWDG_SetReload(800);   //×î³¤12Î» [0,4096] 800*3.2=2.56S 
-	/* Reload IWDG counter */
-	IWDG_ReloadCounter();
-     /* Enable IWDG (the LSI oscillator will be enabled by hardware) */
-  IWDG_Enable();
+    IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+    /* IWDG counter clock: 40KHz(LSI)       128åˆ†é¢‘ ä¸€ä¸ªå‘¨æœŸ3.2ms*/
+    IWDG_SetPrescaler(IWDG_Prescaler_128);
+    /* Set counter reload value to 300  1s */
+    IWDG_SetReload(800); //æœ€é•¿12ä½ [0,4096] 800*3.2=2.56S
+    /* Reload IWDG counter */
+    IWDG_ReloadCounter();
+    /* Enable IWDG (the LSI oscillator will be enabled by hardware) */
+    IWDG_Enable();
 }
 
 void dog(void)
 {
-	IWDG_ReloadCounter();
+    IWDG_ReloadCounter();
 }
-

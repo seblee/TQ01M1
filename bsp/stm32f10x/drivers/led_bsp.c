@@ -17,9 +17,9 @@
 #include "port.h"
 #include "sys_conf.h"
 
-#define led1_rcc                    RCC_APB2Periph_GPIOC
-#define led1_gpio                   GPIOC
-#define led1_pin                    (GPIO_Pin_13)
+#define led1_rcc RCC_APB2Periph_GPIOC
+#define led1_gpio GPIOC
+#define led1_pin (GPIO_Pin_13)
 
 /**
   * @brief  LED initialization
@@ -30,12 +30,12 @@ void drv_led_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    RCC_APB2PeriphClockCmd(led1_rcc,ENABLE);
+    RCC_APB2PeriphClockCmd(led1_rcc, ENABLE);
 
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 
-    GPIO_InitStructure.GPIO_Pin   = led1_pin;
+    GPIO_InitStructure.GPIO_Pin = led1_pin;
     GPIO_Init(led1_gpio, &GPIO_InitStructure);
 }
 
@@ -73,244 +73,325 @@ void led_off(uint32_t n)
     }
 }
 
-
 ///*****************WS2811************************/
 
 /******************************************************************
-//   ≥ı ºªØ LED  ˝æ›  ‰≥ˆ ø⁄
-      PA.0ø⁄
+//   ÂàùÂßãÂåñ LED Êï∞ÊçÆ ËæìÂá∫ Âè£
+      PA.0Âè£
 ******************************************************************/
 void Led_Gpio_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_15;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-	
-//	  GPIO_SetBits(GPIOB, GPIO_Pin_15);
+
+    //	  GPIO_SetBits(GPIOB, GPIO_Pin_15);
 }
 /*****************************************************************
-//   ws2811 LEDœ‘ æ µƒ «˝∂Ø ∫Ø ˝
-      ¥´ 8Œª  ˝æ› ∏ﬂµÕµÁ∆Ω –≠“È ø¥ 
-      πÊ∏Ò È 
+//   ws2811 LEDÊòæÁ§∫ ÁöÑ È©±Âä® ÂáΩÊï∞
+      ‰º† 8‰Ωç Êï∞ÊçÆ È´ò‰ΩéÁîµÂπ≥ ÂçèËÆÆ Áúã 
+      ËßÑÊ†º‰π¶ 
 ******************************************************************/
-void sendA_2811_8bits(uint8_t dat)   //A??
+void sendA_2811_8bits(uint8_t dat) //A??
 {
-	  uint8_t bit;
-	  for(bit=0;bit<8;bit++)
-	  {
-				if(dat&0x80)            //"1"
-		    {
+    uint8_t bit;
+    for (bit = 0; bit < 8; bit++)
+    {
+        if (dat & 0x80) //"1"
+        {
             A_SET_DATA;
-							__nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();
-						A_CLR_DATA;		
-							 __nop();__nop();__nop();
-		    }	    
-				else                             //"0"
-		    {
-				    A_SET_DATA;
-							 __nop();__nop();__nop();__nop();
-							 __nop();__nop();__nop();__nop();
-							 __nop();__nop();__nop();__nop();
-				    A_CLR_DATA;
-							__nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					    __nop();__nop();__nop();__nop();
-					
-					    __nop();__nop();__nop();__nop();
-							__nop();__nop();
-//					    __nop();__nop();__nop();__nop();
-		    } 
-				dat<<=1;
- 	  }
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            A_CLR_DATA;
+            __nop();
+            __nop();
+            __nop();
+        }
+        else //"0"
+        {
+            A_SET_DATA;
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            A_CLR_DATA;
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            __nop();
+            //					    __nop();__nop();__nop();__nop();
+        }
+        dat <<= 1;
+    }
 }
 /*****************************************************************
-//   œÚ LED ¥´ÀÕ 3∏ˆ 8Œª  ˝æ› ∑÷± ¥˙±Ì 
-     R G B —’…´ 
+//   Âêë LED ‰º†ÈÄÅ 3‰∏™ 8‰Ωç Êï∞ÊçÆ ÂàÜÂà´ ‰ª£Ë°® 
+     R G B È¢úËâ≤ 
 ******************************************************************/
 void sendA_2811_24bits(Color_st Color)
 {
-//	  sendA_2811_8bits(Color.red);//B
-//	  sendA_2811_8bits(Color.green);//R
-//	  sendA_2811_8bits(Color.blue);//G
-		//”≤º˛ ‰≥ˆ∑¥œÚ£¨À≥–Úµ˜ªª	
-	  sendA_2811_8bits(Color.blue);//B
-	  sendA_2811_8bits(Color.red);//R
-	  sendA_2811_8bits(Color.green);//G
+    //	  sendA_2811_8bits(Color.red);//B
+    //	  sendA_2811_8bits(Color.green);//R
+    //	  sendA_2811_8bits(Color.blue);//G
+    //Á°¨‰ª∂ËæìÂá∫ÂèçÂêëÔºåÈ°∫Â∫èË∞ÉÊç¢
+    sendA_2811_8bits(Color.blue);  //B
+    sendA_2811_8bits(Color.red);   //R
+    sendA_2811_8bits(Color.green); //G
 }
 
 /******************************************************************
-//   ws2811 LED÷°º‰∏Ù
-         ∏¥Œª –≈∫≈
+//   ws2811 LEDÂ∏ßÈó¥Èöî
+         Â§ç‰Ωç ‰ø°Âè∑
 *******************************************************************/
 void RESET_LED()
 {
-	__nop();__nop();__nop();__nop();
-	__nop();__nop();__nop();__nop();
-	__nop();__nop();__nop();__nop();
-	__nop();__nop();__nop();__nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
+    __nop();
 }
 /*********************************************************************
-//    ≤‚  ‘ ”√ µƒ∫Ø ˝
-      LED—’…´∂®“Â
+//    Êµã ËØï Áî® ÁöÑÂáΩÊï∞
+      LEDÈ¢úËâ≤ÂÆö‰πâ
 **********************************************************************/
-#define COLOR_NUM    12
-static const Temp_Color_st LED_Color[COLOR_NUM]=
-{		// 			Temp	  	Color			
-//		//      B    R    G
-//		{100,{0xAA,0x00,0x00}},//10°Ê…Ó¿∂
-//		{150,{0xFF,0x00,0x00}},//15°Ê…Ó¿∂
-//		{180,{0xFF,0x00,0x33}},//18°Ê…Ó¿∂
-//		{200,{0xFF,0x00,0xAA}},//20°Ê«≥¿∂
-//		{220,{0xFF,0x00,0xEE}},//22°Ê«≥¿∂
-//		{230,{0xBB,0x22,0xEE}},//23°Ê«≥¿∂
-//		{240,{0x00,0xCC,0xFF}},//24°Ê«≥¿∂
-//		{250,{0x00,0xEE,0xBB}},//25°ÊÈŸª∆
-//		{280,{0x00,0xEE,0x44}},//28°ÊÈŸª∆
-//		{300,{0x00,0xEE,0x22}},//30°ÊÈŸ∫Ï
-//		{320,{0x00,0xEE,0x00}},//32°Ê∫Ï…´
-//		{350,{0x00,0xFF,0x00}},//35°Ê…Ó∫Ï
-		//      R    G    B
-		{100,{0x00,0x00,0xAA}},//10°Ê…Ó¿∂
-		{150,{0x00,0x00,0xFF}},//15°Ê…Ó¿∂
-		{180,{0x00,0x33,0xFF}},//18°Ê…Ó¿∂
-		{200,{0x00,0xAA,0xFF}},//20°Ê«≥¿∂
-		{220,{0x00,0xEE,0xFF}},//22°Ê«≥¿∂
-		{230,{0x22,0xEE,0xBB}},//23°Ê«≥¿∂
-		{240,{0xCC,0xFF,0x00}},//24°Ê«≥¿∂
-		{250,{0xEE,0xBB,0x00}},//25°ÊÈŸª∆
-		{280,{0xEE,0x44,0x00}},//28°ÊÈŸª∆
-		{300,{0xEE,0x22,0x00}},//30°ÊÈŸ∫Ï
-		{320,{0xEE,0x00,0x00}},//32°Ê∫Ï…´
-		{350,{0xFF,0x00,0x00}},//35°Ê…Ó∫Ï
+#define COLOR_NUM 12
+static const Temp_Color_st LED_Color[COLOR_NUM] =
+    {
+        // 			Temp	  	Color
+        //		//      B    R    G
+        //		{100,{0xAA,0x00,0x00}},//10‚ÑÉÊ∑±Ëìù
+        //		{150,{0xFF,0x00,0x00}},//15‚ÑÉÊ∑±Ëìù
+        //		{180,{0xFF,0x00,0x33}},//18‚ÑÉÊ∑±Ëìù
+        //		{200,{0xFF,0x00,0xAA}},//20‚ÑÉÊµÖËìù
+        //		{220,{0xFF,0x00,0xEE}},//22‚ÑÉÊµÖËìù
+        //		{230,{0xBB,0x22,0xEE}},//23‚ÑÉÊµÖËìù
+        //		{240,{0x00,0xCC,0xFF}},//24‚ÑÉÊµÖËìù
+        //		{250,{0x00,0xEE,0xBB}},//25‚ÑÉÊ©òÈªÑ
+        //		{280,{0x00,0xEE,0x44}},//28‚ÑÉÊ©òÈªÑ
+        //		{300,{0x00,0xEE,0x22}},//30‚ÑÉÊ©òÁ∫¢
+        //		{320,{0x00,0xEE,0x00}},//32‚ÑÉÁ∫¢Ëâ≤
+        //		{350,{0x00,0xFF,0x00}},//35‚ÑÉÊ∑±Á∫¢
+        //      R    G    B
+        {100, {0x00, 0x00, 0xAA}}, //10‚ÑÉÊ∑±Ëìù
+        {150, {0x00, 0x00, 0xFF}}, //15‚ÑÉÊ∑±Ëìù
+        {180, {0x00, 0x33, 0xFF}}, //18‚ÑÉÊ∑±Ëìù
+        {200, {0x00, 0xAA, 0xFF}}, //20‚ÑÉÊµÖËìù
+        {220, {0x00, 0xEE, 0xFF}}, //22‚ÑÉÊµÖËìù
+        {230, {0x22, 0xEE, 0xBB}}, //23‚ÑÉÊµÖËìù
+        {240, {0xCC, 0xFF, 0x00}}, //24‚ÑÉÊµÖËìù
+        {250, {0xEE, 0xBB, 0x00}}, //25‚ÑÉÊ©òÈªÑ
+        {280, {0xEE, 0x44, 0x00}}, //28‚ÑÉÊ©òÈªÑ
+        {300, {0xEE, 0x22, 0x00}}, //30‚ÑÉÊ©òÁ∫¢
+        {320, {0xEE, 0x00, 0x00}}, //32‚ÑÉÁ∫¢Ëâ≤
+        {350, {0xFF, 0x00, 0x00}}, //35‚ÑÉÊ∑±Á∫¢
 };
-
 
 void LED_Test(uint8_t Type)
 {
-	  uint8_t i;
-		uint8_t LED_N;
-		uint8_t Temp_Color=0;
+    uint8_t i;
+    uint8_t LED_N;
+    uint8_t Temp_Color = 0;
     static uint8_t Last_Color = 0;
     static uint16_t Ctrl_Temp = 0;
-		extern sys_reg_st			g_sys;		
-		extern sys_reg_st			g_sys;
-	
-		if(g_sys.config.general.LED_Num==0)
-		{
-			return;
-		}	
-		switch(Type)//¿‡–Õ
-		{
-			case RED:
-					Temp_Color = COLOR_NUM-1;
-					break;
-			case OTHER:
-					switch(g_sys.config.algorithm.ctrl_target_mode)//Œ¬∂»ƒ£ Ω
-					{
-						case 0:
-								Ctrl_Temp = g_sys.status.sys_tem_hum.return_air_temp ;
-								break;
-						case 1:
-								Ctrl_Temp = g_sys.status.sys_tem_hum.supply_air_temp ;
-								break;
-						case 2:
-								Ctrl_Temp = g_sys.status.sys_tem_hum.remote_air_temp ;
-								break;
-						default:
-								Ctrl_Temp = g_sys.status.sys_tem_hum.return_air_temp ;
-								break;						  
-					}	
+    extern sys_reg_st g_sys;
+    extern sys_reg_st g_sys;
 
-					if(Ctrl_Temp<=LED_Color[0].Temp)
-					{
-								Temp_Color = 0;								
-					}
-					else
-					{
-							for(i=COLOR_NUM-1;i>0;i--)
-							{
-									if(Ctrl_Temp>=LED_Color[i].Temp)
-									{
-											Temp_Color = i;				
-											break;
-									}				
-							}					
-					}
-					break;
-			default:
-					Temp_Color = 0;
-					break;						  
-		}			
-//		rt_kprintf("Ctrl_Temp = %d,Temp_Color = %d\n",Ctrl_Temp,Temp_Color);			
+    if (g_sys.config.general.LED_Num == 0)
+    {
+        return;
+    }
+    switch (Type) //Á±ªÂûã
+    {
+    case RED:
+        Temp_Color = COLOR_NUM - 1;
+        break;
+    case OTHER:
+        switch (g_sys.config.algorithm.ctrl_target_mode) //Ê∏©Â∫¶Ê®°Âºè
+        {
+        case 0:
+            Ctrl_Temp = g_sys.status.sys_tem_hum.return_air_temp;
+            break;
+        case 1:
+            Ctrl_Temp = g_sys.status.sys_tem_hum.supply_air_temp;
+            break;
+        case 2:
+            Ctrl_Temp = g_sys.status.sys_tem_hum.remote_air_temp;
+            break;
+        default:
+            Ctrl_Temp = g_sys.status.sys_tem_hum.return_air_temp;
+            break;
+        }
 
-		if(Last_Color==Temp_Color)
-		{
-			return;
-		}
-//		rt_kprintf("Last_Color = %d\n",Last_Color);	
-		Last_Color =Temp_Color;
-		LED_N=g_sys.config.general.LED_Num;
-		ENTER_CRITICAL_SECTION(); //πÿ»´æ÷÷–∂œ
-		for(i=0;i<=LED_N;i++)
-		{
-				sendA_2811_24bits(LED_Color[Temp_Color].Color);
-				RESET_LED();
-		}		
-//		switch(Color)
-//		{
-//			case RED:
-//					for(i=0;i<=LED_N;i++)
-//					{
-//							sendA_2811_24bits(0x00,0xFF,0x00);//∫Ï
-//							RESET_LED();
-//					}
-//					break;
-//			case ORANGE:
-//					for(i=0;i<=LED_N;i++)
-//					{
-//							sendA_2811_24bits(0x00,0xEE,0x76);//≥»
-//			//		    sendA_2811_24bits(0x00,0x00,0xFF);//¬Ã
-//							RESET_LED();
-//					}
-//					break;
-//			case BLUE:
-//					for(i=0;i<=LED_N;i++)
-//					{
-//					    sendA_2811_24bits(0xFF,0x00,0x00);//¿∂
-//							RESET_LED();
-//					}
-//					break;
-//			default:
-//					for(i=0;i<=LED_N;i++)
-//					{
-//					    sendA_2811_24bits(0xFF,0x00,0x00);//¿∂
-//							RESET_LED();
-//					}
-//					break;
-//		}
-		EXIT_CRITICAL_SECTION(); //ø™»´æ÷÷–∂œ	
-//		PixelRound(1,0,0,20);
+        if (Ctrl_Temp <= LED_Color[0].Temp)
+        {
+            Temp_Color = 0;
+        }
+        else
+        {
+            for (i = COLOR_NUM - 1; i > 0; i--)
+            {
+                if (Ctrl_Temp >= LED_Color[i].Temp)
+                {
+                    Temp_Color = i;
+                    break;
+                }
+            }
+        }
+        break;
+    default:
+        Temp_Color = 0;
+        break;
+    }
+    //		rt_kprintf("Ctrl_Temp = %d,Temp_Color = %d\n",Ctrl_Temp,Temp_Color);
+
+    if (Last_Color == Temp_Color)
+    {
+        return;
+    }
+    //		rt_kprintf("Last_Color = %d\n",Last_Color);
+    Last_Color = Temp_Color;
+    LED_N = g_sys.config.general.LED_Num;
+    ENTER_CRITICAL_SECTION(); //ÂÖ≥ÂÖ®Â±Ä‰∏≠Êñ≠
+    for (i = 0; i <= LED_N; i++)
+    {
+        sendA_2811_24bits(LED_Color[Temp_Color].Color);
+        RESET_LED();
+    }
+    //		switch(Color)
+    //		{
+    //			case RED:
+    //					for(i=0;i<=LED_N;i++)
+    //					{
+    //							sendA_2811_24bits(0x00,0xFF,0x00);//Á∫¢
+    //							RESET_LED();
+    //					}
+    //					break;
+    //			case ORANGE:
+    //					for(i=0;i<=LED_N;i++)
+    //					{
+    //							sendA_2811_24bits(0x00,0xEE,0x76);//Ê©ô
+    //			//		    sendA_2811_24bits(0x00,0x00,0xFF);//Áªø
+    //							RESET_LED();
+    //					}
+    //					break;
+    //			case BLUE:
+    //					for(i=0;i<=LED_N;i++)
+    //					{
+    //					    sendA_2811_24bits(0xFF,0x00,0x00);//Ëìù
+    //							RESET_LED();
+    //					}
+    //					break;
+    //			default:
+    //					for(i=0;i<=LED_N;i++)
+    //					{
+    //					    sendA_2811_24bits(0xFF,0x00,0x00);//Ëìù
+    //							RESET_LED();
+    //					}
+    //					break;
+    //		}
+    EXIT_CRITICAL_SECTION(); //ÂºÄÂÖ®Â±Ä‰∏≠Êñ≠
+    //		PixelRound(1,0,0,20);
 }
-
 
 //uint16_t PixelBuffer[404] = {0};
 //uint16_t PixelPointer = 0;
@@ -322,11 +403,11 @@ void LED_Test(uint8_t Type)
 //    GPIO_InitTypeDef  GPIO_InitStructure;
 //    SPI_InitTypeDef   SPI_InitStructure;
 //    DMA_InitTypeDef   DMA_InitStructure;
-//		
+//
 //    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 //    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
 //		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-//	
+//
 //    DMA_DeInit(DMA1_Channel5);
 //    DMA_InitStructure.DMA_BufferSize = 0;
 //    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) & (SPI2->DR);
@@ -347,7 +428,7 @@ void LED_Test(uint8_t Type)
 
 //		/*
 //    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-//    GPIO_Init(GPIOA, &GPIO_InitStructure); 
+//    GPIO_Init(GPIOA, &GPIO_InitStructure);
 //		*/
 
 ////    GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_0);
@@ -450,7 +531,7 @@ void LED_Test(uint8_t Type)
 //            }
 //        }
 
-//        for (i = 0; i < 20; i++)   
+//        for (i = 0; i < 20; i++)
 //        {
 //            LED_SPI_WriteByte(0x00);
 //        }
@@ -474,22 +555,22 @@ void LED_Test(uint8_t Type)
 
 //void PixelRound(uint8_t r,uint8_t g,uint8_t b,uint16_t pluse){
 //	uint8_t i = 0;
-//	
+//
 //	for(i=0;i<16;i++){ /* ???? */
 //		LEDPixel[i].red = 0x00;
 //		LEDPixel[i].green = 0x00;
 //		LEDPixel[i].blue = 0x00;
 //	}
-//	
+//
 //	for(i=0;i<16;i++){
 //		if(r == 1){
 //			LEDPixel[i].red = 0xFF;
 //		}
 //		if(g == 1){
-//			LEDPixel[i].green = 0xFF;	
+//			LEDPixel[i].green = 0xFF;
 //		}
 //		if(b == 1){
-//			LEDPixel[i].blue = 0xFF;	
+//			LEDPixel[i].blue = 0xFF;
 //		}
 //		LED_SPI_Update(LEDPixel,16);
 ////		Delay_sys(pluse);

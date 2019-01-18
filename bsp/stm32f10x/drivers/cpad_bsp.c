@@ -78,14 +78,14 @@
 
 typedef struct
 {
-	volatile uint8_t tx_buf[CPAD_TX_BUF_DEPTH];
-	volatile uint8_t tx_cnt;
-	volatile uint8_t tx_cmd;
-	volatile uint8_t rx_buf[CPAD_RX_BUF_DEPTH];
-	volatile uint8_t rx_cnt;
-	volatile uint8_t rx_tag;
-	volatile uint16_t rtx_timeout;
-	volatile uint8_t cpad_fsm_cstate;
+    volatile uint8_t tx_buf[CPAD_TX_BUF_DEPTH];
+    volatile uint8_t tx_cnt;
+    volatile uint8_t tx_cmd;
+    volatile uint8_t rx_buf[CPAD_RX_BUF_DEPTH];
+    volatile uint8_t rx_cnt;
+    volatile uint8_t rx_tag;
+    volatile uint16_t rtx_timeout;
+    volatile uint8_t cpad_fsm_cstate;
 } cpad_reg_st;
 
 static cpad_reg_st cpad_reg_inst;
@@ -99,12 +99,12 @@ static cpad_reg_st cpad_reg_inst;
   */
 uint16_t cpad_get_comm_sts(void)
 {
-	return cpad_reg_inst.rtx_timeout;
+    return cpad_reg_inst.rtx_timeout;
 }
 
 uint8_t cpad_get_rx_fsm(void)
 {
-	return cpad_reg_inst.cpad_fsm_cstate;
+    return cpad_reg_inst.cpad_fsm_cstate;
 }
 
 /**
@@ -116,235 +116,235 @@ uint8_t cpad_get_rx_fsm(void)
   */
 uint16_t cpad_frame_recv(void)
 {
-	if (cpad_reg_inst.rx_tag == 1) //if there is already an unprocessed frame in the rx buffer, quit new frame recieving
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
+    if (cpad_reg_inst.rx_tag == 1) //if there is already an unprocessed frame in the rx buffer, quit new frame recieving
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 static uint16_t obcmd_clear_alarm(void)
 {
-	extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
+    extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
 
-	extern sys_reg_st g_sys;
+    extern sys_reg_st g_sys;
 
-	if (clear_alarm() != 1)
-	{
+    if (clear_alarm() != 1)
+    {
 
-		return 0;
-	}
-	else
-	{
-		//sys_set_remap_status(WORK_MODE_STS_REG_NO,ALARM_BEEP_BPOS,0);
-		return 1;
-	}
+        return 0;
+    }
+    else
+    {
+        //sys_set_remap_status(WORK_MODE_STS_REG_NO,ALARM_BEEP_BPOS,0);
+        return 1;
+    }
 }
 
 static uint16_t obcmd_set_time(void)
 {
-	extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
-	time_t now;
-	rt_device_t device;
+    extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
+    time_t now;
+    rt_device_t device;
 
-	now = cpad_usSRegHoldBuf[1];
-	now = (now << 16) | cpad_usSRegHoldBuf[2];
+    now = cpad_usSRegHoldBuf[1];
+    now = (now << 16) | cpad_usSRegHoldBuf[2];
 
-	device = rt_device_find("rtc");
+    device = rt_device_find("rtc");
 
-	if (device != RT_NULL)
-	{
-		rt_rtc_control(device, RT_DEVICE_CTRL_RTC_SET_TIME, &now);
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
+    if (device != RT_NULL)
+    {
+        rt_rtc_control(device, RT_DEVICE_CTRL_RTC_SET_TIME, &now);
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 static uint16_t obcmd_req_time(void)
 {
-	extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
-	time_t now;
+    extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
+    time_t now;
 
-	time(&now);
+    time(&now);
 
-	cpad_usSRegHoldBuf[1] = (uint16_t)((now >> 16) & 0x0000ffff);
-	cpad_usSRegHoldBuf[2] = (uint16_t)(now & 0x0000ffff);
+    cpad_usSRegHoldBuf[1] = (uint16_t)((now >> 16) & 0x0000ffff);
+    cpad_usSRegHoldBuf[2] = (uint16_t)(now & 0x0000ffff);
 
-	return 1;
+    return 1;
 }
 
 static uint16_t obcmd_clear_run_time(void)
 {
-	extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
+    extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
 
-	extern sys_reg_st g_sys;
+    extern sys_reg_st g_sys;
 
-	if (reset_runtime(cpad_usSRegHoldBuf[1]) != 1)
-	{
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
+    if (reset_runtime(cpad_usSRegHoldBuf[1]) != 1)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
 }
 
 static uint16_t obcmd_load_fact(void)
 {
-	extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
+    extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
 
-	extern sys_reg_st g_sys;
+    extern sys_reg_st g_sys;
 
-	if (load_factory_pram() != 1)
-	{
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
+    if (load_factory_pram() != 1)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
 }
 
-//保存配置参数
+//淇濆瓨閰嶇疆鍙傛暟
 static uint16_t obcmd_save_conf(void)
 {
-	extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
+    extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
 
-	extern sys_reg_st g_sys;
+    extern sys_reg_st g_sys;
 
-	if (save_conf_reg(cpad_usSRegHoldBuf[1]) != 0)
-	{
-		return 0;
-	}
-	else
-	{
-		rt_thread_delay(1000);
-		NVIC_SystemReset(); //主板重启
-		return 1;
-	}
+    if (save_conf_reg(cpad_usSRegHoldBuf[1]) != 0)
+    {
+        return 0;
+    }
+    else
+    {
+        rt_thread_delay(1000);
+        NVIC_SystemReset(); //涓绘澘閲嶅惎
+        return 1;
+    }
 }
 
 static uint16_t obcmd_load_conf(void)
 {
-	extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
+    extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
 
-	extern sys_reg_st g_sys;
+    extern sys_reg_st g_sys;
 
-	if (set_load_flag(cpad_usSRegHoldBuf[1]) != 1)
-	{
-		return 0;
-	}
-	else
-	{
-		if (cpad_usSRegHoldBuf[1] != 0)
-		{
-			NVIC_SystemReset();
-		}
-		return 1;
-	}
+    if (set_load_flag(cpad_usSRegHoldBuf[1]) != 1)
+    {
+        return 0;
+    }
+    else
+    {
+        if (cpad_usSRegHoldBuf[1] != 0)
+        {
+            NVIC_SystemReset();
+        }
+        return 1;
+    }
 }
 
 static uint16_t obcmd_clear_alarm_beep(void)
 {
 
-	sys_set_remap_status(WORK_MODE_STS_REG_NO, ALARM_BEEP_BPOS, 0);
+    sys_set_remap_status(WORK_MODE_STS_REG_NO, ALARM_BEEP_BPOS, 0);
 
-	return 1;
+    return 1;
 }
 
 //modbus cpad protocal resolve
 uint16_t cpad_ob_resolve(void)
 {
-	extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
-	uint8_t err_code;
-	uint16_t cmd_type;
+    extern USHORT cpad_usSRegHoldBuf[CMD_REG_SIZE];
+    uint8_t err_code;
+    uint16_t cmd_type;
 
-	cmd_type = cpad_usSRegHoldBuf[0];
-	if (cmd_type != 0)
-	{
-		rt_kprintf("cmd_type is %x\n", cmd_type);
-	}
+    cmd_type = cpad_usSRegHoldBuf[0];
+    if (cmd_type != 0)
+    {
+        rt_kprintf("cmd_type is %x\n", cmd_type);
+    }
 
-	err_code = 0;
+    err_code = 0;
 
-	if (cmd_type != 0)
-	{
-		switch (cmd_type)
-		{
-		case (CPAD_CMD_CLEAR_ALARM):
-		{
-			err_code = obcmd_clear_alarm();
-			break;
-		}
-		case (CPAD_CMD_SET_TIME):
-		{
-			err_code = obcmd_set_time();
-			break;
-		}
-		case (CPAD_CMD_REQ_TIME):
-		{
-			err_code = obcmd_req_time();
-			break;
-		}
-		case (CPAD_CMD_CLEAR_RUN_TIME):
-		{
-			err_code = obcmd_clear_run_time();
-			break;
-		}
-		case (CPAD_CMD_CLEAR_RECORD):
-		{
-			err_code = 1;
-			break;
-		}
-		case (CPAD_CMD_DEFAULT_PRAM): //恢复默认参数
-		{
-			err_code = obcmd_load_fact();
-			break;
-		}
-		case (CPAD_CMD_CONF_SAVE_OPTION):
-		{
-			err_code = obcmd_save_conf();
-			break;
-		}
-		case (CPAD_CMD_CONF_LOAD_OPTION): //恢复原始参数
-		{
-			err_code = obcmd_load_conf();
-			break;
-		}
-		case (CPAD_CMD_CLEAR_ALARM_BEEP):
-		{
-			err_code = obcmd_clear_alarm_beep();
-			break;
-		}
+    if (cmd_type != 0)
+    {
+        switch (cmd_type)
+        {
+        case (CPAD_CMD_CLEAR_ALARM):
+        {
+            err_code = obcmd_clear_alarm();
+            break;
+        }
+        case (CPAD_CMD_SET_TIME):
+        {
+            err_code = obcmd_set_time();
+            break;
+        }
+        case (CPAD_CMD_REQ_TIME):
+        {
+            err_code = obcmd_req_time();
+            break;
+        }
+        case (CPAD_CMD_CLEAR_RUN_TIME):
+        {
+            err_code = obcmd_clear_run_time();
+            break;
+        }
+        case (CPAD_CMD_CLEAR_RECORD):
+        {
+            err_code = 1;
+            break;
+        }
+        case (CPAD_CMD_DEFAULT_PRAM): //鎭㈠榛樿鍙傛暟
+        {
+            err_code = obcmd_load_fact();
+            break;
+        }
+        case (CPAD_CMD_CONF_SAVE_OPTION):
+        {
+            err_code = obcmd_save_conf();
+            break;
+        }
+        case (CPAD_CMD_CONF_LOAD_OPTION): //鎭㈠鍘熷鍙傛暟
+        {
+            err_code = obcmd_load_conf();
+            break;
+        }
+        case (CPAD_CMD_CLEAR_ALARM_BEEP):
+        {
+            err_code = obcmd_clear_alarm_beep();
+            break;
+        }
 
-		default:
-		{
-			err_code = 1;
-			break;
-		}
-		}
-		if (err_code == 0)
-		{
-			cpad_usSRegHoldBuf[0] = 0;
-		}
-		else
-		{
-			cpad_usSRegHoldBuf[0] = 0xffff;
-		}
-	}
-	cpad_usSRegHoldBuf[0] = 0;
-	return 1;
+        default:
+        {
+            err_code = 1;
+            break;
+        }
+        }
+        if (err_code == 0)
+        {
+            cpad_usSRegHoldBuf[0] = 0;
+        }
+        else
+        {
+            cpad_usSRegHoldBuf[0] = 0xffff;
+        }
+    }
+    cpad_usSRegHoldBuf[0] = 0;
+    return 1;
 }
 
 static void show_cpad_info(void)
 {
-	rt_kprintf("Cpad rx_tag: %x, rtx_timeout: %d\n", cpad_reg_inst.rx_tag, cpad_reg_inst.rtx_timeout);
+    rt_kprintf("Cpad rx_tag: %x, rtx_timeout: %d\n", cpad_reg_inst.rx_tag, cpad_reg_inst.rtx_timeout);
 }
 
 FINSH_FUNCTION_EXPORT(show_cpad_info, show cpad information.);

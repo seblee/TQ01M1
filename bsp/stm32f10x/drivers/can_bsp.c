@@ -37,22 +37,21 @@
 //static void can_nvic_config(void)
 //{
 //		NVIC_InitTypeDef  NVIC_InitStructure;
-//		
+//
 //		//can rx isr initialization
 //		NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
 //		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
 //		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 //		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 //		NVIC_Init(&NVIC_InitStructure);
-//		
+//
 //		//can tx isr initialization
 //		NVIC_InitStructure.NVIC_IRQChannel = USB_HP_CAN1_TX_IRQn;
 //		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
 //		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 //		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//		NVIC_Init(&NVIC_InitStructure);	
+//		NVIC_Init(&NVIC_InitStructure);
 //}
-
 
 //// can bus struct initialization
 //static void can_struct_init(uint16_t can_baudrate)
@@ -60,7 +59,7 @@
 //		CAN_InitTypeDef        CAN_InitStructure;
 //		CAN_FilterInitTypeDef  CAN_FilterInitStructure;
 //		GPIO_InitTypeDef  		 GPIO_InitStructure;
-//		
+//
 //		/* GPIO clock enable */
 //		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO|RCC_APB2Periph_GPIOB, ENABLE);
 //		RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
@@ -69,14 +68,14 @@
 //		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_CAN_RX;
 //		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 //		GPIO_Init(GPIO_CAN, &GPIO_InitStructure);
-//		
+//
 //		/* Configure CAN pin: TX */
 //		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_CAN_TX;
 //		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 //		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 //		GPIO_Init(GPIO_CAN, &GPIO_InitStructure);
-//		
-//		GPIO_PinRemapConfig(GPIO_Remapping_CAN , ENABLE);	
+//
+//		GPIO_PinRemapConfig(GPIO_Remapping_CAN , ENABLE);
 
 //		/* CAN register init */
 //		CAN_DeInit(CAN1);
@@ -91,12 +90,12 @@
 //		CAN_InitStructure.CAN_RFLM=DISABLE;
 //		CAN_InitStructure.CAN_TXFP=ENABLE;//DISABLE;
 //		CAN_InitStructure.CAN_Mode=CAN_Mode_Normal;
-//		
+//
 //		/* Baudrate = 500 Kbps */
-//		CAN_InitStructure.CAN_SJW = CAN_SJW_1tq;  
+//		CAN_InitStructure.CAN_SJW = CAN_SJW_1tq;
 //		CAN_InitStructure.CAN_BS1 = CAN_BS1_3tq;
 //		CAN_InitStructure.CAN_BS2 = CAN_BS2_4tq;
-//		
+//
 //		//Set CAN baudrate
 //		switch(can_baudrate)
 //		{
@@ -124,14 +123,14 @@
 //		CAN_FilterInitStructure.CAN_FilterActivation=ENABLE;
 //		CAN_FilterInit(&CAN_FilterInitStructure);
 
-//		/* CAN FIFO0 message pending interrupt enable */ 
-//		CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);	
+//		/* CAN FIFO0 message pending interrupt enable */
+//		CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);
 //}
 
 //void can_port_baudrate(void)
 //{
-//	extern sys_reg_st					g_sys; 	
-//	
+//	extern sys_reg_st					g_sys;
+//
 //	rt_sem_take(can_tx_sem, 200);						//wait for signal for can tx ISR
 //	can_struct_init(g_sys.config.team.baudrate);
 //}
@@ -139,13 +138,12 @@
 //void drv_can_init(void)
 //{
 //		extern  sys_reg_st		g_sys;
-//	
+//
 //		can_nvic_config();
 //		can_struct_init(g_sys.config.team.baudrate);
 //		fifo8_init(&can_rx_fifo, sizeof(CanRxMsg), CAN_RXBUF_SIZE);
-//		can_tx_sem = rt_sem_create("can_tx_sem", 0, RT_IPC_FLAG_FIFO);	
+//		can_tx_sem = rt_sem_create("can_tx_sem", 0, RT_IPC_FLAG_FIFO);
 //}
-
 
 //// can bus send data function
 //int32_t can_send(uint8_t sa, uint8_t da, const uint8_t* data, uint16_t length, uint8_t prio, uint8_t raf)
@@ -154,7 +152,7 @@
 //		uint8 TransmitMailbox;
 //	//	uint32 temp;
 //		uint32 i,res_len,res_count;
-//		//validate tx data length 
+//		//validate tx data length
 //		if(length > MAX_CAN_FRAME_SIZE)
 //		{
 //				rt_kprintf("Can frame length exceeded!\n");
@@ -167,7 +165,7 @@
 //		TxMessage.StdId=0;
 //		TxMessage.IDE=CAN_ID_EXT;
 //		TxMessage.RTR=CAN_RTR_DATA;
-//		
+//
 
 //		//if tx data length is over 8 bytes, fix DLC to 8 and repeatedly send data while residual length is over 8
 //		while(res_len > 8)
@@ -187,7 +185,7 @@
 //				CAN_ITConfig(CAN1,CAN_IT_TME, ENABLE);	//enable can tx interrupt
 //				rt_sem_take(can_tx_sem, 10);						//wait for signal for can tx ISR
 //		}
-//		
+//
 //		//if tx data length is no more than 8 and not none, reset DLC to current length, and transmmit data
 //		if(res_len>0)
 //		{
@@ -198,11 +196,11 @@
 //				{
 //						TxMessage.Data[i] = *(data+(length-res_len));
 //						res_len--;
-//				}	
+//				}
 //				TransmitMailbox = CAN_Transmit(CAN1, &TxMessage);
 //				if(TransmitMailbox == 0x04)	//if TransmitMailbox used up, abort transmission
 //				{
-//						return 0;	
+//						return 0;
 //				}
 //				CAN_ITConfig(CAN1,CAN_IT_TME, ENABLE); 	//enable can tx interrupt
 //				rt_sem_take(can_tx_sem, 10);						//wait for signal for can tx ISR
@@ -222,13 +220,13 @@
 //        rt_kprintf("CAN Frame length exceeded!\n");
 //        return 0;
 //    }
-//    
+//
 //    i = 0;
 //    res_len = length;
 //    TxMessage.StdId   = 0;
 //    TxMessage.ExtId   = 0;
 //    TxMessage.ExtId   = prio << 27 | raf << 22 | sa << 14 | da << 6 | type;
-////    TxMessage.ExtId   |= CANID_EOSF_BITS; //single frame£¬the first frame is the end frame
+////    TxMessage.ExtId   |= CANID_EOSF_BITS; //single frameÂ£Â¬the first frame is the end frame
 //    TxMessage.IDE     = CAN_ID_EXT;
 //    TxMessage.RTR     = CAN_RTR_DATA;
 //    TxMessage.DLC     = length;
@@ -236,9 +234,9 @@
 //    {
 //        TxMessage.Data[i] = *(data + i);
 //    }
-//    
+//
 //    TransmitMailbox = CAN_Transmit(CAN1, &TxMessage);
-//	
+//
 //    if(TransmitMailbox == 0x04)//if TransmitMailbox used up, abort transmission
 //    {
 //			       rt_kprintf("can_send_singleframe: CAN_FLAG_BOF = %d\n",CAN_GetFlagStatus(CAN1,CAN_FLAG_BOF));
@@ -252,7 +250,7 @@
 //    }
 //    CAN_ITConfig(CAN1,CAN_IT_TME, ENABLE);	//enable can tx interrupt
 //    rt_sem_take(can_tx_sem, 10);						//wait for signal for can tx ISR
-//    
+//
 //    return 1;
 //}
 
@@ -266,19 +264,18 @@
 //		{
 //				data_buf[i] = i + j;
 //		}
-////		can_send(da,sa,data_buf,length,0,0);	
+////		can_send(da,sa,data_buf,length,0,0);
 //            j++;
 //    can_send_singleframe(sa, da, 0, data_buf, length, 0, 0);
 //}
 
-
-////CAN RECIEVE ISR 
+////CAN RECIEVE ISR
 //void USB_LP_CAN1_RX0_IRQHandler(void)
 //{
 //		CanRxMsg RxMessage;
 //		uint8 can_fifo_len,i;
 //		can_fifo_len = 0;
-//		
+//
 //		can_fifo_len = CAN_MessagePending(CAN1,CAN_FIFO0);
 //		for(i=0;i<can_fifo_len;i++)
 //		{
@@ -287,11 +284,11 @@
 //		}
 //}
 
-////CAN TRANSMIT ISR 
+////CAN TRANSMIT ISR
 //void USB_HP_CAN1_TX_IRQHandler(void)
 //{
 //		CAN_ClearITPendingBit(CAN1,CAN_IT_TME);
-//		CAN_ITConfig(CAN1,CAN_IT_TME, DISABLE); 
+//		CAN_ITConfig(CAN1,CAN_IT_TME, DISABLE);
 //		rt_sem_release(can_tx_sem);
 //}
 

@@ -50,13 +50,13 @@
 
 //void tcom_thread_entry(void* parameter)
 //{
-//		extern sys_reg_st		g_sys;		
+//		extern sys_reg_st		g_sys;
 //		rt_thread_delay(TCOM_THREAD_DELAY);
 //		team_local_var_init();
 //		while(1)
 //		{
 //        can_frame_resolve();
-//        can_protocal_resolve();      
+//        can_protocal_resolve();
 //				team_snd_pkt();
 //				rt_thread_delay(100);
 //		}
@@ -64,10 +64,10 @@
 
 //static void team_local_var_reset(void)
 //{
-//		uint16_t i,j;		
+//		uint16_t i,j;
 
 //		team_local_inst.team_fsm = TEAM_FSM_IDLE;
-//		
+//
 //		for(i=0;i<TEAM_MAX_SLAVE_NUM;i++)
 //		{
 //				for(j=0;j<TEAM_TAB_MAX;j++)
@@ -75,12 +75,12 @@
 //						team_local_inst.team_table[i][j] = 0;
 //				}
 //		}
-//		
+//
 //		for(i=0;i<TEAM_CONF_MAX;i++)
 //		{
 //				team_local_inst.team_config[i] = 0;
 //		}
-//		
+//
 //		for(i=0;i<TEAM_PARAM_MAX;i++)
 //		{
 //				team_local_inst.team_param[i] = 0;
@@ -90,12 +90,12 @@
 //		{
 //				team_local_inst.team_bitmap[i] = 0;
 //		}
-//    
+//
 //    for(i = 0; i < TEAM_WORK_STATUS_MAX; i++)
 //    {
 //        team_local_inst.team_work_status[i] = 0;
 //    }
-//    
+//
 //    for(i = 0; i < TEAM_MAX_SLAVE_NUM; i++)
 //    {
 //        team_local_inst.team_sort_temp[i] = 0;
@@ -104,7 +104,7 @@
 //    team_local_inst.team_config_set_flag    = 0;
 //    team_local_inst.team_config_set_flag_1  = 0;
 //    team_local_inst.slave_to_master_param_protect = 0;
-//    
+//
 //    for(i = 0; i < 8; i++)
 //    {
 //        team_local_inst.master_req_distb_buf[i]       = 0;
@@ -112,7 +112,7 @@
 //        team_local_inst.master_ex_hum_param_buf[i]    = 0;
 //        team_local_inst.master_run_final_sts_buf[i]   = 0;
 //    }
-//    
+//
 //    team_local_inst.master_send_param_protect = MASTER_SEND_PARAM_PROTECT_CNT;
 //    team_local_inst.rotate_timeout            = ROTATE_TIMEOUT_CNT;
 //		team_local_inst.run_sts_cd								= 0;
@@ -123,25 +123,25 @@
 //void team_local_var_init(void)
 //{
 ////		uint8_t Buffer[2];
-//		
+//
 //		team_local_var_reset();
 //		I2C_EE_BufRead((uint8_t *)&team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT], STS_REG_EE2_ADDR, sizeof(team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT]));
-//		fifo8_init(&cf_rx_fifo,CAN_FRAME_SIZE,CAN_BUF_DEPTH);		
-//		fifo8_init(&cf_tx_fifo,CAN_FRAME_SIZE,CAN_BUF_DEPTH);			
-////		Buffer[0]=fifo8_init(&cf_rx_fifo,CAN_FRAME_SIZE,CAN_BUF_DEPTH);		
-////		Buffer[1]=fifo8_init(&cf_tx_fifo,CAN_FRAME_SIZE,CAN_BUF_DEPTH);			
-////		rt_kprintf("Buffer[0] = %d,Buffer[1] = %d\n",Buffer[0],Buffer[1]);	
+//		fifo8_init(&cf_rx_fifo,CAN_FRAME_SIZE,CAN_BUF_DEPTH);
+//		fifo8_init(&cf_tx_fifo,CAN_FRAME_SIZE,CAN_BUF_DEPTH);
+////		Buffer[0]=fifo8_init(&cf_rx_fifo,CAN_FRAME_SIZE,CAN_BUF_DEPTH);
+////		Buffer[1]=fifo8_init(&cf_tx_fifo,CAN_FRAME_SIZE,CAN_BUF_DEPTH);
+////		rt_kprintf("Buffer[0] = %d,Buffer[1] = %d\n",Buffer[0],Buffer[1]);
 //}
 
 //static uint16_t team_check_local_conf_status(void)
 //{
-//		extern sys_reg_st		g_sys;		
-//		
+//		extern sys_reg_st		g_sys;
+//
 //		if((team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS]&(0x0001<<TEAM_STS_CONFD_BPOS)) != 0)
 //		{
 //				return 1;
 //		}
-//		
+//
 //		return 0;
 //}
 
@@ -149,13 +149,13 @@
 //{
 
 //		extern sys_reg_st		g_sys;
-//		extern local_reg_st l_sys; 
+//		extern local_reg_st l_sys;
 //		uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
 //    uint8_t data_base = 3;
 //    uint8_t i;
-//  
+//
 //    //DA
-//		can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;	
+//		can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;
 //    //type
 //    can_frame_tx_buf[1]                           = TEAM_CMD_MASTER_REQ_DISTB;
 //    //Length
@@ -178,10 +178,10 @@
 //void team_master_conf_frame(void)
 //{
 //		extern sys_reg_st		g_sys;
-//		extern local_reg_st l_sys; 
+//		extern local_reg_st l_sys;
 //		uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
 //    uint8_t i, data_base = 3;
-//  
+//
 //    //DA
 //    can_frame_tx_buf[0]                               = TEAM_BROADCAST_ADDR;
 //    //type
@@ -195,20 +195,19 @@
 //        *(uint16_t *)&can_frame_tx_buf[data_base + 1] = team_local_inst.team_config[0 + i * 3];
 //        *(uint16_t *)&can_frame_tx_buf[data_base + 3] = team_local_inst.team_config[1 + i * 3];
 //        *(uint16_t *)&can_frame_tx_buf[data_base + 5] = team_local_inst.team_config[2 + i * 3];
-//      
+//
 //        fifo8_push(&cf_tx_fifo,can_frame_tx_buf);
 //    }
 //}
-
 
 //static void team_run_sts_set_frame(void)
 //{
 //		extern sys_reg_st		g_sys;
 //		uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
 //    uint8_t data_base = 3;
-//  
+//
 //    //DA
-//    can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;		
+//    can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;
 //    //type
 //    can_frame_tx_buf[1]                           = TEAM_CMD_MASTER_RUN_STS_SET;
 //    //Length
@@ -219,45 +218,44 @@
 //		fifo8_push(&cf_tx_fifo,can_frame_tx_buf);
 //}
 
-
 //static void team_query_frame(uint8_t da)
 //{
 //		extern sys_reg_st		g_sys;
 //		uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
 //    uint8_t data_base = 3;
-//  
+//
 //    //DA
 //    can_frame_tx_buf[0]                           = da;
 //    //type
-//    can_frame_tx_buf[1]                           = TEAM_CMD_MASTER_STS_QEURY;  
+//    can_frame_tx_buf[1]                           = TEAM_CMD_MASTER_STS_QEURY;
 //    //Length
 //    can_frame_tx_buf[2]                           = TEAM_CMD_LEN_MASTER_STS_QEURY;
 //    //data
 //    *(uint16_t *)&can_frame_tx_buf[data_base + 0] = team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS];
 
-//		fifo8_push(&cf_tx_fifo,can_frame_tx_buf);		
+//		fifo8_push(&cf_tx_fifo,can_frame_tx_buf);
 //}
 
 //static void team_query_resp_frame(uint8_t* pt_frame)
 //{
 //		extern sys_reg_st		g_sys;
 //		uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
-//		uint8_t i, da, sa;			
+//		uint8_t i, da, sa;
 //    uint8_t data_base = 3;
 
 //    sa = *(pt_frame + 0);
 //    da = *(pt_frame + 1);
-//		
+//
 //		if(da != g_sys.config.team.addr - 1)
 //		{
 //				return;
 //		}
-//		
+//
 //		if((team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS]&(0x0001<<TEAM_STS_CONFD_BPOS)) == 0)
 //		{
 //				return;
 //		}
-//    
+//
 //    //DA
 //    can_frame_tx_buf[0]                               = sa;
 //    //type
@@ -282,7 +280,7 @@
 //				}
 //        fifo8_push(&cf_tx_fifo,can_frame_tx_buf);
 //    }
-//		
+//
 ////		fifo8_push(&cf_tx_fifo,can_frame_tx_buf);
 //}
 
@@ -291,9 +289,9 @@
 //		extern sys_reg_st		g_sys;
 //		uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
 //    uint8_t data_base = 3;
-//	
+//
 //    //DA
-//    can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;		
+//    can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;
 //    //type
 //    can_frame_tx_buf[1]                           = TEAM_CMD_LOCAL_STS;
 //    //Length
@@ -304,8 +302,8 @@
 //    *(uint16_t *)&can_frame_tx_buf[data_base + 4] = team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_HUM];
 //    *(uint16_t *)&can_frame_tx_buf[data_base + 6] = team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_RESERVE];
 
-//		fifo8_push(&cf_tx_fifo,can_frame_tx_buf);		
-//		
+//		fifo8_push(&cf_tx_fifo,can_frame_tx_buf);
+//
 //		team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_MASTER_TIMEOUT] = TEAM_TAB_TIMEOUT_CNT;
 //}
 
@@ -315,7 +313,7 @@
 //    uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
 //    uint8_t data_base = 3;
 //    uint8_t i;
-//  
+//
 //    //DA
 //    can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;
 //    //type
@@ -325,12 +323,12 @@
 //    //data
 ////    *(uint16_t *)&can_frame_tx_buf[data_base + 0] = team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ];
 ////    *(uint32_t *)&can_frame_tx_buf[data_base + 2] = team_local_inst.team_bitmap[TEAM_BITMAP_TEMP_FULL_REQ_OUT];
-//  
+//
 //    for(i = 0; i < TEAM_CMD_LEN_MASTER_EX_TEMP_PARAM_SET; i++)
 //    {
 //        can_frame_tx_buf[data_base + i] = team_local_inst.master_ex_temp_param_buf[i];
 //    }
-//  
+//
 //    if(team_local_inst.slave_to_master_param_protect == 0)
 //    {
 //        fifo8_push(&cf_tx_fifo,can_frame_tx_buf);
@@ -343,7 +341,7 @@
 //    uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
 //    uint8_t data_base = 3;
 //    uint8_t i;
-//  
+//
 //    //DA
 //    can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;
 //    //type
@@ -353,12 +351,12 @@
 //    //data
 ////    *(uint16_t *)&can_frame_tx_buf[data_base + 0] = team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ];
 ////    *(uint32_t *)&can_frame_tx_buf[data_base + 2] = team_local_inst.team_bitmap[TEAM_BITMAP_HUM_FULL_REQ_OUT];
-//  
+//
 //    for(i = 0; i < TEAM_CMD_LEN_MASTER_EX_HUM_PARAM_SET; i++)
 //    {
 //        can_frame_tx_buf[data_base + i] = team_local_inst.master_ex_hum_param_buf[i];
 //    }
-//  
+//
 //    if(team_local_inst.slave_to_master_param_protect == 0)
 //    {
 //        fifo8_push(&cf_tx_fifo,can_frame_tx_buf);
@@ -371,9 +369,9 @@
 //		uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
 //    uint8_t data_base = 3;
 //    uint8_t i;
-//  
+//
 //    //DA
-//    can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;		
+//    can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;
 //    //type
 //    can_frame_tx_buf[1]                           = TEAM_CMD_MASTER_RUN_FINAL_STS_SET;
 //    //Length
@@ -381,7 +379,7 @@
 //    //data
 ////    *(uint32_t *)&can_frame_tx_buf[data_base + 0] = team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT];
 ////    *(uint32_t *)&can_frame_tx_buf[data_base + 4] = team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT];
-//  
+//
 //    for(i = 0; i < TEAM_CMD_LEN_MASTER_RUN_FINAL_STS_SET; i++)
 //    {
 //        can_frame_tx_buf[data_base + i] = team_local_inst.master_run_final_sts_buf[i];
@@ -398,7 +396,7 @@
 //    extern sys_reg_st   g_sys;
 //    uint8_t can_frame_tx_buf[CAN_FRAME_SIZE];
 //    uint8_t data_base = 3;
-//  
+//
 //    //DA
 //    can_frame_tx_buf[0]                           = TEAM_BROADCAST_ADDR;
 //    //type
@@ -407,7 +405,7 @@
 //    can_frame_tx_buf[2]                           = TEAM_CMD_LEN_MASTER_CLEAR_CONFD_STS_SET;
 //    //data
 //    data_base = data_base;    //add for avoid warning
-//    
+//
 //    fifo8_push(&cf_tx_fifo, can_frame_tx_buf);
 //}
 
@@ -428,8 +426,8 @@
 //				da = can_tx_buf[0];
 //        type = can_tx_buf[1];
 //        length = can_tx_buf[2];
-////					rt_kprintf("can_tx_buf[0] =%x ,can_tx_buf[1] =%x ,can_tx_buf[2] = %x\n",can_tx_buf[0],can_tx_buf[1],can_tx_buf[2]);    
-//				can_send_singleframe(sa, da, type, &can_tx_buf[3], length, 0, 0);				
+////					rt_kprintf("can_tx_buf[0] =%x ,can_tx_buf[1] =%x ,can_tx_buf[2] = %x\n",can_tx_buf[0],can_tx_buf[1],can_tx_buf[2]);
+//				can_send_singleframe(sa, da, type, &can_tx_buf[3], length, 0, 0);
 //		}
 //}
 
@@ -462,34 +460,34 @@
 //{
 //    extern sys_reg_st		g_sys;
 //    uint8_t rx_buf[CAN_FRAME_SIZE];
-//    uint8_t s_addr, d_addr, frame_len;		
+//    uint8_t s_addr, d_addr, frame_len;
 //    team_cmd_em cmd_type;
 //    uint16_t *d16_ptr = NULL;
 //    uint32_t *d32_ptr = NULL;
 //    uint16_t *d16_ptr_s = NULL;
 //    uint32_t *d32_ptr_s = NULL;
 //    uint8_t data_segment = 0;
-//  
+//
 //    d16_ptr = (uint16_t *)&rx_buf[4];
 //		d32_ptr = (uint32_t *)&rx_buf[4];
-//  
+//
 //    d16_ptr_s = (uint16_t *)&rx_buf[5];
 //		d32_ptr_s = (uint32_t *)&rx_buf[5];
-//  
+//
 //    while(is_fifo8_empty(&cf_rx_fifo) == 0)
 //    {
 //        fifo8_pop(&cf_rx_fifo, rx_buf);
 //        s_addr    = rx_buf[0];
 //        d_addr    = rx_buf[1];
-//        cmd_type  = (team_cmd_em)rx_buf[2];  
-//        frame_len = rx_buf[3]; 
-//              
+//        cmd_type  = (team_cmd_em)rx_buf[2];
+//        frame_len = rx_buf[3];
+//
 //        //add for avoid warning
 //        d_addr = d_addr;
 //        frame_len = frame_len;
 //        d32_ptr_s = d32_ptr_s;
-////		rt_kprintf("rx_buf[0] =%x ,rx_buf[1] =%x ,rx_buf[2] = %x,rx_buf[3] = %x\n",rx_buf[0],rx_buf[1],rx_buf[2],rx_buf[3]);      
-//        team_local_inst.team_table[s_addr - 1][TEAM_MASTER_TIMEOUT] = TEAM_TAB_TIMEOUT_CNT;     
+////		rt_kprintf("rx_buf[0] =%x ,rx_buf[1] =%x ,rx_buf[2] = %x,rx_buf[3] = %x\n",rx_buf[0],rx_buf[1],rx_buf[2],rx_buf[3]);
+//        team_local_inst.team_table[s_addr - 1][TEAM_MASTER_TIMEOUT] = TEAM_TAB_TIMEOUT_CNT;
 //        switch(cmd_type)
 //        {
 //          case (TEAM_CMD_MASTER_REQ_DISTB):
@@ -623,7 +621,7 @@
 //{
 //		uint32_t temp;
 //		uint16_t i;
-//		
+//
 //		temp = 0;
 //		for(i=0;i<(team_local_inst.team_config[TEAM_CONF_CNT]&0x00ff);i++)
 //		{
@@ -667,7 +665,7 @@
 //		ret1 ^= (team_local_inst.team_bitmap[TEAM_BITMAP_RS_SET] >> 8) & 0xff;
 //		ret1 ^= team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] & 0xff;
 //		ret1 ^= (team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] >> 8) & 0xff;
-//		
+//
 //		sum = ret | (ret1 << 8);
 //    return sum;
 //}
@@ -677,10 +675,10 @@
 //		extern sys_reg_st		g_sys;
 //		extern local_reg_st l_sys;
 ////		uint16_t target_mode;
-//		
-////		target_mode = (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_TARGET_BPOS) & 0x0003;		
-//		
-//		//update team run enable mode configuration 
+//
+////		target_mode = (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_TARGET_BPOS) & 0x0003;
+//
+//		//update team run enable mode configuration
 //    if(((team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
 //    {
 //        team_local_inst.team_config[TEAM_CONF_MODE] |= (0x0001 << TEAM_CONF_RS_BPOS);
@@ -689,14 +687,14 @@
 //    {
 //        team_local_inst.team_config[TEAM_CONF_MODE] &= ~(0x0001 << TEAM_CONF_RS_BPOS);
 //    }
-//				
+//
 //		//copy team configuration to status reg
 //		team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS] &= 0x03ff;
 //		team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS] |= team_local_inst.team_config[TEAM_CONF_MODE] & 0xfc00;
-//		
+//
 //		team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS] &= ~(0x0003<<TEAM_STS_FSM_BPOS);
 //		team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS] |= (team_local_inst.team_fsm<<TEAM_STS_FSM_BPOS);
-//		
+//
 //		if((g_sys.status.alarm_status_cnt.pwr_off_alarm > 0))
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS] |= (0x0001<<TEAM_STS_ALARM_BPOS);
@@ -705,8 +703,8 @@
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS] &= ~(0x0001<<TEAM_STS_ALARM_BPOS);
 //		}
-//		
-//    //·ç»ú×´Ì¬Î»£¬¼°¿ª¹Ø»ú×´Ì¬
+//
+//    //é£æœºçŠ¶æ€ä½ï¼ŒåŠå¼€å…³æœºçŠ¶æ€
 //		if(sys_get_remap_status(WORK_MODE_STS_REG_NO,FAN_STS_BPOS) != 0)
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS] |= (0x0001<<TEAM_STS_RUN_BPOS);
@@ -714,9 +712,9 @@
 //		else
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS] &= ~(0x0001<<TEAM_STS_RUN_BPOS);
-//		}		
-//    
-//    //¼ÓÈÈ×´Ì¬Î»
+//		}
+//
+//    //åŠ çƒ­çŠ¶æ€ä½
 //    if(sys_get_remap_status(WORK_MODE_STS_REG_NO, HEATING_STS_BPOS) != 0)
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_STATUS] |= (0x0001 << TEAM_STS_HEATING_STS_BPOS);
@@ -725,8 +723,8 @@
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_STATUS] &= ~(0x0001 << TEAM_STS_HEATING_STS_BPOS);
 //		}
-//    
-//    //ÖÆÀä×´Ì¬Î»
+//
+//    //åˆ¶å†·çŠ¶æ€ä½
 //    if(sys_get_remap_status(WORK_MODE_STS_REG_NO, COOLING_STS_BPOS) != 0)
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_STATUS] |= (0x0001 << TEAM_STS_COOLING_STS_BPOS);
@@ -735,8 +733,8 @@
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_STATUS] &= ~(0x0001 << TEAM_STS_COOLING_STS_BPOS);
 //		}
-//    
-//    //¼ÓÊª×´Ì¬Î»
+//
+//    //åŠ æ¹¿çŠ¶æ€ä½
 //    if(sys_get_remap_status(WORK_MODE_STS_REG_NO, HUMING_STS_BPOS) != 0)
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_STATUS] |= (0x0001 << TEAM_STS_HUMING_STS_BPOS);
@@ -745,8 +743,8 @@
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_STATUS] &= ~(0x0001 << TEAM_STS_HUMING_STS_BPOS);
 //		}
-//    
-//    //³ıÊª×´Ì¬Î»
+//
+//    //é™¤æ¹¿çŠ¶æ€ä½
 //    if(sys_get_remap_status(WORK_MODE_STS_REG_NO, DEMHUM_STS_BPOS) != 0)
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_STATUS] |= (0x0001 << TEAM_STS_DEMHUM_STS_BPOS);
@@ -755,31 +753,31 @@
 //		{
 //				team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_STATUS] &= ~(0x0001 << TEAM_STS_DEMHUM_STS_BPOS);
 //		}
-//    
-//    //¸üĞÂ×´Ì¬Î»µ½×´Ì¬¼Ä´æÆ÷
+//
+//    //æ›´æ–°çŠ¶æ€ä½åˆ°çŠ¶æ€å¯„å­˜å™¨
 //    work_status_update();
-//				
+//
 ////		team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_TEMP] = (target_mode == 0)? g_sys.status.sys_tem_hum.return_air_temp : g_sys.status.sys_tem_hum.supply_air_temp;
 ////		team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_HUM] = (target_mode == 0)? g_sys.status.sys_tem_hum.return_air_hum : g_sys.status.sys_tem_hum.supply_air_hum;
 //		*((uint32_t *)&team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_TEMP]) = calc_th_status();
-//		team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_RESERVE] = calc_team_config_check();		
-//		
+//		team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_RESERVE] = calc_team_config_check();
+//
 //		team_local_inst.team_bitmap[TEAM_BITMAP_RS_STS] = team_get_peer_rs_sts();
-//		
+//
 //    team_update_onlinestatus();
 //    team_update_malfun_dev();
 //    team_local_inst.team_bitmap[TEAM_BITMAP_CONFD]  = team_update_confdstatus();
 //}
 
-////¼ÆËãËÍ»Ø·çÎÂÊª¶Èµ½Ò»¸ö32Î»±äÁ¿ÖĞ
+////è®¡ç®—é€å›é£æ¸©æ¹¿åº¦åˆ°ä¸€ä¸ª32ä½å˜é‡ä¸­
 //static uint32_t calc_th_status(void)
 //{
 //	/*
-//	[0]-[9]:Êª¶È
-//	[10]-[20]:ÎÂ¶ÈĞèÇóÎÂ¶È
-//		[10]:ÎÂ¶ÈĞèÇó·ûºÅÎ»
-//	[21]-[31]:·ç»úĞèÇóÎÂ¶È
-//		[21]:·ç»úĞèÇó·ûºÅÎ»
+//	[0]-[9]:æ¹¿åº¦
+//	[10]-[20]:æ¸©åº¦éœ€æ±‚æ¸©åº¦
+//		[10]:æ¸©åº¦éœ€æ±‚ç¬¦å·ä½
+//	[21]-[31]:é£æœºéœ€æ±‚æ¸©åº¦
+//		[21]:é£æœºéœ€æ±‚ç¬¦å·ä½
 //		*/
 //		uint8_t target_mode, temp_calc_mode, team_fan_mode;
 //		uint32_t ret = 0;
@@ -787,8 +785,8 @@
 //		target_mode 		= (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_TARGET_BPOS) & 0x0003;
 //		temp_calc_mode 	= (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_TCMODE_BPOS) & 0x0001;
 //		team_fan_mode		= team_local_inst.team_config[TEAM_CONF_FAN_MODE];
-//	
-//		//Êª¶È¼ÆËã
+//
+//		//æ¹¿åº¦è®¡ç®—
 //		if(target_mode == TARGET_MODE_REMOTE)
 //		{
 //				ret_0_9	= g_sys.status.sys_tem_hum.remote_air_hum & 0x3ff;
@@ -797,17 +795,17 @@
 //		{
 //				ret_0_9	= g_sys.status.sys_tem_hum.return_air_hum & 0x3ff;
 //		}
-//		//ÎÂ¶ÈĞèÇó
+//		//æ¸©åº¦éœ€æ±‚
 //		if(target_mode == TARGET_MODE_RETURN)
 //		{		//return
 //				if(temp_calc_mode == MAX_TEMP_MODE)
 //				{
-//						ret_10_20 = (((g_sys.status.sys_tem_hum.return_air_max_temp & 0x8000) >> 5) | 
+//						ret_10_20 = (((g_sys.status.sys_tem_hum.return_air_max_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.return_air_max_temp & 0x3ff)) & 0x7ff;
 //				}
 //				else
 //				{
-//						ret_10_20 = (((g_sys.status.sys_tem_hum.return_air_temp & 0x8000) >> 5) | 
+//						ret_10_20 = (((g_sys.status.sys_tem_hum.return_air_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.return_air_temp & 0x3ff)) & 0x7ff;
 //				}
 //		}
@@ -815,12 +813,12 @@
 //		{		//supply
 //				if(temp_calc_mode == MAX_TEMP_MODE)
 //				{
-//						ret_10_20 = (((g_sys.status.sys_tem_hum.supply_air_max_temp & 0x8000) >> 5) | 
+//						ret_10_20 = (((g_sys.status.sys_tem_hum.supply_air_max_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.supply_air_max_temp & 0x3ff)) & 0x7ff;
 //				}
 //				else
 //				{
-//						ret_10_20 = (((g_sys.status.sys_tem_hum.supply_air_temp & 0x8000) >> 5) | 
+//						ret_10_20 = (((g_sys.status.sys_tem_hum.supply_air_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.supply_air_temp & 0x3ff)) & 0x7ff;
 //				}
 //		}
@@ -828,49 +826,49 @@
 //		{		//remote
 //				if(temp_calc_mode == MAX_TEMP_MODE)
 //				{
-//						ret_10_20 = (((g_sys.status.sys_tem_hum.remote_air_max_temp & 0x8000) >> 5) | 
+//						ret_10_20 = (((g_sys.status.sys_tem_hum.remote_air_max_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.remote_air_max_temp & 0x3ff)) & 0x7ff;
 //				}
 //				else
 //				{
-//						ret_10_20 = (((g_sys.status.sys_tem_hum.remote_air_temp & 0x8000) >> 5) | 
+//						ret_10_20 = (((g_sys.status.sys_tem_hum.remote_air_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.remote_air_temp & 0x3ff)) & 0x7ff;
 //				}
 //		}
-//		//·ç»úĞèÇó
+//		//é£æœºéœ€æ±‚
 //		switch(team_fan_mode)
 //		{
 //				case TEAM_FAN_MODE_AVR_RETURN:
-//						ret_21_31 = (((g_sys.status.sys_tem_hum.return_air_temp & 0x8000) >> 5) | 
+//						ret_21_31 = (((g_sys.status.sys_tem_hum.return_air_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.return_air_temp & 0x3ff)) & 0x7ff;
 //						break;
 //				case TEAM_FAN_MODE_AVR_SUPPLY:
-//						ret_21_31 = (((g_sys.status.sys_tem_hum.supply_air_temp & 0x8000) >> 5) | 
+//						ret_21_31 = (((g_sys.status.sys_tem_hum.supply_air_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.supply_air_temp & 0x3ff)) & 0x7ff;
 //						break;
 //				case TEAM_FAN_MODE_MAX_RETURN:
-//						ret_21_31 = (((g_sys.status.sys_tem_hum.return_air_max_temp & 0x8000) >> 5) | 
+//						ret_21_31 = (((g_sys.status.sys_tem_hum.return_air_max_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.return_air_max_temp & 0x3ff)) & 0x7ff;
 //						break;
 //				case TEAM_FAN_MODE_MAX_SUPPLY:
-//						ret_21_31 = (((g_sys.status.sys_tem_hum.supply_air_max_temp & 0x8000) >> 5) | 
+//						ret_21_31 = (((g_sys.status.sys_tem_hum.supply_air_max_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.supply_air_max_temp & 0x3ff)) & 0x7ff;
 //						break;
 //				default:
-//						ret_21_31 = (((g_sys.status.sys_tem_hum.return_air_temp & 0x8000) >> 5) | 
+//						ret_21_31 = (((g_sys.status.sys_tem_hum.return_air_temp & 0x8000) >> 5) |
 //												(g_sys.status.sys_tem_hum.return_air_temp & 0x3ff)) & 0x7ff;
 //						break;
 //		}
-//		
+//
 //		ret = (ret_0_9 & 0x3ff) | ((ret_10_20 << 10) & 0x1FFC00) | ((ret_21_31 << 21) & 0xFFE00000);
 //		return ret;
 //}
 
-////´Ó32Î»±äÁ¿ÖĞ¶ÁÈ¡³ö¶ÔÓ¦²ÎÊı
+////ä»32ä½å˜é‡ä¸­è¯»å–å‡ºå¯¹åº”å‚æ•°
 //uint16_t team_get_th(uint16_t type, uint32_t th_temp)
 //{
 //		uint16_t ret;
-//	
+//
 //		switch(type)
 //		{
 //				case TEAM_HUM_REQ_HUM:
@@ -908,7 +906,7 @@
 ////		rt_kprintf("((uint16_t *)&team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] + 0) = %d\n",((uint16_t *)&team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] + 0));
 ////		rt_kprintf("((uint16_t *)&team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] + 1) = %d\n",((uint16_t *)&team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] + 1));
 ////		rt_kprintf("team_local_inst.team_work_status[TEAM_WORK_STATUS_0_3] = %d\n",team_local_inst.team_work_status[TEAM_WORK_STATUS_0_3]);
-//		
+//
 //}
 
 //team_signal_em team_signal_gen(void)
@@ -924,7 +922,7 @@
 //				else
 //				{
 //						team_local_inst.team_signal = TEAM_SIG_SLAVE_EN;
-//				}				
+//				}
 //		}
 //		else if(g_sys.config.team.team_en == 1)
 //		{
@@ -934,13 +932,13 @@
 //		{
 //				team_local_inst.team_signal = TEAM_SIG_STOP;
 //		}
-//		
+//
 //		return team_local_inst.team_signal;
 
 //}
 
 //static uint8_t get_team_con_sts(void)
-//{		
+//{
 //		extern sys_reg_st		g_sys;
 //		uint16_t i;
 ////    total_cnt = (team_local_inst.team_config[TEAM_CONF_CNT] & 0x00ff);
@@ -959,21 +957,21 @@
 //						}
 //				}
 //		}
-//		return 0;		
+//		return 0;
 //}
 
 //static uint8_t get_team_ms_sts(void)
 //{
 //		extern sys_reg_st		g_sys;
 //		uint16_t i;
-//		
+//
 //		for(i=0;i<g_sys.config.team.addr-1;i++)
 //		{
 //				if(team_local_inst.team_table[i][TEAM_TAB_TIMEOUT] > 0)
 //				{
 //						return 0;
-//				}				
-//		}		
+//				}
+//		}
 //		return 1;
 //}
 
@@ -988,18 +986,17 @@
 ////		{
 ////				return 1;
 ////		}
-////		
+////
 ////		return 0;
 ////}
 
-
-// 
+//
 //static uint16_t team_idle(void)
 //{
 //		extern local_reg_st l_sys;
-//		
+//
 //		l_sys.require[TEAM_REQ][T_REQ] = l_sys.require[LOCAL_REQ][T_REQ];
-//		l_sys.require[TEAM_REQ][H_REQ] = l_sys.require[LOCAL_REQ][H_REQ];		
+//		l_sys.require[TEAM_REQ][H_REQ] = l_sys.require[LOCAL_REQ][H_REQ];
 //		l_sys.require[TEAM_REQ][F_REQ] = l_sys.require[LOCAL_REQ][F_REQ];
 //    clear_param();
 //		team_local_inst.sync_poweron_timeout = SYNC_POWERON_TIMEOUT;
@@ -1009,7 +1006,7 @@
 //static uint16_t get_conf_data(void)
 //{
 //		extern sys_reg_st		g_sys;
-//		uint16_t conf_data;	
+//		uint16_t conf_data;
 //		conf_data = (g_sys.config.algorithm.temp_ctrl_mode << TEAM_CONF_TMODE_BPOS)|
 //								(g_sys.config.algorithm.hum_ctrl_mode << TEAM_CONF_HMODE_BPOS)|
 //								(g_sys.config.algorithm.ctrl_target_mode << TEAM_CONF_TARGET_BPOS)|
@@ -1017,15 +1014,15 @@
 //                (g_sys.config.team.cascade_enable << TEAM_CONF_CASCADE_BPOS)|
 //								(g_sys.config.algorithm.temp_calc_mode << TEAM_CONF_TCMODE_BPOS)|
 //								(g_sys.config.team.team_fan_mode << TEAM_CONF_TEAM_FAN_MODE_BPOS) |
-//								(g_sys.config.team.fault_power_en<<TEAM_CONF_TEAM_POWER_OFF_EN);	
-//		
+//								(g_sys.config.team.fault_power_en<<TEAM_CONF_TEAM_POWER_OFF_EN);
+//
 //		return conf_data;
 //}
 
 //static uint16_t team_slave_init(void)
 //{
-//		extern sys_reg_st		g_sys;	
-////		rt_kprintf("team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS]=%d\n", team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS]);		
+//		extern sys_reg_st		g_sys;
+////		rt_kprintf("team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS]=%d\n", team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS]);
 //		if((team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS]&(0x0001<<TEAM_STS_CONFD_BPOS)) != 0)
 //		{
 //				return 1;
@@ -1035,11 +1032,11 @@
 
 //static int16_t team_check_conf_sts(void)
 //{
-//		extern sys_reg_st		g_sys;	
+//		extern sys_reg_st		g_sys;
 //		uint16_t i, total_cnt;
 //    total_cnt = 32;//(team_local_inst.team_config[TEAM_CONF_CNT] & 0x00ff);
 //		//rt_kprintf("total_cnt=%d\n", total_cnt);
-//		
+//
 //		for(i = 0; i < total_cnt; i++)
 //		{
 //				if(team_local_inst.team_table[i][TEAM_TAB_TIMEOUT] > 0)
@@ -1055,8 +1052,8 @@
 //										return i;
 //								}
 //						}
-//				}		
-//		}		
+//				}
+//		}
 //		return -1;
 //}
 
@@ -1065,10 +1062,10 @@
 //		extern sys_reg_st		g_sys;
 
 //		uint32_t team_rs_bitmap;
-//		
+//
 //		team_rs_bitmap = 0xffffffff >> (32 - (uint16_t)(team_local_inst.team_config[TEAM_CONF_CNT] & 0xff) + (uint16_t)((team_local_inst.team_config[TEAM_CONF_CNT] >> 8) & 0xff));
 
-//		return team_rs_bitmap;		
+//		return team_rs_bitmap;
 //}
 
 //uint8_t check_target_temp_hum(void)
@@ -1076,22 +1073,22 @@
 //		extern team_local_st  team_local_inst;
 //		uint16_t target_temp,target_hum;
 //		uint8_t req;
-//	
+//
 //		req = 0;
 //		if(g_sys.config.algorithm.ctrl_target_mode == TARGET_MODE_RETURN)
 //		{
 //				target_temp = g_sys.config.algorithm.return_air_temp;
-//				target_hum = g_sys.config.algorithm.return_air_hum;	
+//				target_hum = g_sys.config.algorithm.return_air_hum;
 //		}
 //		else if(g_sys.config.algorithm.ctrl_target_mode == TARGET_MODE_SUPPLY)
 //		{
 //				target_temp = g_sys.config.algorithm.supply_air_temp;
 //				target_hum = g_sys.config.algorithm.return_air_hum;
-//		}				
+//		}
 //		else
 //		{
 //				target_temp = g_sys.config.algorithm.remote_air_temp;
-//				target_hum = g_sys.config.algorithm.remote_air_hum;		
+//				target_hum = g_sys.config.algorithm.remote_air_hum;
 //		}
 //	if(team_local_inst.team_config[TEAM_CONF_TEMP_SETVAL]!= target_temp)
 //	{
@@ -1142,7 +1139,7 @@
 //						team_local_inst.team_bitmap[TEAM_BITMAP_RS_SET] = team_rotate_init();
 //						team_local_inst.team_bitmap[TEAM_BITMAP_RS_STS] = 0;
 //						check_target_temp_hum();
-//						ret = 1;	
+//						ret = 1;
 ////						rt_kprintf("22222\n");
 //				}
 //				else
@@ -1177,14 +1174,14 @@
 //								team_local_inst.team_config[TEAM_CONF_FAN_FLOW_DIFF_STEP]		= g_sys.config.fan.flow_diff_step;
 //								team_local_inst.team_config[TEAM_CONF_FAN_FLOW_DIFF_DELAY]	= g_sys.config.fan.flow_diff_delay;
 //								team_local_inst.team_bitmap[TEAM_BITMAP_RS_SET] = team_rotate_init();
-//								team_local_inst.team_bitmap[TEAM_BITMAP_RS_STS] = 0;	
+//								team_local_inst.team_bitmap[TEAM_BITMAP_RS_STS] = 0;
 //								check_target_temp_hum();
-//								ret = 1;	
+//								ret = 1;
 ////								rt_kprintf("44444\n");
 //						}
 //				}
 //		}
-//		
+//
 //		if(ret == 1)
 //		{
 //				team_master_conf_frame();
@@ -1196,16 +1193,15 @@
 //				team_local_inst.team_table[g_sys.config.team.addr-1][TEAM_TAB_STATUS] &= ~(0x0001<<TEAM_STS_CONFD_BPOS);
 ////				rt_kprintf("66666\n");
 //		}
-//		
+//
 //		return ret;
 //}
 
-
 //uint16_t team_sync(void)
 //{
-//		uint16_t init_done;		
+//		uint16_t init_done;
 //		extern local_reg_st l_sys;
-//  
+//
 //    if(team_local_inst.sync_param_protect != 0)
 //    {
 //        team_local_inst.sync_param_protect--;
@@ -1213,17 +1209,17 @@
 //    if(team_local_inst.sync_param_protect == 0)
 //    {
 //        l_sys.require[TEAM_REQ][T_REQ] = l_sys.require[LOCAL_REQ][T_REQ];
-//        l_sys.require[TEAM_REQ][H_REQ] = l_sys.require[LOCAL_REQ][H_REQ];	
+//        l_sys.require[TEAM_REQ][H_REQ] = l_sys.require[LOCAL_REQ][H_REQ];
 //				l_sys.require[TEAM_REQ][F_REQ] = l_sys.require[LOCAL_REQ][F_REQ];
 //    }
-//		
+//
 //		if(team_local_inst.sync_poweron_timeout != 0)
 //		{
 //				team_local_inst.sync_poweron_timeout--;
 //		}
 //		if(team_local_inst.sync_poweron_timeout == 0)
 //		{
-//				//¿ªÆôµçÔ´
+//				//å¼€å¯ç”µæº
 //		}
 //		if(team_local_inst.team_signal == TEAM_SIG_SLAVE_EN)
 //		{
@@ -1268,10 +1264,10 @@
 //    uint8_t cascade_enable;
 //    uint8_t i, total_cnt;
 //    uint32_t temp_bitmap;
-//  
+//
 //    cascade_enable  = (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_CASCADE_BPOS) & 0x0001;
 //    total_cnt       = (team_local_inst.team_config[TEAM_CONF_CNT] & 0x00ff);
-//		
+//
 //		if(((team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
 //		{
 //				team_mode = (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_TMMOD_BPOS) & 0x0003;
@@ -1279,9 +1275,9 @@
 //				{
 //						case(TEAM_MODE_STANDALONE):
 //						{
-//                //¶ÀÁ¢ÔËĞĞÄ£Ê½£ºÈº¿ØĞèÇóÎª±¾µØĞèÇó
-//                //Ö§³Ö±¸ÓÃºÍÂÖÑ²
-//                //²»ÔÊĞí²ãµş
+//                //ç‹¬ç«‹è¿è¡Œæ¨¡å¼ï¼šç¾¤æ§éœ€æ±‚ä¸ºæœ¬åœ°éœ€æ±‚
+//                //æ”¯æŒå¤‡ç”¨å’Œè½®å·¡
+//                //ä¸å…è®¸å±‚å 
 //								l_sys.require[TEAM_REQ][T_REQ] = l_sys.require[LOCAL_REQ][T_REQ];
 //								l_sys.require[TEAM_REQ][H_REQ] = l_sys.require[LOCAL_REQ][H_REQ];
 //								l_sys.require[TEAM_REQ][F_REQ] = l_sys.require[LOCAL_REQ][F_REQ];
@@ -1289,15 +1285,15 @@
 //						}
 //						case(TEAM_MODE_EVENDISTRIB):
 //						{
-//                //Æ½¾ù·ÖÅäÄ£Ê½£ºÆ½¾ù·ÖÅäÃ¿Ì¨µÄĞèÇó
-//                //Ö§³Ö±¸ÓÃ¡¢ÂÖÑ²ºÍ²ãµş
-//                //ÊÇ·ñ²ãµşÊ¹ÄÜ
+//                //å¹³å‡åˆ†é…æ¨¡å¼ï¼šå¹³å‡åˆ†é…æ¯å°çš„éœ€æ±‚
+//                //æ”¯æŒå¤‡ç”¨ã€è½®å·¡å’Œå±‚å 
+//                //æ˜¯å¦å±‚å ä½¿èƒ½
 //                if(cascade_enable)
-//                {   
-//										//ÎÂ¶ÈĞèÇó
+//                {
+//										//æ¸©åº¦éœ€æ±‚
 //                    if(team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] & 0x0080)
-//                    {   //ĞèÒª²ãµş£¬Ç°N-1Ì¨»ú×éÎª100%£¬×îºóÒ»Ì¨ÎªX%
-//                        //·ÖÅäÈ«¿ªĞèÇó
+//                    {   //éœ€è¦å±‚å ï¼Œå‰N-1å°æœºç»„ä¸º100%ï¼Œæœ€åä¸€å°ä¸ºX%
+//                        //åˆ†é…å…¨å¼€éœ€æ±‚
 //                        for(i = 0; i < total_cnt; i++)
 //                        {
 //                            if(((team_local_inst.team_bitmap[TEAM_BITMAP_TEMP_FULL_REQ_OUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
@@ -1316,14 +1312,14 @@
 //																l_sys.require[TEAM_REQ][T_REQ] = 0;
 //														}
 //                        }
-//												//·ÖÅä×îºóÒ»Ì¨ĞèÇó
+//												//åˆ†é…æœ€åä¸€å°éœ€æ±‚
 //                        if(g_sys.config.team.addr == ((uint8_t)((team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] >> 8) & 0xff)))
 //                        {
-//                            l_sys.require[TEAM_REQ][T_REQ] = team_local_inst.team_param[TEAM_PARAM_TEMP_REQ];														
+//                            l_sys.require[TEAM_REQ][T_REQ] = team_local_inst.team_param[TEAM_PARAM_TEMP_REQ];
 //                        }
 //                    }
 //                    else
-//                    {   //²»ĞèÒª²ãµş£¬Æ½¾ù·ÖÅäÃ¿Ì¨µÄĞèÇó
+//                    {   //ä¸éœ€è¦å±‚å ï¼Œå¹³å‡åˆ†é…æ¯å°çš„éœ€æ±‚
 ////                        if(((team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
 //												if(((team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
 //                        {
@@ -1334,11 +1330,11 @@
 //														l_sys.require[TEAM_REQ][T_REQ] = 0;
 //												}
 //                    }
-//										
-//										//Êª¶ÈĞèÇó
+//
+//										//æ¹¿åº¦éœ€æ±‚
 //                    if(team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] & 0x0080)
-//                    {   //ĞèÒª²ãµş£¬Ç°N-1Ì¨»ú×éÎª100%£¬×îºóÒ»Ì¨ÎªX%                        
-//                        //·ÖÅäÈ«¿ªĞèÇó
+//                    {   //éœ€è¦å±‚å ï¼Œå‰N-1å°æœºç»„ä¸º100%ï¼Œæœ€åä¸€å°ä¸ºX%
+//                        //åˆ†é…å…¨å¼€éœ€æ±‚
 //                        for(i = 0; i < total_cnt; i++)
 //                        {
 //                            if(((team_local_inst.team_bitmap[TEAM_BITMAP_HUM_FULL_REQ_OUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
@@ -1357,14 +1353,14 @@
 //																l_sys.require[TEAM_REQ][H_REQ] = 0;
 //														}
 //                        }
-//												//·ÖÅä×îºóÒ»Ì¨ĞèÇó
+//												//åˆ†é…æœ€åä¸€å°éœ€æ±‚
 //                        if(g_sys.config.team.addr == ((uint8_t)((team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] >> 8) & 0xff)))
 //                        {
 //                            l_sys.require[TEAM_REQ][H_REQ] = team_local_inst.team_param[TEAM_PARAM_HUM_REQ];
 //                        }
 //                    }
 //                    else
-//                    {   //²»ĞèÒª²ãµş£¬Æ½¾ù·ÖÅäÃ¿Ì¨µÄĞèÇó
+//                    {   //ä¸éœ€è¦å±‚å ï¼Œå¹³å‡åˆ†é…æ¯å°çš„éœ€æ±‚
 ////                        if(((team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
 //												if(((team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
 //                        {
@@ -1377,7 +1373,7 @@
 //                    }
 //                }
 //                else
-//                {   //²ãµş²»Ê¹ÄÜ£¬Æ½¾ù·ÖÅäĞèÇó
+//                {   //å±‚å ä¸ä½¿èƒ½ï¼Œå¹³å‡åˆ†é…éœ€æ±‚
 //                    l_sys.require[TEAM_REQ][T_REQ] = team_local_inst.team_param[TEAM_PARAM_TEMP_REQ];
 //                    l_sys.require[TEAM_REQ][H_REQ] = team_local_inst.team_param[TEAM_PARAM_HUM_REQ];
 //                }
@@ -1386,11 +1382,11 @@
 //						}
 //						case(TEAM_MODE_UINIDIRECTION):
 //						{
-//                //Í¬Ïò×ÔÖ÷Ä£Ê½£º
-//                //ÔÊĞí±¸ÓÃ
-//                //²»Ö§³ÖÂÖÑ²ºÍ²ãµş
-//              
-//                //ÎÂ¶ÈĞèÇó
+//                //åŒå‘è‡ªä¸»æ¨¡å¼ï¼š
+//                //å…è®¸å¤‡ç”¨
+//                //ä¸æ”¯æŒè½®å·¡å’Œå±‚å 
+//
+//                //æ¸©åº¦éœ€æ±‚
 //								if(((team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] < 0) && (team_config_temp_req_calc() < 0))||
 //										((team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] > 0) && (team_config_temp_req_calc() > 0)))
 //								{
@@ -1401,7 +1397,7 @@
 //								{
 //										l_sys.require[TEAM_REQ][T_REQ] = l_sys.require[RESET_REQ][T_REQ];
 //								}
-//								//Êª¶ÈĞèÇó
+//								//æ¹¿åº¦éœ€æ±‚
 //								if(((team_local_inst.team_param[TEAM_PARAM_HUM_REQ] < 0) && (team_config_hum_req_calc() < 0))||
 //										((team_local_inst.team_param[TEAM_PARAM_HUM_REQ] > 0) && (team_config_hum_req_calc() > 0)))
 //								{
@@ -1417,18 +1413,18 @@
 //						}
 //						case(TEAM_MODE_REQDISTRIB):
 //						{
-//                //°´Ğè·ÖÅä
-//                //ÔÊĞí±¸ÓÃºÍ²ãµş
-//                //²»Ö§³ÖÂÖÑ²
+//                //æŒ‰éœ€åˆ†é…
+//                //å…è®¸å¤‡ç”¨å’Œå±‚å 
+//                //ä¸æ”¯æŒè½®å·¡
 ////                if(cascade_enable)
-//                {   //Ê¹ÄÜ²ãµş
+//                {   //ä½¿èƒ½å±‚å 
 //                    //hum_req
-//                    //·ÖÅä×îºóÒ»Ì¨ĞèÇó
+//                    //åˆ†é…æœ€åä¸€å°éœ€æ±‚
 //                    if(g_sys.config.team.addr == ((uint8_t)((team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] >> 8) & 0xff)))
 //                    {
 //                        l_sys.require[TEAM_REQ][T_REQ] = team_local_inst.team_param[TEAM_PARAM_TEMP_REQ];
 //                    }
-//                    //·ÖÅäÈ«¿ªĞèÇó
+//                    //åˆ†é…å…¨å¼€éœ€æ±‚
 //                    for(i = 0; i < total_cnt; i++)
 //                    {
 //                        if(((team_local_inst.team_bitmap[TEAM_BITMAP_TEMP_FULL_REQ_OUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
@@ -1443,8 +1439,8 @@
 //                            }
 //                        }
 //                    }
-//                    //·ÖÅäÆäÓàµÄÁãĞèÇó
-//                    temp_bitmap = team_local_inst.team_bitmap[TEAM_BITMAP_TEMP_FULL_REQ_OUT] | 
+//                    //åˆ†é…å…¶ä½™çš„é›¶éœ€æ±‚
+//                    temp_bitmap = team_local_inst.team_bitmap[TEAM_BITMAP_TEMP_FULL_REQ_OUT] |
 //                                  (find_bitmap_by_addr((uint8_t)((team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] >> 8) & 0xff)));
 //                    temp_bitmap = team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] & (~temp_bitmap);
 ////                    rt_kprintf("%x %x %x \n", team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT],
@@ -1455,12 +1451,12 @@
 //                        l_sys.require[TEAM_REQ][T_REQ] = 0;
 //                    }
 //                    //hum_req
-//                    //·ÖÅä×îºóÒ»Ì¨ĞèÇó
+//                    //åˆ†é…æœ€åä¸€å°éœ€æ±‚
 //                    if(g_sys.config.team.addr == ((uint8_t)((team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] >> 8) & 0xff)))
 //                    {
 //                        l_sys.require[TEAM_REQ][H_REQ] = team_local_inst.team_param[TEAM_PARAM_HUM_REQ];
 //                    }
-//                    //·ÖÅäÈ«¿ªĞèÇó
+//                    //åˆ†é…å…¨å¼€éœ€æ±‚
 //                    for(i = 0; i < total_cnt; i++)
 //                    {
 //                        if(((team_local_inst.team_bitmap[TEAM_BITMAP_HUM_FULL_REQ_OUT] >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
@@ -1475,8 +1471,8 @@
 //                            }
 //                        }
 //                    }
-//                    //·ÖÅäÆäÓàµÄÁãĞèÇó
-//                    temp_bitmap = team_local_inst.team_bitmap[TEAM_BITMAP_HUM_FULL_REQ_OUT] | 
+//                    //åˆ†é…å…¶ä½™çš„é›¶éœ€æ±‚
+//                    temp_bitmap = team_local_inst.team_bitmap[TEAM_BITMAP_HUM_FULL_REQ_OUT] |
 //                                  (find_bitmap_by_addr((uint8_t)((team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] >> 8) & 0xff)));
 //                    temp_bitmap = team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] & (~temp_bitmap);
 //                    if(((temp_bitmap >> (g_sys.config.team.addr - 1)) & 0x0001) != 0)
@@ -1485,7 +1481,7 @@
 //                    }
 //                }
 ////                else
-//                {   //²»Ê¹ÄÜ²ãµş
+//                {   //ä¸ä½¿èƒ½å±‚å 
 //                    ;
 //                }
 //								l_sys.require[TEAM_REQ][F_REQ] = team_config_fan_req_calc();
@@ -1508,12 +1504,10 @@
 //		}
 //}
 
-
-
 //static uint16_t team_slave(void)
 //{
 //		extern sys_reg_st		g_sys;
-//		team_local_status_frame();		
+//		team_local_status_frame();
 ////		team_slave_mode();
 //    team_req_distr();
 //    clear_param();
@@ -1550,7 +1544,7 @@
 //    time(&now);
 //    now += 28800;
 //    ti = localtime(&now);
-//		
+//
 ////		period = (team_local_inst.team_config[TEAM_CONF_ROTATE_PERIOD]>>8)&0x00ff;
 //		wday = team_local_inst.team_config[TEAM_CONF_ROTATE_PERIOD]&0x00ff;
 //    if(wday == 0)
@@ -1576,10 +1570,10 @@
 //    }
 //		min = (team_local_inst.team_config[TEAM_CONF_ROTATE_TIME]>>8)&0x00ff;
 //		hour = team_local_inst.team_config[TEAM_CONF_ROTATE_TIME]&0x00ff;
-//		//µÃ³öÂÖÖµĞ¡Ê±ÖÜÆÚ
+//		//å¾—å‡ºè½®å€¼å°æ—¶å‘¨æœŸ
 //		hour_t 	= team_local_inst.team_config[TEAM_CONF_ROTATE_TIME] % 24;
 //		day_t 	= team_local_inst.team_config[TEAM_CONF_ROTATE_TIME] / 24;
-//		
+//
 //		if(day_t >= 365)
 //		{
 //				year_t	= day_t	/ 365;
@@ -1592,14 +1586,14 @@
 //		hour_t = hour_t;
 //		day_t  = day_t;
 //		year_t = year_t;
-//		
+//
 //		period_rotate = team_local_inst.team_config[TEAM_CONF_ROTATE_TIME] * 3600;
 ////		rt_kprintf("set is %d now is %d\n", team_local_inst.rotate_time_t,now);
 //		//rt_kprintf("ROTATE time is %d year %d day %d hour\n Now is %d year %d day %d hour\n", team_local_inst.time_rotate->tm_year, team_local_inst.time_rotate->tm_yday, team_local_inst.time_rotate->tm_hour,
 //		//ti->tm_year, ti->tm_yday, ti->tm_hour);
 ////		rt_kprintf("rotate time is %d year %d day %d hour\n", year_t, day_t, hour_t);
 ////		rt_kprintf("%d\n", team_local_inst.rotate_timeout);
-//		
+//
 //		switch(period)
 //		{
 //				case(TEAM_ROTATE_PERIOD_NONE):
@@ -1640,7 +1634,7 @@
 //                {
 //                    ret = 0;
 //                }
-//						}			
+//						}
 //						else
 //						{
 //								ret = 0;
@@ -1692,29 +1686,29 @@
 //		uint32_t mask;
 //		uint16_t total_cnt,backup_cnt;
 
-//		
+//
 //		total_cnt = (team_local_inst.team_config[TEAM_CONF_CNT]&0x00ff);
-//		backup_cnt = ((team_local_inst.team_config[TEAM_CONF_CNT]>>8)&0x00ff);		
+//		backup_cnt = ((team_local_inst.team_config[TEAM_CONF_CNT]>>8)&0x00ff);
 //		mask = ((0xffffffff<<(32-total_cnt))>>(32-total_cnt))>>(total_cnt - backup_cnt);
-//		
+//
 //		bitmap_in = team_local_inst.team_bitmap[TEAM_BITMAP_RS_SET];
 //		bitmap_reg = (bitmap_in & mask)<<(total_cnt - backup_cnt);
 
-//		bitmap_out = bitmap_reg|(bitmap_in>>backup_cnt);		
-//		
+//		bitmap_out = bitmap_reg|(bitmap_in>>backup_cnt);
+//
 //		return bitmap_out;
-//}	
+//}
 
 //static uint16_t team_run_backup_switch_arbitration(void)
 //{
-//		uint16_t ret;	
+//		uint16_t ret;
 //    uint16_t team_mode;
 
 //    team_mode         = (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_TMMOD_BPOS) & 0x0003;
 
-//		if((team_rotate_timeup() == 1) &&         //´ïµ½ÂÖÑ²Ê±¼ä
-//      ((team_mode == TEAM_MODE_STANDALONE) ||  //¶ÀÁ¢ÔËĞĞÄ£Ê½
-//      (team_mode == TEAM_MODE_EVENDISTRIB)))   //Æ½¾ùĞèÇóÄ£Ê½
+//		if((team_rotate_timeup() == 1) &&         //è¾¾åˆ°è½®å·¡æ—¶é—´
+//      ((team_mode == TEAM_MODE_STANDALONE) ||  //ç‹¬ç«‹è¿è¡Œæ¨¡å¼
+//      (team_mode == TEAM_MODE_EVENDISTRIB)))   //å¹³å‡éœ€æ±‚æ¨¡å¼
 //		{
 //				team_local_inst.team_bitmap[TEAM_BITMAP_RS_SET] = team_rotate();
 //        rt_kprintf("run_backup_switch\n");
@@ -1729,7 +1723,7 @@
 
 //static void team_calc_req(void)
 //{
-//		extern local_reg_st l_sys;		
+//		extern local_reg_st l_sys;
 //    extern sys_reg_st		g_sys;
 //    uint16_t team_mode;
 //    uint16_t cascade_enable, total_cnt;
@@ -1737,44 +1731,44 @@
 //    uint16_t abs_temp, abs_hum;
 //    uint8_t addition_temp, addition_hum;
 //    uint8_t temp_full_flag, hum_full_flag;
-//  
+//
 //    cascade_enable  = (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_CASCADE_BPOS) & 0x0001;
 //    total_cnt       = (team_local_inst.team_config[TEAM_CONF_CNT] & 0x00ff);
-//  
-//    //×ÜÎÂ¶ÈĞèÇó
+//
+//    //æ€»æ¸©åº¦éœ€æ±‚
 //    team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ] = team_temp_req_calc(TOTAL_REQ);
-//    //×ÜÊª¶ÈĞèÇó
+//    //æ€»æ¹¿åº¦éœ€æ±‚
 //    team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ]  = team_hum_req_calc(TOTAL_REQ);
-//    //Æ½¾ùÎÂ¶ÈĞèÇó
+//    //å¹³å‡æ¸©åº¦éœ€æ±‚
 //    team_local_inst.team_param[TEAM_PARAM_AVER_TEMP_REQ]  = team_temp_req_calc(AVER_REQ);
-//    //Æ½¾ùÊª¶ÈĞèÇó
+//    //å¹³å‡æ¹¿åº¦éœ€æ±‚
 //    team_local_inst.team_param[TEAM_PARAM_AVER_HUM_REQ]   = team_hum_req_calc(AVER_REQ);
-//		//Æ½¾ù·ç»úĞèÇó
+//		//å¹³å‡é£æœºéœ€æ±‚
 //		team_local_inst.team_param[TEAM_PARAM_FAN_REQ]				= team_fan_req_calc();
 
 //    addition_temp = 0;
 //    addition_hum  = 0;
 //    temp_full_flag= 0;
 //    hum_full_flag = 0;
-//  
+//
 //    team_mode         = (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_TMMOD_BPOS) & 0x0003;
 //    switch(team_mode)
 //    {
-//        case (TEAM_MODE_STANDALONE):  //¶ÀÁ¢ÔËĞĞ
+//        case (TEAM_MODE_STANDALONE):  //ç‹¬ç«‹è¿è¡Œ
 //            //temp req
 //            team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_TEMP_REQ];
 //            //hum req
 //            team_local_inst.team_param[TEAM_PARAM_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_HUM_REQ];
-//        
+//
 //            break;
-//        case (TEAM_MODE_EVENDISTRIB): //Æ½¾ù·ÖÅäĞèÇó
-//            if(cascade_enable)        //²ãµşÊ¹ÄÜ
+//        case (TEAM_MODE_EVENDISTRIB): //å¹³å‡åˆ†é…éœ€æ±‚
+//            if(cascade_enable)        //å±‚å ä½¿èƒ½
 //            {
 //                //temp req
 //                if(abs(team_local_inst.team_param[TEAM_PARAM_AVER_TEMP_REQ]) > 100)
-//                {   //ĞèÒª²ãµş
+//                {   //éœ€è¦å±‚å 
 //                    team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] | 0x0080;
-//                    //¼ÆËãĞèÒª²ãµşµÄÌ¨Êı
+//                    //è®¡ç®—éœ€è¦å±‚å çš„å°æ•°
 //                    if((team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ] % 100) == 0)
 //                    {
 //                        addition_temp   = abs(team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ]) / 100;
@@ -1785,9 +1779,9 @@
 //                        addition_temp   = abs(team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ]) / 100 + 1;
 //                        temp_full_flag  = 1;
 //                    }
-//                    //×îºóÒ»Ì¨Î´È«¿ªµÄĞèÇó
+//                    //æœ€åä¸€å°æœªå…¨å¼€çš„éœ€æ±‚
 //                    team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ] % 100;
-//                    //È«¿ªµÄÕı¸ºĞèÇó
+//                    //å…¨å¼€çš„æ­£è´Ÿéœ€æ±‚
 //                    if(team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ] > 0)
 //                    {
 //                        team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] | 0x0040;
@@ -1798,15 +1792,15 @@
 //                    }
 //                }
 //                else
-//                {   //²»ĞèÒª²ãµş,Æ½¾ù·ÖÅäĞèÇó
+//                {   //ä¸éœ€è¦å±‚å ,å¹³å‡åˆ†é…éœ€æ±‚
 //                    team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] & (~(0x0080));
 //                    team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_TEMP_REQ];
 //                }
 //                //hum req
 //                if(abs(team_local_inst.team_param[TEAM_PARAM_AVER_HUM_REQ]) > 100)
-//                {   //ĞèÒª²ãµş
+//                {   //éœ€è¦å±‚å 
 //                    team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] | 0x0080;
-//                    //¼ÆËãĞèÒª²ãµşµÄÌ¨Êı
+//                    //è®¡ç®—éœ€è¦å±‚å çš„å°æ•°
 //                    if((team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ] % 100) == 0)
 //                    {
 //                        addition_hum    = abs(team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ]) / 100;
@@ -1817,9 +1811,9 @@
 //                        addition_hum    = abs(team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ]) / 100 + 1;
 //                        hum_full_flag   = 1;
 //                    }
-//                    //×îºóÒ»Ì¨Î´È«¿ªµÄĞèÇó
+//                    //æœ€åä¸€å°æœªå…¨å¼€çš„éœ€æ±‚
 //                    team_local_inst.team_param[TEAM_PARAM_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ] % 100;
-//                    //È«¿ªµÄÕı¸ºĞèÇó
+//                    //å…¨å¼€çš„æ­£è´Ÿéœ€æ±‚
 //                    if(team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ] > 0)
 //                    {
 //                        team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] | 0x0040;
@@ -1830,24 +1824,24 @@
 //                    }
 //                }
 //                else
-//                {   //²»ĞèÒª²ãµş,Æ½¾ù·ÖÅäĞèÇó
+//                {   //ä¸éœ€è¦å±‚å ,å¹³å‡åˆ†é…éœ€æ±‚
 //                    team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] & (~(0x0080));
 //                    team_local_inst.team_param[TEAM_PARAM_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_HUM_REQ];
 //                }
 //            }
 //            else
-//            {   //²ãµş²»Ê¹ÄÜ£¬Æ½¾ù·ÖÅäĞèÇó
+//            {   //å±‚å ä¸ä½¿èƒ½ï¼Œå¹³å‡åˆ†é…éœ€æ±‚
 //                //temp req
 //                team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_TEMP_REQ];
 //                //hum req
 //                team_local_inst.team_param[TEAM_PARAM_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_HUM_REQ];
 //            }
-//                    
+//
 //            break;
-//        case (TEAM_MODE_UINIDIRECTION): //Í¬Ïò×ÔÖ÷
+//        case (TEAM_MODE_UINIDIRECTION): //åŒå‘è‡ªä¸»
 //            //temp req
 //            team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_TEMP_REQ];
-//            if(team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ] == 0)   //ĞèÇóÎª0£¬·½ÏòÎª¾ø¶ÔÖµ×î´óµÄ·½Ïò
+//            if(team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ] == 0)   //éœ€æ±‚ä¸º0ï¼Œæ–¹å‘ä¸ºç»å¯¹å€¼æœ€å¤§çš„æ–¹å‘
 //            {
 //                temp_cnt = 0;
 //                abs_temp = 0;
@@ -1864,10 +1858,10 @@
 //                }
 //                team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] = team_local_inst.team_table[temp_cnt][TEAM_TAB_TEMP_REQ];
 //            }
-//            
+//
 //            //hum req
 //            team_local_inst.team_param[TEAM_PARAM_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_HUM_REQ];
-//            if(team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ] == 0)   //ĞèÇóÎª0£¬·½ÏòÎª¾ø¶ÔÖµ×î´óµÄ·½Ïò
+//            if(team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ] == 0)   //éœ€æ±‚ä¸º0ï¼Œæ–¹å‘ä¸ºç»å¯¹å€¼æœ€å¤§çš„æ–¹å‘
 //            {
 //                hum_cnt = 0;
 //                abs_hum = 0;
@@ -1884,10 +1878,10 @@
 //                }
 //                team_local_inst.team_param[TEAM_PARAM_HUM_REQ] = team_local_inst.team_table[hum_cnt][TEAM_TAB_HUM_REQ];
 //            }
-//                                          
+//
 //            break;
-//        case (TEAM_MODE_REQDISTRIB):  //°´Ğè·ÖÅä
-//            //¼ÆËãĞèÒª´ò¿ªµÄÌ¨Êı
+//        case (TEAM_MODE_REQDISTRIB):  //æŒ‰éœ€åˆ†é…
+//            //è®¡ç®—éœ€è¦æ‰“å¼€çš„å°æ•°
 //            //temp_req
 //            if((team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ] % 100) == 0)
 //            {
@@ -1899,9 +1893,9 @@
 //                addition_temp   = abs(team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ]) / 100 + 1;
 //                temp_full_flag  = 1;
 //            }
-//            //×îºóÒ»Ì¨Î´È«¿ªµÄĞèÇó
+//            //æœ€åä¸€å°æœªå…¨å¼€çš„éœ€æ±‚
 //            team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ] % 100;
-//            //È«¿ªµÄÕı¸ºĞèÇó
+//            //å…¨å¼€çš„æ­£è´Ÿéœ€æ±‚
 //            if(team_local_inst.team_param[TEAM_PARAM_TOTAL_TEMP_REQ] > 0)
 //            {
 //                team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] | 0x0040;
@@ -1921,9 +1915,9 @@
 //                addition_hum   = abs(team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ]) / 100 + 1;
 //                hum_full_flag  = 1;
 //            }
-//            //×îºóÒ»Ì¨Î´È«¿ªµÄĞèÇó
+//            //æœ€åä¸€å°æœªå…¨å¼€çš„éœ€æ±‚
 //            team_local_inst.team_param[TEAM_PARAM_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ] % 100;
-//            //È«¿ªµÄÕı¸ºĞèÇó
+//            //å…¨å¼€çš„æ­£è´Ÿéœ€æ±‚
 //            if(team_local_inst.team_param[TEAM_PARAM_TOTAL_HUM_REQ] > 0)
 //            {
 //                team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] | 0x0040;
@@ -1932,13 +1926,13 @@
 //            {
 //                team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] & (~(0x0040));
 //            }
-//            
-//            if(cascade_enable)        //²ãµşÊ¹ÄÜ
+//
+//            if(cascade_enable)        //å±‚å ä½¿èƒ½
 //            {
 //                //temp req
-//                
+//
 //                //hum req
-//              
+//
 //            }
 //            else
 //            {
@@ -1959,7 +1953,7 @@
 //        default:
 //            team_local_inst.team_param[TEAM_PARAM_TEMP_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_TEMP_REQ];
 //            team_local_inst.team_param[TEAM_PARAM_HUM_REQ] = team_local_inst.team_param[TEAM_PARAM_AVER_HUM_REQ];
-//        
+//
 //            break;
 //    }
 ////    rt_kprintf("%x %x %x %x\n", addition_temp, temp_full_flag, addition_hum ,hum_full_flag);
@@ -1978,13 +1972,13 @@
 //        {
 //            continue;
 //        }
-//        if((team_local_inst.team_table[i][TEAM_TAB_RESERVE] & 0xff) != 
+//        if((team_local_inst.team_table[i][TEAM_TAB_RESERVE] & 0xff) !=
 //           (team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_RESERVE] & 0xff))
 //        {
 //            team_clear_confd();
 //            break;
 //        }
-//				if((team_local_inst.team_table[i][TEAM_TAB_RESERVE] & 0xff00) != 
+//				if((team_local_inst.team_table[i][TEAM_TAB_RESERVE] & 0xff00) !=
 //           (team_local_inst.team_table[g_sys.config.team.addr - 1][TEAM_TAB_RESERVE] & 0xff00))
 //				{
 //						team_local_inst.run_sts_flag							= 1;
@@ -1996,55 +1990,55 @@
 //static uint16_t team_master(void)
 //{
 //		extern sys_reg_st		g_sys;
-//  
+//
 //    if(team_local_inst.slave_to_master_param_protect != 0)
 //    {
 //        team_local_inst.slave_to_master_param_protect--;
 //    }
 //    team_local_inst.sync_param_protect = SYNC_PARAM_PROTECT_CNT;
 //		team_local_inst.sync_poweron_timeout = SYNC_POWERON_TIMEOUT;
-//    
+//
 //    if(team_local_inst.master_send_param_protect == 0)
 //    {
 //        team_local_inst.master_send_param_protect = MASTER_SEND_PARAM_PROTECT_CNT;
-//      
+//
 //        *(uint16_t *)&team_local_inst.master_req_distb_buf[0]     = team_local_inst.team_param[TEAM_PARAM_MODE];
 //        *(uint16_t *)&team_local_inst.master_req_distb_buf[2]     = team_local_inst.team_param[TEAM_PARAM_TEMP_REQ];
 //        *(uint16_t *)&team_local_inst.master_req_distb_buf[4]     = team_local_inst.team_param[TEAM_PARAM_HUM_REQ];
 //				*(uint16_t *)&team_local_inst.master_req_distb_buf[6]			= team_local_inst.team_param[TEAM_PARAM_FAN_REQ];
-//      
+//
 //        *(uint16_t *)&team_local_inst.master_ex_temp_param_buf[0] = team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ];
 //        *(uint32_t *)&team_local_inst.master_ex_temp_param_buf[2] = team_local_inst.team_bitmap[TEAM_BITMAP_TEMP_FULL_REQ_OUT];
-//      
+//
 //        *(uint16_t *)&team_local_inst.master_ex_hum_param_buf[0]  = team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ];
 //        *(uint32_t *)&team_local_inst.master_ex_hum_param_buf[2]  = team_local_inst.team_bitmap[TEAM_BITMAP_HUM_FULL_REQ_OUT];
-//      
+//
 //        *(uint32_t *)&team_local_inst.master_run_final_sts_buf[0] = team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT];
 //        *(uint32_t *)&team_local_inst.master_run_final_sts_buf[4] = team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT];
 //    }
-//		
+//
 //		team_local_status_frame();
-//  
+//
 //    team_update_output();
-//		
+//
 //		team_calc_req();
-//  
+//
 //    team_table_req_update();
-//		
+//
 //		team_master_distb_frame();
-//  
+//
 //    team_req_distr();
-//  
+//
 //    team_check_config();
-//		
+//
 //		//check if all slaves are configured
 //		if(check_slave_conf_sts() == 0)
 //		{
 //				team_master_conf_frame();
 //		}
-//		
+//
 //		//check if team rotation timeup or team run state match
-//		if((team_run_backup_switch_arbitration() != 0) || 
+//		if((team_run_backup_switch_arbitration() != 0) ||
 //			  (team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT] != team_local_inst.team_bitmap[TEAM_BITMAP_RS_STS]) ||
 //				team_local_inst.run_sts_flag)
 //				//(team_local_inst.run_sts_cd == 0))
@@ -2054,9 +2048,9 @@
 //				team_local_inst.run_sts_cd = RUN_STS_CD;
 //				team_local_inst.run_sts_flag = 0;
 //		}
-//		
+//
 //		//set local run status
-//		
+//
 //		return 1;
 //}
 
@@ -2066,7 +2060,7 @@
 //		time_t now;
 //		team_lc_sts_update();
 //		team_signal_gen();
-////		rt_kprintf("team_fsm = %d\n",team_local_inst.team_fsm);	 		
+////		rt_kprintf("team_fsm = %d\n",team_local_inst.team_fsm);
 //		switch(team_local_inst.team_fsm)
 //		{
 //				case(TEAM_FSM_IDLE):
@@ -2079,7 +2073,7 @@
 //						else
 //						{
 //								team_local_inst.team_fsm = TEAM_FSM_IDLE;
-//						}						
+//						}
 //						break;
 //				}
 //				case(TEAM_FSM_SYNC):
@@ -2092,7 +2086,7 @@
 //										if(team_local_inst.team_signal == TEAM_SIG_MASTER_EN)
 //										{
 //												team_local_inst.team_fsm = TEAM_FSM_MASTER;
-//												//»ñÈ¡µ±Ç°Ê±¼ä×÷ÎªÆô¶¯Ê±¼ä
+//												//è·å–å½“å‰æ—¶é—´ä½œä¸ºå¯åŠ¨æ—¶é—´
 //												time(&now);
 //												now += 28800;
 //												team_local_inst.rotate_time_t = now;
@@ -2100,8 +2094,8 @@
 //										else
 //										{
 //												team_local_inst.team_fsm = TEAM_FSM_SLAVE;
-//										}										
-//										
+//										}
+//
 //								}
 //								else
 //								{
@@ -2126,7 +2120,7 @@
 //						else if(team_local_inst.team_signal != TEAM_SIG_SLAVE_EN)
 //						{
 //								team_local_inst.team_fsm = TEAM_FSM_SYNC;
-//						}	
+//						}
 //						else
 //						{
 //								team_local_inst.team_fsm = TEAM_FSM_SLAVE;
@@ -2176,16 +2170,15 @@
 //    team_local_inst.team_param[TEAM_PARAM_AVER_HUM_REQ]   = 0;
 //}
 
-
 //static uint8_t team_update_onlinestatus(void)
 //{
 //    uint32_t onlineStatus = 0;
 //    uint8_t i;
 //    uint8_t online_cnt = 0;
 //    uint16_t total_cnt;
-//  
+//
 //    total_cnt = (team_local_inst.team_config[TEAM_CONF_CNT] & 0x00ff);
-//  
+//
 //    for(i = 0; i < total_cnt; i++)
 //    {
 //        if(team_local_inst.team_table[i][TEAM_TAB_TIMEOUT] > 0)
@@ -2245,8 +2238,8 @@
 //}
 //static void team_state_update(void)
 //{
-//		extern sys_reg_st		g_sys; 
-//		
+//		extern sys_reg_st		g_sys;
+//
 //		if(g_sys.config.team.team_en == 1)
 //		{
 //			if(team_local_inst.team_fsm == TEAM_FSM_MASTER )
@@ -2255,7 +2248,7 @@
 //					{
 //						//set status bit
 //							sys_option_di_sts(DI_GROUP_DEFAULT_BPOS,1);
-//						
+//
 //					}
 //					else if((uint16_t)(team_local_inst.team_config[TEAM_CONF_CNT] & 0xff) != online_calc( team_local_inst.team_bitmap[TEAM_BITMAP_ONLINE]))
 //					{
@@ -2279,7 +2272,7 @@
 //					//reset ststus bit
 //					sys_option_di_sts(DI_GROUP_DEFAULT_BPOS,0);
 //			}
-//			
+//
 //		}
 //		else
 //		{
@@ -2287,8 +2280,6 @@
 //					sys_option_di_sts(DI_GROUP_DEFAULT_BPOS,0);
 //		}
 //}
-
-
 
 //static uint32_t team_get_totalbitmap(uint8_t total_num)
 //{
@@ -2350,27 +2341,27 @@
 //    uint32_t temp_bitmap;
 //    uint8_t  i, temp;
 //    uint8_t  warningDev_Num;
-//  
+//
 //    i               = 0;
 //    temp            = 0;
 //    temp_bitmap     = 0;
 //    warningDev_Num  = team_update_malfun_dev();
 ////    warningDev_Num = test_num;
 ////    team_local_inst.team_bitmap[TEAM_BITMAP_MALFUN_DEV] = test_dev;
-//  
+//
 ////    rt_kprintf("warningDev num: %x, bitmap: %x\n", warningDev_Num, team_local_inst.team_bitmap[TEAM_BITMAP_MALFUN_DEV]);
 //    totalBitmap     = team_get_totalbitmap((uint16_t)(team_local_inst.team_config[TEAM_CONF_CNT] & 0xff));
 //    backupBitmap    = totalBitmap & (~team_local_inst.team_bitmap[TEAM_BITMAP_RS_SET]);
 ////		rt_kprintf("total map: %x, backup map: %x\n", totalBitmap, backupBitmap);
-//  
+//
 //    //turn off warning device
-//    team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT] = team_local_inst.team_bitmap[TEAM_BITMAP_RS_SET] & 
+//    team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT] = team_local_inst.team_bitmap[TEAM_BITMAP_RS_SET] &
 //                                                      (~team_local_inst.team_bitmap[TEAM_BITMAP_MALFUN_DEV]);
 ////    rt_kprintf("turn off warning device: %x\n", team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT]);
 //    //turn on backup device
 //    while((i < 32) && (temp < warningDev_Num))
 //    {
-//        if(((backupBitmap & (0x00000001 << i)) != 0) && 
+//        if(((backupBitmap & (0x00000001 << i)) != 0) &&
 //          ((team_local_inst.team_bitmap[TEAM_BITMAP_MALFUN_DEV] & (0x00000001 << i)) == 0))
 //        {
 //            temp++;
@@ -2382,8 +2373,8 @@
 //    team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT] = team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT] | temp_bitmap;
 ////    rt_kprintf("turn on warning device: %x\n\n\n", team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT]);
 ////		rt_kprintf("team_local_inst.team_work_status[TEAM_BITMAP_MALFUN_DEV] = %d\n",team_local_inst.team_bitmap[TEAM_BITMAP_MALFUN_DEV]);
-////		rt_kprintf("team_local_inst.team_work_status[TEAM_BITMAP_ONLINE] = %d\n",team_local_inst.team_bitmap[TEAM_BITMAP_ONLINE]);			
-////		rt_kprintf("team_local_inst.team_work_status[TEAM_BITMAP_OUTPUT] = %d\n",team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT]);		
+////		rt_kprintf("team_local_inst.team_work_status[TEAM_BITMAP_ONLINE] = %d\n",team_local_inst.team_bitmap[TEAM_BITMAP_ONLINE]);
+////		rt_kprintf("team_local_inst.team_work_status[TEAM_BITMAP_OUTPUT] = %d\n",team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT]);
 ////		rt_kprintf("team_local_inst.team_work_status[TEAM_WORK_STATUS_0_3] = %d\n",team_local_inst.team_work_status[TEAM_WORK_STATUS_0_3]);
 //}
 
@@ -2391,12 +2382,12 @@
 //{
 //    extern sys_reg_st g_sys;
 //    uint8_t cascade_enable, team_mode;
-//  
+//
 //    cascade_enable = (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_CASCADE_BPOS) & 0x0001;
 //    team_mode      = (team_local_inst.team_config[TEAM_CONF_MODE] >> TEAM_CONF_TMMOD_BPOS) & 0x0003;
-//  
+//
 //    if(cascade_enable)
-//    { //²ãµşÊ¹ÄÜ
+//    { //å±‚å ä½¿èƒ½
 //        switch(team_mode)
 //        {
 //            case TEAM_MODE_STANDALONE:
@@ -2422,7 +2413,7 @@
 //        }
 //    }
 //    else
-//    { //Î´Ê¹ÄÜ²ãµşÄ£Ê½
+//    { //æœªä½¿èƒ½å±‚å æ¨¡å¼
 //        switch(team_mode)
 //        {
 //            case TEAM_MODE_STANDALONE:
@@ -2545,135 +2536,135 @@
 //    uint32_t t_usableBitmap, h_usableBitmap;
 //    uint32_t temp_openBitmap, hum_openBitmap;
 //    uint32_t temp_full_usableBitmap, hum_full_usableBitmap;
-//  
+//
 ////    rt_kprintf("%x %x %x %x \n", temp_cnt, temp_flag, hum_cnt, hum_flag);
-//    //µ±Ç°Ö÷±¸ÇĞ»»ºóÊä³öbitmapµÄ»ú×éÊıÁ¿
+//    //å½“å‰ä¸»å¤‡åˆ‡æ¢åè¾“å‡ºbitmapçš„æœºç»„æ•°é‡
 //    output_cnt = get_bitmap_num(team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT]);
 //    if(temp_cnt > output_cnt)
-//    {   //ÎÂ¶ÈĞèÒª²ãµş
+//    {   //æ¸©åº¦éœ€è¦å±‚å 
 //        temp_cascade_flag = 1;
 //    }
 //    else
-//    {   //ÎÂ¶È²»ĞèÒª²ãµş
+//    {   //æ¸©åº¦ä¸éœ€è¦å±‚å 
 //        temp_cascade_flag = 0;
 //    }
 //    if(hum_cnt > output_cnt)
-//    {   //Êª¶ÈĞèÒª²ãµş
+//    {   //æ¹¿åº¦éœ€è¦å±‚å 
 //        hum_cascade_flag = 1;
 //    }
 //    else
-//    {   //Êª¶È²»ĞèÒª²ãµş
+//    {   //æ¹¿åº¦ä¸éœ€è¦å±‚å 
 //        hum_cascade_flag = 0;
 //    }
-//    
-//    //µ±Ç°ÉèÖÃËùÓĞ»ú×éµÄBitmap
+//
+//    //å½“å‰è®¾ç½®æ‰€æœ‰æœºç»„çš„Bitmap
 //    totalBitmap         = team_get_totalbitmap((uint16_t)(team_local_inst.team_config[TEAM_CONF_CNT] & 0xff));
-//    //Î´ÔËĞĞ»ú×éµÄBitmap
+//    //æœªè¿è¡Œæœºç»„çš„Bitmap
 //    stopBitmap          = totalBitmap & (~team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT]);
-//    //¿ÉÓÃµÄ±¸»úBitmap
+//    //å¯ç”¨çš„å¤‡æœºBitmap
 //    usableBackupBitmap  = stopBitmap & (~team_local_inst.team_bitmap[TEAM_BITMAP_MALFUN_DEV]);
-//    
-//    //¿ÉÓÃµÄBitmap
+//
+//    //å¯ç”¨çš„Bitmap
 //    if(temp_cascade_flag)
-//    {   //ÎÂ¶ÈĞèÒª²ãµş£¬¿ÉÓÃBitmapÎª¿ÉÓÃµÄ±¸»úBitmap
+//    {   //æ¸©åº¦éœ€è¦å±‚å ï¼Œå¯ç”¨Bitmapä¸ºå¯ç”¨çš„å¤‡æœºBitmap
 //        t_usableBitmap  = usableBackupBitmap;
 //    }
 //    else
-//    {   //ÎÂ¶È²»ĞèÒª²ãµş¿ÉÓÃBitmapÎªÖ÷±¸ÇĞ»»ºóµÄ´ò¿ªµÄBitmap
+//    {   //æ¸©åº¦ä¸éœ€è¦å±‚å å¯ç”¨Bitmapä¸ºä¸»å¤‡åˆ‡æ¢åçš„æ‰“å¼€çš„Bitmap
 //        t_usableBitmap  = team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT];
 //    }
 //    if(hum_cascade_flag)
-//    {   //Êª¶ÈĞèÒª²ãµş£¬¿ÉÓÃBitmapÎª¿ÉÓÃµÄ±¸»úBitmap
+//    {   //æ¹¿åº¦éœ€è¦å±‚å ï¼Œå¯ç”¨Bitmapä¸ºå¯ç”¨çš„å¤‡æœºBitmap
 //        h_usableBitmap  = usableBackupBitmap;
 //    }
 //    else
-//    {   //Êª¶È²»ĞèÒª²ãµş¿ÉÓÃBitmapÎªÖ÷±¸ÇĞ»»ºóµÄ´ò¿ªµÄBitmap
+//    {   //æ¹¿åº¦ä¸éœ€è¦å±‚å å¯ç”¨Bitmapä¸ºä¸»å¤‡åˆ‡æ¢åçš„æ‰“å¼€çš„Bitmap
 //        h_usableBitmap  = team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT];
 //    }
-//    
-//    //¿ª¹Ø»úµÄBitmap
+//
+//    //å¼€å…³æœºçš„Bitmap
 //    if(temp_cascade_flag)
-//    {   //ÎÂ¶ÈĞèÒª²ãµş
+//    {   //æ¸©åº¦éœ€è¦å±‚å 
 //        temp_openBitmap = find_bitmap_in_bitmap(t_usableBitmap, (temp_cnt - output_cnt));
 //    }
 //    else
-//    {   //ÎÂ¶È²»ĞèÒª²ãµş
+//    {   //æ¸©åº¦ä¸éœ€è¦å±‚å 
 ////        temp_openBitmap = find_bitmap_in_bitmap(t_usableBitmap, temp_cnt);
 //        temp_openBitmap = find_bitmap_in_bitmap_by_sort(t_usableBitmap, temp_cnt, team_local_inst.team_sort_temp);
 //    }
 //    if(hum_cascade_flag)
-//    {   //Êª¶ÈĞèÒª²ãµş
+//    {   //æ¹¿åº¦éœ€è¦å±‚å 
 //        hum_openBitmap  = find_bitmap_in_bitmap(h_usableBitmap, (hum_cnt - output_cnt));
 //    }
 //    else
-//    {   //Êª¶È²»ĞèÒª²ãµş
+//    {   //æ¹¿åº¦ä¸éœ€è¦å±‚å 
 ////        hum_openBitmap  = find_bitmap_in_bitmap(h_usableBitmap, hum_cnt);
 //        hum_openBitmap  = find_bitmap_in_bitmap_by_sort(h_usableBitmap, hum_cnt, team_local_inst.team_sort_hum);
 //    }
-//    
-//    //×îÖÕÊä³öĞèÒª¿ªÆôµÄBitmap
+//
+//    //æœ€ç»ˆè¾“å‡ºéœ€è¦å¼€å¯çš„Bitmap
 //    team_local_inst.team_bitmap[TEAM_BITMAP_FINAL_OUT]  = team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT] |
 //                                                          temp_openBitmap |
 //                                                          hum_openBitmap;
-//    
+//
 //    //full open bitmap
 //    if(temp_cascade_flag)
-//    {   //ÎÂ¶ÈĞèÒª²ãµş
+//    {   //æ¸©åº¦éœ€è¦å±‚å 
 //        temp_full_usableBitmap = find_bitmap_in_bitmap(temp_openBitmap, (temp_cnt - output_cnt - temp_flag));
 //    }
 //    else
-//    {   //ÎÂ¶È²»ĞèÒª²ãµş
+//    {   //æ¸©åº¦ä¸éœ€è¦å±‚å 
 ////        temp_full_usableBitmap = find_bitmap_in_bitmap(temp_openBitmap, (temp_cnt - temp_flag));
 //        temp_full_usableBitmap = find_bitmap_in_bitmap_by_sort(temp_openBitmap, (temp_cnt - temp_flag), team_local_inst.team_sort_temp);
 //    }
 //    if(hum_cascade_flag)
-//    {   //Êª¶ÈĞèÒª²ãµş
+//    {   //æ¹¿åº¦éœ€è¦å±‚å 
 //        hum_full_usableBitmap  = find_bitmap_in_bitmap(hum_openBitmap, (hum_cnt - output_cnt - hum_flag));
 //    }
 //    else
-//    {   //Êª¶È²»ĞèÒª²ãµş
+//    {   //æ¹¿åº¦ä¸éœ€è¦å±‚å 
 ////        hum_full_usableBitmap  = find_bitmap_in_bitmap(hum_openBitmap, (hum_cnt - hum_flag));
 //        hum_full_usableBitmap  = find_bitmap_in_bitmap_by_sort(hum_openBitmap, (hum_cnt - hum_flag), team_local_inst.team_sort_hum);
 //    }
-//    
+//
 //    if(temp_cascade_flag)
-//    {   //ÎÂ¶ÈĞèÒª²ãµş
+//    {   //æ¸©åº¦éœ€è¦å±‚å 
 //        team_local_inst.team_bitmap[TEAM_BITMAP_TEMP_FULL_REQ_OUT] = team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT] |
 //                                                                     temp_full_usableBitmap;
 //    }
 //    else
-//    {   //ÎÂ¶È²»ĞèÒª²ãµş
+//    {   //æ¸©åº¦ä¸éœ€è¦å±‚å 
 //        team_local_inst.team_bitmap[TEAM_BITMAP_TEMP_FULL_REQ_OUT] = temp_full_usableBitmap;
 //    }
 //    if(hum_cascade_flag)
-//    {   //Êª¶ÈĞèÒª²ãµş
+//    {   //æ¹¿åº¦éœ€è¦å±‚å 
 //        team_local_inst.team_bitmap[TEAM_BITMAP_HUM_FULL_REQ_OUT] = team_local_inst.team_bitmap[TEAM_BITMAP_OUTPUT] |
 //                                                                    hum_full_usableBitmap;
 //    }
 //    else
-//    {   //Êª¶È²»ĞèÒª²ãµş
+//    {   //æ¹¿åº¦ä¸éœ€è¦å±‚å 
 //        team_local_inst.team_bitmap[TEAM_BITMAP_HUM_FULL_REQ_OUT] = hum_full_usableBitmap;
 //    }
 ////    rt_kprintf("%x %x %x\n", team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ], temp_openBitmap, temp_full_usableBitmap);
-//    //·ÇÈ«¿ªµÄµØÖ·(1~32)
+//    //éå…¨å¼€çš„åœ°å€(1~32)
 //    if(temp_cascade_flag)
-//    {   //ÎÂ¶ÈĞèÒª²ãµş
-//        team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] = ((uint16_t)team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] & 0xff) | 
+//    {   //æ¸©åº¦éœ€è¦å±‚å 
+//        team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] = ((uint16_t)team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] & 0xff) |
 //                                                           ((find_addr_in_bitmap(temp_openBitmap & (~temp_full_usableBitmap))) << 8);
 //    }
 //    else
-//    {   //ÎÂ¶È²»ĞèÒª²ãµş
-//        team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] = ((uint16_t)team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] & 0xff) | 
+//    {   //æ¸©åº¦ä¸éœ€è¦å±‚å 
+//        team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] = ((uint16_t)team_local_inst.team_param[TEAM_PARAM_DIFF_TEMP_REQ] & 0xff) |
 //                                                           ((find_addr_in_bitmap(temp_openBitmap & (~temp_full_usableBitmap))) << 8);
 //    }
 //    if(hum_cascade_flag)
-//    {   //Êª¶ÈĞèÒª²ãµş
-//        team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ]  = ((uint16_t)team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] & 0xff) | 
+//    {   //æ¹¿åº¦éœ€è¦å±‚å 
+//        team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ]  = ((uint16_t)team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] & 0xff) |
 //                                                           ((find_addr_in_bitmap(hum_openBitmap & (~hum_full_usableBitmap))) << 8);
 //    }
 //    else
-//    {   //Êª¶È²»ĞèÒª²ãµş
-//        team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ]  = ((uint16_t)team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] & 0xff)| 
+//    {   //æ¹¿åº¦ä¸éœ€è¦å±‚å 
+//        team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ]  = ((uint16_t)team_local_inst.team_param[TEAM_PARAM_DIFF_HUM_REQ] & 0xff)|
 //                                                           ((find_addr_in_bitmap(hum_openBitmap & (~hum_full_usableBitmap))) << 8);
 //    }
 //}
@@ -2693,7 +2684,7 @@
 //		uint16_t i;
 //		rt_kprintf("Team---fsm   signal    addr    enmode    tmode  status      confm	  OLSta  ConfSta  MFSta  OutSta   FinalOut\n");
 //		rt_kprintf("       %d      %d        %d       %x          %x      %x       %x               %x    %x      %x       %x        %x\n",
-//		team_local_inst.team_fsm,		
+//		team_local_inst.team_fsm,
 //		team_local_inst.team_signal,
 //		g_sys.config.team.addr,
 //		g_sys.config.team.team_en,
@@ -2729,12 +2720,12 @@
 //								rt_kprintf("   %4d   ",team_local_inst.team_table[i][TEAM_TAB_TIMEOUT]);
 //								rt_kprintf("\n");
 ////						}
-//						}		
+//						}
 //		}
 //    rt_kprintf("-------------------------------------------------------\n");
 //    rt_kprintf("TC    Mode      TP      TD     TS     HP     HD    HS     AHT    ALT     AHH    ALH    \n");
 //		rt_kprintf("     %4x       %3d     %3d    %3d    %3d    %3d    %3d    %3d    %3d    %3d    %3d    \n",
-//		team_local_inst.team_config[TEAM_CONF_MODE],		
+//		team_local_inst.team_config[TEAM_CONF_MODE],
 //		team_local_inst.team_config[TEAM_CONF_TEMP_PRECISION],
 //		team_local_inst.team_config[TEAM_CONF_TEMP_DEADBAND],
 //		team_local_inst.team_config[TEAM_CONF_TEMP_SETVAL],
@@ -2759,16 +2750,16 @@
 //		team_local_inst.team_config[TEAM_CONF_FAN_FLOW_DIFF_STEP],
 //		team_local_inst.team_config[TEAM_CONF_FAN_FLOW_DIFF_DELAY],
 //		team_local_inst.team_bitmap[TEAM_BITMAP_RS_SET],
-//		team_local_inst.team_bitmap[TEAM_BITMAP_RS_STS]);		
-//		
+//		team_local_inst.team_bitmap[TEAM_BITMAP_RS_STS]);
+//
 //		rt_kprintf("TP     Mode        T-req       H-req       F-req       Resv\n");
 //		rt_kprintf("       %4x        %3d         %3d         %3d        %4x\n",
-//		team_local_inst.team_param[TEAM_PARAM_MODE],		
+//		team_local_inst.team_param[TEAM_PARAM_MODE],
 //		team_local_inst.team_param[TEAM_PARAM_TEMP_REQ],
 //		team_local_inst.team_param[TEAM_PARAM_HUM_REQ],
 //		team_local_inst.team_param[TEAM_PARAM_FAN_REQ],
 //		team_local_inst.team_param[TEAM_PARAM_RESERVE]);
-//    
+//
 //    rt_kprintf("-------------------------------------------------------\n");
 //    rt_kprintf("T_T    T_H    A_T    A_H    D_T     D_H     Team_T    Team_H    Team_F      T_F_Bitmap    H_F_Bitmap\n");
 //    rt_kprintf("%d    %d     %d   %d     %x     %x       %d      %d      %d    %x    %x\n",
@@ -2783,7 +2774,7 @@
 //		l_sys.require[TEAM_REQ][F_REQ],
 //    team_local_inst.team_bitmap[TEAM_BITMAP_TEMP_FULL_REQ_OUT],
 //    team_local_inst.team_bitmap[TEAM_BITMAP_HUM_FULL_REQ_OUT]);
-//    
+//
 //    rt_kprintf("-------------------------------------------------------\n");
 //    rt_kprintf("temp sort : ");
 //    for(i = 0; i < TEAM_MAX_SLAVE_NUM; i++)

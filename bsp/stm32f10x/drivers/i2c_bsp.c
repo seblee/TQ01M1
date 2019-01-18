@@ -8,504 +8,467 @@
   * @param  None
   * @retval : None
   */
-#define   USE_MUTEX 1 // π”√
-#define   I2CSPEED 2    //I2Cƒ£ƒ‚—” ±
-#define   I2CPAGEWriteDelay  5
+#define USE_MUTEX 1 //‰ΩøÁî®
+#define I2CSPEED 2  //I2CÊ®°ÊãüÂª∂Êó∂
+#define I2CPAGEWriteDelay 5
 static void init_IIC_Mutex(void);
 
 static void I2C_Config(void)
 {
-		GPIO_InitTypeDef  GPIO_InitStructure; 
+    GPIO_InitTypeDef GPIO_InitStructure;
 
-		//Configure I2C1 pins: SCL 
-		GPIO_InitStructure.GPIO_Pin =  II_SCL_Pin;
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-		GPIO_Init(II_SCL_GPIO, &GPIO_InitStructure);
-		
-		GPIO_SetBits(II_SCL_GPIO,II_SCL_Pin);
-		
-	 //Configure I2C1 pins: SDA
-	 
-		GPIO_InitStructure.GPIO_Pin =  II_SDA_Pin;
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-		GPIO_Init(II_SDA_GPIO, &GPIO_InitStructure);
-		
-		GPIO_SetBits(II_SDA_GPIO,II_SDA_Pin);
+    //Configure I2C1 pins: SCL
+    GPIO_InitStructure.GPIO_Pin = II_SCL_Pin;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(II_SCL_GPIO, &GPIO_InitStructure);
 
-		GPIO_InitStructure.GPIO_Pin =  II_WP_Pin;
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-		GPIO_Init(II_WP_GPIO, &GPIO_InitStructure);
-		//writ_disable
-		GPIO_SetBits(II_SDA_GPIO,II_SDA_Pin);
-  
- 
+    GPIO_SetBits(II_SCL_GPIO, II_SCL_Pin);
+
+    //Configure I2C1 pins: SDA
+
+    GPIO_InitStructure.GPIO_Pin = II_SDA_Pin;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(II_SDA_GPIO, &GPIO_InitStructure);
+
+    GPIO_SetBits(II_SDA_GPIO, II_SDA_Pin);
+
+    GPIO_InitStructure.GPIO_Pin = II_WP_Pin;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(II_WP_GPIO, &GPIO_InitStructure);
+    //writ_disable
+    GPIO_SetBits(II_SDA_GPIO, II_SDA_Pin);
 }
 
-static void IIC_SCL( uint8_t n)  
-{  
-		if(n == 1)
-		{
-				 GPIO_SetBits(II_SCL_GPIO,II_SCL_Pin);
-		}
-		else
-		{
-				 GPIO_ResetBits(II_SCL_GPIO,II_SCL_Pin);
-		}
+static void IIC_SCL(uint8_t n)
+{
+    if (n == 1)
+    {
+        GPIO_SetBits(II_SCL_GPIO, II_SCL_Pin);
+    }
+    else
+    {
+        GPIO_ResetBits(II_SCL_GPIO, II_SCL_Pin);
+    }
 }
 
-static void IIC_SDA( uint8_t n)   
-{	
-		if(n == 1)
-		{
-				 GPIO_SetBits(II_SDA_GPIO,II_SDA_Pin);
-		}
-		else
-		{
-				GPIO_ResetBits(II_SDA_GPIO,II_SDA_Pin);
-		} 
+static void IIC_SDA(uint8_t n)
+{
+    if (n == 1)
+    {
+        GPIO_SetBits(II_SDA_GPIO, II_SDA_Pin);
+    }
+    else
+    {
+        GPIO_ResetBits(II_SDA_GPIO, II_SDA_Pin);
+    }
 }
-
-
 
 void drv_i2c_init(void)
 {
-		I2C_Config();
+    I2C_Config();
 #if USE_MUTEX
-		init_IIC_Mutex(); 
+    init_IIC_Mutex();
 #endif
 }
 
-
-
 static rt_mutex_t iic_mutex;
-//°‰°‰?°ß?£§3a®¢?
+//‚Ä≤‚Ä≤?¬®?Ôø•3a√°?
 #if USE_MUTEX
 static void init_IIC_Mutex(void)
 {
-		rt_err_t erro;	
-		
-		iic_mutex= rt_mutex_create ("IIC_Mutex", RT_IPC_FLAG_PRIO);
-		erro= rt_mutex_init(iic_mutex, "IIC_Mutex", RT_IPC_FLAG_PRIO);
-		if(erro != RT_EOK)
-		{
-				rt_kprintf("IICBSP: rt_mutex_init erro\n");	
-		}
-	
+    rt_err_t erro;
+
+    iic_mutex = rt_mutex_create("IIC_Mutex", RT_IPC_FLAG_PRIO);
+    erro = rt_mutex_init(iic_mutex, "IIC_Mutex", RT_IPC_FLAG_PRIO);
+    if (erro != RT_EOK)
+    {
+        rt_kprintf("IICBSP: rt_mutex_init erro\n");
+    }
 }
 #endif
 
-
-
 static void SDA_OUT(void)
 {
-	  GPIO_InitTypeDef  GPIO_InitStructure; 
-	  GPIO_InitStructure.GPIO_Pin =  II_SDA_Pin;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  	GPIO_Init(II_SDA_GPIO, &GPIO_InitStructure);
+    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitStructure.GPIO_Pin = II_SDA_Pin;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(II_SDA_GPIO, &GPIO_InitStructure);
 }
-
 
 static void SDA_IN(void)
 {
-	  GPIO_InitTypeDef  GPIO_InitStructure; 
-	  GPIO_InitStructure.GPIO_Pin =  II_SDA_Pin;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-  	GPIO_Init(II_SDA_GPIO, &GPIO_InitStructure);
+    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitStructure.GPIO_Pin = II_SDA_Pin;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(II_SDA_GPIO, &GPIO_InitStructure);
 }
 
 static void delay_us(u32 nus)
 {
-		u8 i;
-		u32 temp;
-		for(i = 0;i <4;i++)
-		{
-				for(temp = nus; temp != 0; temp--)
-				{
-						;
-				}
-		}
+    u8 i;
+    u32 temp;
+    for (i = 0; i < 4; i++)
+    {
+        for (temp = nus; temp != 0; temp--)
+        {
+            ;
+        }
+    }
 }
 
-
-//2®≤®¶®≤IIC?e®∫?D?o?
+//2√∫√©√∫IIC?e√™?D?o?
 static void IIC_Start(void)
 {
-		SDA_OUT();     
-		IIC_SDA(1);	  	  
-		IIC_SCL(1);
-		delay_us(I2CSPEED);
-		IIC_SDA(0);//START:when CLK is high,DATA change form high to low 
-		delay_us(I2CSPEED);
-		IIC_SCL(0);//?°•°¡?I2C°¡®π??°Í?°¡?°¿?°§°È?®™?®∞?®Æ®∫?®∫y?Y 
-}	  
-//2®≤®¶®≤IIC®™°Í?1D?o?
+    SDA_OUT();
+    IIC_SDA(1);
+    IIC_SCL(1);
+    delay_us(I2CSPEED);
+    IIC_SDA(0); //START:when CLK is high,DATA change form high to low
+    delay_us(I2CSPEED);
+    IIC_SCL(0); //?Àâ√ó?I2C√ó√º??Ôø°?√ó?¬±?¬∑Ôø†?√≠?√≤?√≥√™?√™y?Y
+}
+//2√∫√©√∫IIC√≠Ôø°?1D?o?
 static void IIC_Stop(void)
 {
-		SDA_OUT();//sda??®∫?3?
-		IIC_SCL(0);
-		IIC_SDA(0);//STOP:when CLK is high DATA change form low to high
-		delay_us(I2CSPEED);
-		IIC_SCL(1); 
-		IIC_SDA(1);//°§°È?®™I2C°¡®π???®¢®∫?D?o?
-		delay_us(I2CSPEED);							   	
+    SDA_OUT(); //sda??√™?3?
+    IIC_SCL(0);
+    IIC_SDA(0); //STOP:when CLK is high DATA change form low to high
+    delay_us(I2CSPEED);
+    IIC_SCL(1);
+    IIC_SDA(1); //¬∑Ôø†?√≠I2C√ó√º???√°√™?D?o?
+    delay_us(I2CSPEED);
 }
-//¶Ã®®°‰y®Æ|°‰eD?o?¶Ã?®§°‰
-//°§¶Ã???¶Ã°Ío1°Í??®Æ®∫?®Æ|°‰e®∫°Ï°„®π
-//        0°Í??®Æ®∫?®Æ|°‰e3®¶1|
+//Œº√®‚Ä≤y√≥|‚Ä≤eD?o?Œº?√†‚Ä≤
+//¬∑Œº???ŒºÔø°o1Ôø°??√≥√™?√≥|‚Ä≤e√™¬ß¬∞√º
+//        0Ôø°??√≥√™?√≥|‚Ä≤e3√©1|
 static uint8_t IIC_Wait_Ack(void)
 {
-		uint8_t ucerrtime=0;
-		SDA_IN();  //SDA®¶®®???a®∫?®®?  
-		IIC_SDA(1);
-		delay_us(I2CSPEED);   
-		IIC_SCL(1);
-		delay_us(I2CSPEED);	 
-		while(READ_SDA())
-		{
-				ucerrtime++;
-				if(ucerrtime>250)
-				{
-						IIC_Stop();
-						return 1;
-				}
-		}
-		IIC_SCL(0);//®∫°¿?®Æ®∫?3?0 	   
-		return 0;  
-} 
-//2®≤®¶®≤ACK®Æ|°‰e
+    uint8_t ucerrtime = 0;
+    SDA_IN(); //SDA√©√®???a√™?√®?
+    IIC_SDA(1);
+    delay_us(I2CSPEED);
+    IIC_SCL(1);
+    delay_us(I2CSPEED);
+    while (READ_SDA())
+    {
+        ucerrtime++;
+        if (ucerrtime > 250)
+        {
+            IIC_Stop();
+            return 1;
+        }
+    }
+    IIC_SCL(0); //√™¬±?√≥√™?3?0
+    return 0;
+}
+//2√∫√©√∫ACK√≥|‚Ä≤e
 static void IIC_Ack(void)
 {
-		IIC_SCL(0);
-		SDA_OUT();
-		IIC_SDA(0);
-		delay_us(I2CSPEED);
-		IIC_SCL(1);
-		delay_us(I2CSPEED);
-		IIC_SCL(0);
+    IIC_SCL(0);
+    SDA_OUT();
+    IIC_SDA(0);
+    delay_us(I2CSPEED);
+    IIC_SCL(1);
+    delay_us(I2CSPEED);
+    IIC_SCL(0);
 }
-//2?2®≤®¶®≤ACK®Æ|°‰e		    
+//2?2√∫√©√∫ACK√≥|‚Ä≤e
 static void IIC_NAck(void)
 {
-		IIC_SCL(0);
-		SDA_OUT();
-		IIC_SDA(1);
-		delay_us(I2CSPEED);
-		IIC_SCL(1);
-		delay_us(I2CSPEED);
-		IIC_SCL(0);
-}					 				     
-//IIC°§°È?®™®∞???°¡??®≤
-//°§¶Ã??°‰®Æ?®≤®ÆD?T®Æ|°‰e
-//1°Í?®ÆD®Æ|°‰e
-//0°Í??T®Æ|°‰e			  
+    IIC_SCL(0);
+    SDA_OUT();
+    IIC_SDA(1);
+    delay_us(I2CSPEED);
+    IIC_SCL(1);
+    delay_us(I2CSPEED);
+    IIC_SCL(0);
+}
+//IIC¬∑Ôø†?√≠√≤???√ó??√∫
+//¬∑Œº??‚Ä≤√≥?√∫√≥D?T√≥|‚Ä≤e
+//1Ôø°?√≥D√≥|‚Ä≤e
+//0Ôø°??T√≥|‚Ä≤e
 static void IIC_Send_Byte(uint8_t txd)
-{                        
-    uint8_t t; 
-  
-	  SDA_OUT(); 	    
-    IIC_SCL(0);//®§-¶Ã®™®∫°¿?®Æ?a®∫?®∫y?Y°‰?®∫?
-    for(t=0;t<8;t++)
-    {              
-        IIC_SDA((txd&0x80)>>7);
-        txd<<=1; 	  
-				delay_us(I2CSPEED);   //??TEA5767?a®®y???®Æ®∫°¿??®∫?°¿?D?¶Ã?
-				IIC_SCL(1);
-				delay_us(I2CSPEED);
-				IIC_SCL(0);	
-				delay_us(I2CSPEED);
-    }	 
-} 	    
-//?®¢1??°¡??®≤°Í?ack=1®∫°¿°Í?°§°È?®™ACK°Í?ack=0°Í?°§°È?®™nACK   
+{
+    uint8_t t;
+
+    SDA_OUT();
+    IIC_SCL(0); //√†-Œº√≠√™¬±?√≥?a√™?√™y?Y‚Ä≤?√™?
+    for (t = 0; t < 8; t++)
+    {
+        IIC_SDA((txd & 0x80) >> 7);
+        txd <<= 1;
+        delay_us(I2CSPEED); //??TEA5767?a√®y???√≥√™¬±??√™?¬±?D?Œº?
+        IIC_SCL(1);
+        delay_us(I2CSPEED);
+        IIC_SCL(0);
+        delay_us(I2CSPEED);
+    }
+}
+//?√°1??√ó??√∫Ôø°?ack=1√™¬±Ôø°?¬∑Ôø†?√≠ACKÔø°?ack=0Ôø°?¬∑Ôø†?√≠nACK
 static uint8_t IIC_Read_Byte(uint8_t ack)
 {
-		uint8_t i,receive=0;
-		SDA_IN();//SDA®¶®®???a®∫?®®?
-    for(i=0;i<8;i++ )
-		{
-        IIC_SCL(0); 
+    uint8_t i, receive = 0;
+    SDA_IN(); //SDA√©√®???a√™?√®?
+    for (i = 0; i < 8; i++)
+    {
+        IIC_SCL(0);
         delay_us(I2CSPEED);
-				IIC_SCL(1);
-        receive<<=1;
-        if(READ_SDA())receive++;   
-				delay_us(I2CSPEED); 
-    }					 
+        IIC_SCL(1);
+        receive <<= 1;
+        if (READ_SDA())
+            receive++;
+        delay_us(I2CSPEED);
+    }
     if (!ack)
-        IIC_NAck();//°§°È?®™nACK
+        IIC_NAck(); //¬∑Ôø†?√≠nACK
     else
-        IIC_Ack(); //°§°È?®™ACK   
+        IIC_Ack(); //¬∑Ôø†?√≠ACK
     return receive;
 }
 
-
-static int8_t  I2c_write_byte(uint8_t data)
+static int8_t I2c_write_byte(uint8_t data)
 {
-	IIC_Send_Byte(data);
-	if(IIC_Wait_Ack()==0)
-	{
-		return(1);
-	}
-	else
-	{
-		return(0);
-	}
-	
+    IIC_Send_Byte(data);
+    if (IIC_Wait_Ack() == 0)
+    {
+        return (1);
+    }
+    else
+    {
+        return (0);
+    }
 }
-static int8_t WriteEEROMPage(uint8_t* write_buffer, uint16_t write_addr, uint8_t num_byte_write)
+static int8_t WriteEEROMPage(uint8_t *write_buffer, uint16_t write_addr, uint8_t num_byte_write)
 {
-		u16 len;
-		WP_Enable();
-		IIC_Start();
-		//I2C Slave addr
-		if(I2c_write_byte(SLAVE_ADDR&0xFE)==0)
-		{
-				IIC_Stop();
-				WP_Diable();
-				//rt_kprintf("\n IICBSP: I2C_EE_BufWrite  ERR \n");	
-				return(EEPROM_BUSSERRO);	
-		}
-		// Data high 8 addr
-		if(I2c_write_byte(write_addr>>8)==0)
-		{
-				IIC_Stop();
-				WP_Diable();
-				rt_kprintf("\n IICBSP: WriteEEROMPage high 8\n");	
-				return(EEPROM_BUSSERRO);	
-		}
-		// data low 8 addr
-		if(I2c_write_byte(write_addr&0x00ff)==0)
-		{
-				IIC_Stop();
-				WP_Diable();
-				rt_kprintf("\n IICBSP: WriteEEROMPage low 8 \n");	
-				return(EEPROM_BUSSERRO);	
-		}
+    u16 len;
+    WP_Enable();
+    IIC_Start();
+    //I2C Slave addr
+    if (I2c_write_byte(SLAVE_ADDR & 0xFE) == 0)
+    {
+        IIC_Stop();
+        WP_Diable();
+        //rt_kprintf("\n IICBSP: I2C_EE_BufWrite  ERR \n");
+        return (EEPROM_BUSSERRO);
+    }
+    // Data high 8 addr
+    if (I2c_write_byte(write_addr >> 8) == 0)
+    {
+        IIC_Stop();
+        WP_Diable();
+        rt_kprintf("\n IICBSP: WriteEEROMPage high 8\n");
+        return (EEPROM_BUSSERRO);
+    }
+    // data low 8 addr
+    if (I2c_write_byte(write_addr & 0x00ff) == 0)
+    {
+        IIC_Stop();
+        WP_Diable();
+        rt_kprintf("\n IICBSP: WriteEEROMPage low 8 \n");
+        return (EEPROM_BUSSERRO);
+    }
 
-		for(len=0;len<num_byte_write;len++)
-		{
-				if(I2c_write_byte(*(write_buffer+len))==0)
-				{
-						IIC_Stop();
-						WP_Diable();
-						rt_kprintf("\n IICBSP: WriteEEROMPage len=%d \n",len);	
-						return(EEPROM_BUSSERRO);
-				}
-		}
-		IIC_Stop();
-		WP_Diable();
-		return(EEPROM_NOERRO);
-
+    for (len = 0; len < num_byte_write; len++)
+    {
+        if (I2c_write_byte(*(write_buffer + len)) == 0)
+        {
+            IIC_Stop();
+            WP_Diable();
+            rt_kprintf("\n IICBSP: WriteEEROMPage len=%d \n", len);
+            return (EEPROM_BUSSERRO);
+        }
+    }
+    IIC_Stop();
+    WP_Diable();
+    return (EEPROM_NOERRO);
 }
 
-
-
-
-
-
-
-int8_t I2C_EE_BufWrite_bsp(uint8_t* write_buffer, uint16_t write_addr, uint16_t num_byte_write)
+int8_t I2C_EE_BufWrite_bsp(uint8_t *write_buffer, uint16_t write_addr, uint16_t num_byte_write)
 {
-	u8 byte_count;
-	u16 page_number;
-	u8 cnt;
-	
+    u8 byte_count;
+    u16 page_number;
+    u8 cnt;
 
-	// º∆À„µ⁄“ª¥Œ–Ë“™–¥»Îµƒ≥§∂»
-	byte_count =  I2C2_EE_PageSize - (write_addr % I2C2_EE_PageSize);
-	
-	if(num_byte_write <= byte_count)
-	{
-		byte_count = num_byte_write;
-	}
-	// œ»–¥»Îµ⁄“ª“≥µƒ ˝æ›
-	if(WriteEEROMPage(write_buffer,write_addr,byte_count) != EEPROM_NOERRO )
-	{
-		// –¥»Î¥ÌŒÛ,∑µªÿ¥ÌŒÛ
-		return EEPROM_BUSSERRO;
-	}
-	
-	// ÷ÿ–¬º∆À„ªπ–Ë“™–¥»Îµƒ◊÷Ω⁄
-	//“≥—” ±
+    // ËÆ°ÁÆóÁ¨¨‰∏ÄÊ¨°ÈúÄË¶ÅÂÜôÂÖ•ÁöÑÈïøÂ∫¶
+    byte_count = I2C2_EE_PageSize - (write_addr % I2C2_EE_PageSize);
 
-	num_byte_write -= byte_count;
-	if(!num_byte_write)
-	{
-		//  ˝æ›“—æ≠–¥»ÎÕÍ±œ
-		rt_thread_delay(I2CPAGEWriteDelay);
-		return EEPROM_NOERRO;
-	}
-	write_addr += byte_count;
-	write_buffer += byte_count;
-	// º∆À„–Ë“™Ω¯––µƒ“≥–¥¥Œ ˝
-	page_number = num_byte_write / I2C2_EE_PageSize;
-	// —≠ª∑–¥»Î ˝æ›
+    if (num_byte_write <= byte_count)
+    {
+        byte_count = num_byte_write;
+    }
+    // ÂÖàÂÜôÂÖ•Á¨¨‰∏ÄÈ°µÁöÑÊï∞ÊçÆ
+    if (WriteEEROMPage(write_buffer, write_addr, byte_count) != EEPROM_NOERRO)
+    {
+        // ÂÜôÂÖ•ÈîôËØØ,ËøîÂõûÈîôËØØ
+        return EEPROM_BUSSERRO;
+    }
 
+    // ÈáçÊñ∞ËÆ°ÁÆóËøòÈúÄË¶ÅÂÜôÂÖ•ÁöÑÂ≠óËäÇ
+    //È°µÂª∂Êó∂
 
+    num_byte_write -= byte_count;
+    if (!num_byte_write)
+    {
+        // Êï∞ÊçÆÂ∑≤ÁªèÂÜôÂÖ•ÂÆåÊØï
+        rt_thread_delay(I2CPAGEWriteDelay);
+        return EEPROM_NOERRO;
+    }
+    write_addr += byte_count;
+    write_buffer += byte_count;
+    // ËÆ°ÁÆóÈúÄË¶ÅËøõË°åÁöÑÈ°µÂÜôÊ¨°Êï∞
+    page_number = num_byte_write / I2C2_EE_PageSize;
+    // Âæ™ÁéØÂÜôÂÖ•Êï∞ÊçÆ
 
-while(page_number--)
-	{
-	cnt=10;
-	while(cnt)
-		{
-			//»Áπ˚–¥≤ª≥…π¶
-			if((WriteEEROMPage(write_buffer,write_addr,I2C2_EE_PageSize)) != EEPROM_NOERRO)
-			{
-				// —” ±
-				cnt--;
-				rt_thread_delay(1);
+    while (page_number--)
+    {
+        cnt = 10;
+        while (cnt)
+        {
+            //Â¶ÇÊûúÂÜô‰∏çÊàêÂäü
+            if ((WriteEEROMPage(write_buffer, write_addr, I2C2_EE_PageSize)) != EEPROM_NOERRO)
+            {
+                // Âª∂Êó∂
+                cnt--;
+                rt_thread_delay(1);
+            }
+            else //ÂÜôÊàêÂäü‰∫Ü
+            {
+                break;
+            }
+        }
+        //Ê£ÄÊü•ÂÜôÂ§±Ë¥•
+        if (cnt == 0)
+        {
+            rt_kprintf("\n IICBSP: I2C_EE_BufWrite  ERR \n");
+        }
 
-			}
-			else//–¥≥…π¶¡À
-			{
-				break;
-				
-			}
-		
-	 }
-		//ºÏ≤È–¥ ß∞‹
-		if(cnt==0)
-		{
-			rt_kprintf("\n IICBSP: I2C_EE_BufWrite  ERR \n");	
-		}
-		
-		num_byte_write -= I2C2_EE_PageSize;
-		write_addr += I2C2_EE_PageSize;
-		write_buffer += I2C2_EE_PageSize;
-	}	
-	rt_thread_delay(I2CPAGEWriteDelay);
-	if(!num_byte_write)
-	{
+        num_byte_write -= I2C2_EE_PageSize;
+        write_addr += I2C2_EE_PageSize;
+        write_buffer += I2C2_EE_PageSize;
+    }
+    rt_thread_delay(I2CPAGEWriteDelay);
+    if (!num_byte_write)
+    {
 
-		return EEPROM_NOERRO;
-	}
-	// –¥»Î◊Ó∫Û“ª“≥µƒ ˝æ›
-	if((WriteEEROMPage(write_buffer,write_addr,num_byte_write)) != EEPROM_NOERRO)
-	{
-		// –¥»Î¥ÌŒÛ,∑µªÿ¥ÌŒÛ
+        return EEPROM_NOERRO;
+    }
+    // ÂÜôÂÖ•ÊúÄÂêé‰∏ÄÈ°µÁöÑÊï∞ÊçÆ
+    if ((WriteEEROMPage(write_buffer, write_addr, num_byte_write)) != EEPROM_NOERRO)
+    {
+        // ÂÜôÂÖ•ÈîôËØØ,ËøîÂõûÈîôËØØ
 
-		return EEPROM_BUSSERRO;
-	}	
-	 rt_thread_delay(I2CPAGEWriteDelay);	
-	return EEPROM_NOERRO;
+        return EEPROM_BUSSERRO;
+    }
+    rt_thread_delay(I2CPAGEWriteDelay);
+    return EEPROM_NOERRO;
 }
 
-
-int8_t I2C_EE_BufWrite(uint8_t* write_buffer, uint16_t write_addr, uint16_t num_byte_write)
+int8_t I2C_EE_BufWrite(uint8_t *write_buffer, uint16_t write_addr, uint16_t num_byte_write)
 {
-		int8_t erro;
-		rt_err_t mutex_erro;
-		
-		erro = EEPROM_NOERRO;
-	
+    int8_t erro;
+    rt_err_t mutex_erro;
+
+    erro = EEPROM_NOERRO;
+
 #if USE_MUTEX
-		mutex_erro = rt_mutex_take(iic_mutex, 50);
-		if(mutex_erro != RT_EOK)
-		{
-				erro = EEPROM_MUXERRO; 
-				return(erro);
-		}
+    mutex_erro = rt_mutex_take(iic_mutex, 50);
+    if (mutex_erro != RT_EOK)
+    {
+        erro = EEPROM_MUXERRO;
+        return (erro);
+    }
 #endif
-	
-		erro = I2C_EE_BufWrite_bsp(write_buffer,write_addr,num_byte_write);
+
+    erro = I2C_EE_BufWrite_bsp(write_buffer, write_addr, num_byte_write);
 #if USE_MUTEX
-		rt_mutex_release(iic_mutex);			
+    rt_mutex_release(iic_mutex);
 #endif
-	
-	 return(erro);
+
+    return (erro);
 }
 
-
-
-int8_t I2C_EE_BufRead_bsp(uint8_t* read_buffer, uint16_t read_addr, uint16_t num_byte_Read)
+int8_t I2C_EE_BufRead_bsp(uint8_t *read_buffer, uint16_t read_addr, uint16_t num_byte_Read)
 {
-	
-	uint16_t len;
-	
-	//ªÒ»°ª•≥‚¡ø
-	WP_Enable();
-	IIC_Start();
-	//I2C Slave addr
-	if(I2c_write_byte(SLAVE_ADDR&0xFE)==0)
-	{
-		WP_Diable();
-		IIC_Stop();
-	
-		rt_kprintf("\n IICBSP: I2C_EE_BufRead SLAVE_ADDR\n");	
-		return(EEPROM_BUSSERRO);	
-	}
-	// Data high 8 addr
-	if(I2c_write_byte(read_addr>>8)==0)
-	{
-		WP_Diable();
-		IIC_Stop();
-		rt_kprintf("\n IICBSP: I2C_EE_BufRead ADDR high 8\n");
-		return(EEPROM_BUSSERRO);	
-	}
-	// data low 8 addr
-	if(I2c_write_byte(read_addr&0x00ff)==0)
-	{
-		WP_Diable();
-		IIC_Stop();
-		rt_kprintf("\n IICBSP: I2C_EE_BufRead ADDR LOW  8\n");
-		return(EEPROM_BUSSERRO);	
-	}
-	
 
-	
-	IIC_Start();
+    uint16_t len;
 
-	if(I2c_write_byte(SLAVE_ADDR|0x01)==0)
-	{
-		WP_Diable();
-		IIC_Stop();
+    //Ëé∑Âèñ‰∫íÊñ•Èáè
+    WP_Enable();
+    IIC_Start();
+    //I2C Slave addr
+    if (I2c_write_byte(SLAVE_ADDR & 0xFE) == 0)
+    {
+        WP_Diable();
+        IIC_Stop();
 
-		rt_kprintf("\n IICBSP: I2C_EE_BufRead SLAVE_ADDR  123\n");	
-		return(EEPROM_BUSSERRO);	
-	}
-	
-	WP_Diable();//write protect
-	
-	for(len=0;len<num_byte_Read-1;len++)
-	{
+        rt_kprintf("\n IICBSP: I2C_EE_BufRead SLAVE_ADDR\n");
+        return (EEPROM_BUSSERRO);
+    }
+    // Data high 8 addr
+    if (I2c_write_byte(read_addr >> 8) == 0)
+    {
+        WP_Diable();
+        IIC_Stop();
+        rt_kprintf("\n IICBSP: I2C_EE_BufRead ADDR high 8\n");
+        return (EEPROM_BUSSERRO);
+    }
+    // data low 8 addr
+    if (I2c_write_byte(read_addr & 0x00ff) == 0)
+    {
+        WP_Diable();
+        IIC_Stop();
+        rt_kprintf("\n IICBSP: I2C_EE_BufRead ADDR LOW  8\n");
+        return (EEPROM_BUSSERRO);
+    }
 
-		*(read_buffer++)=IIC_Read_Byte(1);
-	}
-	*(read_buffer)=IIC_Read_Byte(0);
-	IIC_Stop();
+    IIC_Start();
 
+    if (I2c_write_byte(SLAVE_ADDR | 0x01) == 0)
+    {
+        WP_Diable();
+        IIC_Stop();
 
-	return(EEPROM_NOERRO);
-	
-	
+        rt_kprintf("\n IICBSP: I2C_EE_BufRead SLAVE_ADDR  123\n");
+        return (EEPROM_BUSSERRO);
+    }
+
+    WP_Diable(); //write protect
+
+    for (len = 0; len < num_byte_Read - 1; len++)
+    {
+
+        *(read_buffer++) = IIC_Read_Byte(1);
+    }
+    *(read_buffer) = IIC_Read_Byte(0);
+    IIC_Stop();
+
+    return (EEPROM_NOERRO);
 }
 
-
-
-int8_t I2C_EE_BufRead(uint8_t* read_buffer, uint16_t read_addr, uint16_t num_byte_read)
+int8_t I2C_EE_BufRead(uint8_t *read_buffer, uint16_t read_addr, uint16_t num_byte_read)
 {
-		int8_t erro;
-		rt_err_t mutex_erro;
-		
-		erro = EEPROM_NOERRO;
-	
+    int8_t erro;
+    rt_err_t mutex_erro;
+
+    erro = EEPROM_NOERRO;
+
 #if USE_MUTEX
-		mutex_erro = rt_mutex_take(iic_mutex, 50);
-		if(mutex_erro != RT_EOK)
-		{
-				erro = EEPROM_MUXERRO; 
-				return(erro);
-		}
+    mutex_erro = rt_mutex_take(iic_mutex, 50);
+    if (mutex_erro != RT_EOK)
+    {
+        erro = EEPROM_MUXERRO;
+        return (erro);
+    }
 #endif
-	
-		erro = I2C_EE_BufRead_bsp(read_buffer,read_addr,num_byte_read);
+
+    erro = I2C_EE_BufRead_bsp(read_buffer, read_addr, num_byte_read);
 #if USE_MUTEX
-		rt_mutex_release(iic_mutex);			
+    rt_mutex_release(iic_mutex);
 #endif
-	  return(erro);
+    return (erro);
 }
-
-

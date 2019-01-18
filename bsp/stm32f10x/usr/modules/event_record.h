@@ -3,32 +3,28 @@
 #include "sys_conf.h"
 #include "cyc_buff.h"
 
-//±¨¾¯¼ÇÂ¼
+//æŠ¥è­¦è®°å½•
 
-#define CRITICAL_ALARM_lEVEL     0x00//ÑÏÖØ¸æ¾¯
-#define MAJOR_ALARM_LEVEL        0x01//Ò»°ã¸æ¾¯
-#define MIOOR_ALARM_LEVEL        0x02//ÌáÊ¾¸æ¾¯
+#define CRITICAL_ALARM_lEVEL 0x00 //ä¸¥é‡å‘Šè­¦
+#define MAJOR_ALARM_LEVEL 0x01    //ä¸€èˆ¬å‘Šè­¦
+#define MIOOR_ALARM_LEVEL 0x02    //æç¤ºå‘Šè­¦
 
+#define ALARM_FIFO_DEPTH 30
 
+#define ALARM_STATUS_LEN (sizeof(alram_node) - 4)
 
-#define ALARM_FIFO_DEPTH  30
+#define ALARM_RECORD_LEN sizeof(alarm_log_st)
 
-#define ALARM_STATUS_LEN    (sizeof(alram_node) - 4)
+#define EVENT_RECORD_LEN sizeof(event_log_st)
+#define TEMP_HUM_RECORD_LEN 4 * 60
 
-#define ALARM_RECORD_LEN    sizeof(alarm_log_st)
-
-#define EVENT_RECORD_LEN    sizeof(event_log_st)
-#define TEMP_HUM_RECORD_LEN  4*60
-
-//ÊÂ¼ş¼ÇÂ¼
-#define EVE_MAX_CNT 500 //ÊÂ¼şÀà¼ÇÂ¼×ÜÌõÊı
+//äº‹ä»¶è®°å½•
+#define EVE_MAX_CNT 500 //äº‹ä»¶ç±»è®°å½•æ€»æ¡æ•°
 
 #define EVENT_FIFO_DEPTH 64
 
-
-
 //yxq
-#pragma pack (1)
+#pragma pack(1)
 
 // typedef struct
 // {
@@ -37,116 +33,102 @@
 //	  uint16_t cnt;
 // }record_pt_st;
 
-
 typedef struct
 {
-	uint32_t trigger_time;
-	uint16_t alarm_value;
-	uint16_t alarm_id;
-}alarm_table_st;
+    uint32_t trigger_time;
+    uint16_t alarm_value;
+    uint16_t alarm_id;
+} alarm_table_st;
 
-
-//ÊÂ¼ş¼ÇÂ¼½á¹¹Ìå£»
+//äº‹ä»¶è®°å½•ç»“æ„ä½“ï¼›
 typedef struct
 {
-	uint16_t event_id;
-	uint32_t time;
-	uint16_t user_id;
-	uint16_t former_data;
-	uint16_t new_data;
+    uint16_t event_id;
+    uint32_t time;
+    uint16_t user_id;
+    uint16_t former_data;
+    uint16_t new_data;
 } event_log_st;
 
-//±¨¾¯¼ÇÂ¼½á¹¹Ìå
+//æŠ¥è­¦è®°å½•ç»“æ„ä½“
 typedef struct
 {
-	uint16_t alarm_id;
-	uint32_t trigger_time;
-	uint32_t end_time;
-	uint16_t rev;
-}alarm_log_st;
+    uint16_t alarm_id;
+    uint32_t trigger_time;
+    uint32_t end_time;
+    uint16_t rev;
+} alarm_log_st;
 
 typedef struct node
 {
-	uint32_t trigger_time;
-	uint16_t  alarm_id;
-	uint16_t alarm_value;
-	struct node* next;
-}alram_node;
+    uint32_t trigger_time;
+    uint16_t alarm_id;
+    uint16_t alarm_value;
+    struct node *next;
+} alram_node;
 
-
-#pragma pack ()
-
+#pragma pack()
 
 typedef enum
 {
-	USER_DEFAULT =0,
-	USER_MODEBUS_SLAVE,
-	USER_CPAD,
-	USER_ADMIN,
-}user_ID;
-
+    USER_DEFAULT = 0,
+    USER_MODEBUS_SLAVE,
+    USER_CPAD,
+    USER_ADMIN,
+} user_ID;
 
 typedef enum
 {
-	ALARM_TRIGER=0,
-	ALARM_END,
-	
-}alarm_enum;
+    ALARM_TRIGER = 0,
+    ALARM_END,
+
+} alarm_enum;
 
 enum
 {
-	EVENT_TYPE=0,//²Ù×÷ÀàÊÂ¼ş¼ÇÂ¼
-	ALARM_TYPE,//±¨¾¯ÊÂ¼ş¼ÇÂ¼
-	TEM_HUM_TYPE,
+    EVENT_TYPE = 0, //æ“ä½œç±»äº‹ä»¶è®°å½•
+    ALARM_TYPE,     //æŠ¥è­¦äº‹ä»¶è®°å½•
+    TEM_HUM_TYPE,
 };
-
 
 enum
 {
-	HOUR_TIMER=0,
-	DATE_TIMER,
-	WEEK_TIMER,
-	MONTH_TIMER,
-	TIMER_TOTAL_NUM,
+    HOUR_TIMER = 0,
+    DATE_TIMER,
+    WEEK_TIMER,
+    MONTH_TIMER,
+    TIMER_TOTAL_NUM,
 };
-
 
 uint8_t clear_log(uint8_t flag);
-void add_alarmlog_fifo( uint16_t alarm_id, alarm_enum flg,uint16  alarm_value);
+void add_alarmlog_fifo(uint16_t alarm_id, alarm_enum flg, uint16 alarm_value);
 void user_alarmlog_add(void);
-void  init_evnet_log(void);
+void init_evnet_log(void);
 
-
-
-
-void  init_alarm_log(void);
+void init_alarm_log(void);
 
 void user_eventlog_add(void);
 
-void add_eventlog_fifo( uint16 event_id,uint16 user_id,uint16 former_data, uint16 new_data);
+void add_eventlog_fifo(uint16 event_id, uint16 user_id, uint16 former_data, uint16 new_data);
 
+//è·å–äº‹ä»¶è®°å½•
+uint16_t get_log(uint8_t *log_data, uint16_t start_num, uint16_t cont, uint16_t *total_cnt, uint8_t log_type);
 
-//»ñÈ¡ÊÂ¼ş¼ÇÂ¼
-uint16_t  get_log(uint8_t*log_data,uint16_t start_num,uint16_t cont,uint16_t* total_cnt,uint8_t log_type);
-
-
-//¸æ¾¯×´Ì¬ÏÈ¹Øº¯Êı½Ó¿Ú
+//å‘Šè­¦çŠ¶æ€å…ˆå…³å‡½æ•°æ¥å£
 
 void chain_init(void);
 
-uint8_t  node_append(uint16_t alarm_id,uint16_t alarm_value);
+uint8_t node_append(uint16_t alarm_id, uint16_t alarm_value);
 
 uint8_t node_delete(uint16_t alarm_id);
 //test_shell
 
-uint8_t get_alarm_status(uint8_t*status_data,uint16_t start_num,uint8_t len);
+uint8_t get_alarm_status(uint8_t *status_data, uint16_t start_num, uint8_t len);
 
-
-//ÎÂÊª¶ÈÇúÏßÏà¹Øº¯Êı½Ó¿Ú
-void  init_tem_hum_record(void);
+//æ¸©æ¹¿åº¦æ›²çº¿ç›¸å…³å‡½æ•°æ¥å£
+void init_tem_hum_record(void);
 void add_hum_temp_log(void);
 uint8_t clear_tem_hum_log(void);
-uint8_t get_tem_hum_log(uint8_t*log_data,uint16_t block);
+uint8_t get_tem_hum_log(uint8_t *log_data, uint16_t block);
 
 #endif //__ALARM_ACL_H__
-

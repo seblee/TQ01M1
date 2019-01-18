@@ -4,60 +4,59 @@
 #include "sys_conf.h"
 enum
 {
-	WORK_MODE_FSM_OPEN = 0xE1,//ÍêÈ«ÊÚÈ¨
-	WORK_MODE_FSM_MANAGE = 0xD2,//ÏŞÊ±¹Ü¿Ø
-	WORK_MODE_FSM_LOCK = 0xC3,//¿ª»ú¹Ü¿Ø
-	WORK_MODE_FSM_LIMIT = 0xB4,//ÏŞÊ±ÔËĞĞ
+    WORK_MODE_FSM_OPEN = 0xE1,   //å®Œå…¨æˆæƒ
+    WORK_MODE_FSM_MANAGE = 0xD2, //é™æ—¶ç®¡æ§
+    WORK_MODE_FSM_LOCK = 0xC3,   //å¼€æœºç®¡æ§
+    WORK_MODE_FSM_LIMIT = 0xB4,  //é™æ—¶è¿è¡Œ
 };
 
-enum//Ê£ÓàÊ±¼ä
+enum //å‰©ä½™æ—¶é—´
 {
-	WORK_REMAIN_0=0x00,//0Ìì
-	WORK_REMAIN_1=0x01,//1Ìì
-	WORK_REMAIN_3=0x03,//3Ìì
-	WORK_REMAIN_7=0x07,//7Ìì
-	WORK_REMAIN_15=0x0F,//15Ìì
-	WORK_REMAIN_30=0x1E,//30Ìì
+    WORK_REMAIN_0 = 0x00,  //0å¤©
+    WORK_REMAIN_1 = 0x01,  //1å¤©
+    WORK_REMAIN_3 = 0x03,  //3å¤©
+    WORK_REMAIN_7 = 0x07,  //7å¤©
+    WORK_REMAIN_15 = 0x0F, //15å¤©
+    WORK_REMAIN_30 = 0x1E, //30å¤©
 };
 
-enum//ÏŞÊ±Ê£ÓàÊ±¼ä
+enum //é™æ—¶å‰©ä½™æ—¶é—´
 {
-	WORK_LIMIT_ZERO=0x01,//0Ìì
-	WORK_LIMIT_DAY_1=0x02,//1Ìì
-	WORK_LIMIT_DAY_3=0x04,//3Ìì
-	WORK_LIMIT_DAY_7=0x08,//7Ìì
-	WORK_LIMIT_DAY_15=0x10,//15Ìì
-	WORK_LIMIT_DAY_30=0x20,//30Ìì
-	WORK_LIMIT_LOCK=0x100,//ËøÆÁ
-	WORK_LIMIT_CATION=0x400,//¸æ¾¯ÌáĞÑ,90ºÅ¸æ¾¯×´Ì¬×Ö
-	WORK_PASS_CLEAR=0x3F,//Çå³ı¸æ¾¯
-	WORK_PASS_ALL=0x13F,//Çå³ı¸æ¾¯
-	WORK_PASS_SET=0x1000,//
+    WORK_LIMIT_ZERO = 0x01,    //0å¤©
+    WORK_LIMIT_DAY_1 = 0x02,   //1å¤©
+    WORK_LIMIT_DAY_3 = 0x04,   //3å¤©
+    WORK_LIMIT_DAY_7 = 0x08,   //7å¤©
+    WORK_LIMIT_DAY_15 = 0x10,  //15å¤©
+    WORK_LIMIT_DAY_30 = 0x20,  //30å¤©
+    WORK_LIMIT_LOCK = 0x100,   //é”å±
+    WORK_LIMIT_CATION = 0x400, //å‘Šè­¦æé†’,90å·å‘Šè­¦çŠ¶æ€å­—
+    WORK_PASS_CLEAR = 0x3F,    //æ¸…é™¤å‘Šè­¦
+    WORK_PASS_ALL = 0x13F,     //æ¸…é™¤å‘Šè­¦
+    WORK_PASS_SET = 0x1000,    //
 };
 #define LIMIT_DAY_MAX 1000
-//5¼¶¼ÓÃÜ¹Ü¿Ø
+//5çº§åŠ å¯†ç®¡æ§
 enum
 {
-	GRADE_POWERON = 0xA1,//½×¶Î0£¬¿ª»ú
-	GRADE_1 = 0xB2,//½×¶Î1
-	GRADE_2 = 0xC3,//½×¶Î2
-	GRADE_3 = 0xD4,//½×¶Î3
-	GRADE_4 = 0xE5,//½×¶Î4
-	GRADE_LOCK = 0xF6,//Ëø¶¨¹Ø»ú
-	GRADE_OPEN = 0x6F,//ÍêÈ«ÊÚÈ¨
+    GRADE_POWERON = 0xA1, //é˜¶æ®µ0ï¼Œå¼€æœº
+    GRADE_1 = 0xB2,       //é˜¶æ®µ1
+    GRADE_2 = 0xC3,       //é˜¶æ®µ2
+    GRADE_3 = 0xD4,       //é˜¶æ®µ3
+    GRADE_4 = 0xE5,       //é˜¶æ®µ4
+    GRADE_LOCK = 0xF6,    //é”å®šå…³æœº
+    GRADE_OPEN = 0x6F,    //å®Œå…¨æˆæƒ
 };
 
 void init_work_mode(void);
 
 void work_mode_manage(void);
 
-uint8_t passward_compare(uint8_t *st1,uint8_t *st2, uint8_t len);
-uint8_t cpad_work_mode(uint8_t work_mode,uint16_t day_limit);
+uint8_t passward_compare(uint8_t *st1, uint8_t *st2, uint8_t len);
+uint8_t cpad_work_mode(uint8_t work_mode, uint16_t day_limit);
 
-uint8_t  write_passward (uint8_t*password, uint8_t work_mode,uint16 limit_time);
+uint8_t write_passward(uint8_t *password, uint8_t work_mode, uint16 limit_time);
 uint8_t get_work_mode_power_state(void);
 
-uint8_t  Write_Controlpassward (uint16_t*MBBuffer);
-uint8_t  Passward_Verify(uint16_t MBBuff);
+uint8_t Write_Controlpassward(uint16_t *MBBuffer);
+uint8_t Passward_Verify(uint16_t MBBuff);
 #endif
-

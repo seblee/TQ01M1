@@ -79,15 +79,6 @@ uint8_t sys_get_do_sts(uint8_t dout_channel)
     {
         return 0;
     }
-
-    //		if(g_sys.status.ComSta.u16Dout_bitmap & (0x0001<<dout_channel))
-    //		{
-    //				return 1;
-    //		}
-    //		else
-    //		{
-    //				return 0;
-    //		}
 }
 
 uint16_t sys_get_pwr_signal(void)

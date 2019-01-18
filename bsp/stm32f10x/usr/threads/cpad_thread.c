@@ -17,19 +17,18 @@
 //		{
 //				if(cpad_frame_recv() == 1)
 //				{
-//						cpad_frame_resolve();	
-//				}				
+//						cpad_frame_resolve();
+//				}
 //				rt_thread_delay(100);
 //		}
 //}
-//ÊÖ³­Æ÷ÃüÁî²Ù×÷
-void cpad_thread_entry(void* parameter)
+//æ‰‹æŠ„å™¨å‘½ä»¤æ“ä½œ
+void cpad_thread_entry(void *parameter)
 {
-		rt_thread_delay(CPAD_THREAD_DELAY);
-		while(1)
-		{
-				cpad_ob_resolve();
-				rt_thread_delay(100);
-		}
+    rt_thread_delay(CPAD_THREAD_DELAY);
+    while (1)
+    {
+        cpad_ob_resolve();
+        rt_thread_delay(100);
+    }
 }
-

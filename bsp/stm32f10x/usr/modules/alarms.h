@@ -3,71 +3,69 @@
 
 #include "sys_conf.h"
 
+#define ACL_INACTIVE 0
+#define ACL_PREACTIVE 1
+#define ACL_ACTIVE 2
+#define ACL_POSTACTIVE 3
 
-#define ACL_INACTIVE 		0
-#define ACL_PREACTIVE 	1
-#define ACL_ACTIVE 			2
-#define ACL_POSTACTIVE	3
-
-#define ACL_ENABLE			0
-#define ACL_SUPPRESS		1
-#define ACL_DISABLE			2
+#define ACL_ENABLE 0
+#define ACL_SUPPRESS 1
+#define ACL_DISABLE 2
 
 //alarm acl def
 enum
 {
-//∆‰À˚	
-			ACL_E0 = 0		,//Œﬁ≥ˆÀÆ∏ÊæØ
-			ACL_E1			  ,
-			ACL_E2		    ,
-			ACL_E3			  ,
-			ACL_E4		 		,//
-      ACL_E5        ,//
-			ACL_E6				,
-			ACL_E7				,
-			ACL_E8			  ,//◊œÕ‚µ∆…±æ˙Œ¥ø™
-			ACL_RESERVE_01	,
-	
-			ACL_FAN01_OD		,
-			ACL_HI_PRESS1		,//∏ﬂ—π1
-			ACL_HI_PRESS2		,//∏ﬂ—π2
-			ACL_FILTER_OT		,//¬ÀÕ¯
-			ACL_FILTER_ELEMENT_0_OT	,//¬À–æ1
-			ACL_FILTER_ELEMENT_1_OT	,//¬À–æ2
-			ACL_FILTER_ELEMENT_2_OT	,//¬À–æ3
-			ACL_FILTER_ELEMENT_3_OT	,//¬À–æ4
-			ACL_FILTER_ELEMENT_4_OT	,//¬À–æ5
-			ACL_UV1_OT	,//◊œÕ‚µ∆1
-			
-			ACL_UV2_OT	,//◊œÕ‚µ∆2≥¨ ±
-//“Ï≥£
-			ACL_TOTAL_NUM				,
+    //ÂÖ∂‰ªñ
+    ACL_E0 = 0, //Êó†Âá∫Ê∞¥ÂëäË≠¶
+    ACL_E1,
+    ACL_E2,
+    ACL_E3,
+    ACL_E4, //
+    ACL_E5, //
+    ACL_E6,
+    ACL_E7,
+    ACL_E8, //Á¥´Â§ñÁÅØÊùÄËèåÊú™ÂºÄ
+    ACL_RESERVE_01,
+
+    ACL_FAN01_OD,
+    ACL_HI_PRESS1,           //È´òÂéã1
+    ACL_HI_PRESS2,           //È´òÂéã2
+    ACL_FILTER_OT,           //Êª§ÁΩë
+    ACL_FILTER_ELEMENT_0_OT, //Êª§ËäØ1
+    ACL_FILTER_ELEMENT_1_OT, //Êª§ËäØ2
+    ACL_FILTER_ELEMENT_2_OT, //Êª§ËäØ3
+    ACL_FILTER_ELEMENT_3_OT, //Êª§ËäØ4
+    ACL_FILTER_ELEMENT_4_OT, //Êª§ËäØ5
+    ACL_UV1_OT,              //Á¥´Â§ñÁÅØ1
+
+    ACL_UV2_OT, //Á¥´Â§ñÁÅØ2Ë∂ÖÊó∂
+                //ÂºÇÂ∏∏
+    ACL_TOTAL_NUM,
 
 };
 
 //Alair,20161227
 enum
 {
-	DEV_RETURN_SENSOR1_FAULT_BPOS=0,
-	DEV_RETURN_SENSOR2_FAULT_BPOS,
-	DEV_RETURN_SENSOR3_FAULT_BPOS,
-	DEV_RETURN_SENSOR4_FAULT_BPOS,
-	DEV_SUPPLY_SENSOR1_FAULT_BPOS,
-	DEV_SUPPLY_SENSOR2_FAULT_BPOS,
-	//
-	DEV_TEM_HUM_RESERVE1_FAULT_BPOS,
-	DEV_TEM_HUM_RESERVE2_FAULT_BPOS,
-	//
-	DEV_NTC7_BPOS,
-	DEV_NTC8_BPOS,
-	DEV_CIOL_NTC1_FAULT_BPOS,
-	DEV_CIOL_NTC2_FAULT_BPOS,
-	DEV_RETUREN_NTC1_FAULT_BPOS,
-	DEV_RETUREN_NTC2_FAULT_BPOS,
-	DEV_SUPPLY_NTC1_FAULT_BPOS,
-	DEV_SUPPLY_NTC2_FAULT_BPOS,
+    DEV_RETURN_SENSOR1_FAULT_BPOS = 0,
+    DEV_RETURN_SENSOR2_FAULT_BPOS,
+    DEV_RETURN_SENSOR3_FAULT_BPOS,
+    DEV_RETURN_SENSOR4_FAULT_BPOS,
+    DEV_SUPPLY_SENSOR1_FAULT_BPOS,
+    DEV_SUPPLY_SENSOR2_FAULT_BPOS,
+    //
+    DEV_TEM_HUM_RESERVE1_FAULT_BPOS,
+    DEV_TEM_HUM_RESERVE2_FAULT_BPOS,
+    //
+    DEV_NTC7_BPOS,
+    DEV_NTC8_BPOS,
+    DEV_CIOL_NTC1_FAULT_BPOS,
+    DEV_CIOL_NTC2_FAULT_BPOS,
+    DEV_RETUREN_NTC1_FAULT_BPOS,
+    DEV_RETUREN_NTC2_FAULT_BPOS,
+    DEV_SUPPLY_NTC1_FAULT_BPOS,
+    DEV_SUPPLY_NTC2_FAULT_BPOS,
 };
-
 
 void alarm_acl_init(void);
 void alarm_acl_exe(void);

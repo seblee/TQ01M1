@@ -12,31 +12,31 @@
 //static void top_fsm(void);
 static void req_process(void);
 
-void core_thread_entry(void* parameter)
+void core_thread_entry(void *parameter)
 {
-		rt_thread_delay(CORE_THREAD_DELAY);
-		alarm_acl_init(); 
+    rt_thread_delay(CORE_THREAD_DELAY);
+    alarm_acl_init();
     inc_pid_param_init();
-		sys_option_di_sts(DI_POWER_LOSS_BPOS,1);
-		
-		while(1)
-		{		 
-				alarm_acl_exe();
-//				top_fsm();
-				req_process();				
-				oc_update();
-//				rt_thread_delay(1000);
-				rt_thread_delay(500);
-		}			
+    sys_option_di_sts(DI_POWER_LOSS_BPOS, 1);
+
+    while (1)
+    {
+        alarm_acl_exe();
+        //				top_fsm();
+        req_process();
+        oc_update();
+        //				rt_thread_delay(1000);
+        rt_thread_delay(500);
+    }
 }
 
 //static void top_fsm_signal_gen(void)
 //{
 //		extern sys_reg_st		g_sys;
 //		extern local_reg_st l_sys;
-//		
-//		
-//		
+//
+//
+//
 //}
 
 //static void top_fsm(void)
@@ -60,9 +60,9 @@ void core_thread_entry(void* parameter)
 //								l_sys.t_fsm_state = T_FSM_STATE_TEAM;
 //						}
 //						else
-//						{	
+//						{
 //								l_sys.t_fsm_state = T_FSM_STATE_IDLE;
-//						}							
+//						}
 //						break;
 //				}
 //				case(T_FSM_STATE_STANDALONE):
@@ -78,9 +78,9 @@ void core_thread_entry(void* parameter)
 //								l_sys.t_fsm_state = T_FSM_STATE_TEAM;
 //						}
 //						else
-//						{	
+//						{
 //								l_sys.t_fsm_state = T_FSM_STATE_STANDALONE;
-//						}							
+//						}
 //						break;
 //				}
 //				case(T_FSM_STATE_TEAM):
@@ -95,29 +95,29 @@ void core_thread_entry(void* parameter)
 //						{
 //								l_sys.t_fsm_state = T_FSM_STATE_STANDALONE;
 //						}
-//						else 
-//						{	
+//						else
+//						{
 //								l_sys.t_fsm_state = T_FSM_STATE_TEAM;
-//						}							
+//						}
 //						break;
 //				}
 //				default:
-//				{	
+//				{
 //						l_sys.t_fsm_state = T_FSM_STATE_IDLE;
-//				}				
-//		}		
+//				}
+//		}
 //}
 
-//–Ë«Û¥¶¿Ì
+//ÈúÄÊ±ÇÂ§ÑÁêÜ
 static void req_process(void)
 {
-		extern sys_reg_st		g_sys;
-		int16_t i16Current_Temp;
-		int16_t i16Current_Hum;
-		
-		i16Current_Temp=(int16_t)g_sys.status.ComSta.u16TH[0].Temp;
-		i16Current_Hum=(int16_t)g_sys.status.ComSta.u16TH[0].Hum;
+    extern sys_reg_st g_sys;
+    int16_t i16Current_Temp;
+    int16_t i16Current_Hum;
 
-//		rt_kprintf("i16Current_Temp=%d,i16Current_Hum= %d\n",i16Current_Temp,i16Current_Hum);			
-		req_execution(i16Current_Temp,i16Current_Hum);		//execute requirement 				
+    i16Current_Temp = (int16_t)g_sys.status.ComSta.u16TH[0].Temp;
+    i16Current_Hum = (int16_t)g_sys.status.ComSta.u16TH[0].Hum;
+
+    //		rt_kprintf("i16Current_Temp=%d,i16Current_Hum= %d\n",i16Current_Temp,i16Current_Hum);
+    req_execution(i16Current_Temp, i16Current_Hum); //execute requirement
 }

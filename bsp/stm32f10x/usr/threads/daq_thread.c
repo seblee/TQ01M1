@@ -17,18 +17,17 @@ static void daq_gvar_update(void);
   * @param  none
   * @retval none
 **/
-void daq_thread_entry(void* parameter)
+void daq_thread_entry(void *parameter)
 {
-		rt_thread_delay(DAQ_THREAD_DELAY);
-//		delay_init();//ÑÓÊ±³õÊ¼»¯£¬ÏµÍ³Ê±ÖÓ³õÊ¼»¯
-		while(1)
-		{ 
-				daq_gvar_update();
-//				rt_thread_delay(1000);
-				rt_thread_delay(500);
-		}
+    rt_thread_delay(DAQ_THREAD_DELAY);
+    //		delay_init();//å»¶æ—¶åˆå§‹åŒ–ï¼Œç³»ç»Ÿæ—¶é’Ÿåˆå§‹åŒ–
+    while (1)
+    {
+        daq_gvar_update();
+        //				rt_thread_delay(1000);
+        rt_thread_delay(500);
+    }
 }
-
 
 /**
   * @brief  update global variable g_din_inst and g_ain_inst according to di and ai inputs
@@ -37,11 +36,11 @@ void daq_thread_entry(void* parameter)
 **/
 static void daq_gvar_update(void)
 {
-		extern sys_reg_st	g_sys; 
-	
-		ai_sts_update(&g_sys);													//update g_ain_inst
-		di_sts_update(&g_sys);													//update g_din_inst
-	
-		AM_Sensor_update(&g_sys);	
-//		mbm_sts_update(&g_sys);													//update modbus master components status
+    extern sys_reg_st g_sys;
+
+    ai_sts_update(&g_sys); //update g_ain_inst
+    di_sts_update(&g_sys); //update g_din_inst
+
+    AM_Sensor_update(&g_sys);
+    //		mbm_sts_update(&g_sys);													//update modbus master components status
 }

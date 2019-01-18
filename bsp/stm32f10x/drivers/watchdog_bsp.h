@@ -11,6 +11,4 @@ void watchdog_init(void);
 
 void dog(void);
 
-
 #endif
-
