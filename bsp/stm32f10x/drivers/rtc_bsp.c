@@ -34,12 +34,12 @@ static rt_size_t rt_rtc_read(rt_device_t dev, rt_off_t pos, void *buffer, rt_siz
     return 0;
 }
 
-rt_err_t rt_rtc_control(rt_device_t dev, rt_uint8_t cmd, void *args) //modified by GP
+rt_err_t rt_rtc_control(rt_device_t dev, int cmd, void *args) //modified by GP
 {
     rt_time_t *time;
     RT_ASSERT(dev != RT_NULL);
 
-    switch (cmd)
+    switch (cmd) 
     {
     case RT_DEVICE_CTRL_RTC_GET_TIME:
         time = (rt_time_t *)args;
@@ -141,26 +141,26 @@ void drv_rtc_init(void)
 }
 
 #include <time.h>
-#if defined(__IAR_SYSTEMS_ICC__) && (__VER__) >= 6020000 /* for IAR 6.2 later Compiler */
-#pragma module_name = "?time"
-time_t(__time32)(time_t *t) /* Only supports 32-bit timestamp */
-#else
-time_t time(time_t *t)
-#endif
-{
-    rt_device_t device;
-    time_t time = 0;
+// #if defined(__IAR_SYSTEMS_ICC__) && (__VER__) >= 6020000 /* for IAR 6.2 later Compiler */
+// #pragma module_name = "?time"
+// time_t(__time32)(time_t *t) /* Only supports 32-bit timestamp */
+// #else
+// time_t time(time_t *t)
+// #endif
+// {
+//     rt_device_t device;
+//     time_t time = 0;
 
-    device = rt_device_find("rtc");
-    if (device != RT_NULL)
-    {
-        rt_device_control(device, RT_DEVICE_CTRL_RTC_GET_TIME, &time);
-        if (t != RT_NULL)
-            *t = time;
-    }
+//     device = rt_device_find("rtc");
+//     if (device != RT_NULL)
+//     {
+//         rt_device_control(device, RT_DEVICE_CTRL_RTC_GET_TIME, &time);
+//         if (t != RT_NULL)
+//             *t = time;
+//     }
 
-    return time;
-}
+//     return time;
+// }
 void get_local_time(time_t *t)
 {
     time(t);

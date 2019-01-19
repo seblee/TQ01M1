@@ -133,7 +133,7 @@ void show_ao_list(void)
         rt_kprintf("i:%d\n,final:%x,req:%x,man:%x\n", i, l_sys.ao_list[i][BITMAP_FINAL], l_sys.ao_list[i][BITMAP_REQ], l_sys.ao_list[i][BITMAP_MANUAL]);
     }
 }
-
+#include <finsh.h>
 FINSH_FUNCTION_EXPORT(show_ao_list, show ao_list_info.);
 
 FINSH_FUNCTION_EXPORT(show_all, show all debug infomation.);

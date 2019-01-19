@@ -15,11 +15,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
- struct timeval 
- {
-     long tv_sec;  /* seconds */
-     long tv_usec; /* and microseconds */
- };
+
 int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
 
 #ifdef __cplusplus

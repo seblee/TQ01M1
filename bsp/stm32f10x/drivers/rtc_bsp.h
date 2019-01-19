@@ -17,7 +17,7 @@
 #include <rtthread.h>
 #include "sys_conf.h"
 void drv_rtc_init(void);
-rt_err_t rt_rtc_control(rt_device_t dev, rt_uint8_t cmd, void *args);
+rt_err_t rt_rtc_control(rt_device_t dev, int cmd, void *args);
 //void rtc_sts_update(sys_reg_st*	gds_sys_ptr);
 void set_date(uint32_t year, uint32_t month, uint32_t day);
 void set_time(uint32_t hour, uint32_t minute, uint32_t second);

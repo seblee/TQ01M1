@@ -16,16 +16,16 @@
 #ifdef SAL_USING_POSIX
 #include <dfs_file.h>
 #endif
-#include <sys/socket.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//#if !defined(socklen_t) && !defined(SOCKLEN_T_DEFINED)
-//typedef unsigned long socklen_t;
-//#endif 
+#if !defined(socklen_t) && !defined(SOCKLEN_T_DEFINED)
+typedef uint32_t socklen_t;
+#endif
 
-/* sal socket magic word */
+/* SAL socket magic word */
 #define SAL_SOCKET_MAGIC               0x5A10
 
 /* The maximum number of sockets structure */

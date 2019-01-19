@@ -1365,7 +1365,7 @@ static void sys_dbg(uint16_t flag)
         l_sys.debug_tiemout = 0;
     }
 }
-
+#include <finsh.h>
 void eeprom_addr(void)
 {
     rt_kprintf("user1 conf  start =%d ,end =%d ,size = %d\n", CONF_REG_EE1_ADDR, CONF_REG_EE2_ADDR, (CONF_REG_EE2_ADDR - CONF_REG_EE1_ADDR));

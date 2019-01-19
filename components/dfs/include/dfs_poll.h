@@ -13,7 +13,7 @@
 #include <rtthread.h>
 
 #ifdef RT_USING_POSIX
-#include <time.h> /* for struct timeval */
+#include <sys/time.h> /* for struct timeval */
 
 #if !defined(POLLIN) && !defined(POLLOUT)
 #define POLLIN          (0x01)

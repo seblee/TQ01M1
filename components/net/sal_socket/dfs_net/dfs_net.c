@@ -12,10 +12,10 @@
  */
 
 #include <rtthread.h>
-#include <rtdevice.h>
+
 #include <dfs.h>
 #include <dfs_net.h>
-#include <rtlibc.h>
+
 #include <sys/socket.h>
 
 int dfs_net_getsocket(int fd)

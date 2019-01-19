@@ -13,8 +13,7 @@
 #include <rthw.h>
 #include <rtdevice.h>
 #include <rtthread.h>
-#include <ipc/poll.h>
-#include "ipc/waitqueue.h"
+
 #include <dfs.h>
 #include <dfs_file.h>
 #include <dfs_posix.h>
@@ -41,7 +40,7 @@ static int __wqueue_pollwake(struct rt_wqueue_node *wait, void *key)
 {
     struct rt_poll_node *pn;
 
-    if (key && !((rt_uint32_t)key & wait->key))
+    if (key && !((rt_ubase_t)key & wait->key))
         return -1;
 
     pn = rt_container_of(wait, struct rt_poll_node, wqn);

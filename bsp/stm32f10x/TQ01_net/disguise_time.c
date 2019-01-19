@@ -109,7 +109,7 @@ void current_systime_set(struct tm *ti)
     now = mktime(ti);
     current_timestamp_set(now);
 }
-const short __spm[13] = {
+static const short __spm[13] = {
     0,
     (31),
     (31 + 28),
@@ -124,7 +124,7 @@ const short __spm[13] = {
     (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30),
     (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31),
 };
-int __isleap(int year)
+static int __isleap(int year)
 {
     /* every fourth year is a leap year except for century years that are
 	 * not divisible by 400. */
@@ -200,18 +200,4 @@ void get_bulid_date_time(struct tm *r)
         }
     }
     r->tm_year -= 1900;
-}
-
-int gettimeofday(struct timeval *tp, void *ignore)
-{
-    time_t time;
-    time = current_timestamp_get();
-
-    if (tp != RT_NULL)
-    {
-        tp->tv_sec = time;
-        tp->tv_usec = 0;
-    }
-
-    return time;
 }

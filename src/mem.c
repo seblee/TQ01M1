@@ -88,7 +88,7 @@ void rt_malloc_sethook(void (*hook)(void *ptr, rt_size_t size))
 {
     rt_malloc_hook = hook;
 }
-
+ 
 /**
  * This function will set a hook function, which will be invoked when a memory
  * block is released to heap memory.

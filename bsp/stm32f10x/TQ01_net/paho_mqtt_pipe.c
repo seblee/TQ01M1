@@ -4,7 +4,7 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <dfs_posix.h>
-#include <time.h>
+#include <sys/time.h>
 
 #include <netdb.h>
 #include <sys/socket.h>
@@ -12,8 +12,7 @@
 
 #include "MQTTPacket.h"
 #include "paho_mqtt.h"
-#include <rtlibc.h>
-
+ 
 #include "network.h"
 #include "mqtt_client.h"
 
