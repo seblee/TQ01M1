@@ -18,6 +18,7 @@
 #include "mqtt_client.h"
 
 #include "modul_ctr.h"
+// #include "disguise_time.h"
 
 #define DBG_ENABLE
 #define DBG_SECTION_NAME "paho"
@@ -76,7 +77,7 @@ static int mqtt_resolve_uri(MQTTClient *c, struct addrinfo **res)
     char *host_addr_new = RT_NULL;
     const char *uri = c->uri;
     uri_len = strlen(uri);
-    LOG_D(" c->uri:%s", c->uri);
+    // LOG_D(" c->uri:%s", c->uri);
 
     /* strip protocol(tcp or ssl) */
     if (strncmp(uri, "tcp://", 6) == 0)
@@ -150,7 +151,7 @@ static int mqtt_resolve_uri(MQTTClient *c, struct addrinfo **res)
 
         strncpy(port_str, host_addr + host_addr_len + 1, port_len);
         port_str[port_len] = '\0';
-        LOG_D("ipv4 address port: %s", port_str);
+        // LOG_D("ipv4 address port: %s", port_str);
     }
 
     /* get host addr ok. */
@@ -169,7 +170,7 @@ static int mqtt_resolve_uri(MQTTClient *c, struct addrinfo **res)
 
         memcpy(host_addr_new, host_addr, host_addr_len);
         host_addr_new[host_addr_len] = '\0';
-        LOG_D("HOST = '%s'", host_addr_new);
+        // LOG_D("HOST = '%s'", host_addr_new);
 
 #ifdef MQTT_USING_TLS
         if (c->tls_session)
@@ -337,9 +338,12 @@ static int net_disconnect(MQTTClient *c)
 #else
     if (c->sock >= 0)
     {
-        closesocket(c->sock);
-        c->sock = -1;
+        int i = 0;
+    _reclose:
+        if ((closesocket(c->sock) != 0) && (i++ < 5))
+            goto _reclose;
     }
+    c->sock = -1;
 #endif
     return 0;
 }
@@ -597,6 +601,7 @@ static int MQTTDisconnect(MQTTClient *c)
     c->isQRcodegeted = 0;
     c->isparameterPutted = 0;
     c->isInformed = 0;
+    // rt_thread_delay(1000);
     return rc;
 }
 
@@ -813,13 +818,17 @@ enum ClientSend
     SENDREALTIME,
     SENDTIMING,
 } sendState = SENDINIT;
+
+void current_systime_get(struct tm *ti);
+
 static void paho_mqtt_thread(void *param)
 {
     MQTTClient *c = (MQTTClient *)param;
-    int i, rc, len, rc_t = 0;
+    int i, rc, len = 0;
+    rt_uint32_t connect_count = 0, connected_count = 0, disconnect_count = 0;
+    rt_uint32_t total, used, max_used;
 
 _mqtt_start:
-
     if ((module_state(RT_NULL) != MODULE_4G_READY) &&
         (module_state(RT_NULL) != MODULE_WIFI_READY))
     {
@@ -827,7 +836,7 @@ _mqtt_start:
         rt_thread_delay(rt_tick_from_millisecond(5000));
         goto _net_disconnect;
     }
-
+    connect_count++;
     if (c->connect_callback)
     {
         c->connect_callback(c);
@@ -839,7 +848,7 @@ _mqtt_start:
         LOG_E("[%d] Net connect error(%d)", rt_tick_get(), rc);
         goto _mqtt_restart;
     }
-
+    connected_count++;
     rc = MQTTConnect(c);
     if (rc != 0)
     {
@@ -847,7 +856,7 @@ _mqtt_start:
         goto _mqtt_disconnect;
     }
 
-    LOG_I("[%d] MQTT server connect success", rt_tick_get());
+    // LOG_I("[%d] MQTT server connect success", rt_tick_get());
 
     for (i = 0; i < MAX_MESSAGE_HANDLERS; i++)
     {
@@ -859,7 +868,7 @@ _mqtt_start:
         // LOG_I("Subscribe>>Qos:%d,Subscribe:%s", qos, topic);
 
         rc = MQTTSubscribe(c, topic, qos);
-        LOG_I("Subscribe #%d %s %s!", i, topic, (rc < 0) || (rc == 0x80) ? ("fail") : ("OK"));
+        // LOG_I("Subscribe #%d %s %s!", i, topic, (rc < 0) || (rc == 0x80) ? ("fail") : ("OK"));
 
         if (rc != 0)
         {
@@ -936,7 +945,7 @@ _mqtt_start:
         FD_ZERO(&readset);
         FD_SET(c->sock, &readset);
         timeout.tv_usec = 0;
-        LOG_I("[%d] State:%d timeout.tv_sec: %d ", rt_tick_get(), sendState, timeout.tv_sec);
+        // LOG_I("[%d] State:%d timeout.tv_sec: %d ", rt_tick_get(), sendState, timeout.tv_sec);
 
         /* int select(maxfdp1, readset, writeset, exceptset, timeout); */
         res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
@@ -980,11 +989,10 @@ _mqtt_start:
                 break;
             case SENDPARAMETER:
                 len = mq_client_publish(c, PARAMETER_PUT);
-                LOG_I("[%d] SENDPARAMETER res: %d", rt_tick_get(), len);
-                c->isQRcodegeted = 0;
                 break;
             case SENDREALTIME:
-                // goto _mqtt_disconnect;
+                disconnect_count++;
+                goto _mqtt_disconnect;
 
                 len = mq_client_publish(c, REALTIME_REPORT);
                 c->tick_realtime = rt_tick_get();
@@ -1023,8 +1031,8 @@ _mqtt_start:
             }
             if (sendState == SENDINFORM)
                 c->isInformed = 1;
-            // if (sendState == SENDPARAMETER)
-            //     c->isparameterPutted = 1;
+            if (sendState == SENDPARAMETER)
+                c->isparameterPutted = 1;
             if (sendState != SENDEDINIT)
                 sendState++;
         }
@@ -1067,8 +1075,14 @@ _net_disconnect:
         LOG_W("[%d] module is need restart", rt_tick_get());
         rt_sem_release(module_setup_sem);
     }
+    rt_memory_info(&total, &used, &max_used);
+    LOG_I("total:%d,used:%d,max_used:%d", total, used, max_used);
+    struct tm ti;
+    current_systime_get(&ti);
+    LOG_I("%04d-%02d-%02d %02d:%02d:%02d connect:%d connected:%d disconnect:%d",
+          ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec, connect_count, connected_count, disconnect_count);
+
     rt_thread_delay(RT_TICK_PER_SECOND * 5);
-    LOG_D("restart!");
     goto _mqtt_start;
 
     goto _mqtt_disconnect_exit;

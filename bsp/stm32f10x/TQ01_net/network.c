@@ -23,7 +23,7 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
-#define DBG_ENABLE
+// #define DBG_ENABLE
 #define DBG_SECTION_NAME "network"
 #ifdef MQTT_DEBUG
 #define DBG_LEVEL DBG_LOG
@@ -180,8 +180,8 @@ void network_Serialize_init_json(char **datapoint)
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
-    if (*datapoint)
-        LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
+    // if (*datapoint)
+    //     LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
 }
 /**
  ****************************************************************************
@@ -202,7 +202,7 @@ void network_Serialize_inform_json(char **datapoint)
     root = cJSON_CreateObject();
     if (!root)
     {
-        LOG_D("[%d] get root faild !\n");
+        LOG_D("[%d] get root faild !");
         goto __exit;
     }
 
@@ -224,8 +224,8 @@ void network_Serialize_inform_json(char **datapoint)
     *datapoint = cJSON_PrintUnformatted(root);
 __exit:
     cJSON_Delete(root);
-    if (*datapoint)
-        LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
+    // if (*datapoint)
+    //     LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
 }
 
 /**
@@ -283,9 +283,6 @@ void network_Serialize_para_json(char **datapoint)
                 DEVICE_NAME, PRODUCT_KEY, msgid, StrCache, Timestamp_str, Timestamp_str);
 
     utils_md5((const unsigned char *)sign_Cache, strlen(sign_Cache), sign);
-    // LOG_D("[%d] MD5");
-    // rt_kprintf("MD5(%.400s", sign_Cache);
-    // rt_kprintf("%s)\r\n", sign_Cache + 400);
     rt_memset(sign_hex, 0, sizeof(sign_hex));
     for (i = 0; i < 16; ++i)
     {
@@ -296,12 +293,8 @@ void network_Serialize_para_json(char **datapoint)
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
-    if (*datapoint)
-    {
-        LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
-        // rt_kprintf("string:%.400s", *datapoint);
-        // rt_kprintf("%s\r\n", *datapoint + 400);
-    }
+    //    if (*datapoint)
+    //       LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
 }
 /**
  ****************************************************************************
@@ -333,7 +326,7 @@ rt_err_t network_water_notice_parse(const char *Str)
         }
         int MCode_value = 0;
         sscanf(js_MCode->valuestring, "%d", &MCode_value);
-        LOG_D("[%d] MCode_value:%d !\n", rt_tick_get(), MCode_value);
+        LOG_D("[%d] MCode_value:%d !", rt_tick_get(), MCode_value);
         if (MCode_value == MCode_QRCODE_GENERATE)
         {
             LOG_D("[%d] get QRCode !!!", rt_tick_get());
@@ -431,8 +424,8 @@ void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type)
     cJSON_AddItemToObject(root, "Sign", cJSON_CreateString(sign_hex));
     *datapoint = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
-    if (*datapoint)
-        LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
+    // if (*datapoint)
+    //     LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
 }
 /**
  ****************************************************************************
@@ -482,7 +475,7 @@ rt_err_t network_parameter_get_parse(const char *Str)
     root = cJSON_Parse(Str);
     if (!root)
     {
-        LOG_E("[%d] get root faild !\n");
+        LOG_E("[%d] get root faild !");
         rc = -1;
     }
     else

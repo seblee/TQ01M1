@@ -121,9 +121,6 @@ static void mqtt_online_callback(MQTTClient *c)
 static void mqtt_offline_callback(MQTTClient *c)
 {
     LOG_D("inter mqtt_offline_callback!");
-    rt_uint32_t total, used, max_used;
-    rt_memory_info(&total, &used, &max_used);
-    LOG_I("total:%d,used:%d,max_used:%d", total, used, max_used);
 }
 
 extern sys_reg_st g_sys;
