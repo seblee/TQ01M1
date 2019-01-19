@@ -17,6 +17,10 @@
 #ifdef SAL_USING_POSIX
 #include <ipc/waitqueue.h>
 #endif
+#ifdef SAL_USING_TLS
+#include <sal_tls.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
