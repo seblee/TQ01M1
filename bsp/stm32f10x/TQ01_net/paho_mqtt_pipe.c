@@ -601,7 +601,8 @@ static int MQTTDisconnect(MQTTClient *c)
     c->isQRcodegeted = 0;
     c->isparameterPutted = 0;
     c->isInformed = 0;
-    // rt_thread_delay(1000);
+    /***wait socket closed by remote***/
+    rt_thread_delay(200);
     return rc;
 }
 
