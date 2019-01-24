@@ -17,13 +17,8 @@
 /* Private include -----------------------------------------------------------*/
 #include <rtthread.h >
 #include "sys_conf.h"
-#include "time.h"
+#include "sys/time.h"
 /* Private typedef -----------------------------------------------------------*/
-struct timeval
-{
-    long tv_sec;  /* seconds */
-    long tv_usec; /* and microseconds */
-};
 
 /* Private define ------------------------------------------------------------*/
 
@@ -42,7 +37,6 @@ void get_bulid_date_time(struct tm *r);
 
 void current_systime_set(struct tm *ti);
 
-int gettimeofday(struct timeval *tp, void *ignore);
 /*----------------------------------------------------------------------------*/
 
 #endif /* DISGUISE_TIME*/

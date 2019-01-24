@@ -6,13 +6,17 @@
  * Change Logs:
  * Date           Author       Notes
  * 2018-05-23     ChenYong     First version
+ * 2018-11-12     ChenYong     Add TLS support
  */
 
 #include <rtthread.h>
 #include <rthw.h>
-#include <rtdevice.h>
+
 #include <sal_socket.h>
 #include <sal_netdb.h>
+#ifdef SAL_USING_TLS
+#include <sal_tls.h>
+#endif
 #include <sal.h>
 
 #define DBG_ENABLE

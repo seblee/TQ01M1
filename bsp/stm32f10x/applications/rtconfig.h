@@ -111,7 +111,7 @@
 
 /* POSIX layer and C standard library */
 
-//#define RT_USING_MINILIBC
+#define RT_USING_LIBC
 #define RT_USING_POSIX
 /* Socket abstraction layer */
 

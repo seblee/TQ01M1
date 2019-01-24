@@ -14,7 +14,7 @@
 #include <rthw.h>
 #include <rtdevice.h>
 #include <rtservice.h>
-#include "ipc/waitqueue.h"
+
 void rt_wqueue_add(rt_wqueue_t *queue, struct rt_wqueue_node *node)
 {
     rt_base_t level;

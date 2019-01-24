@@ -137,6 +137,5 @@ int eland_http_request(http_method method,
                        char *http_body,   //BODY
                        char *response);   //response 指針
 
-Netstatus_t net_state(Netstatus_t value);
-
+ 
 #endif /* __PAHO_MQTT_H__ */

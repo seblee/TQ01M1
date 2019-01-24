@@ -87,12 +87,11 @@ static time_t current_timestamp_get(void)
  * @Brief    : 
  * @Version  : V1.0
 **/
-struct tm *gmtime_con(const time_t *timep, struct tm *r);
 void current_systime_get(struct tm *ti)
 {
     time_t now = current_timestamp_get();
 
-    gmtime_con(&now, ti);
+    gmtime_r(&now, ti);
 }
 /**
  ****************************************************************************
@@ -109,72 +108,7 @@ void current_systime_set(struct tm *ti)
     now = mktime(ti);
     current_timestamp_set(now);
 }
-const short __spm[13] = {
-    0,
-    (31),
-    (31 + 28),
-    (31 + 28 + 31),
-    (31 + 28 + 31 + 30),
-    (31 + 28 + 31 + 30 + 31),
-    (31 + 28 + 31 + 30 + 31 + 30),
-    (31 + 28 + 31 + 30 + 31 + 30 + 31),
-    (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31),
-    (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30),
-    (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31),
-    (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30),
-    (31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31),
-};
-int __isleap(int year)
-{
-    /* every fourth year is a leap year except for century years that are
-	 * not divisible by 400. */
-    /*  return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)); */
-    return (!(year % 4) && ((year % 100) || !(year % 400)));
-}
-/**
- ****************************************************************************
- * @Function : struct tm *gmtime_con(const time_t *timep, struct tm *r)
- * @File     : bkg_thread.c
- * @Program  : none
- * @Created  : 2018-09-26 by seblee
- * @Brief    : 
- * @Version  : V1.0
-**/
-struct tm *gmtime_con(const time_t *timep, struct tm *r)
-{
-    time_t i;
-    register time_t work = *timep % (86400);
-    r->tm_sec = work % 60;
-    work /= 60;
-    r->tm_min = work % 60;
-    r->tm_hour = work / 60;
-    work = *timep / (86400);
-    r->tm_wday = (4 + work) % 7;
-    for (i = 1970;; ++i)
-    {
-        register time_t k = __isleap(i) ? 366 : 365;
-        if (work >= k)
-            work -= k;
-        else
-            break;
-    }
-    r->tm_year = i - 1900;
-    r->tm_yday = work;
-
-    r->tm_mday = 1;
-    if (__isleap(i) && (work > 58))
-    {
-        if (work == 59)
-            r->tm_mday = 2; /* 29.2. */
-        work -= 1;
-    }
-
-    for (i = 11; i && (__spm[i] > work); --i)
-        ;
-    r->tm_mon = i;
-    r->tm_mday += work - __spm[i];
-    return r;
-}
+ 
 const unsigned char MonthStr[12][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 /**
  ****************************************************************************
@@ -200,18 +134,4 @@ void get_bulid_date_time(struct tm *r)
         }
     }
     r->tm_year -= 1900;
-}
-
-int gettimeofday(struct timeval *tp, void *ignore)
-{
-    time_t time;
-    time = current_timestamp_get();
-
-    if (tp != RT_NULL)
-    {
-        tp->tv_sec = time;
-        tp->tv_usec = 0;
-    }
-
-    return time;
 }

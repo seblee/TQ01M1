@@ -653,7 +653,7 @@ static rt_size_t rt_serial_write(struct rt_device *dev,
 }
 
 static rt_err_t rt_serial_control(struct rt_device *dev,
-                                  rt_uint8_t        cmd,
+                                  int        cmd,
                                   void             *args)
 {
     struct rt_serial_device *serial;

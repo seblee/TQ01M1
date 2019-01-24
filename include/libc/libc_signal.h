@@ -2,10 +2,6 @@
  * Copyright (c) 2006-2018, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
- */
-
-/*
- * File      : libc_signal.h
  *
  * Change Logs:
  * Date           Author       Notes
@@ -50,8 +46,8 @@ struct sigevent
 #ifndef HAVE_SIGINFO
 struct siginfo
 {
-    unsigned short   si_signo;
-    unsigned short  si_code;
+    rt_uint16_t si_signo;
+    rt_uint16_t si_code;
 
     union sigval si_value;
 };

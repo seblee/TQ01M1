@@ -96,9 +96,9 @@ void rt_init_thread_entry(void *parameter)
     rt_components_init();
 #endif
 
-#ifdef RT_USING_FINSH
-    finsh_set_device(RT_CONSOLE_DEVICE_NAME);
-#endif /* RT_USING_FINSH */
+    // #ifdef RT_USING_FINSH
+    //     finsh_set_device(RT_CONSOLE_DEVICE_NAME);
+    // #endif /* RT_USING_FINSH */
     hw_drivers_init();
     sys_global_var_init();
     sys_local_var_init();

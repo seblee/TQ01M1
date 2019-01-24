@@ -9,15 +9,15 @@
  */
 
 #include <rtthread.h>
-#include <rtdevice.h>
+
 #include <netdb.h>
-#include <sal.h> 
+#include <sal.h>
 
 #include <at_socket.h>
 #include <af_inet.h>
 
 #ifdef SAL_USING_POSIX
-#include <ipc/poll.h>
+#include <dfs_poll.h>
 #endif
 
 #ifdef SAL_USING_AT

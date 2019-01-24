@@ -4,7 +4,7 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <dfs_posix.h>
-#include <time.h>
+#include <sys/time.h>
 
 #include <netdb.h>
 #include <sys/socket.h>
@@ -12,13 +12,12 @@
 
 #include "MQTTPacket.h"
 #include "paho_mqtt.h"
-#include <rtlibc.h>
+//#include <rtlibc.h>
 
 #include "network.h"
 #include "mqtt_client.h"
 
-#include "modul_ctr.h"
-// #include "disguise_time.h"
+#include "modul_ctr.h" 
 
 #define DBG_ENABLE
 #define DBG_SECTION_NAME "paho"
@@ -829,6 +828,13 @@ static void paho_mqtt_thread(void *param)
     rt_uint32_t connect_count = 0, connected_count = 0, disconnect_count = 0;
     rt_uint32_t total, used, max_used;
 
+    /* create publish pipe. */
+    if (pipe(c->pub_pipe) != 0)
+    {
+        LOG_E("creat pipe err");
+        goto _mqtt_exit;
+    }
+
 _mqtt_start:
     if ((module_state(RT_NULL) != MODULE_4G_READY) &&
         (module_state(RT_NULL) != MODULE_WIFI_READY))
@@ -1091,15 +1097,15 @@ _net_disconnect:
     rt_thread_delay(RT_TICK_PER_SECOND * 5);
     goto _mqtt_start;
 
-    //     goto _mqtt_disconnect_exit;
-    // _mqtt_disconnect_exit:
-    //     MQTTDisconnect(c);
-    //     net_disconnect(c);
+//     goto _mqtt_disconnect_exit;
+// _mqtt_disconnect_exit:
+//     MQTTDisconnect(c);
+//     net_disconnect(c);
 
-    //     goto _mqtt_exit;
-    // _mqtt_exit:
-    //     LOG_D("thread exit");
-    //     return;
+//     goto _mqtt_exit;
+_mqtt_exit:
+    LOG_D("thread exit");
+    return;
 }
 
 int paho_mqtt_start(MQTTClient *client)

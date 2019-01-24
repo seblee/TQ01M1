@@ -12,12 +12,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#include <sys/time.h>
 
 #include <at_socket.h>
 
 #ifdef SAL_USING_POSIX
-//#include <dfs_poll.h>
+#include <dfs_poll.h>
 #endif
 
 #define LOG_TAG              "at.skt"
@@ -50,7 +50,7 @@ typedef enum {
 /* the global array of available sockets */
 static struct at_socket sockets[AT_SOCKETS_NUM] = { 0 };
 /* AT device socket options */
-static struct at_device_ops *at_dev_ops = RT_NULL; 
+static struct at_device_ops *at_dev_ops = RT_NULL;
 
 struct at_socket *at_get_socket(int socket)
 {
@@ -86,7 +86,7 @@ static size_t at_recvpkt_put(rt_slist_t *rlist, const char *ptr, size_t length)
 
     rt_slist_append(rlist, &pkt->list);
 
-    return length; 
+    return length;
 }
 
 /* delete and free all receive buffer list */
@@ -100,13 +100,13 @@ static int at_recvpkt_all_delete(rt_slist_t *rlist)
 
     for(node = rt_slist_first(rlist); node; node = rt_slist_next(node))
     {
-        pkt = rt_slist_entry(node, struct at_recv_pkt, list); 
+        pkt = rt_slist_entry(node, struct at_recv_pkt, list);
         if (pkt->buff)
         {
-            rt_free(pkt->buff); 
+            rt_free(pkt->buff);
         }
-        if(pkt)  
-        { 
+        if(pkt)
+        {
             rt_free(pkt);
             pkt = RT_NULL;
         }
@@ -572,10 +572,16 @@ __exit:
 
     if (result < 0)
     {
-        at_do_event_changes(sock, AT_EVENT_ERROR, RT_TRUE);
+        if (sock != RT_NULL)
+        {
+            at_do_event_changes(sock, AT_EVENT_ERROR, RT_TRUE);
+        }
     }
 
-    at_do_event_changes(sock, AT_EVENT_SEND, RT_TRUE);
+    if (sock)
+    {
+        at_do_event_changes(sock, AT_EVENT_SEND, RT_TRUE);
+    }
     
     return result;
 }
@@ -622,8 +628,20 @@ int at_recvfrom(int socket, void *mem, size_t len, int flags, struct sockaddr *f
             goto __exit;
         }
         sock->state = AT_SOCKET_CONNECT;
+        /* set AT socket receive data callback function */
+        at_dev_ops->at_set_event_cb(AT_SOCKET_EVT_RECV, at_recv_notice_cb);
+        at_dev_ops->at_set_event_cb(AT_SOCKET_EVT_CLOSED, at_closed_notice_cb);
     }
 
+    /* receive packet list last transmission of remaining data */
+    rt_mutex_take(sock->recv_lock, RT_WAITING_FOREVER);
+    if((recv_len = at_recvpkt_get(&(sock->recvpkt_list), (char *)mem, len)) > 0)
+    {
+        rt_mutex_release(sock->recv_lock);
+        goto __exit;
+    }
+    rt_mutex_release(sock->recv_lock);
+        
     /* socket passively closed, receive function return 0 */
     if (sock->state == AT_SOCKET_CLOSED)
     {
@@ -636,15 +654,6 @@ int at_recvfrom(int socket, void *mem, size_t len, int flags, struct sockaddr *f
         result = -1;
         goto __exit;
     }
-
-    /* receive packet list last transmission of remaining data */
-    rt_mutex_take(sock->recv_lock, RT_WAITING_FOREVER);
-    if((recv_len = at_recvpkt_get(&(sock->recvpkt_list), (char *)mem, len)) > 0)
-    {
-        rt_mutex_release(sock->recv_lock);
-        goto __exit;
-    }
-    rt_mutex_release(sock->recv_lock);
 
     /* non-blocking sockets receive data */
     if (flags & MSG_DONTWAIT)
@@ -696,23 +705,26 @@ int at_recvfrom(int socket, void *mem, size_t len, int flags, struct sockaddr *f
 
 __exit:
 
-    if (recv_len > 0)
+    if (sock != RT_NULL)
     {
-        result = recv_len;
-        at_do_event_changes(sock, AT_EVENT_RECV, RT_FALSE);
-        errno = 0;
-        if (!rt_slist_isempty(&sock->recvpkt_list))
+        if (recv_len > 0)
         {
-            at_do_event_changes(sock, AT_EVENT_RECV, RT_TRUE);
+            result = recv_len;
+            at_do_event_changes(sock, AT_EVENT_RECV, RT_FALSE);
+            errno = 0;
+            if (!rt_slist_isempty(&sock->recvpkt_list))
+            {
+                at_do_event_changes(sock, AT_EVENT_RECV, RT_TRUE);
+            }
+            else
+            {
+                at_do_event_clean(sock, AT_EVENT_RECV);
+            }
         }
         else
         {
-            at_do_event_clean(sock, AT_EVENT_RECV);
+            at_do_event_changes(sock, AT_EVENT_ERROR, RT_TRUE);
         }
-    }
-    else
-    {
-        at_do_event_changes(sock, AT_EVENT_ERROR, RT_TRUE);
     }
 
     return result;
@@ -804,7 +816,10 @@ __exit:
 
     if (result < 0)
     {
-        at_do_event_changes(sock, AT_EVENT_ERROR, RT_TRUE);
+        if (sock != RT_NULL)
+        {
+            at_do_event_changes(sock, AT_EVENT_ERROR, RT_TRUE);   
+        }
     }
     else
     {
@@ -813,11 +828,7 @@ __exit:
 
     return result;
 }
- struct timeval
- {
-     long tv_sec;  /* seconds */
-     long tv_usec; /* and microseconds */
- };
+
 int at_send(int socket, const void *data, size_t size, int flags)
 {
     return at_sendto(socket, data, size, flags, RT_NULL, 0);
