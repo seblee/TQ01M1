@@ -16,6 +16,7 @@
 #include "mqtt_client.h"
 #include "utils_hmac.h"
 #include "paho_mqtt.h"
+#include "sys_status.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -115,11 +116,13 @@ static void mqtt_connect_callback(MQTTClient *c)
 
 static void mqtt_online_callback(MQTTClient *c)
 {
+    sys_set_remap_status(WORK_MODE_STS_REG_NO, NET_STS_BPOS, 1);
     LOG_D("inter mqtt_online_callback!");
 }
 
 static void mqtt_offline_callback(MQTTClient *c)
 {
+    sys_set_remap_status(WORK_MODE_STS_REG_NO, NET_STS_BPOS, 0);
     LOG_D("inter mqtt_offline_callback!");
 }
 

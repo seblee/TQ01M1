@@ -2,13 +2,13 @@
 #define __REQ_CALC_H__
 #include "sys_conf.h"
 
-#define TEMP_MAX (1000)
-#define TEMP_MIN (-400)
-#define HUM_MAX (1000)
-#define HUM_MIN (0)
+#define TEMP_MAX  (1000)
+#define TEMP_MIN  (-400)
+#define HUM_MAX   (1000)
+#define HUM_MIN   (0)
 
 #define TOTAL_REQ 1
-#define AVER_REQ 2
+#define AVER_REQ  2
 
 void inc_pid_param_init(void);
 void req_update(void);

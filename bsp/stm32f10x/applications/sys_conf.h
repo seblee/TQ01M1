@@ -37,6 +37,14 @@ enum
     DO_RSV_BPOS_1,    //预留
     DO_RSV_BPOS_2,    //预留
     DO_RSV_BPOS_3,    //预留
+    DO_RSV_BPOS_4,    //预留
+    DO_RSV_BPOS_5,    //预留
+    DO_RSV_BPOS_6,    //预留
+    DO_RSV_BPOS_7,    //预留
+    DO_RSV_BPOS_8,    //预留
+    DO_RSV_BPOS_9,    //预留
+    DO_RSV_BPOS_10,   //预留
+    DO_RSV_BPOS_11,   //预留
 
     DO_FILLTER_DUMMY_BPOS,           //滤网
     DO_FILLTER_ELEMENT_DUMMY_BPOS_0, //滤芯  0
@@ -48,10 +56,10 @@ enum
     DO_MAX_CNT,
 };
 #define DO_FAN_LOW_BPOS DO_FAN_BPOS //风机低档
-#define DO_UV2_BPOS DO_RSV1_BPOS    //紫外灯2
+#define DO_UV2_BPOS DO_RSV1_BPOS    //紫外灯2,过流
 //L  双按键出水
-#define DO_WP2_BPOS DO_RSV2_BPOS      //出水泵2
-#define DO_DV2_BPOS DO_RSV3_BPOS      //出水阀2
+#define DO_WP2_BPOS DO_RSV2_BPOS //出水泵2
+#define DO_DV2_BPOS DO_RSV3_BPOS //出水阀2
 #define DO_HEAT_FAN_BPOS DO_RSV2_BPOS //扇热风机
 
 //application delay
@@ -111,8 +119,9 @@ enum
     TEST_NORMAL_WATER = 0x03,      //出常温水
     TEST_HEAT_WATER = 0x04,        //出热水
     TEST_PRPDUCE_COLDWATER = 0x05, //制冰水
-    TEST_UV = 0x06,                //UV测试
-    TEST_UR = 0x07,                //UV2测试
+    TEST_TANK = 0x06,              //抽空源水箱与饮水箱
+    TEST_UV = 0x07,                //UV测试
+    TEST_UR = 0x08,                //UV2测试
     TEST_Relay = 0x3C,             //继电器测试
     TEST_ALL_OUT = 0x5A,           //全开
 };
@@ -509,22 +518,6 @@ typedef struct
     int16_t reserve_aout[2];
 } aout_st;
 
-//Digital output definition
-typedef struct
-{
-    int16_t fan_out[MAX_FAN_NUM];
-    int16_t compressor_out[MAX_COMPRESSOR_NUM];
-    int16_t heater_out[MAX_HEATER_NUM];
-    int16_t liq_val_bypass_out[MAX_COMPRESSOR_NUM];
-    int16_t hot_gas_bypass_out[MAX_COMPRESSOR_NUM];
-    int16_t humidifier_out;
-    int16_t dehumidification_out;
-    int16_t water_injection_out;
-    int16_t common_alarm_out;
-    int16_t scr_out;
-    int16_t usr_out[DO_MAX_CNT];
-} dout_st;
-
 ///////////////////////////////////////////////////////////////
 //system log
 ///////////////////////////////////////////////////////////////
@@ -697,7 +690,7 @@ typedef struct
     uint16_t u16Clear_RT;              //清除部件时间
     uint16_t u16Clear_ALARM;           //清除告警
     uint16_t u16Set_Time[2];           //设置系统时间
-    uint16_t u16Fan_Start_Delay;       //风机开启延时
+    uint16_t u16Start_Delay;           //开启延时
     uint16_t u16Fan_Stop_Delay;        //风机关闭延时
     uint16_t u16Comp_Interval;         //压机间隔
     uint16_t u16ColdWater_Mode;        //冰水模式
@@ -891,6 +884,7 @@ typedef struct
     uint16_t TEST5;
     uint16_t TEST6;
     uint16_t REQ_TEST[3];
+    uint16_t net_status;
 } ComSta_st;
 
 typedef struct

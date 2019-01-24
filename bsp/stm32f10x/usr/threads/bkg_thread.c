@@ -100,7 +100,7 @@ static void test_mode_init_data(void)
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
     uint8_t u8Temp = 0;
-    uint16_t u16W_Flow = 1000;
+    uint16_t u16W_Flow = 0;
     static uint8_t u8Test[2] = {0};
     static uint16_t u16Test_UV[3] = {0};
 
@@ -119,7 +119,9 @@ static void test_mode_init_data(void)
     {
     case TEST_ALL_OUT: //全开
         g_sys.config.dev_mask.ain = 0xffff;
-        g_sys.config.dev_mask.din[0] = 0x7fff;
+        g_sys.config.dev_mask.din_bitmap_polarity[0] = 0xffff;
+        g_sys.config.dev_mask.din_bitmap_polarity[1] = 0xffff;
+        g_sys.config.dev_mask.din[0] = 0xffff;
         g_sys.config.dev_mask.din[1] = 0xffff;
         g_sys.config.dev_mask.aout = 0xffff;
         g_sys.config.dev_mask.mb_comp = 0x01;
@@ -127,16 +129,31 @@ static void test_mode_init_data(void)
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
 
         l_sys.bitmap[0][BITMAP_MANUAL] = DO_MASK1;
-        l_sys.bitmap[1][BITMAP_MANUAL] = DO_MASK2;
+        l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ENABLE;
         l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 50;
-        l_sys.ao_list[AO_EC_COMPRESSOR][BITMAP_MANUAL] = 50;
-        l_sys.ao_list[AO_WATER_VALVE][BITMAP_MANUAL] = 50;
-        l_sys.ao_list[AO_PREV_1][BITMAP_MANUAL] = 50;
-        l_sys.ao_list[AO_PREV_2][BITMAP_MANUAL] = 50;
+        //			  l_sys.ao_list[AO_EC_COMPRESSOR][BITMAP_MANUAL] = 50;
+        //			  l_sys.ao_list[AO_WATER_VALVE][BITMAP_MANUAL] = 50;
+        //			  l_sys.ao_list[AO_PREV_1][BITMAP_MANUAL] = 50;
+        //			  l_sys.ao_list[AO_PREV_2][BITMAP_MANUAL] = 50;
+        u8Temp = g_sys.config.ComPara.u16HotWater_Temp / 10;
+        u16W_Flow = 1000;
+        if (Heat_Send(HEAT_WRITEPARA, OPEN_HEAT, u8Temp, u16W_Flow)) //发送热水命令
+        {
+        }
+        u16W_Flow = TEST_LLJ_READ();
+        if (u16W_Flow)
+        {
+            g_sys.status.ComSta.u16Last_Water = 0;
+        }
+        else
+        {
+            g_sys.status.ComSta.u16Last_Water = 1;
+        }
+        //				rt_kprintf("u16W_Flow=%d,u16Last_Water=%d\n",u16W_Flow,g_sys.status.ComSta.u16Last_Water);
         break;
     case TEST_PRPDUCE_WATER: //制水
         g_sys.config.dev_mask.ain = 0xffff;
-        g_sys.config.dev_mask.din[0] = 0x7fff;
+        g_sys.config.dev_mask.din[0] = 0xffff;
         g_sys.config.dev_mask.din[1] = 0xffff;
         g_sys.config.dev_mask.aout = 0xffff;
         g_sys.config.dev_mask.mb_comp = 0x01;
@@ -150,13 +167,13 @@ static void test_mode_init_data(void)
         break;
     case TEST_PURIFICATION: //净化
         g_sys.config.dev_mask.ain = 0xffff;
-        g_sys.config.dev_mask.din[0] = 0x7fff;
+        g_sys.config.dev_mask.din[0] = 0xffff;
         g_sys.config.dev_mask.din[1] = 0xffff;
         g_sys.config.dev_mask.aout = 0xffff;
         g_sys.config.dev_mask.mb_comp = 0x01;
         g_sys.config.dev_mask.dout[0] = DO_MASK1;
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
-        l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
+        l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         u32Sterilize_Interval = (g_sys.config.ComPara.u16Sterilize_Interval[0] * 60);
         if (u32Sterilize_Interval >= (g_sys.config.ComPara.u16Sterilize_Interval[0] * 60)) //开始杀菌
@@ -173,43 +190,57 @@ static void test_mode_init_data(void)
         break;
     case TEST_NORMAL_WATER: //出常温水
         g_sys.config.dev_mask.ain = 0xffff;
-        g_sys.config.dev_mask.din[0] = 0x7fff;
+        g_sys.config.dev_mask.din[0] = 0xffff;
         g_sys.config.dev_mask.din[1] = 0xffff;
         g_sys.config.dev_mask.aout = 0xffff;
         g_sys.config.dev_mask.mb_comp = 0x01;
         g_sys.config.dev_mask.dout[0] = DO_MASK1;
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
-        l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
+        l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_UV1_BPOS) | (0x0001 << DO_UV2_BPOS) | (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DV_BPOS) | (0x0001 << DO_WP2_BPOS) | (0x0001 << DO_PWP_BPOS);
         l_sys.bitmap[1][BITMAP_MANUAL] = (0x0001 << (DO_DV2_BPOS >> 16));
         break;
-    case TEST_HEAT_WATER: //出热水
+    case TEST_TANK: //抽空源水箱与饮水箱
         g_sys.config.dev_mask.ain = 0xffff;
-        g_sys.config.dev_mask.din[0] = 0x7fff;
+        g_sys.config.dev_mask.din[0] = 0xffff;
         g_sys.config.dev_mask.din[1] = 0xffff;
         g_sys.config.dev_mask.aout = 0xffff;
         g_sys.config.dev_mask.mb_comp = 0x01;
         g_sys.config.dev_mask.dout[0] = DO_MASK1;
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
-        l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
+        l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
+
+        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DV_BPOS) | (0x0001 << DO_WP2_BPOS) | (0x0001 << DO_PWP_BPOS);
+        l_sys.bitmap[1][BITMAP_MANUAL] = (0x0001 << (DO_DV2_BPOS >> 16));
+        break;
+    case TEST_HEAT_WATER: //出热水
+        g_sys.config.dev_mask.ain = 0xffff;
+        g_sys.config.dev_mask.din[0] = 0xffff;
+        g_sys.config.dev_mask.din[1] = 0xffff;
+        g_sys.config.dev_mask.aout = 0xffff;
+        g_sys.config.dev_mask.mb_comp = 0x01;
+        g_sys.config.dev_mask.dout[0] = DO_MASK1;
+        g_sys.config.dev_mask.dout[1] = DO_MASK2;
+        l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_RH1_BPOS) | (0x0001 << DO_HWP_BPOS); //加热器电源
 
         u8Temp = g_sys.config.ComPara.u16HotWater_Temp / 10;
+        u16W_Flow = 1000;
         if (Heat_Send(HEAT_WRITEPARA, OPEN_HEAT, u8Temp, u16W_Flow)) //发送热水命令
         {
         }
         break;
     case TEST_PRPDUCE_COLDWATER: //制冰水
         g_sys.config.dev_mask.ain = 0xffff;
-        g_sys.config.dev_mask.din[0] = 0x7fff;
+        g_sys.config.dev_mask.din[0] = 0xffff;
         g_sys.config.dev_mask.din[1] = 0xffff;
         g_sys.config.dev_mask.aout = 0xffff;
         g_sys.config.dev_mask.mb_comp = 0x01;
         g_sys.config.dev_mask.dout[0] = DO_MASK1;
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
-        l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
+        l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_COMP1_BPOS) | (0x0001 << DO_COMP2_BPOS) | (0x0001 << DO_FAN_BPOS) | (0x0001 << DO_WV_BPOS) | (0x0001 << DO_CV_BPOS);
         l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 80;
@@ -223,7 +254,7 @@ static void test_mode_init_data(void)
                 u8Test[0] = 0;
             }
             g_sys.config.dev_mask.ain = 0xffff;
-            g_sys.config.dev_mask.din[0] = 0x7fff;
+            g_sys.config.dev_mask.din[0] = 0xffff;
             g_sys.config.dev_mask.din[1] = 0xffff;
             g_sys.config.dev_mask.aout = 0xffff;
             g_sys.config.dev_mask.mb_comp = 0x01;
@@ -311,7 +342,7 @@ static void test_mode_init_data(void)
         {
             g_sys.config.dev_mask.dout[0] = DO_MASK1;
             g_sys.config.dev_mask.dout[1] = DO_MASK2;
-            l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
+            l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
             l_sys.bitmap[0][BITMAP_MANUAL] = 0x00;
             if (u16Test_UV[2] <= TEST_UV2_OPEN)
@@ -326,7 +357,7 @@ static void test_mode_init_data(void)
         }
 
         break;
-    case TEST_UR: //UV测试
+    case TEST_UR: //UV2测试
         u16Test_UV[0]++;
         if (u16Test_UV[0] > TEST_TIME)
         {
@@ -359,7 +390,7 @@ static void test_mode_init_data(void)
         {
             g_sys.config.dev_mask.dout[0] = DO_MASK1;
             g_sys.config.dev_mask.dout[1] = DO_MASK2;
-            l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
+            l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
             l_sys.bitmap[0][BITMAP_MANUAL] = 0x00;
             if (u16Test_UV[2] <= TEST_UR2_OPEN)
@@ -372,7 +403,6 @@ static void test_mode_init_data(void)
                 l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_UV1_BPOS);
             }
         }
-
         break;
     default:
         u8Test[0] = 0;
@@ -385,7 +415,7 @@ static void test_mode_init_data(void)
         g_sys.config.dev_mask.mb_comp = 0x00;
         g_sys.config.dev_mask.dout[0] = DO_MASK1;
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
-        l_sys.bitmap[1][BITMAP_MANUAL] = 0x00;
+        l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         l_sys.bitmap[0][BITMAP_MANUAL] = 0x00;
         l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 0x00;
@@ -546,18 +576,10 @@ static void sys_comp_cooldown(void)
     {
         l_sys.comp_startup_interval--;
     }
-    else
-    {
-        l_sys.comp_startup_interval = 0;
-    }
 
     if (l_sys.comp_stop_interval > 0)
     {
         l_sys.comp_stop_interval--;
-    }
-    else
-    {
-        l_sys.comp_stop_interval = 0;
     }
 
     if (l_sys.TH_Check_Delay > 0)
@@ -565,18 +587,20 @@ static void sys_comp_cooldown(void)
         l_sys.TH_Check_Delay--;
         l_sys.TH_Check_Interval = 0;
     }
-    else
-    {
-        l_sys.TH_Check_Delay = 0;
-    }
 
     if (l_sys.TH_Check_Interval > 0)
     {
         l_sys.TH_Check_Interval--;
     }
-    else
+    //压机重启间隔
+    if (l_sys.Comp_Interval[0] > 0)
     {
-        l_sys.TH_Check_Interval = 0;
+        l_sys.Comp_Interval[0]--;
+    }
+
+    if (l_sys.Comp_Interval[1] == 0)
+    {
+        l_sys.Comp_Interval[1]--;
     }
 
     if (l_sys.Set_Systime_Delay > 0)
@@ -593,18 +617,10 @@ static void sys_comp_cooldown(void)
     {
         l_sys.ChildLock_Cnt[0]++;
     }
-    else
-    {
-        l_sys.ChildLock_Cnt[0] = 0;
-    }
     //童锁指示
     if (l_sys.ChildLock_Cnt[1])
     {
         l_sys.ChildLock_Cnt[1]--;
-    }
-    else
-    {
-        l_sys.ChildLock_Cnt[1] = 0;
     }
 
     //出水延时
@@ -612,20 +628,13 @@ static void sys_comp_cooldown(void)
     {
         l_sys.OutWater_Delay[0]--;
     }
-    else
-    {
-        l_sys.OutWater_Delay[0] = 0;
-    }
 
     //出水延时
     if (l_sys.OutWater_Delay[1])
     {
         l_sys.OutWater_Delay[1]--;
     }
-    else
-    {
-        l_sys.OutWater_Delay[1] = 0;
-    }
+    return;
 }
 
 //通信设置系统时间

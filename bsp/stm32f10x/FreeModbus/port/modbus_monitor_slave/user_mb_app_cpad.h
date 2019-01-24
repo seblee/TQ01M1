@@ -1,4 +1,4 @@
-#ifndef	USER_APP
+#ifndef USER_APP
 #define USER_APP
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb_monitor.h"
@@ -8,20 +8,17 @@
 #include "mbutils.h"
 #include "sys_conf.h"
 /* -----------------------Slave Defines -------------------------------------*/
-#define 				 MONITOR_REG_HOLDING_START           0
-#define 				 MONITOR_REG_HOLDING_NREGS           37
-#define 				 REG_HOLDING_WRITE_NREGS       5//¿ÉĞ´·¶Î§+
-//´Ó»úÄ£Ê½£ºÔÚ±£³Ö¼Ä´æÆ÷ÖĞ£¬¸÷¸öµØÖ·¶ÔÓ¦µÄ¹¦ÄÜ¶¨Òå
-#define          S_HD_RESERVE                     0		  //±£Áô
-#define          S_HD_CPU_USAGE_MAJOR             1         //µ±Ç°CPUÀûÓÃÂÊµÄÕûÊıÎ»
-#define          S_HD_CPU_USAGE_MINOR             2         //µ±Ç°CPUÀûÓÃÂÊµÄĞ¡ÊıÎ»
+#define MONITOR_REG_HOLDING_START 0
+#define MONITOR_REG_HOLDING_NREGS 37
+#define REG_HOLDING_WRITE_NREGS 5 //å¯å†™èŒƒå›´+
+//ä»æœºæ¨¡å¼ï¼šåœ¨ä¿æŒå¯„å­˜å™¨ä¸­ï¼Œå„ä¸ªåœ°å€å¯¹åº”çš„åŠŸèƒ½å®šä¹‰
+#define S_HD_RESERVE 0         //ä¿ç•™
+#define S_HD_CPU_USAGE_MAJOR 1 //å½“å‰CPUåˆ©ç”¨ç‡çš„æ•´æ•°ä½
+#define S_HD_CPU_USAGE_MINOR 2 //å½“å‰CPUåˆ©ç”¨ç‡çš„å°æ•°ä½
 
-//´Ó»úÄ£Ê½£ºÔÚÊäÈë¼Ä´æÆ÷ÖĞ£¬¸÷¸öµØÖ·¶ÔÓ¦µÄ¹¦ÄÜ¶¨Òå
-#define          S_IN_RESERVE                     0		  //±£Áô
+//ä»æœºæ¨¡å¼ï¼šåœ¨è¾“å…¥å¯„å­˜å™¨ä¸­ï¼Œå„ä¸ªåœ°å€å¯¹åº”çš„åŠŸèƒ½å®šä¹‰
+#define S_IN_RESERVE 0 //ä¿ç•™
 
-
-
-
-void mbm_sts_update(sys_reg_st* gds_ptr);
-void mbs_sts_update(void);// ¸üĞÂ±¾µØ±äÁ¿µ½Ğ­ÒéÕ»¼Ä´æÆ÷ÖĞ
+void mbm_sts_update(sys_reg_st *gds_ptr);
+void mbs_sts_update(void); // æ›´æ–°æœ¬åœ°å˜é‡åˆ°åè®®æ ˆå¯„å­˜å™¨ä¸­
 #endif

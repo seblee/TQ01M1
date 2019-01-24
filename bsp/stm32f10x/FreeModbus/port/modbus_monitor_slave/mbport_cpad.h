@@ -29,7 +29,6 @@
  *            mbport.h,v 1.60 2013/08/17 11:42:56 Armink Add Master Functions  $
  */
 
-
 #ifndef MNT_MB_PORT_H
 #define MNT_MB_PORT_H
 
@@ -39,63 +38,61 @@ PR_BEGIN_EXTERN_C
 #include "port.h"
 #define MNT_RX_LEN 512
 #define MNT_RX_MIN 4
-#define MNT_CMD_LEN 8 
+#define MNT_CMD_LEN 8
 typedef enum
 {
-    MB_PAR_NONE,                /*!< No parity. */
-    MB_PAR_ODD,                 /*!< Odd parity. */
-    MB_PAR_EVEN                 /*!< Even parity. */
+    MB_PAR_NONE, /*!< No parity. */
+    MB_PAR_ODD,  /*!< Odd parity. */
+    MB_PAR_EVEN  /*!< Even parity. */
 } eMBParity;
 
 //enum
 //{
 //		REC_ADDR_STATE =0,
-//		REC_DATA_STATE 
+//		REC_DATA_STATE
 //};
 
 enum
 {
-		REC_ADDR_STATE =0,
-		REC_HEAD_STATE, 
-		REC_LEN_STATE, 
-		REC_DATA_STATE 
+    REC_ADDR_STATE = 0,
+    REC_HEAD_STATE,
+    REC_LEN_STATE,
+    REC_DATA_STATE
 };
 
-typedef struct{
-		uint8_t rec_state;
-		uint8_t rxbuf[MNT_RX_LEN];
-		uint8_t rx_flag;
-		uint8_t rx_ok;
-		uint16_t rec_cnt;
-		uint16_t addr;
-		uint8_t rx_timeout;
-		uint8_t update_timer_flag;
-		uint8_t rx_DataCnt;
-}cpad_slave_st;
+typedef struct
+{
+    uint8_t rec_state;
+    uint8_t rxbuf[MNT_RX_LEN];
+    uint8_t rx_flag;
+    uint8_t rx_ok;
+    uint16_t rec_cnt;
+    uint16_t addr;
+    uint8_t rx_timeout;
+    uint8_t update_timer_flag;
+    uint8_t rx_DataCnt;
+} cpad_slave_st;
 
 /* ----------------------- Serial port functions ----------------------------*/
 
-void            cpad_MBPortSerialInit( UCHAR ucPort, ULONG ulBaudRate,
-                                   UCHAR ucDataBits, eMBParity eParity );
+void cpad_MBPortSerialInit(UCHAR ucPort, ULONG ulBaudRate,
+                           UCHAR ucDataBits, eMBParity eParity);
 
-void            MonitorvMBPortClose( void );
+void MonitorvMBPortClose(void);
 
-void            MonitorxMBPortSerialClose( void );
+void MonitorxMBPortSerialClose(void);
 
-void            MonitorvMBPortSerialEnable( BOOL xRxEnable, BOOL xTxEnable );
-void            cpad_xMBPortSerialPutByte(uint8_t *ucbyte, uint16_t len);
+void MonitorvMBPortSerialEnable(BOOL xRxEnable, BOOL xTxEnable);
+void cpad_xMBPortSerialPutByte(uint8_t *ucbyte, uint16_t len);
 
 /* ----------------------- Timers functions ---------------------------------*/
-void            cpad_xMBPortTimersInit( USHORT usTimeOut50us );
+void cpad_xMBPortTimersInit(USHORT usTimeOut50us);
 
-void            cpad_xMBPortTimersClose( void );
+void cpad_xMBPortTimersClose(void);
 
-void            cpad_vMBPortTimersEnable( void );
-void            cpad_vMBPortTimersDisable(void);
+void cpad_vMBPortTimersEnable(void);
+void cpad_vMBPortTimersDisable(void);
 
 /* ----------------------- Callback for the protocol stack ------------------*/
 
-
 #endif
-
-

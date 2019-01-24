@@ -67,30 +67,6 @@ const pin_map_st in_pin_map_inst[Pin_Map_In] = //数字输入Pin_Map
 #define Pin_Map_Out 21
 const pin_map_st out_pin_map_inst[Pin_Map_Out] = //数字输出Pin_Map
     {
-#ifdef SYS_HMI_TQ_T10
-        {GPIO_Pin_4, GPIOC},  //DO1
-        {GPIO_Pin_7, GPIOA},  //DO2
-        {GPIO_Pin_6, GPIOA},  //DO3
-        {GPIO_Pin_5, GPIOA},  //DO4
-        {GPIO_Pin_0, GPIOB},  //DO17//T10,UV_24V,DO5与DO17互换
-        {GPIO_Pin_2, GPIOA},  //DO6
-        {GPIO_Pin_1, GPIOA},  //DO7
-        {GPIO_Pin_0, GPIOA},  //DO8
-        {GPIO_Pin_8, GPIOE},  //DO9
-        {GPIO_Pin_10, GPIOE}, //DO10
-        {GPIO_Pin_11, GPIOE}, //DO11
-        {GPIO_Pin_12, GPIOE}, //DO12
-        {GPIO_Pin_13, GPIOE}, //DO13
-        {GPIO_Pin_14, GPIOE}, //DO14
-        {GPIO_Pin_7, GPIOE},  //DO15
-        {GPIO_Pin_1, GPIOB},  //DO16
-
-        {GPIO_Pin_4, GPIOA},  //DO5
-        {GPIO_Pin_5, GPIOC},  //DO18
-        {GPIO_Pin_9, GPIOE},  //DO19-LOCKLED
-        {GPIO_Pin_11, GPIOA}, //DO20-PWRCTRL
-        {GPIO_Pin_13, GPIOC}, //LED,RUN
-#else
         {GPIO_Pin_4, GPIOC},  //DO1
         {GPIO_Pin_7, GPIOA},  //DO2
         {GPIO_Pin_6, GPIOA},  //DO3
@@ -113,9 +89,180 @@ const pin_map_st out_pin_map_inst[Pin_Map_Out] = //数字输出Pin_Map
         {GPIO_Pin_9, GPIOE},  //DO19-LOCKLED
         {GPIO_Pin_11, GPIOA}, //DO20-PWRCTRL
         {GPIO_Pin_13, GPIOC}, //LED,RUN
-#endif
-
 };
+
+//DI重映射表
+const Bit_remap_st DI_remap_table[] = {
+    {0, 0},   //
+    {1, 1},   //
+    {2, 2},   //
+    {3, 3},   //
+    {4, 4},   //
+    {5, 5},   //
+    {6, 6},   //
+    {7, 7},   //
+    {8, 8},   //
+    {9, 9},   //
+    {10, 10}, //
+    {11, 11}, //
+    {12, 12}, //
+    {13, 13}, //
+    {14, 14}, //
+    {15, 15}, //
+};
+//DO重映射表
+const Bit_remap_st DO_remap_table[] = {
+    {0, 0}, //
+    {1, 1}, //
+    {2, 2}, //
+    {3, 3}, //
+#ifdef SYS_HMI_TQ_T10
+    {4, 16}, ////T10,UV_24V,DO5与DO17互换
+#else
+    {4, 4},   //
+#endif
+    {5, 5},   //
+    {6, 6},   //
+    {7, 7},   //
+    {8, 8},   //
+    {9, 9},   //
+    {10, 10}, //
+    {11, 11}, //
+    {12, 12}, //
+    {13, 13}, //
+    {14, 14}, //
+    {15, 15}, //
+#ifdef SYS_HMI_TQ_T10
+    {16, 4}, //
+#else
+    {16, 16}, //
+#endif
+    {17, 17}, //
+    {18, 18}, //
+    {19, 19}, //
+    {20, 20}, //
+};
+//AI重映射表
+const Bit_remap_st AI_remap_table[] = {
+    {0, 0},   //
+    {1, 1},   //
+    {2, 2},   //
+    {3, 3},   //
+    {4, 4},   //
+    {5, 5},   //
+    {6, 6},   //
+    {7, 7},   //
+    {8, 8},   //
+    {9, 9},   //
+    {10, 10}, //
+    {11, 11}, //
+    {12, 12}, //
+    {13, 13}, //
+};
+//AO重映射表
+const Bit_remap_st AO_remap_table[] = {
+    {0, 0}, //
+    {1, 1}, //
+    {2, 2}, //
+    {3, 3}, //
+};
+
+//重映射端口
+uint32_t Sts_Remap(uint32_t u32IN_Bit, uint8_t Rep_Type, uint8_t Rep_Dir)
+{
+    uint32_t u32Rep_bit;
+    uint8_t i, u8Length;
+
+    u32Rep_bit = 0x0000;
+    switch (Rep_Type)
+    {
+    case Rep_DI:
+        u8Length = sizeof(DI_remap_table) / 2;
+        for (i = 0; i < u8Length; i++)
+        {
+            if (Rep_Dir)
+            {
+                if ((u32IN_Bit >> DI_remap_table[i].u8M1_Bit) & 0x0001)
+                {
+                    u32Rep_bit |= (0x0001 << DI_remap_table[i].u8M3_Bit);
+                }
+            }
+            else
+            {
+                if ((u32IN_Bit >> DI_remap_table[i].u8M3_Bit) & 0x0001)
+                {
+                    u32Rep_bit |= (0x0001 << DI_remap_table[i].u8M1_Bit);
+                }
+            }
+        }
+        //			rt_kprintf("u16IN_Bit = %X,u8Length = %X,u16Rep_bit = %X\n",u16IN_Bit,u8Length,u16Rep_bit);
+        break;
+    case Rep_DO:
+        u8Length = sizeof(DO_remap_table) / 2;
+        for (i = 0; i < u8Length; i++)
+        {
+            if (Rep_Dir)
+            {
+                if ((u32IN_Bit >> DO_remap_table[i].u8M1_Bit) & 0x0001)
+                {
+                    u32Rep_bit |= (0x0001 << DO_remap_table[i].u8M3_Bit);
+                }
+            }
+            else
+            {
+                if ((u32IN_Bit >> DO_remap_table[i].u8M3_Bit) & 0x0001)
+                {
+                    u32Rep_bit |= (0x0001 << DO_remap_table[i].u8M1_Bit);
+                }
+            }
+        }
+        //			rt_kprintf("u16IN_Bit = %X,u8Length = %X,u16Rep_bit = %X\n",u32IN_Bit,u8Length,u32Rep_bit);
+        break;
+    case Rep_AI:
+        u8Length = sizeof(AI_remap_table) / 2;
+        for (i = 0; i < u8Length; i++)
+        {
+            if (Rep_Dir)
+            {
+                if (u32IN_Bit == AI_remap_table[i].u8M1_Bit)
+                {
+                    u32Rep_bit = AI_remap_table[i].u8M3_Bit;
+                }
+            }
+            else
+            {
+                if (u32IN_Bit == AI_remap_table[i].u8M3_Bit)
+                {
+                    u32Rep_bit = AI_remap_table[i].u8M1_Bit;
+                }
+            }
+        }
+        break;
+    case Rep_AO:
+        u8Length = sizeof(AO_remap_table) / 2;
+        for (i = 0; i < u8Length; i++)
+        {
+            if (Rep_Dir)
+            {
+                if (u32IN_Bit == AO_remap_table[i].u8M1_Bit)
+                {
+                    u32Rep_bit = AO_remap_table[i].u8M3_Bit;
+                }
+            }
+            else
+            {
+                if (u32IN_Bit == AO_remap_table[i].u8M3_Bit)
+                {
+                    u32Rep_bit = AO_remap_table[i].u8M1_Bit;
+                }
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    return u32Rep_bit;
+}
 
 //local variable definition
 static dio_dev_st dio_dev_inst;

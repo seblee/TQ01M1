@@ -21,21 +21,6 @@ static void final_ao_op(uint8_t component_bpos, int16_t value)
     l_sys.ao_list[component_bpos][BITMAP_FINAL] = value;
 }
 
-////PWM控制模式操作函数
-//static void manual_pwm_op(uint8_t component_bpos, int16_t value)
-//{
-//		extern local_reg_st l_sys;
-//		l_sys.pwm_list[component_bpos][BITMAP_MANUAL] = value;
-//}
-
-////最终PWM输出操作函数
-//static void final_pwm_op(uint8_t component_bpos, int16_t value)
-//{
-//		extern local_reg_st l_sys;
-
-//		l_sys.pwm_list[component_bpos][BITMAP_FINAL] = value;
-//}
-
 /**
   * @brief 	output control module dout and system status update 
 	* @param  none
@@ -46,11 +31,20 @@ static void oc_do_update(uint32_t new_bitmap)
 {
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
+
     uint32_t xor_bitmap, old_bitmap;
     uint16_t i;
+    uint32_t u32DO[2];
+
     old_bitmap = g_sys.status.dout_bitmap[0] | ((uint32_t)g_sys.status.dout_bitmap[1] << 16);
+
+    u32DO[0] = old_bitmap;
+    u32DO[1] = new_bitmap;
+    old_bitmap = Sts_Remap(u32DO[0], Rep_DO, 0);
+    new_bitmap = Sts_Remap(u32DO[1], Rep_DO, 0);
+    //	  rt_kprintf("new_bitmap= %x,old_bitmap= %x,u32DO[0]=%x,u32DO[1]=%x\n",new_bitmap,old_bitmap,u32DO[0],u32DO[1]);
     xor_bitmap = new_bitmap ^ old_bitmap;
-    //	  rt_kprintf("g_sys.status.dout_bitmap= %x,old_bitmap= %x,xor_bitmap=%x,new_bitmap=%x\n",g_sys.status.dout_bitmap,old_bitmap,xor_bitmap,new_bitmap);
+
     if (xor_bitmap != 0) //if output bitmap changed
     {
         for (i = 0; i < 32; i++)

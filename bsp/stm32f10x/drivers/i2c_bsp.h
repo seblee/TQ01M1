@@ -25,7 +25,7 @@ extern sys_reg_st g_sys;
 #define CONF_REG_FACT_ADDR (CONF_REG_EE3_ADDR + 2 * (CONF_REG_MAP_NUM + 1)) // CONF_REG_MAP_NUM+1 //Reg+check
 #define STS_REG_EE1_ADDR (CONF_REG_FACT_ADDR + 2 * (CONF_REG_MAP_NUM + 1))  // CONF_REG_MAP_NUM+1 //Reg+check
 
-#define STS_REG_EE2_ADDR (STS_REG_EE1_ADDR + 100)
+#define STS_REG_EE2_ADDR (STS_REG_EE1_ADDR + 200)
 
 #define WORK_MODE_EE_ADDR (STS_REG_EE2_ADDR + 4) //team_bitmap[TEAM_BITMAP_FINAL_OUT]
 

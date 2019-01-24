@@ -14,49 +14,6 @@
 #include "pwm_bsp.h"
 #include "usart_bsp.h"
 
-//相序切换状态
-enum
-{
-    PPE_FSM_POWER_ON,
-    PPE_FSM_PN_SWITCH,
-    PPE_FSM_NO_CONF,
-    PPE_FSM_NORMAL,
-    PPE_FSM_REVERSE
-};
-
-//双电源切换状态
-enum
-{
-    DP_FSM_IDLE = 0,
-    DP_FSM_NORMAL_A,
-    DP_FSM_SWITCH_A,
-    DP_FSM_NORMAL_B,
-    DP_FSM_SWITCH_B,
-    DP_FSM_APART,
-};
-//双电源异常状态
-enum
-{
-    IO_ABNORMAL = 0x01,
-    A_ABNORMAL = 0x02,
-    B_ABNORMAL = 0x04,
-};
-enum
-{
-    SWITCH_NO = 0, //无双电源切换
-    SWITCH_A,      //选择A路
-    SWITCH_B,      //选择B路
-};
-
-#define INIT_DELAY 10
-
-#define COMPRESSOR_BITMAP_MASK_POS 0x0006
-#define HEATER_BITMAP_MASK_POS 0x0418
-#define HUMIDIFIER_BITMAP_MASK_POS 0x0020
-#define DEHUMER_BITMAP_MASK_POS 0x0300
-
-#define HUM_CHECKE_INTERVAL 12 * 3600
-
 enum
 {
     RUNING_STATUS_COOLING_BPOS = 0,
@@ -71,32 +28,6 @@ enum
     COMPRESSOR_SIG_ON,
     COMPRESSOR_SIG_OFF,
     COMPRESSOR_SIG_ERR,
-};
-
-enum
-{
-    WATER_COOLED_SIG_HOLD = 0,
-    WATER_COOLED_SIG_ON,
-    WATER_COOLED_SIG_OFF,
-    WATER_COOLED_SIG_ERR,
-};
-
-enum
-{
-    HEATER_SIG_IDLE = 0,
-    HEATER_SIG_L1,
-    HEATER_SIG_L2,
-    HEATER_SIG_L3,
-    HEATER_SIG_ERR,
-};
-
-enum
-{
-    HEATER_FSM_IDLE = 0,
-    HEATER_FSM_L1,
-    HEATER_FSM_L2,
-    HEATER_FSM_L3,
-    HEATER_FSM_ERR,
 };
 
 enum
@@ -240,6 +171,11 @@ static int16_t analog_step_follower(int16_t target, uint16_t dev_type)
     return ret_val;
 }
 
+void Close_DIS_PWR(void)
+{
+    req_bitmap_op(DO_PWR_CTRL_BPOS, 1); //关闭显示电源
+}
+
 //风机档位输出
 static void Fan_Fsm_Out(uint8_t Fan_Gear)
 {
@@ -277,7 +213,7 @@ static void fan_fsm_exe(uint8_t fan_signal)
         if (fan_signal == FAN_SIG_START)
         {
             l_sys.l_fsm_state[FAN_FSM_STATE] = FSM_FAN_INIT;
-            l_sys.comp_timeout[DO_FAN_BPOS] = g_sys.config.ComPara.u16Fan_Start_Delay; //assign startup delay to timeout counter
+            l_sys.comp_timeout[DO_FAN_BPOS] = g_sys.config.ComPara.u16Start_Delay; //assign startup delay to timeout counter
         }
         else
         {
@@ -516,13 +452,14 @@ static uint16_t compressor_signal_gen(int16_t req_temp, int16_t req_hum, uint8_t
         return 0;
     }
 
-    if ((sys_get_pwr_sts() == 0) || (l_sys.Comp_Close != 0x00))
+    if ((sys_get_pwr_sts() == 0) || ((l_sys.Comp_Close[0] != 0x00) && (l_sys.Comp_Close[1] != 0x00)))
     {
         *comp1_sig = COMPRESSOR_SIG_OFF;
         *comp2_sig = COMPRESSOR_SIG_OFF;
         l_sys.l_fsm_state[COMPRESS_SIG_FSM_STATE] = 0;
         return 0;
     }
+
     if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, FAN_STS_BPOS) != 0))
     {
         if (compressor_count == 1) //one compressor configured
@@ -563,6 +500,7 @@ static uint16_t compressor_signal_gen(int16_t req_temp, int16_t req_hum, uint8_t
             {
                 *comp1_sig = COMPRESSOR_SIG_ON;
                 *comp2_sig = COMPRESSOR_SIG_ON;
+
                 if ((get_alarm_bitmap(ACL_E1) || get_alarm_bitmap(ACL_E2)) ||                                                                                       //水满告警
                     ((comp1_alarm_flag & comp2_alarm_flag) != 0) ||                                                                                                 //告警
                     ((sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST1_STS_BPOS) != 0) && (sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST2_STS_BPOS) != 0))) //除霜
@@ -784,7 +722,7 @@ static void compressor_fsm(uint8_t compressor_id, uint8_t signal)
         {
             l_sys.l_fsm_state[l_fsm_state_id] = COMPRESSOR_FSM_STATE_IDLE;
             //									l_sys.comp_timeout[do_bpos] = g_sys.config.compressor.min_stoptime;//取消最短停机时间
-            l_sys.comp_timeout[do_bpos] = 0;
+            l_sys.comp_timeout[do_bpos] = g_sys.config.ComPara.u16Start_Delay; //启动延时
             req_bitmap_op(do_bpos, 0);
             l_sys.comp_stop_interval = g_sys.config.ComPara.u16Comp_Interval;
         }
@@ -813,10 +751,11 @@ static void compressor_req_exe(int16_t req_temp, int16_t req_hum)
 #define CF_DELAY 60
 enum
 {
-    FC_WL = 0x01,
-    FC_PT = 0x02,
-    FC_TH = 0x04,
-    FC_WS = 0x08,
+    FC_WL = 0x01, //水位
+    FC_PT = 0x02, //
+    FC_TH = 0x04, //温湿度
+    FC_WS = 0x08, //外接水源
+    FC_DF = 0x10, //化霜
 };
 //风机,压机启动条件
 void Sys_Fan_CP_WL(void)
@@ -827,6 +766,7 @@ void Sys_Fan_CP_WL(void)
     uint16_t u16WL;
     uint16_t Test = 0;
     static uint8_t u8Offset_CNT = 0;
+    static uint8_t u8FCP_Start = 0;
 
     if (sys_get_pwr_sts() == 1)
     {
@@ -843,27 +783,31 @@ void Sys_Fan_CP_WL(void)
     //		//TEST
     //		u16WL=0x13;
     //水位异常
-    //		if((u16WL==0x07)||(u16WL==0x0F)||(u16WL==0x18)||(u16WL==0x19)||(u16WL==0x1B)||(u16WL==0x1F)||(u16WL==0x38)||(u16WL==0x39)||(u16WL==0x3A)||(u16WL==0x3B)||(u16WL==0x3F))
     if ((u16WL & S_U) || (u16WL & D_U) || (u16WL & D_M))
     {
         if (l_sys.Cold_Water == TRUE)
         {
             Test |= 0x02;
             l_sys.Fan_Close &= ~FC_WL;
-            l_sys.Comp_Close &= ~FC_WL;
+            l_sys.Comp_Close[0] &= ~FC_WL;
+            l_sys.Comp_Close[1] &= ~FC_WL;
         }
         else
         {
             Test |= 0x04;
             l_sys.Fan_Close |= FC_WL;
-            l_sys.Comp_Close |= FC_WL;
+            l_sys.Comp_Close[0] |= FC_WL;
+            l_sys.Comp_Close[1] |= FC_WL;
         }
     }
     else
     {
+        Test |= 0x08;
         l_sys.Fan_Close &= ~FC_WL;
-        l_sys.Comp_Close &= ~FC_WL;
+        l_sys.Comp_Close[0] &= ~FC_WL;
+        l_sys.Comp_Close[1] &= ~FC_WL;
     }
+
     //		//长时间未到中水位
     //		if(((u16WL&S_M)==0)&&(l_sys.PowerOn_Time>=POWERTIME))//90分钟小于中水位
     //		{
@@ -876,50 +820,67 @@ void Sys_Fan_CP_WL(void)
     //				l_sys.Fan_Close &= ~FC_PT;
     //				l_sys.Comp_Close &= ~FC_PT;
     //		}
+
     u8Offset_CNT++;
     if (u8Offset_CNT >= CF_DELAY)
     {
         u8Offset_CNT = CF_DELAY;
     }
-    if ((l_sys.TH_Check_Interval == 0) && ((g_sys.status.ComSta.u16TH[0].Temp < g_sys.config.ComPara.u16Stop_Temp) || (g_sys.status.ComSta.u16TH[0].Hum < g_sys.config.ComPara.u16Stop_Humidity))) //温湿度不满足条件
+    if ((l_sys.TH_Check_Interval == 0) && (u8Offset_CNT >= CF_DELAY)) //上电延时判断温湿度
     {
-        if (u8Offset_CNT >= CF_DELAY)
+        l_sys.TH_Check_Interval = THINTERVAL; //温湿度判断间隔
+        if (u8FCP_Start == 0)                 //冷启动
         {
-            Test |= 0x10;
-            l_sys.TH_Check_Interval = THINTERVAL; //温湿度检测间隔
-            l_sys.Fan_Close |= FC_TH;
-            l_sys.Comp_Close |= FC_TH;
+            if ((g_sys.status.ComSta.u16TH[0].Temp > g_sys.config.ComPara.u16Start_Temp) && (g_sys.status.ComSta.u16TH[0].Hum > g_sys.config.ComPara.u16Start_Humidity)) //温湿度满足条件
+            {
+                Test |= 0x100;
+                l_sys.Fan_Close &= ~FC_TH;
+                l_sys.Comp_Close[0] &= ~FC_TH;
+                l_sys.Comp_Close[1] &= ~FC_TH;
+                u8FCP_Start = 1; //启动
+            }
+            else
+            {
+                Test |= 0x200;
+                l_sys.Fan_Close |= FC_TH;
+                l_sys.Comp_Close[0] |= FC_TH;
+                l_sys.Comp_Close[1] |= FC_TH;
+            }
+        }
+        else
+        {
+            if ((g_sys.status.ComSta.u16TH[0].Temp < g_sys.config.ComPara.u16Stop_Temp) || (g_sys.status.ComSta.u16TH[0].Hum < g_sys.config.ComPara.u16Stop_Humidity)) //温湿度不满足条件
+            {
+                Test |= 0x400;
+                l_sys.Fan_Close |= FC_TH;
+                l_sys.Comp_Close[0] |= FC_TH;
+                l_sys.Comp_Close[1] |= FC_TH;
+                u8FCP_Start = 0;
+            }
         }
     }
-    else if ((l_sys.TH_Check_Interval == 0) && ((g_sys.status.ComSta.u16TH[0].Temp >= g_sys.config.ComPara.u16Start_Temp) && (g_sys.status.ComSta.u16TH[0].Hum >= g_sys.config.ComPara.u16Start_Humidity))) //温湿度满足条件
-    {
-        if (u8Offset_CNT >= CF_DELAY)
-        {
-            Test |= 0x20;
-            l_sys.TH_Check_Interval = THINTERVAL; //温湿度检测间隔
-            l_sys.Fan_Close &= ~FC_TH;
-            l_sys.Comp_Close &= ~FC_TH;
-        }
-    }
-    //		else
-    //		{
-    //				l_sys.Fan_Close &= ~FC_TH;
-    //				l_sys.Comp_Close &= ~FC_TH;
-    //		}
 
     if (g_sys.config.ComPara.u16WaterSource_Mode) //外接水源
     {
-        Test |= 0x40;
+        Test |= 0x800;
         l_sys.Fan_Close |= FC_WS;
-        l_sys.Comp_Close |= FC_WS;
+        l_sys.Comp_Close[0] |= FC_WS;
+        l_sys.Comp_Close[1] |= FC_WS;
     }
     else
     {
+        Test |= 0x1000;
         l_sys.Fan_Close &= ~FC_WS;
-        l_sys.Comp_Close &= ~FC_WS;
+        l_sys.Comp_Close[0] &= ~FC_WS;
+        l_sys.Comp_Close[1] &= ~FC_WS;
     }
-
-    g_sys.status.ComSta.REQ_TEST[0] = (l_sys.Fan_Close << 8) | Test;
+    if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST1_STS_BPOS) != 0) || (sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST2_STS_BPOS) != 0)) //
+    {
+        l_sys.TH_Check_Interval = 0; //除霜后，需要检测温湿度
+        u8FCP_Start = 0;
+        Test |= 0x2000;
+    }
+    g_sys.status.ComSta.REQ_TEST[0] = Test;
     //		g_sys.status.ComSta.REQ_TEST[0]=Test;
 
     // rt_kprintf("u16WL=%x,Test=%x,TH_Check_Interval=%d,din_bitmap[0]=%x,Fan_Close=%x,Comp_Close=%x\n", u16WL, Test, l_sys.TH_Check_Interval, g_sys.status.ComSta.u16Din_bitmap[0], l_sys.Fan_Close, l_sys.Comp_Close);
@@ -943,10 +904,10 @@ void Pwp_req_exe(void)
     {
         l_sys.Pwp_Open = TRUE;
     }
-    else if (g_sys.config.ComPara.u16Change_WaterTank) //更换源水箱
-    {
-        l_sys.Pwp_Open = TRUE;
-    }
+    //		else if(g_sys.config.ComPara.u16Change_WaterTank)//更换源水箱
+    //		{
+    //				l_sys.Pwp_Open=TRUE;
+    //		}
     //外壳打开时，开净化泵
     else if ((sys_get_di_sts(DI_OPEN_BPOS) == 0) && (g_sys.config.ComPara.u16Water_Ctrl & OPEN_PWP))
     {
@@ -1030,6 +991,7 @@ void WaterOut_Key(void)
     }
     else
     {
+
         l_sys.OutWater_Key &= ~WATER_NORMAL_ICE;
         l_sys.OutWater_Delay[0] = 0;
     }
@@ -1478,10 +1440,6 @@ void Sterilize_req_exe(void)
     }
     //水位
     u16WL = Get_Water_level();
-    //		if(u16WL<=0x07)//小于饮水箱低水位
-    //		{
-    //			return;
-    //		}
     if (((u16WL & D_L) == 0)) //饮水箱低水位
     {
         return;
@@ -1600,13 +1558,9 @@ void External_Water_exe(void)
         {
             req_bitmap_op(DO_FV_BPOS, 1); //外接水源
         }
-        l_sys.Fan_Close |= FC_WS;
-        l_sys.Comp_Close |= FC_WS;
     }
     else
     {
-        l_sys.Fan_Close &= ~FC_WS;
-        l_sys.Comp_Close &= ~FC_WS;
         req_bitmap_op(DO_FV_BPOS, 0);
     }
 
@@ -1621,6 +1575,7 @@ void Cold_Water_exe(void)
     uint16_t u16WL;
     uint16_t u16Temp;
     int16_t i16Water_Temp;
+    static uint8_t u8Coldwater = 0;
 
     i16Water_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC4];
 
@@ -1630,36 +1585,43 @@ void Cold_Water_exe(void)
     {
         u16Temp |= 0x01;
         u16WL = Get_Water_level();
-        if (((u16WL & D_L) && (u16WL & D_MU)) && (i16Water_Temp != ABNORMAL_VALUE)) //到达制冷水位
+        if (((u16WL & D_L) && (u16WL & D_MD)) && (i16Water_Temp != ABNORMAL_VALUE)) //到达制冷水位
         {
             u16Temp |= 0x02;
             if (i16Water_Temp > g_sys.config.ComPara.u16ColdWater_StartTemp) //开始制冰水
             {
                 u16Temp |= 0x04;
                 l_sys.Cold_Water = TRUE;
+                u8Coldwater = TRUE;
                 req_bitmap_op(DO_WV_BPOS, 1); //制冷
                 req_bitmap_op(DO_CV_BPOS, 1); //制冰水
             }
             else if (i16Water_Temp < g_sys.config.ComPara.u16ColdWater_StopTemp) //关闭
             {
                 u16Temp |= 0x08;
+                u8Coldwater = FALSE;
                 req_bitmap_op(DO_WV_BPOS, 0); //制冷
                 req_bitmap_op(DO_CV_BPOS, 0); //制冰水
             }
             else //保持
+                if (u8Coldwater == TRUE)
             {
+                u16Temp |= 0x10;
+                l_sys.Cold_Water = TRUE;
+                req_bitmap_op(DO_WV_BPOS, 1); //制冷
+                req_bitmap_op(DO_CV_BPOS, 1); //制冰水
             }
         }
         else
         {
-            u16Temp |= 0x10;
+            u16Temp |= 0x20;
             req_bitmap_op(DO_WV_BPOS, 0); //制冷关闭
             req_bitmap_op(DO_CV_BPOS, 0); //制冰水关闭
         }
     }
     else
     {
-        u16Temp |= 0x20;
+        u16Temp |= 0x40;
         req_bitmap_op(DO_WV_BPOS, 0); //制冷
         req_bitmap_op(DO_CV_BPOS, 0); //制冰水
     }
@@ -1674,6 +1636,7 @@ void Heat_Fan_exe(void)
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
 
+    static uint8_t u8Heatfan = 0;
     int16_t i16Heat_Temp;
 
     i16Heat_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC3];
@@ -1682,14 +1645,18 @@ void Heat_Fan_exe(void)
     {
         if ((i16Heat_Temp == ABNORMAL_VALUE) || (i16Heat_Temp > g_sys.config.ComPara.u16HeatFan_StartTemp)) //
         {
+            u8Heatfan = TRUE;
             req_bitmap_op(DO_HEAT_FAN_BPOS, 1); //扇热风机
         }
         else if ((i16Heat_Temp < g_sys.config.ComPara.u16HeatFan_StopTemp)) //关闭
         {
+            u8Heatfan = FALSE;
             req_bitmap_op(DO_HEAT_FAN_BPOS, 0); //
         }
-        else
+        else //保持
+            if (u8Heatfan == TRUE)
         {
+            req_bitmap_op(DO_HEAT_FAN_BPOS, 1); //扇热风机
         }
     }
     return;

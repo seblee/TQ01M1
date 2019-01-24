@@ -67,10 +67,10 @@ enum
     S_L = 0x01,
     S_M = 0x02,
     S_U = 0x04,
-    D_L = 0x08,
-    D_M = 0x10,
+    D_L = 0x08, //制水
+    D_M = 0x10, //满水
     D_U = 0x20,
-    D_MU = 0x40, //制冷水位
+    D_MD = 0x40, //制冷水位,中水位
 };
 
 //流量脉冲
@@ -146,4 +146,5 @@ enum
 void hum_capacity_calc(void);
 void req_execution(int16_t target_req_temp, int16_t target_req_hum);
 void req_bitmap_op(uint8_t component_bpos, uint8_t action);
+void Close_DIS_PWR(void);
 #endif //__REQ_EXE_H__

@@ -15,6 +15,4 @@ void bkg_thread_entry(void *parameter);
 void di_thread_entry(void *parameter);
 
 void net_thread_entry(void *parameter);
-void modul_control_thread_entry(void *parameter);
-
 #endif //__THREADS_ENTRIES

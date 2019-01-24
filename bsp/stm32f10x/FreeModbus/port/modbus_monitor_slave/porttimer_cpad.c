@@ -28,82 +28,80 @@
 
 /* ----------------------- static functions ---------------------------------*/
 
-extern cpad_slave_st  cpad_slave_inst;
+extern cpad_slave_st cpad_slave_inst;
 /* ----------------------- Start implementation -----------------------------*/
 void cpad_xMBPortTimersInit(USHORT usTim1Timerout50us)
 {
 
-	uint16_t PrescalerValue = 0;
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-	//====================================Ê±ÖÓ³õÊ¼»¯===========================
-	//Ê¹ÄÜ¶¨Ê±Æ÷3Ê±ÖÓ
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
-	//====================================¶¨Ê±Æ÷³õÊ¼»¯===========================
-	//¶¨Ê±Æ÷Ê±¼ä»ùÅäÖÃËµÃ÷
-	//HCLKÎª72MHz£¬APB1¾­¹ı2·ÖÆµÎª36MHz
-	//TIM3µÄÊ±ÖÓ±¶ÆµºóÎª72MHz£¨Ó²¼ş×Ô¶¯±¶Æµ,´ïµ½×î´ó£©
-	//TIM3µÄ·ÖÆµÏµÊıÎª3599£¬Ê±¼ä»ùÆµÂÊÎª72 / (1 + Prescaler) = 20KHz,»ù×¼Îª50us
-	//TIM×î´ó¼ÆÊıÖµÎªusTim1Timerout50u
-	
-	PrescalerValue = (uint16_t) (SystemCoreClock / 20000) - 1;
-	//¶¨Ê±Æ÷1³õÊ¼»¯
-//	TIM_TimeBaseStructure.TIM_Period = (uint16_t) usTim1Timerout50us;
-	TIM_TimeBaseStructure.TIM_Period = (uint16_t) usTim1Timerout50us * 20;//Åä·½µ¼Êı¾İ£¬ĞŞ¸Ä
-	TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
-	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
-	//Ô¤×°ÔØÊ¹ÄÜ
-	TIM_ARRPreloadConfig(TIM5, ENABLE);
-	//====================================ÖĞ¶Ï³õÊ¼»¯===========================
-	//ÉèÖÃNVICÓÅÏÈ¼¶·Ö×éÎªGroup2£º0-3ÇÀÕ¼Ê½ÓÅÏÈ¼¶£¬0-3µÄÏìÓ¦Ê½ÓÅÏÈ¼¶
-	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-	NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-	//Çå³ıÒç³öÖĞ¶Ï±êÖ¾Î»
-	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
-	//¶¨Ê±Æ÷3Òç³öÖĞ¶Ï¹Ø±Õ
-	TIM_ITConfig(TIM5, TIM_IT_Update, DISABLE);
-	//¶¨Ê±Æ÷3½ûÄÜ
-	TIM_Cmd(TIM5 ,DISABLE);
-	
-	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
-	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
-	TIM_SetCounter(TIM5, 0);
-	TIM_Cmd(TIM5, DISABLE);
+    uint16_t PrescalerValue = 0;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    //====================================æ—¶é’Ÿåˆå§‹åŒ–===========================
+    //ä½¿èƒ½å®šæ—¶å™¨3æ—¶é’Ÿ
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+    //====================================å®šæ—¶å™¨åˆå§‹åŒ–===========================
+    //å®šæ—¶å™¨æ—¶é—´åŸºé…ç½®è¯´æ˜
+    //HCLKä¸º72MHzï¼ŒAPB1ç»è¿‡2åˆ†é¢‘ä¸º36MHz
+    //TIM3çš„æ—¶é’Ÿå€é¢‘åä¸º72MHzï¼ˆç¡¬ä»¶è‡ªåŠ¨å€é¢‘,è¾¾åˆ°æœ€å¤§ï¼‰
+    //TIM3çš„åˆ†é¢‘ç³»æ•°ä¸º3599ï¼Œæ—¶é—´åŸºé¢‘ç‡ä¸º72 / (1 + Prescaler) = 20KHz,åŸºå‡†ä¸º50us
+    //TIMæœ€å¤§è®¡æ•°å€¼ä¸ºusTim1Timerout50u
+
+    PrescalerValue = (uint16_t)(SystemCoreClock / 20000) - 1;
+    //å®šæ—¶å™¨1åˆå§‹åŒ–
+    //	TIM_TimeBaseStructure.TIM_Period = (uint16_t) usTim1Timerout50us;
+    TIM_TimeBaseStructure.TIM_Period = (uint16_t)usTim1Timerout50us * 20; //é…æ–¹å¯¼æ•°æ®ï¼Œä¿®æ”¹
+    TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
+    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM5, &TIM_TimeBaseStructure);
+    //é¢„è£…è½½ä½¿èƒ½
+    TIM_ARRPreloadConfig(TIM5, ENABLE);
+    //====================================ä¸­æ–­åˆå§‹åŒ–===========================
+    //è®¾ç½®NVICä¼˜å…ˆçº§åˆ†ç»„ä¸ºGroup2ï¼š0-3æŠ¢å å¼ä¼˜å…ˆçº§ï¼Œ0-3çš„å“åº”å¼ä¼˜å…ˆçº§
+    //NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+    //æ¸…é™¤æº¢å‡ºä¸­æ–­æ ‡å¿—ä½
+    TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
+    //å®šæ—¶å™¨3æº¢å‡ºä¸­æ–­å…³é—­
+    TIM_ITConfig(TIM5, TIM_IT_Update, DISABLE);
+    //å®šæ—¶å™¨3ç¦èƒ½
+    TIM_Cmd(TIM5, DISABLE);
+
+    TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
+    TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
+    TIM_SetCounter(TIM5, 0);
+    TIM_Cmd(TIM5, DISABLE);
 }
 
 void cpad_vMBPortTimersEnable()
 {
-	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
-	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
-	TIM_SetCounter(TIM5, 0);
-	TIM_Cmd(TIM5, ENABLE);
+    TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
+    TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);
+    TIM_SetCounter(TIM5, 0);
+    TIM_Cmd(TIM5, ENABLE);
 }
 
 void cpad_vMBPortTimersDisable()
 {
-	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
-	TIM_ITConfig(TIM5, TIM_IT_Update, DISABLE);
-	TIM_SetCounter(TIM5, 0);
-	TIM_Cmd(TIM5, DISABLE);
+    TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
+    TIM_ITConfig(TIM5, TIM_IT_Update, DISABLE);
+    TIM_SetCounter(TIM5, 0);
+    TIM_Cmd(TIM5, DISABLE);
 }
-
-
 
 void TIM5_IRQHandler(void)
 {
-	rt_interrupt_enter();
-	if (TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET)
-	{
-		
-		TIM_ClearFlag(TIM5, TIM_FLAG_Update);	     		//ÇåÖĞ¶Ï±ê¼Ç
-		TIM_ClearITPendingBit(TIM5, TIM_IT_Update);		//Çå³ı¶¨Ê±Æ÷T3Òç³öÖĞ¶Ï±êÖ¾Î»
-		cpad_slave_inst.rx_timeout = 1;
-	}
-	rt_interrupt_leave();
+    rt_interrupt_enter();
+    if (TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET)
+    {
+
+        TIM_ClearFlag(TIM5, TIM_FLAG_Update);       //æ¸…ä¸­æ–­æ ‡è®°
+        TIM_ClearITPendingBit(TIM5, TIM_IT_Update); //æ¸…é™¤å®šæ—¶å™¨T3æº¢å‡ºä¸­æ–­æ ‡å¿—ä½
+        cpad_slave_inst.rx_timeout = 1;
+    }
+    rt_interrupt_leave();
 }

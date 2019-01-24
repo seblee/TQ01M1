@@ -16,6 +16,8 @@
 #include <rthw.h>
 #include <rtthread.h>
 
+#include "port.h"
+
 #include "stm32f10x.h"
 #include "stm32f10x_fsmc.h"
 #include "board.h"
@@ -85,10 +87,10 @@ void rt_hw_board_init(void)
     NVIC_Configuration();
     /* Configure the SysTick */
     SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
-
+#ifdef SYS_DEBUG
     drv_usart_init();
     rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
-
+#endif
 #ifdef RT_USING_COMPONENTS_INIT
     rt_components_board_init();
 #endif
@@ -96,6 +98,7 @@ void rt_hw_board_init(void)
 
 void hw_drivers_init(void)
 {
+
     drv_adc_dma_init(); //模拟输入初始化
 
     drv_dio_init(); //数字输入输出初始化

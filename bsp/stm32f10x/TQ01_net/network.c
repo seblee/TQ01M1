@@ -567,7 +567,7 @@ rt_err_t network_parameter_set_parse(const char *Str)
                 {
                     sscanf(Settingmsg_str + 2 * i, "%02X", &Settingmsg_data);
                     Settingmsg_data_buf[i] = (uint8_t)(Settingmsg_data & (int)0xFF);
-                    rt_kprintf("%02x", Settingmsg_data_buf[i]);
+                    // rt_kprintf("%02x", Settingmsg_data_buf[i]);
                 }
 
                 cpad_eMBRegHoldingCB((unsigned char *)Settingmsg_data_buf, Setaddrstart, Settingleng, CPAD_MB_REG_MULTIPLE_WRITE);

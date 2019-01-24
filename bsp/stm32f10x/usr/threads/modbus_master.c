@@ -2,7 +2,6 @@
 #include "mb.h"
 #include "mb_m.h"
 
-
 /**
   * @brief  modbus master poll thread
   * @param  none
@@ -22,8 +21,8 @@
 //				rt_kprintf("MBM enable fail\n");
 //		}
 //		while(1)
-//		{ 
-//				eStatus = eMBMasterPoll();	
+//		{
+//				eStatus = eMBMasterPoll();
 //				if(eStatus != MB_ENOERR)
 //				{
 //						rt_kprintf("MBM poll err!\n");

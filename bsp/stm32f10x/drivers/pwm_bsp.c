@@ -94,7 +94,7 @@ void drv_pwm_init(void)
     uint16_t i;
     pwm_rcc_conf();
     pwm_gpio_conf();
-    drv_pwm_conf(100000);                  //set frequency to 100Hz
+    drv_pwm_conf(1000000);                 //set frequency to 1000Hz
     for (i = 1; i <= AO_CHAN_MAX_NUM; i++) //reset pwm initial state to output 0
     {
         pwm_set_ao(i, 0);
@@ -191,7 +191,7 @@ static void pwm_gpio_conf(void)
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
-/*****************************************PWM Pluse****************************************/
+/*****************************************PWM Pluse 流量计****************************************/
 
 static void CNT_Pluse_Rcc_Conf(void)
 {
@@ -222,7 +222,7 @@ static void CNT_Pluse_Time_Conf(void)
     TIM_TimeBaseStructure.TIM_Period = 60000;
     TIM_TimeBaseStructure.TIM_Prescaler = 0x00;
     TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
-    TIM_ETRClockMode2Config(TIM1, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 2); //ExtTRGFilter:Íâ²¿´¥·¢ÂË²¨Æ÷,·¶Î§0-0xF,Ô¤¶¨10
+    TIM_ETRClockMode2Config(TIM1, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 2); //ExtTRGFilter:外部触发滤波器,范围0-0xF,预定10
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;

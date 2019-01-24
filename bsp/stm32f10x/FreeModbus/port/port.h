@@ -30,48 +30,47 @@
 #include <assert.h>
 #include <inttypes.h>
 
-#define	INLINE
-#define PR_BEGIN_EXTERN_C           extern "C" {
-#define	PR_END_EXTERN_C             }
+#define INLINE
+#define PR_BEGIN_EXTERN_C \
+    extern "C"            \
+    {
+#define PR_END_EXTERN_C }
 
+#define CONSOLE_RS485_SND_MODE GPIO_SetBits(GPIOD, GPIO_Pin_3)
+#define CONSOLE_RS485_RCV_MODE GPIO_ResetBits(GPIOD, GPIO_Pin_3)
 
-#define CONSOLE_RS485_SND_MODE  GPIO_SetBits(GPIOD,GPIO_Pin_3)
-#define CONSOLE_RS485_RCV_MODE  GPIO_ResetBits(GPIOD,GPIO_Pin_3)
+#define SLAVE_RS485_SEND_MODE GPIO_SetBits(GPIOE, GPIO_Pin_6) //ÁõëÊéßÂè£
+#define SLAVE_RS485_RECEIVE_MODE GPIO_ResetBits(GPIOE, GPIO_Pin_6)
 
-#define SLAVE_RS485_SEND_MODE               GPIO_SetBits(GPIOE,GPIO_Pin_6)//º‡øÿø⁄
-#define SLAVE_RS485_RECEIVE_MODE            GPIO_ResetBits(GPIOE,GPIO_Pin_6)
+#define CPAD_SLAVE_RS485_SEND_MODE GPIO_SetBits(GPIOD, GPIO_Pin_7) //HMIÂè£
+#define CPAD_SLAVE_RS485_RECEIVE_MODE GPIO_ResetBits(GPIOD, GPIO_Pin_7)
 
-#define CPAD_SLAVE_RS485_SEND_MODE          GPIO_SetBits(GPIOD,GPIO_Pin_7)//HMIø⁄
-#define CPAD_SLAVE_RS485_RECEIVE_MODE       GPIO_ResetBits(GPIOD,GPIO_Pin_7)
+#define MASTER_RS485_SEND_MODE GPIO_SetBits(GPIOA, GPIO_Pin_11) //ÂÜÖÈÉ®ÈÄö‰ø°Âè£
+#define MASTER_RS485_RECEIVE_MODE GPIO_ResetBits(GPIOA, GPIO_Pin_11)
 
+#define MASTER_RS485_SEND_MODE_01 GPIO_SetBits(GPIOA, GPIO_Pin_15) //ÂÜÖÈÉ®ÈÄö‰ø°Âè£2
+#define MASTER_RS485_RECEIVE_MODE_01 GPIO_ResetBits(GPIOA, GPIO_Pin_15)
 
-#define MASTER_RS485_SEND_MODE  GPIO_SetBits(GPIOA,GPIO_Pin_11)//ƒ⁄≤øÕ®–≈ø⁄
-#define MASTER_RS485_RECEIVE_MODE  GPIO_ResetBits(GPIOA,GPIO_Pin_11)
-
-#define MASTER_RS485_SEND_MODE_01               GPIO_SetBits(GPIOA,GPIO_Pin_15)//ƒ⁄≤øÕ®–≈ø⁄2
-#define MASTER_RS485_RECEIVE_MODE_01            GPIO_ResetBits(GPIOA,GPIO_Pin_15)
-
-#define MASTER_RS485_SEND_MODE_02               GPIO_SetBits(GPIOD,GPIO_Pin_3)//ƒ⁄≤øÕ®–≈ø⁄3
-#define MASTER_RS485_RECEIVE_MODE_02            GPIO_ResetBits(GPIOD,GPIO_Pin_3)
+#define MASTER_RS485_SEND_MODE_02 GPIO_SetBits(GPIOD, GPIO_Pin_3) //ÂÜÖÈÉ®ÈÄö‰ø°Âè£3
+#define MASTER_RS485_RECEIVE_MODE_02 GPIO_ResetBits(GPIOD, GPIO_Pin_3)
 
 enum
 {
-	UPORT_MBMASTER=1,
-	UPORT_CPAD,
-	UPORT_SLAVE,
-	UPORT_PM25,
-	UPORT_CONSEL,	
-	UPORT_MAX,	
+    UPORT_MBMASTER = 1,
+    UPORT_CPAD,
+    UPORT_SLAVE,
+    UPORT_PM25,
+    UPORT_CONSEL,
+    UPORT_MAX,
 };
 
-
-#define ENTER_CRITICAL_SECTION()	EnterCriticalSection()
-#define EXIT_CRITICAL_SECTION()    ExitCriticalSection()
+#define ENTER_CRITICAL_SECTION() EnterCriticalSection()
+#define EXIT_CRITICAL_SECTION() ExitCriticalSection()
 
 typedef uint8_t BOOL;
 
 typedef unsigned char UCHAR;
-typedef char    CHAR;
+typedef char CHAR;
 
 typedef uint16_t USHORT;
 typedef int16_t SHORT;
@@ -80,11 +79,11 @@ typedef uint32_t ULONG;
 typedef int32_t LONG;
 
 #ifndef TRUE
-#define TRUE            1
+#define TRUE 1
 #endif
 
 #ifndef FALSE
-#define FALSE           0
+#define FALSE 0
 #endif
 
 void EnterCriticalSection(void);

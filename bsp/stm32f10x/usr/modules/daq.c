@@ -103,20 +103,19 @@ uint16_t get_current_hum()
 //	return(relvaule);
 //}
 
-//k_factor has 3-valid-digitals integer
-// static int16_t calc_hi_press_ai(uint16_t adc_value, uint16_t k_factor, int16_t cali);
-// static int16_t calc_hi_press_ai(uint16_t adc_value, uint16_t k_factor, int16_t cali)
-// {
-//     int32_t ret_val = 0;
-//     //As Vo/Vcc*100 = K*P+10, Vadc*4/Vcc*100 = K*P+10. Vadc = 3.3/4096 * N.
-//     //(((3.3/4096)*N)*4)/Vcc*100 = K*P + 10;
-//     ret_val = ((3.3 * adc_value * 100 * 4) / (4096 * 5) - 10) * 1000 / k_factor + (int16_t)(cali); //unit is BAR(aka. 0.1MPaG)
-//     if (ret_val <= 0)
-//     {
-//         ret_val = ABNORMAL_VALUE;
-//     }
-//     return (int16_t)ret_val;
-// }
+////k_factor has 3-valid-digitals integer
+//static int16_t calc_hi_press_ai(uint16_t adc_value,uint16_t k_factor,int16_t cali)
+//{
+//    int32_t ret_val = 0;
+//    //As Vo/Vcc*100 = K*P+10, Vadc*4/Vcc*100 = K*P+10. Vadc = 3.3/4096 * N.
+//    //(((3.3/4096)*N)*4)/Vcc*100 = K*P + 10;
+//    ret_val = ((3.3*adc_value*100*4)/(4096*5) - 10)*1000/k_factor + (int16_t)(cali); //unit is BAR(aka. 0.1MPaG)
+//	  if(ret_val <=0)
+//		{
+//				ret_val =ABNORMAL_VALUE;
+//		}
+//    return (int16_t)ret_val;
+//}
 //测量UV光强
 static int16_t Calc_UV_ai(uint16_t adc_value, uint16_t k_factor, int16_t cali)
 {

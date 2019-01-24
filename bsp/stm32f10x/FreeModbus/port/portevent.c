@@ -24,45 +24,42 @@
 #include "mbport.h"
 
 /* ----------------------- Variables ----------------------------------------*/
-static struct rt_event     xSlaveOsEvent;
+static struct rt_event xSlaveOsEvent;
 /* ----------------------- Start implementation -----------------------------*/
-BOOL
-xMBPortEventInit( void )
+BOOL xMBPortEventInit(void)
 {
-	rt_event_init(&xSlaveOsEvent,"slave event",RT_IPC_FLAG_PRIO);
+    rt_event_init(&xSlaveOsEvent, "slave event", RT_IPC_FLAG_PRIO);
     return TRUE;
 }
 
-BOOL
-xMBPortEventPost( eMBEventType eEvent )
+BOOL xMBPortEventPost(eMBEventType eEvent)
 {
-	rt_event_send(&xSlaveOsEvent, eEvent);
+    rt_event_send(&xSlaveOsEvent, eEvent);
     return TRUE;
 }
 
-BOOL
-xMBPortEventGet( eMBEventType * eEvent )
+BOOL xMBPortEventGet(eMBEventType *eEvent)
 {
     rt_uint32_t recvedEvent;
     /* waiting forever OS event */
-	rt_event_recv(&xSlaveOsEvent,
-			EV_READY | EV_FRAME_RECEIVED | EV_EXECUTE | EV_FRAME_SENT,
-			RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR, RT_WAITING_FOREVER,
-			&recvedEvent);
-	switch (recvedEvent)
-	{
-	case EV_READY:
-		*eEvent = EV_READY;
-		break;
-	case EV_FRAME_RECEIVED:
-		*eEvent = EV_FRAME_RECEIVED;
-		break;
-	case EV_EXECUTE:
-		*eEvent = EV_EXECUTE;
-		break;
-	case EV_FRAME_SENT:
-		*eEvent = EV_FRAME_SENT;
-		break;
-	}
+    rt_event_recv(&xSlaveOsEvent,
+                  EV_READY | EV_FRAME_RECEIVED | EV_EXECUTE | EV_FRAME_SENT,
+                  RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR, RT_WAITING_FOREVER,
+                  &recvedEvent);
+    switch (recvedEvent)
+    {
+    case EV_READY:
+        *eEvent = EV_READY;
+        break;
+    case EV_FRAME_RECEIVED:
+        *eEvent = EV_FRAME_RECEIVED;
+        break;
+    case EV_EXECUTE:
+        *eEvent = EV_EXECUTE;
+        break;
+    case EV_FRAME_SENT:
+        *eEvent = EV_FRAME_SENT;
+        break;
+    }
     return TRUE;
 }

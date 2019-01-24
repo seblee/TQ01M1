@@ -20,8 +20,8 @@
 
 void *malloc(int n)
 {
-    return rt_malloc(n); 
-} 
+    return rt_malloc(n);
+}
 
 void *realloc(void *rmem, rt_size_t newsize)
 {

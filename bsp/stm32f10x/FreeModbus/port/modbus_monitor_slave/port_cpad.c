@@ -1,4 +1,4 @@
- /*
+/*
   * FreeModbus Libary: STM32 Port
   * Copyright (C) 2013 Armink <armink.ztl@gmail.com>
   *
@@ -28,17 +28,18 @@
 /* ----------------------- Start implementation -----------------------------*/
 void MonitorEnterCriticalSection(void)
 {
-	//关闭全局中断
-	__disable_irq();
+    //鍏抽棴鍏ㄥ眬涓柇
+    __disable_irq();
 }
 
 void MonitorExitCriticalSection(void)
 {
-	//开启全局中断
-	__enable_irq();
+    //寮�鍚叏灞�涓柇
+    __enable_irq();
 }
 
 void MonitorvMBDelay(ULONG nCount)
 {
-  for(; nCount > 0;nCount--);
+    for (; nCount > 0; nCount--)
+        ;
 }

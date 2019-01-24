@@ -364,14 +364,14 @@ uint16_t Get_Water_level(void)
         u16Water_level &= ~D_U;
     }
 
-    //D_MU
-    if (sys_get_di_sts(DI_DRINK_MU_BPOS) == 0)
+    //D_MD
+    if (sys_get_di_sts(DI_DRINK_MD_BPOS) == 0)
     {
-        u16Water_level |= D_MU;
+        u16Water_level |= D_MD;
     }
     else
     {
-        u16Water_level &= ~D_MU;
+        u16Water_level &= ~D_MD;
     }
 
     g_sys.status.ComSta.u16WL = u16Water_level;

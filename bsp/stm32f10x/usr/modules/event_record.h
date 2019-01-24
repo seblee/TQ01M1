@@ -23,7 +23,7 @@
 
 #define EVENT_FIFO_DEPTH 64
 
-//yxq
+//y
 #pragma pack(1)
 
 // typedef struct
@@ -130,5 +130,6 @@ void init_tem_hum_record(void);
 void add_hum_temp_log(void);
 uint8_t clear_tem_hum_log(void);
 uint8_t get_tem_hum_log(uint8_t *log_data, uint16_t block);
+uint8_t COM_SINGLE_eMBRegHoldingCB(uint16_t usAddress, uint16_t usValue);
 
 #endif //__ALARM_ACL_H__

@@ -174,4 +174,5 @@ typedef enum
 
 void mbm_sts_update(sys_reg_st *gds_ptr);
 void mbs_sts_update(void); // 更新本地变量到协议栈寄存器中
+
 #endif

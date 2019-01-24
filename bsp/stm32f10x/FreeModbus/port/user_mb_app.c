@@ -136,7 +136,6 @@ const reg_table_st modbus_slave_reg_table[] = {
     {0, 186}, //
     {0, 187}, //
     {0, 188}, //
-
     {0, 189}, //
     {0, 190}, //
     {0, 191}, //
@@ -361,16 +360,12 @@ eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegist
                         //写入保持寄存器中同时跟新到内存和flash保存
                         // 写入寄存器和EEPROM中。
 
-                        if (reg_map_write(conf_reg_map_inst[pt[iRegIndex].reg_addr].id, &Writ_Value, 1, USER_MODEBUS_SLAVE) == CPAD_ERR_NOERR)
+                        if (COM_SINGLE_eMBRegHoldingCB(conf_reg_map_inst[pt[iRegIndex].reg_addr].id, Writ_Value) == MB_ENOERR)
                         {
-                            pusRegHoldingBuf[iRegIndex] = *pucRegBuffer++ << 8;
-                            pusRegHoldingBuf[iRegIndex] |= *pucRegBuffer++;
-                            iRegIndex++;
                             usNRegs--;
                         }
                         else
                         {
-
                             eStatus = MB_ENORES;
                             break; //	 while( usNRegs > 0 )
                         }

@@ -20,12 +20,12 @@ enum
     ACL_E1,
     ACL_E2,
     ACL_E3,
-    ACL_E4, //
+    ACL_E4, //ACL_UV2_OT
     ACL_E5, //
     ACL_E6,
     ACL_E7,
-    ACL_E8, //紫外灯杀菌未开
-    ACL_RESERVE_01,
+    ACL_E8,         //紫外灯杀菌未开
+    ACL_WATER_LEAK, //漏水告警
 
     ACL_FAN01_OD,
     ACL_HI_PRESS1,           //高压1
@@ -36,14 +36,14 @@ enum
     ACL_FILTER_ELEMENT_2_OT, //滤芯3
     ACL_FILTER_ELEMENT_3_OT, //滤芯4
     ACL_FILTER_ELEMENT_4_OT, //滤芯5
-    ACL_UV1_OT,              //紫外灯1
-
-    ACL_UV2_OT, //紫外灯2超时
-                //异常
+                             //			ACL_UV1_OT	,//紫外灯1
+                             //			ACL_UV2_OT,
+                             //异常
     ACL_TOTAL_NUM,
 
 };
-
+#define ACL_UV1_OT ACL_E8 //紫外灯2超时
+#define ACL_UV2_OT ACL_E4 //紫外灯2超时
 //Alair,20161227
 enum
 {

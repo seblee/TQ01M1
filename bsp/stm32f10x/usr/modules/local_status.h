@@ -133,16 +133,17 @@ typedef struct
     uint16_t l_fsm_state[L_FSM_STATE_MAX_NUM];
     pid_st pid;
     Fan_st Fan;
-    uint8_t Fan_Close;       //风机开关信号
-    uint8_t Comp_Close;      //压缩机开关信号
-    uint8_t Pwp_Open;        //净化泵开关信号
-    uint8_t OutWater_Flag;   //出水中
-    uint8_t OutWater_OK;     //出水完成
-    uint8_t HeatWater_st;    //加热器出水状态
-    uint16_t HeatWater_Flow; //加热器出水流量
-    uint16_t HeatWater_Time; //加热器出水时间
-    uint8_t Cold_Water;      //制冰水信号
-    uint8_t SEL_Jump;        //跳线选择
+    uint8_t Fan_Close;         //风机开关信号
+    uint8_t Comp_Close[2];     //压缩机开关信号
+    uint16_t Comp_Interval[2]; //压机启动间隔
+    uint8_t Pwp_Open;          //净化泵开关信号
+    uint8_t OutWater_Flag;     //出水中
+    uint8_t OutWater_OK;       //出水完成
+    uint8_t HeatWater_st;      //加热器出水状态
+    uint16_t HeatWater_Flow;   //加热器出水流量
+    uint16_t HeatWater_Time;   //加热器出水时间
+    uint8_t Cold_Water;        //制冰水信号
+    uint8_t SEL_Jump;          //跳线选择
     uint16_t comp_startup_interval;
     uint16_t comp_stop_interval;
     uint16_t PowerOn_Time;      //开机计时
@@ -155,7 +156,6 @@ typedef struct
     uint8_t ChildLock_Key;      //童锁
     uint8_t ChildLock_Cnt[2];   //童锁计数器
     uint16_t u16Uart_Timeout;   //串口重启
-    uint16_t NetStates;   //联网状态(bit0:wifi↔AP bit1:M1↔internet bit2:MQTT is OK)
 } local_reg_st;
 
 enum

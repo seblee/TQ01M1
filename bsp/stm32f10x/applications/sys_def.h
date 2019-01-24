@@ -27,20 +27,20 @@ typedef uint32_t time_t;
 #define DEBUG_OFF_FLAG 123
 
 #define SYS_HMI_TQ 1 //天泉
-//#define SYS_HMI_TQ_T10  1        //天泉
+//#define	SYS_HMI_TQ_T10		1			//T10小机
 //#define	SYS_HMI_VJL		1		//威金利
 
 #ifdef SYS_HMI_TQ
 #define CONF_REG_MAP_NUM 300
 #define CONF_REG_SID_START 200
 #define CONF_REG_SID_NUM 100
-#define SOFTWARE_VER 0x120D
+#define SOFTWARE_VER 0x1031
 
 #elif SYS_HMI_TQ_T10
 #define CONF_REG_MAP_NUM 300
 #define CONF_REG_SID_START 200
 #define CONF_REG_SID_NUM 100
-#define SOFTWARE_VER 0x1002
+#define SOFTWARE_VER 0x1104
 
 #elif SYS_HMI_VJL
 #define CONF_REG_MAP_NUM 106
