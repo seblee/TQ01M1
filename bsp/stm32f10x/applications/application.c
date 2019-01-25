@@ -22,8 +22,6 @@
 #include <rtthread.h>
 #include <math.h>
 
- 
-
 #ifdef RT_USING_DFS
 /* dfs filesystem:ELM filesystem init */
 #include <dfs_elm.h>
@@ -93,6 +91,19 @@ void rt_init_thread_entry(void *parameter)
     /* initialization RT-Thread Components */
     rt_components_init();
 #endif
+
+    //     /* Filesystem Initialization */
+    // #if defined(RT_USING_DFS) && defined(RT_USING_DFS_ELMFAT)
+    //     /* mount sd card fat partition 1 as root directory */
+    //     elm_init();
+    //     int err = dfs_mount("sd0", "/", "elm", 0, 0);
+    //     if (err == 0)
+    //     {
+    //         rt_kprintf("File System initialized!\n");
+    //     }
+    //     else
+    //         rt_kprintf("File System initialzation failed!err:%d get_err=%d\n", err, rt_get_errno());
+    // #endif /* RT_USING_DFS */
 
     // #ifdef RT_USING_FINSH
     //     finsh_set_device(RT_CONSOLE_DEVICE_NAME);

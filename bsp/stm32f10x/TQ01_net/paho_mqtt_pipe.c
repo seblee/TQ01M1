@@ -17,7 +17,7 @@
 #include "network.h"
 #include "mqtt_client.h"
 
-#include "modul_ctr.h" 
+#include "modul_ctr.h"
 
 #define DBG_ENABLE
 #define DBG_SECTION_NAME "paho"
