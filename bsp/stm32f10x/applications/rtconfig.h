@@ -59,35 +59,41 @@
 // <bool name="RT_USING_COMPONENTS_INIT" description="Using RT-Thread components initialization" default="true" />
 #define RT_USING_COMPONENTS_INIT
 
-/* SECTION: Device System */
-/* Using Device System */
-#define RT_USING_DEVICE
-// <bool name="RT_USING_DEVICE_IPC" description="Using device communication" default="true" />
-#define RT_USING_DEVICE_IPC
-// <bool name="RT_USING_SERIAL" description="Using Serial" default="true" />
-#define RT_USING_SERIAL
+/* Kernel Device Object */
 
-/* SECTION: Console options */
+#define RT_USING_DEVICE
 #define RT_USING_CONSOLE
-/* the buffer size of console*/
 #define RT_CONSOLEBUF_SIZE 512
-// <string name="RT_CONSOLE_DEVICE_NAME" description="The device name for console" default="uart1" />
 #define RT_CONSOLE_DEVICE_NAME "uart5"
+#define RT_VER_NUM 0x40000
+#define ARCH_ARM
+#define ARCH_ARM_CORTEX_M
+#define ARCH_ARM_CORTEX_M3
+
+/* Device Drivers */
+#define RT_USING_DEVICE_IPC
+#define RT_PIPE_BUFSZ 512
+#define RT_USING_SERIAL
+#define RT_SERIAL_USING_DMA
+
+#define RT_USING_RTC
+#define RT_USING_ALARMS
+// <string name="RT_CONSOLE_DEVICE_NAME" description="The device name for console" default="uart1" />
 
 /* SECTION: finsh, a C-Express shell */
 #define RT_USING_FINSH
-/* Using symbol table */
+#define FINSH_THREAD_NAME "tshell"
+#define FINSH_USING_HISTORY
+#define FINSH_HISTORY_LINES 5
 #define FINSH_USING_SYMTAB
 #define FINSH_USING_DESCRIPTION
+#define FINSH_THREAD_PRIORITY 20
+#define FINSH_THREAD_STACK_SIZE 4096
+#define FINSH_CMD_SIZE 80
+#define FINSH_USING_MSH
+#define FINSH_USING_MSH_DEFAULT
+#define FINSH_ARG_MAX 10
 
-/* SECTION: RTC */
-#define RT_USING_RTC
-#define RT_USING_ALARMS
-
-/* SECTION: I2C */
-#define RT_USING_I2C
-
-/* SECTION: device filesystem */
 /* Device virtual file system */
 
 #define RT_USING_DFS
@@ -96,7 +102,9 @@
 #define DFS_FILESYSTEM_TYPES_MAX 2
 #define DFS_FD_MAX 4
 #define RT_USING_DFS_ELMFAT
+
 /* elm-chan's FatFs, Generic FAT Filesystem Module */
+
 #define RT_DFS_ELM_CODE_PAGE 437
 #define RT_DFS_ELM_WORD_ACCESS
 #define RT_DFS_ELM_USE_LFN_3
@@ -107,12 +115,17 @@
 #define RT_DFS_ELM_REENTRANT
 #define RT_USING_DFS_DEVFS
 
+/* SECTION: I2C */
+#define RT_USING_I2C
+
+/* SECTION: device filesystem */
+
 /* Network */
 
 /* POSIX layer and C standard library */
 
-#define RT_USING_LIBC
 #define RT_USING_POSIX
+#define RT_USING_LIBC
 /* Socket abstraction layer */
 
 #define RT_USING_SAL

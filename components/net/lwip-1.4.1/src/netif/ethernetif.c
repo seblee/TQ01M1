@@ -1,24 +1,6 @@
 /*
- * File      : ethernetif.c
- * This file is part of RT-Thread RTOS
- * COPYRIGHT (C) 2006 - 2010, RT-Thread Development Team
- *
- * The license and distribution terms for this file may be
- * found in the file LICENSE in this distribution or at
- * http://www.rt-thread.org/license/LICENSE
- *
- * Change Logs:
- * Date           Author       Notes
- * 2010-07-07     Bernard      fix send mail to mailbox issue.
- * 2011-07-30     mbbill       port lwIP 1.4.0 to RT-Thread
- * 2012-04-10     Bernard      add more compatible with RT-Thread.
- * 2012-11-12     Bernard      The network interface can be initialized
- *                             after lwIP initialization.
- * 2013-02-28     aozima       fixed list_tcps bug: ipaddr_ntoa isn't reentrant.
- */
-
-/*
  * Copyright (c) 2001-2004 Swedish Institute of Computer Science.
+ * COPYRIGHT (C) 2006-2010, RT-Thread Development Team
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -47,6 +29,14 @@
  *
  * Author: Adam Dunkels <adam@sics.se>
  *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2010-07-07     Bernard      fix send mail to mailbox issue.
+ * 2011-07-30     mbbill       port lwIP 1.4.0 to RT-Thread
+ * 2012-04-10     Bernard      add more compatible with RT-Thread.
+ * 2012-11-12     Bernard      The network interface can be initialized
+ *                             after lwIP initialization.
+ * 2013-02-28     aozima       fixed list_tcps bug: ipaddr_ntoa isn't reentrant.
  */
 
 #include <rtthread.h>
@@ -63,9 +53,16 @@
 
 #include "netif/etharp.h"
 #include "netif/ethernetif.h"
+#include "lwip/inet.h"
 
 #define netifapi_netif_set_link_up(n)      netifapi_netif_common(n, netif_set_link_up, NULL)
 #define netifapi_netif_set_link_down(n)    netifapi_netif_common(n, netif_set_link_down, NULL)
+
+#ifndef RT_LWIP_ETHTHREAD_PRIORITY
+#define RT_ETHERNETIF_THREAD_PREORITY	0x90
+#else
+#define RT_ETHERNETIF_THREAD_PREORITY	RT_LWIP_ETHTHREAD_PRIORITY
+#endif
 
 #ifndef LWIP_NO_TX_THREAD
 /**
@@ -79,7 +76,7 @@ struct eth_tx_msg
 
 static struct rt_mailbox eth_tx_thread_mb;
 static struct rt_thread eth_tx_thread;
-#ifndef RT_LWIP_ETHTHREAD_PRIORITY
+#ifndef RT_LWIP_ETHTHREAD_MBOX_SIZE
 static char eth_tx_thread_mb_pool[32 * 4];
 static char eth_tx_thread_stack[512];
 #else
@@ -91,12 +88,10 @@ static char eth_tx_thread_stack[RT_LWIP_ETHTHREAD_STACKSIZE];
 #ifndef LWIP_NO_RX_THREAD
 static struct rt_mailbox eth_rx_thread_mb;
 static struct rt_thread eth_rx_thread;
-#ifndef RT_LWIP_ETHTHREAD_PRIORITY
-#define RT_ETHERNETIF_THREAD_PREORITY	0x90
+#ifndef RT_LWIP_ETHTHREAD_MBOX_SIZE
 static char eth_rx_thread_mb_pool[48 * 4];
 static char eth_rx_thread_stack[1024];
 #else
-#define RT_ETHERNETIF_THREAD_PREORITY	RT_LWIP_ETHTHREAD_PRIORITY
 static char eth_rx_thread_mb_pool[RT_LWIP_ETHTHREAD_MBOX_SIZE * 4];
 static char eth_rx_thread_stack[RT_LWIP_ETHTHREAD_STACKSIZE];
 #endif
@@ -150,7 +145,7 @@ static err_t eth_netif_device_init(struct netif *netif)
         }
 
         /* copy device flags to netif flags */
-        netif->flags = ethif->flags;
+        netif->flags = (ethif->flags & 0xff);
 
         /* set default netif */
         if (netif_default == RT_NULL)
@@ -169,9 +164,11 @@ static err_t eth_netif_device_init(struct netif *netif)
             netif_set_up(ethif->netif);
         }
 
-#ifdef LWIP_NETIF_LINK_CALLBACK
-        netif_set_link_up(ethif->netif);
-#endif
+        if (!(ethif->flags & ETHIF_LINK_PHYUP))
+        {
+            /* set link_up for this netif */
+            netif_set_link_up(ethif->netif);
+        }
 
         return ERR_OK;
     }
@@ -180,7 +177,7 @@ static err_t eth_netif_device_init(struct netif *netif)
 }
 
 /* Keep old drivers compatible in RT-Thread */
-rt_err_t eth_device_init_with_flag(struct eth_device *dev, char *name, rt_uint8_t flags)
+rt_err_t eth_device_init_with_flag(struct eth_device *dev, char *name, rt_uint16_t flags)
 {
     struct netif* netif;
 
@@ -224,15 +221,20 @@ rt_err_t eth_device_init_with_flag(struct eth_device *dev, char *name, rt_uint8_
     {
         struct ip_addr ipaddr, netmask, gw;
 
-#if !LWIP_DHCP
-        IP4_ADDR(&ipaddr, RT_LWIP_IPADDR0, RT_LWIP_IPADDR1, RT_LWIP_IPADDR2, RT_LWIP_IPADDR3);
-        IP4_ADDR(&gw, RT_LWIP_GWADDR0, RT_LWIP_GWADDR1, RT_LWIP_GWADDR2, RT_LWIP_GWADDR3);
-        IP4_ADDR(&netmask, RT_LWIP_MSKADDR0, RT_LWIP_MSKADDR1, RT_LWIP_MSKADDR2, RT_LWIP_MSKADDR3);
-#else
-        IP4_ADDR(&ipaddr, 0, 0, 0, 0);
-        IP4_ADDR(&gw, 0, 0, 0, 0);
-        IP4_ADDR(&netmask, 0, 0, 0, 0);
-#endif
+    #if LWIP_DHCP
+        if (dev->flags & NETIF_FLAG_DHCP)
+        {
+            IP4_ADDR(&ipaddr, 0, 0, 0, 0);
+            IP4_ADDR(&gw, 0, 0, 0, 0);
+            IP4_ADDR(&netmask, 0, 0, 0, 0);
+        }
+        else
+    #endif
+        {
+            ipaddr.addr = inet_addr(RT_LWIP_IPADDR);
+            gw.addr = inet_addr(RT_LWIP_GWADDR);
+            netmask.addr = inet_addr(RT_LWIP_MSKADDR);
+        }
 
         netifapi_netif_add(netif, &ipaddr, &netmask, &gw, dev, eth_netif_device_init, tcpip_input);
     }
@@ -242,7 +244,7 @@ rt_err_t eth_device_init_with_flag(struct eth_device *dev, char *name, rt_uint8_
 
 rt_err_t eth_device_init(struct eth_device * dev, char *name)
 {
-    rt_uint8_t flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
+    rt_uint16_t flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
 
 #if LWIP_DHCP
     /* DHCP support */
@@ -305,7 +307,7 @@ static void eth_tx_thread_entry(void* parameter)
 
     while (1)
     {
-        if (rt_mb_recv(&eth_tx_thread_mb, (rt_uint32_t*)&msg, RT_WAITING_FOREVER) == RT_EOK)
+        if (rt_mb_recv(&eth_tx_thread_mb, (rt_ubase_t*)&msg, RT_WAITING_FOREVER) == RT_EOK)
         {
             struct eth_device* enetif;
 
@@ -318,7 +320,7 @@ static void eth_tx_thread_entry(void* parameter)
                 /* call driver's interface */
                 if (enetif->eth_tx(&(enetif->parent), msg->buf) != RT_EOK)
                 {
-                    rt_kprintf("transmit eth packet failed\n");
+                    /* transmit eth packet failed */
                 }
             }
 
@@ -337,7 +339,7 @@ static void eth_rx_thread_entry(void* parameter)
 
     while (1)
     {
-        if (rt_mb_recv(&eth_rx_thread_mb, (rt_uint32_t*)&device, RT_WAITING_FOREVER) == RT_EOK)
+        if (rt_mb_recv(&eth_rx_thread_mb, (rt_ubase_t*)&device, RT_WAITING_FOREVER) == RT_EOK)
         {
             struct pbuf *p;
 
@@ -361,6 +363,8 @@ static void eth_rx_thread_entry(void* parameter)
             /* receive all of buffer */
             while (1)
             {
+            	if(device->eth_rx == RT_NULL) break;
+            	
                 p = device->eth_rx(&(device->parent));
                 if (p != RT_NULL)
                 {
@@ -397,7 +401,7 @@ int eth_system_device_init(void)
 
     result = rt_thread_init(&eth_rx_thread, "erx", eth_rx_thread_entry, RT_NULL,
                             &eth_rx_thread_stack[0], sizeof(eth_rx_thread_stack),
-                            RT_LWIP_ETHTHREAD_PRIORITY, 16);
+                            RT_ETHERNETIF_THREAD_PREORITY, 16);
     RT_ASSERT(result == RT_EOK);
     result = rt_thread_startup(&eth_rx_thread);
     RT_ASSERT(result == RT_EOK);
@@ -420,9 +424,9 @@ int eth_system_device_init(void)
     RT_ASSERT(result == RT_EOK);
 #endif
 
-	return (int)result;
+    return (int)result;
 }
-INIT_DEVICE_EXPORT(eth_system_device_init);
+INIT_PREV_EXPORT(eth_system_device_init);
 
 #ifdef RT_USING_FINSH
 #include <finsh.h>
@@ -603,5 +607,35 @@ void list_tcps(void)
 }
 FINSH_FUNCTION_EXPORT(list_tcps, list all of tcp connections);
 #endif
+
+#if LWIP_UDP
+#include "lwip/udp.h"
+void list_udps(void)
+{
+    struct udp_pcb *pcb;
+    rt_uint32_t num = 0;
+    char local_ip_str[16];
+    char remote_ip_str[16];
+
+    rt_enter_critical();
+    rt_kprintf("Active UDP PCB states:\n");
+    for (pcb = udp_pcbs; pcb != NULL; pcb = pcb->next)
+    {
+        strcpy(local_ip_str, ipaddr_ntoa(&(pcb->local_ip)));
+        strcpy(remote_ip_str, ipaddr_ntoa(&(pcb->remote_ip)));
+
+        rt_kprintf("#%d %d %s:%d <==> %s:%d \n",
+                   num, (int)pcb->flags,
+                   local_ip_str,
+                   pcb->local_port,
+                   remote_ip_str,
+                   pcb->remote_port);
+
+        num++;
+    }
+    rt_exit_critical();
+}
+FINSH_FUNCTION_EXPORT(list_udps, list all of udp connections);
+#endif /* LWIP_UDP */
 
 #endif
