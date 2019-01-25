@@ -22,9 +22,7 @@
 #include <rtthread.h>
 #include <math.h>
 
-#ifdef RT_USING_COMPONENTS_INIT
-#include <components.h>
-#endif /* RT_USING_COMPONENTS_INIT */
+ 
 
 #ifdef RT_USING_DFS
 /* dfs filesystem:ELM filesystem init */

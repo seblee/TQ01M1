@@ -15,6 +15,43 @@
 #include <rtthread.h>
 #include <stdint.h>
 
+
+/* USART1 */
+#define UART1_GPIO_TX GPIO_Pin_9
+#define UART1_GPIO_RX GPIO_Pin_10
+#define UART1_GPIO GPIOA
+#define UART1_DIR_GPIO GPIOA
+#define UART1_DIR_GPIO_PIN GPIO_Pin_11
+
+/* USART2 */
+#define UART2_GPIO_TX GPIO_Pin_5
+#define UART2_GPIO_RX GPIO_Pin_6
+#define UART2_GPIO GPIOD
+#define UART2_DIR_GPIO GPIOD
+#define UART2_DIR_GPIO_PIN GPIO_Pin_7
+
+/* USART3_REMAP[1:0] = 00 */
+#define UART3_GPIO_TX GPIO_Pin_8
+#define UART3_GPIO_RX GPIO_Pin_9
+#define UART3_GPIO GPIOD
+#define UART3_DIR_GPIO GPIOE
+#define UART3_DIR_GPIO_PIN GPIO_Pin_6
+
+/* UART4 */ //SURV UART
+#define UART4_GPIO_TX GPIO_Pin_10
+#define UART4_GPIO_RX GPIO_Pin_11
+#define UART4_GPIO GPIOC
+#define UART4_DIR_GPIO GPIOA
+#define UART4_DIR_GPIO_PIN GPIO_Pin_15
+
+/* UART5 */ //CPAD UART
+#define UART5_GPIO_TX GPIO_Pin_12
+#define UART5_GPIO_RX GPIO_Pin_2
+#define UART5_GPIO_T GPIOC
+#define UART5_GPIO_R GPIOD
+#define UART5_DIR_GPIO GPIOD
+#define UART5_DIR_GPIO_PIN GPIO_Pin_3
+
 #define UART_ENABLE_IRQ(n)            NVIC_EnableIRQ((n))
 #define UART_DISABLE_IRQ(n)           NVIC_DisableIRQ((n))
 

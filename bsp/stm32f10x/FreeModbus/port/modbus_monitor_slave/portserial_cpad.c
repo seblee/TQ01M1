@@ -28,6 +28,7 @@
 #include "mb_event_cpad.h"
 #include "local_status.h"
 #include "dio_bsp.h"
+#include "usart_bsp.h"
 
 /* ----------------------- Start implementation -----------------------------*/
 static fifo8_cb_td mnt_tx_fifo = {0};

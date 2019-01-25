@@ -1,6 +1,6 @@
 #ifndef __DIO
 #define __DIO
-#include <components.h>
+
 #include <rtthread.h>
 #include "dio_bsp.h"
 #include "led_bsp.h"

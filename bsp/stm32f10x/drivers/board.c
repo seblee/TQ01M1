@@ -27,9 +27,7 @@
 #include "Delay.h"
 #include "TH_SENSOR_BSP.h"
 
-#ifdef RT_USING_COMPONENTS_INIT
-#include <components.h>
-#endif /* RT_USING_COMPONENTS_INIT */
+ 
 
 /**
  * @addtogroup STM32

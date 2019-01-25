@@ -1,5 +1,4 @@
-#include <rtthread.h>
-#include <components.h>
+#include <rtthread.h> 
 #include "daq.h"
 #include "sys_conf.h"
 #include "sys_status.h"

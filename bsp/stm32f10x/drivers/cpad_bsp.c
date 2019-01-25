@@ -1,5 +1,4 @@
 #include <rtthread.h>
-#include <components.h>
 #include "stm32f10x.h"
 #include "kits/fifo.h"
 #include "global_var.h"

@@ -19,7 +19,7 @@
 #include <rtthread.h>
 #include "board.h"
 #include "MQTTPacket.h"
-
+#include "usart_bsp.h"
 #include "paho_mqtt.h"
 /* Private define ------------------------------------------------------------*/
 /* From device.h */
