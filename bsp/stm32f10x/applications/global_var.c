@@ -1,5 +1,4 @@
-#include <rtthread.h>
-#include <components.h>
+#include <rtthread.h> 
 #include "sys_conf.h"
 #include "calc.h"
 #include "sys_def.h"

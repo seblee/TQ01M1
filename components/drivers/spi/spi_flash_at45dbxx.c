@@ -1,11 +1,7 @@
 /*
- * File      : rtdef.h
- * This file is part of RT-Thread RTOS
- * COPYRIGHT (C) 2006 - 2011, RT-Thread Development Team
+ * Copyright (c) 2006-2018, RT-Thread Development Team
  *
- * The license and distribution terms for this file may be
- * found in the file LICENSE in this distribution or at
- * http://www.rt-thread.org/license/LICENSE
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
@@ -24,7 +20,7 @@
 #define FLASH_TRACE(...)
 #endif /**< #ifdef FLASH_DEBUG */
 
-/* JEDEC Manufacturer¡¯s ID */
+/* JEDEC Manufacturerâ€™s ID */
 #define MF_ID                (0x1F) /* atmel */
 #define DENSITY_CODE_011D    (0x02) /* AT45DB011D Density Code : 00010 = 1-Mbit */
 #define DENSITY_CODE_021D    (0x03) /* AT45DB021D Density Code : 00011 = 2-Mbit */
@@ -107,7 +103,7 @@ static rt_err_t AT45DB_flash_close(rt_device_t dev)
     return RT_EOK;
 }
 
-static rt_err_t AT45DB_flash_control(rt_device_t dev, rt_uint8_t cmd, void *args)
+static rt_err_t AT45DB_flash_control(rt_device_t dev, int cmd, void *args)
 {
     RT_ASSERT(dev != RT_NULL);
 
@@ -130,12 +126,12 @@ static rt_size_t AT45DB_flash_read_page_256(rt_device_t dev, rt_off_t pos, void*
 {
     uint32_t index, nr;
     uint8_t * read_buffer = buffer;
+    uint32_t  page = pos;
 
     nr = size;
 
     for (index = 0; index < nr; index++)
     {
-        uint32_t  page = pos;
         uint8_t send_buffer[8];
         uint32_t i;
 
@@ -160,12 +156,12 @@ static rt_size_t AT45DB_flash_read_page_512(rt_device_t dev, rt_off_t pos, void*
 {
     uint32_t index, nr;
     uint8_t * read_buffer = buffer;
+    uint32_t  page = pos;
 
     nr = size;
 
     for (index = 0; index < nr; index++)
     {
-        uint32_t  page = pos;
         uint8_t send_buffer[8];
         uint32_t i;
 
@@ -190,12 +186,12 @@ static rt_size_t AT45DB_flash_read_page_1024(rt_device_t dev, rt_off_t pos, void
 {
     uint32_t index, nr;
     uint8_t * read_buffer = buffer;
+    uint32_t  page = pos;
 
     nr = size;
 
     for (index = 0; index < nr; index++)
     {
-        uint32_t  page = pos;
         uint8_t send_buffer[8];
         uint32_t i;
 
@@ -220,12 +216,12 @@ static rt_size_t AT45DB_flash_write_page_256(rt_device_t dev, rt_off_t pos, cons
 {
     rt_uint32_t index, nr;
     const uint8_t * write_buffer = buffer;
+    uint32_t  page = pos;
 
     nr = size;
 
     for (index = 0; index < nr; index++)
     {
-        uint32_t  page = pos;
         uint8_t send_buffer[4];
 
         send_buffer[0] = AT45DB_MM_PAGE_PROG_THRU_BUFFER1;
@@ -248,12 +244,12 @@ static rt_size_t AT45DB_flash_write_page_512(rt_device_t dev, rt_off_t pos, cons
 {
     rt_uint32_t index, nr;
     const uint8_t * write_buffer = buffer;
+    uint32_t  page = pos;
 
     nr = size;
 
     for (index = 0; index < nr; index++)
     {
-        uint32_t  page = pos;
         uint8_t send_buffer[4];
 
         send_buffer[0] = AT45DB_MM_PAGE_PROG_THRU_BUFFER1;
@@ -276,12 +272,12 @@ static rt_size_t AT45DB_flash_write_page_1024(rt_device_t dev, rt_off_t pos, con
 {
     rt_uint32_t index, nr;
     const uint8_t * write_buffer = buffer;
+    uint32_t  page = pos;
 
     nr = size;
 
     for (index = 0; index < nr; index++)
     {
-        uint32_t  page = pos;
         uint8_t send_buffer[4];
 
         send_buffer[0] = AT45DB_MM_PAGE_PROG_THRU_BUFFER1;
@@ -335,7 +331,7 @@ rt_err_t at45dbxx_init(const char * flash_device_name, const char * spi_device_n
         /**< 001 = Atmel DataFlash */
         if(JEDEC_ID->manufacturer_id != 0x1F || JEDEC_ID->family_code != 0x01)
         {
-            FLASH_TRACE("Manufacturer¡¯s ID or Memory Type error!\r\n");
+            FLASH_TRACE("Manufacturerâ€™s ID or Memory Type error!\r\n");
             FLASH_TRACE("JEDEC Read-ID Data : %02X %02X %02X\r\n", id_recv[0], id_recv[1], id_recv[2]);
             return -RT_ENOSYS;
         }

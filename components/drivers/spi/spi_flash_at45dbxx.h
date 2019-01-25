@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2006-2018, RT-Thread Development Team
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Change Logs:
+ * Date           Author       Notes
+ * 2011-12-16     aozima       the first version
+ */
+
 #ifndef SPI_FLASH_AT45DBXX_H_INCLUDED
 #define SPI_FLASH_AT45DBXX_H_INCLUDED
 

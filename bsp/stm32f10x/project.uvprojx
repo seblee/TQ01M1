@@ -788,6 +788,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\src\timer.c</FilePath>
             </File>
+            <File>
+              <FileName>components.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\components.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -952,16 +957,6 @@
               <FileName>finsh_token.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\components\finsh\finsh_token.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Components</GroupName>
-          <Files>
-            <File>
-              <FileName>components.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\components\init\components.c</FilePath>
             </File>
           </Files>
         </Group>

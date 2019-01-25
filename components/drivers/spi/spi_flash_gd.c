@@ -5,17 +5,15 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2011-12-16     aozima       the first version
- * 2012-05-06     aozima       can page write.
- * 2012-08-23     aozima       add flash lock.
- * 2012-08-24     aozima       fixed write status register BUG.
+ * 2015-10-11     fullhan      copy from winbond flash
  */
 
 #include <stdint.h>
+#include <rtthread.h>
 #include <rtdevice.h>
 
 #include "spi_flash.h"
-#include "spi_flash_w25qxx.h"
+#include "spi_flash_gd.h"
 
 #define FLASH_DEBUG
 
@@ -27,19 +25,10 @@
 
 #define PAGE_SIZE           4096
 
-/* JEDEC Manufacturer ID */
-#define MF_ID           (0xEF)
-
+/* JEDEC Manufacturer's ID */
+#define MF_ID           (0xC8)
 /* JEDEC Device ID: Memory type and Capacity */
-#define MTC_W25Q80_BV         (0x4014) /* W25Q80BV */
-#define MTC_W25Q16_BV_CL_CV   (0x4015) /* W25Q16BV W25Q16CL W25Q16CV  */
-#define MTC_W25Q16_DW         (0x6015) /* W25Q16DW  */
-#define MTC_W25Q32_BV         (0x4016) /* W25Q32BV */
-#define MTC_W25Q32_DW         (0x6016) /* W25Q32DW */
-#define MTC_W25Q64_BV_CV      (0x4017) /* W25Q64BV W25Q64CV */
-#define MTC_W25Q64_DW         (0x4017) /* W25Q64DW */
-#define MTC_W25Q128_BV        (0x4018) /* W25Q128BV */
-#define MTC_W25Q256_FV        (TBD)    /* W25Q256FV */
+#define MTC_GD25Q128                (0x4018)
 
 /* command list */
 #define CMD_WRSR                    (0x01)  /* Write Status Register */
@@ -114,7 +103,7 @@ static uint32_t w25qxx_read(uint32_t offset, uint8_t * buffer, uint32_t size)
  * \return uint32_t
  *
  */
-uint32_t w25qxx_page_write(uint32_t page_addr, const uint8_t* buffer)
+static uint32_t w25qxx_page_write(uint32_t page_addr, const uint8_t* buffer)
 {
     uint32_t index;
     uint8_t send_buffer[4];
@@ -251,7 +240,7 @@ static rt_size_t w25qxx_flash_write(rt_device_t dev,
 }
 
 #ifdef RT_USING_DEVICE_OPS
-const static struct rt_device_ops w25qxx_device_ops =
+const static struct rt_device_ops gd_device_ops =
 {
     w25qxx_flash_init,
     w25qxx_flash_open,
@@ -262,7 +251,7 @@ const static struct rt_device_ops w25qxx_device_ops =
 };
 #endif
 
-rt_err_t w25qxx_init(const char * flash_device_name, const char * spi_device_name)
+rt_err_t gd_init(const char * flash_device_name, const char * spi_device_name)
 {
     struct rt_spi_device * rt_spi_device;
 
@@ -324,45 +313,10 @@ rt_err_t w25qxx_init(const char * flash_device_name, const char * spi_device_nam
         memory_type_capacity = id_recv[1];
         memory_type_capacity = (memory_type_capacity << 8) | id_recv[2];
 
-        if(memory_type_capacity == MTC_W25Q128_BV)
+        if(memory_type_capacity == MTC_GD25Q128)
         {
-            FLASH_TRACE("W25Q128BV detection\r\n");
+            FLASH_TRACE("GD128 detection\r\n");
             spi_flash_device.geometry.sector_count = 4096;
-        }
-        else if(memory_type_capacity == MTC_W25Q64_BV_CV)
-        {
-            FLASH_TRACE("W25Q64BV or W25Q64CV detection\r\n");
-            spi_flash_device.geometry.sector_count = 2048;
-        }
-        else if(memory_type_capacity == MTC_W25Q64_DW)
-        {
-            FLASH_TRACE("W25Q64DW detection\r\n");
-            spi_flash_device.geometry.sector_count = 2048;
-        }
-        else if(memory_type_capacity == MTC_W25Q32_BV)
-        {
-            FLASH_TRACE("W25Q32BV detection\r\n");
-            spi_flash_device.geometry.sector_count = 1024;
-        }
-        else if(memory_type_capacity == MTC_W25Q32_DW)
-        {
-            FLASH_TRACE("W25Q32DW detection\r\n");
-            spi_flash_device.geometry.sector_count = 1024;
-        }
-        else if(memory_type_capacity == MTC_W25Q16_BV_CL_CV)
-        {
-            FLASH_TRACE("W25Q16BV or W25Q16CL or W25Q16CV detection\r\n");
-            spi_flash_device.geometry.sector_count = 512;
-        }
-        else if(memory_type_capacity == MTC_W25Q16_DW)
-        {
-            FLASH_TRACE("W25Q16DW detection\r\n");
-            spi_flash_device.geometry.sector_count = 512;
-        }
-        else if(memory_type_capacity == MTC_W25Q80_BV)
-        {
-            FLASH_TRACE("W25Q80BV detection\r\n");
-            spi_flash_device.geometry.sector_count = 256;
         }
         else
         {
@@ -374,7 +328,7 @@ rt_err_t w25qxx_init(const char * flash_device_name, const char * spi_device_nam
     /* register device */
     spi_flash_device.flash_device.type    = RT_Device_Class_Block;
 #ifdef RT_USING_DEVICE_OPS
-    spi_flash_device.flash_device.ops     = &w25qxx_device_ops;
+    spi_flash_device.flash_device.ops     = &gd_device_ops;
 #else
     spi_flash_device.flash_device.init    = w25qxx_flash_init;
     spi_flash_device.flash_device.open    = w25qxx_flash_open;
