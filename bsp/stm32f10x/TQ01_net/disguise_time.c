@@ -84,7 +84,7 @@ static time_t current_timestamp_get(void)
  * @File     : rtc_bsp.c
  * @Program  : none
  * @Created  : 2018-09-26 by seblee
- * @Brief    : 
+ * @Brief    :
  * @Version  : V1.0
 **/
 void current_systime_get(struct tm *ti)
@@ -99,7 +99,7 @@ void current_systime_get(struct tm *ti)
  * @File     : rtc_bsp.c
  * @Program  : none
  * @Created  : 2018-09-26 by seblee
- * @Brief    : 
+ * @Brief    :
  * @Version  : V1.0
 **/
 void current_systime_set(struct tm *ti)
@@ -108,7 +108,7 @@ void current_systime_set(struct tm *ti)
     now = mktime(ti);
     current_timestamp_set(now);
 }
- 
+
 const unsigned char MonthStr[12][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 /**
  ****************************************************************************
@@ -116,7 +116,7 @@ const unsigned char MonthStr[12][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
  * @File     : disguise_time.c
  * @Program  : none
  * @Created  : 2018-09-26 by seblee
- * @Brief    : 
+ * @Brief    :
  * @Version  : V1.0
 **/
 void get_bulid_date_time(struct tm *r)

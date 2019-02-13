@@ -1008,11 +1008,6 @@
               <FileType>1</FileType>
               <FilePath>..\..\components\dfs\filesystems\elmfat\ff.c</FilePath>
             </File>
-            <File>
-              <FileName>ccsbcs.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\components\dfs\filesystems\elmfat\option\ccsbcs.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

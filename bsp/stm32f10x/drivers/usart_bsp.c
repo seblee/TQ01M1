@@ -267,10 +267,8 @@ static void uart_isr(struct rt_serial_device *serial)
         /* clear interrupt */
         USART_ClearITPendingBit(uart->uart_device, USART_IT_RXNE);
     }
-
 #ifdef RT_SERIAL_USING_DMA
     if (USART_GetITStatus(uart->uart_device, USART_IT_IDLE) != RESET)
-
     {
         dma_uart_rx_idle_isr(serial);
     }
@@ -302,7 +300,6 @@ static const struct rt_uart_ops stm32_uart_ops =
 #if defined(RT_USING_UART1)
 /* UART1 device driver structure */
 struct stm32_uart uart1 =
-
     {
         USART1,
         USART1_IRQn,
@@ -314,7 +311,6 @@ struct stm32_uart uart1 =
             0,
         },
 #endif /* RT_SERIAL_USING_DMA */
-
 };
 struct rt_serial_device serial1;
 
@@ -347,7 +343,6 @@ void DMA1_Channel5_IRQHandler(void)
 #if defined(RT_USING_UART2)
 /* UART2 device driver structure */
 struct stm32_uart uart2 =
-
     {
         USART2,
         USART2_IRQn,
@@ -359,7 +354,6 @@ struct stm32_uart uart2 =
             0,
         },
 #endif /* RT_SERIAL_USING_DMA */
-
 };
 struct rt_serial_device serial2;
 
@@ -377,7 +371,6 @@ void USART2_IRQHandler(void)
 #ifdef RT_SERIAL_USING_DMA
 void DMA1_Channel6_IRQHandler(void)
 {
-
     /* enter interrupt */
     rt_interrupt_enter();
 
@@ -393,7 +386,6 @@ void DMA1_Channel6_IRQHandler(void)
 #if defined(RT_USING_UART3)
 /* UART3 device driver structure */
 struct stm32_uart uart3 =
-
     {
         USART3,
         USART3_IRQn,
@@ -405,7 +397,6 @@ struct stm32_uart uart3 =
             0,
         },
 #endif /* RT_SERIAL_USING_DMA */
-
 };
 struct rt_serial_device serial3;
 
@@ -423,7 +414,6 @@ void USART3_IRQHandler(void)
 #ifdef RT_SERIAL_USING_DMA
 void DMA1_Channel3_IRQHandler(void)
 {
-
     /* enter interrupt */
     rt_interrupt_enter();
 
@@ -439,7 +429,6 @@ void DMA1_Channel3_IRQHandler(void)
 #if defined(RT_USING_UART4)
 /* UART4 device driver structure */
 struct stm32_uart uart4 =
-
     {
         UART4,
         UART4_IRQn,
@@ -451,7 +440,6 @@ struct stm32_uart uart4 =
             0,
         },
 #endif /* RT_SERIAL_USING_DMA */
-
 };
 struct rt_serial_device serial4;
 
@@ -469,7 +457,6 @@ void UART4_IRQHandler(void)
 #ifdef RT_SERIAL_USING_DMA
 void DMA2_Channel3_IRQHandler(void)
 {
-
     /* enter interrupt */
     rt_interrupt_enter();
 
@@ -520,19 +507,19 @@ static void RCC_Configuration(void)
 {
 #if defined(RT_USING_UART1)
     /* Enable UART GPIO clocks */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOB, ENABLE);
     /* Enable UART clock */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 #endif /* RT_USING_UART1 */
 
-#ifdef RT_USING_UART2
+#if defined(RT_USING_UART2)
     /* Enable UART GPIO clocks */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
     /* Enable UART clock */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 #endif /* RT_USING_UART2 */
 
-#ifdef RT_USING_UART3
+#if defined(RT_USING_UART3)
     /* Enable UART GPIO clocks */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD | RCC_APB2Periph_AFIO, ENABLE); //串口3重映射
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
@@ -547,7 +534,7 @@ static void RCC_Configuration(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 #endif /* RT_USING_UART4 */
 
-#ifdef RT_USING_UART5
+#if defined(RT_USING_UART5) 
     /* Enable UART GPIO clocks */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
@@ -625,7 +612,7 @@ static void GPIO_Configuration(void)
 
 #endif /* RT_USING_UART4 */
 
-#ifdef RT_USING_UART5
+#if defined(RT_USING_UART5)
     /* Configure UART Rx/tx PIN */
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_InitStructure.GPIO_Pin = UART5_GPIO_RX;
@@ -657,7 +644,6 @@ static void NVIC_Configuration(struct stm32_uart *uart)
 static void DMA_Configuration(struct rt_serial_device *serial)
 {
     struct stm32_uart *uart = (struct stm32_uart *)serial->parent.user_data;
-
     struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
     DMA_InitTypeDef DMA_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -773,7 +759,7 @@ void rt_hw_usart_init(void)
                           uart);
 #endif /* RT_USING_UART4 */
 
-#ifdef RT_USING_UART5
+#if defined(RT_USING_UART5)
     uart = &uart5;
     config.baud_rate = BAUD_RATE_115200;
 

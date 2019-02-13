@@ -1,11 +1,7 @@
 /*
- * File      : application.c
- * This file is part of RT-Thread RTOS
- * COPYRIGHT (C) 2006, RT-Thread Development Team
+ * Copyright (c) 2006-2018, RT-Thread Development Team
  *
- * The license and distribution terms for this file may be
- * found in the file LICENSE in this distribution or at
- * http://www.rt-thread.org/license/LICENSE
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
@@ -85,25 +81,23 @@ static struct rt_thread net_thread;
 
 void set_boot_flag(void);
 
-void rt_init_thread_entry(void *parameter)
+void rt_init_thread_entry(void* parameter)
 {
 #ifdef RT_USING_COMPONENTS_INIT
     /* initialization RT-Thread Components */
     rt_components_init();
 #endif
 
-    //     /* Filesystem Initialization */
-    // #if defined(RT_USING_DFS) && defined(RT_USING_DFS_ELMFAT)
-    //     /* mount sd card fat partition 1 as root directory */
-    //     elm_init();
-    //     int err = dfs_mount("sd0", "/", "elm", 0, 0);
-    //     if (err == 0)
-    //     {
-    //         rt_kprintf("File System initialized!\n");
-    //     }
-    //     else
-    //         rt_kprintf("File System initialzation failed!err:%d get_err=%d\n", err, rt_get_errno());
-    // #endif /* RT_USING_DFS */
+    /* Filesystem Initialization */
+#if defined(RT_USING_DFS) && defined(RT_USING_DFS_ELMFAT)
+    /* mount sd card fat partition 1 as root directory */
+    if (dfs_mount("sd0", "/", "elm", 0, 0) == 0)
+    {
+        rt_kprintf("File System initialized!\n");
+    }
+    else
+        rt_kprintf("File System initialzation failed!\n");
+#endif  /* RT_USING_DFS */
 
     // #ifdef RT_USING_FINSH
     //     finsh_set_device(RT_CONSOLE_DEVICE_NAME);

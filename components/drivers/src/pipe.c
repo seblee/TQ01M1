@@ -514,6 +514,7 @@ int pipe(int fildes[2])
     pipe = rt_pipe_create(dname, PIPE_BUFSZ);
     if (pipe == RT_NULL)
     {
+        rt_kprintf("rt_pipe_create failed err:%d\r\n", rt_get_errno());
         return -1;
     }
 
@@ -521,12 +522,14 @@ int pipe(int fildes[2])
     fildes[0] = open(dev_name, O_RDONLY, 0);
     if (fildes[0] < 0)
     {
+        rt_kprintf("fildes[0] open failed err:%d\r\n", rt_get_errno());
         return -1;
     }
 
     fildes[1] = open(dev_name, O_WRONLY, 0);
     if (fildes[1] < 0)
     {
+        rt_kprintf("fildes[1] open failed err:%d\r\n", rt_get_errno());
         close(fildes[0]);
         return -1;
     }

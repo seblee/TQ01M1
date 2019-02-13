@@ -233,8 +233,6 @@ unsigned char PCF8563_Check(void)
         PCF8563_Write_Byte(PCF8563_Address_Timer_VAL, Time_Count); //恢复现场
         PCF8563_Write_Byte(PCF8563_Address_Timer, PCF_Timer_Open); //启动定时器
     }
-    LOG_I("%02x-----%02x", test_value, PCF8563_Check_Data); //PCF8563检测结果：错误或损坏
-
     if (test_value != PCF8563_Check_Data) //如果读出值与写入值不同，则器件错误或损坏
     {
         return 1; //错误或损坏

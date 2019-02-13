@@ -21,7 +21,6 @@
 
 #include <rtthread.h>
 #include <rthw.h>
-#include "sys_def.h"
 #include "local_status.h"
 #ifdef RT_USING_MODULE
 #include <dlmodule.h>
@@ -536,9 +535,9 @@ void rt_show_version(void)
     rt_kprintf("- RT -     Thread Operating System\n");
     rt_kprintf(" / | \\     %d.%d.%d build %s\n",
                RT_VERSION, RT_SUBVERSION, RT_REVISION, __DATE__);
-    rt_kprintf(" 2006 - 2018 Copyright by rt-thread team\n");
-		rt_kprintf(" Software Version %d.%d\n",(SOFTWARE_VER>>8),SOFTWARE_VER&0x00ff);
-		rt_kprintf(" Hardware Version %d.%d\n",(HARDWARE_VER>>8),HARDWARE_VER&0x00ff);
+    rt_kprintf(" 2006 - 2019 Copyright by rt-thread team\n");
+    rt_kprintf(" Software Version %d.%d\n",(SOFTWARE_VER>>8),SOFTWARE_VER&0x00ff);
+    rt_kprintf(" Hardware Version %d.%d\n",(HARDWARE_VER>>8),HARDWARE_VER&0x00ff);
 }
 RTM_EXPORT(rt_show_version);
 
@@ -604,6 +603,7 @@ static char *print_number(char *buf,
 #else
     char tmp[16];
 #endif
+    int precision_bak = precision;
     const char *digits;
     static const char small_digits[] = "0123456789abcdef";
     static const char large_digits[] = "0123456789ABCDEF";
@@ -727,7 +727,7 @@ static char *print_number(char *buf,
 #endif
 
     /* put number in the temporary buffer */
-    while (i-- > 0)
+    while (i-- > 0 && (precision_bak != 0))
     {
         if (buf <= end)
             *buf = tmp[i];

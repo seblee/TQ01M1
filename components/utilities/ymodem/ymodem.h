@@ -1,13 +1,16 @@
-#ifndef __YMODEM_H__
-#define __YMODEM_H__
 /*
- * File      : ymodem.h
- * COPYRIGHT (C) 2012, Shanghai Real-Thread Technology Co., Ltd
+ * COPYRIGHT (C) 2012, Real-Thread Information Technology Ltd
+ * All rights reserved
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
  * 2013-04-14     Grissiom     initial implementation
  */
+
+#ifndef __YMODEM_H__
+#define __YMODEM_H__
 
 #include "rtthread.h"
 
@@ -66,7 +69,8 @@ enum rym_stage {
     RYM_STAGE_ESTABLISHING,
     /* set when we've got the packet 0 and sent ACK and second C */
     RYM_STAGE_ESTABLISHED,
-    /* set when the sender respond to our second C */
+    /* set when the sender respond to our second C and recviever got a real
+     * data packet. */
     RYM_STAGE_TRANSMITTING,
     /* set when the sender send a EOT */
     RYM_STAGE_FINISHING,

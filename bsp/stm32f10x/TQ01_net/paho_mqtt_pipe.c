@@ -12,7 +12,6 @@
 
 #include "MQTTPacket.h"
 #include "paho_mqtt.h"
-//#include <rtlibc.h>
 
 #include "network.h"
 #include "mqtt_client.h"
@@ -831,7 +830,7 @@ static void paho_mqtt_thread(void *param)
     /* create publish pipe. */
     if (pipe(c->pub_pipe) != 0)
     {
-        LOG_E("creat pipe err");
+        LOG_E("creat pipe err=%d", rt_get_errno());
         goto _mqtt_exit;
     }
 
@@ -948,9 +947,6 @@ _mqtt_start:
             timeout.tv_sec = 1;
             sendState = SENDINFORM;
         }
-
-        FD_ZERO(&readset);
-        FD_SET(c->sock, &readset);
         timeout.tv_usec = 0;
         {
             LOG_I("[%d]State:%d timeout.tv_sec: %d ", rt_tick_get(), sendState, timeout.tv_sec);
@@ -963,8 +959,15 @@ _mqtt_start:
                   connect_count, connected_count, disconnect_count,
                   total, used, max_used);
         }
+
+        FD_ZERO(&readset);
+        FD_SET(c->sock, &readset);
+        FD_SET(c->pub_pipe[0], &readset);
+
         /* int select(maxfdp1, readset, writeset, exceptset, timeout); */
-        res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
+        res = select(((c->pub_pipe[0] > c->sock) ? c->pub_pipe[0] : c->sock) + 1,
+                     &readset, RT_NULL, RT_NULL, &timeout);
+
         if (res == 0)
         {
             len = 0;
@@ -1064,6 +1067,50 @@ _mqtt_start:
             if (rc < 0)
                 goto _mqtt_disconnect;
         }
+
+        if (FD_ISSET(c->pub_pipe[0], &readset))
+        {
+            MQTTMessage *message;
+            MQTTString topic = MQTTString_initializer;
+
+            //LOG_D("pub_sock FD_ISSET");
+
+            len = read(c->pub_pipe[0], c->readbuf, c->readbuf_size);
+
+            if (len < sizeof(MQTTMessage))
+            {
+                c->readbuf[len] = '\0';
+                LOG_D("pub_sock recv %d byte: %s", len, c->readbuf);
+
+                if (strcmp((const char *)c->readbuf, "DISCONNECT") == 0)
+                {
+                    LOG_D("DISCONNECT");
+                    goto _mqtt_disconnect_exit;
+                }
+
+                continue;
+            }
+
+            message = (MQTTMessage *)c->readbuf;
+            message->payload = c->readbuf + sizeof(MQTTMessage);
+            topic.cstring = (char *)c->readbuf + sizeof(MQTTMessage) + message->payloadlen;
+            //LOG_D("pub_sock topic:%s, payloadlen:%d", topic.cstring, message->payloadlen);
+
+            len = MQTTSerialize_publish(c->buf, c->buf_size, 0, message->qos, message->retained, message->id,
+                                        topic, (unsigned char *)message->payload, message->payloadlen);
+            if (len <= 0)
+            {
+                LOG_D("MQTTSerialize_publish len: %d", len);
+                goto _mqtt_disconnect;
+            }
+
+            if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
+            {
+                LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
+                goto _mqtt_disconnect;
+            }
+        } /* pbulish sock handler. */
+
         if ((module_state(RT_NULL) != MODULE_4G_READY) &&
             (module_state(RT_NULL) != MODULE_WIFI_READY))
         {
@@ -1097,12 +1144,10 @@ _net_disconnect:
     rt_thread_delay(RT_TICK_PER_SECOND * 5);
     goto _mqtt_start;
 
-//     goto _mqtt_disconnect_exit;
-// _mqtt_disconnect_exit:
-//     MQTTDisconnect(c);
-//     net_disconnect(c);
+_mqtt_disconnect_exit:
+    MQTTDisconnect(c);
+    net_disconnect(c);
 
-//     goto _mqtt_exit;
 _mqtt_exit:
     LOG_D("thread exit");
     return;

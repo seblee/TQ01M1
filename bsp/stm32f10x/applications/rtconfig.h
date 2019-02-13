@@ -1,8 +1,11 @@
-/* RT-Thread config file */
-#ifndef __RTTHREAD_CFG_H__
-#define __RTTHREAD_CFG_H__
+#ifndef RT_CONFIG_H__
+#define RT_CONFIG_H__
 
-/* RT_NAME_MAX*/
+/* Automatically generated file; DO NOT EDIT. */
+/* RT-Thread Project Configuration */
+
+/* RT-Thread Kernel */
+
 #define RT_NAME_MAX 8
 
 /* RT_ALIGN_SIZE*/
@@ -50,14 +53,11 @@
 /* Using Memory Pool Management*/
 #define RT_USING_MEMPOOL
 
-/* Using Dynamic Heap Management */
-#define RT_USING_HEAP
-
 /* Using Small MM */
 #define RT_USING_SMALL_MEM
 
-// <bool name="RT_USING_COMPONENTS_INIT" description="Using RT-Thread components initialization" default="true" />
-#define RT_USING_COMPONENTS_INIT
+/* Using Dynamic Heap Management */
+#define RT_USING_HEAP
 
 /* Kernel Device Object */
 
@@ -65,20 +65,18 @@
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 512
 #define RT_CONSOLE_DEVICE_NAME "uart5"
-#define RT_VER_NUM 0x40000
+#define RT_VER_NUM 0x40001
 #define ARCH_ARM
 #define ARCH_ARM_CORTEX_M
 #define ARCH_ARM_CORTEX_M3
 
-/* Device Drivers */
-#define RT_USING_DEVICE_IPC
-#define RT_PIPE_BUFSZ 512
-#define RT_USING_SERIAL
-#define RT_SERIAL_USING_DMA
+/* RT-Thread Components */
+
+#define RT_USING_COMPONENTS_INIT
+
 
 #define RT_USING_RTC
 #define RT_USING_ALARMS
-// <string name="RT_CONSOLE_DEVICE_NAME" description="The device name for console" default="uart1" />
 
 /* SECTION: finsh, a C-Express shell */
 #define RT_USING_FINSH
@@ -107,13 +105,21 @@
 
 #define RT_DFS_ELM_CODE_PAGE 437
 #define RT_DFS_ELM_WORD_ACCESS
-#define RT_DFS_ELM_USE_LFN_3
-#define RT_DFS_ELM_USE_LFN 3
+#define RT_DFS_ELM_USE_LFN_0
+#define RT_DFS_ELM_USE_LFN 0
 #define RT_DFS_ELM_MAX_LFN 255
 #define RT_DFS_ELM_DRIVES 2
 #define RT_DFS_ELM_MAX_SECTOR_SIZE 512
 #define RT_DFS_ELM_REENTRANT
 #define RT_USING_DFS_DEVFS
+
+/* Device Drivers */
+
+#define RT_USING_DEVICE_IPC
+#define RT_PIPE_BUFSZ 512
+#define RT_USING_SERIAL
+#define RT_SERIAL_USING_DMA
+#define RT_SERIAL_RB_BUFSZ 64
 
 /* SECTION: I2C */
 #define RT_USING_I2C
@@ -124,8 +130,8 @@
 
 /* POSIX layer and C standard library */
 
-#define RT_USING_POSIX
 #define RT_USING_LIBC
+#define RT_USING_POSIX
 /* Socket abstraction layer */
 
 #define RT_USING_SAL
