@@ -1070,44 +1070,30 @@ _mqtt_start:
 
         if (FD_ISSET(c->pub_pipe[0], &readset))
         {
-            MQTTMessage *message;
-            MQTTString topic = MQTTString_initializer;
-
-            //LOG_D("pub_sock FD_ISSET");
-
+            // LOG_D("pub_sock FD_ISSET");
             len = read(c->pub_pipe[0], c->readbuf, c->readbuf_size);
-
             if (len < sizeof(MQTTMessage))
             {
                 c->readbuf[len] = '\0';
-                LOG_D("pub_sock recv %d byte: %s", len, c->readbuf);
+                // LOG_D("pub_sock recv %d byte: %s", len, c->readbuf);
 
                 if (strcmp((const char *)c->readbuf, "DISCONNECT") == 0)
                 {
+                    disconnect_count++;
                     LOG_D("DISCONNECT");
                     goto _mqtt_disconnect_exit;
                 }
-
-                continue;
-            }
-
-            message = (MQTTMessage *)c->readbuf;
-            message->payload = c->readbuf + sizeof(MQTTMessage);
-            topic.cstring = (char *)c->readbuf + sizeof(MQTTMessage) + message->payloadlen;
-            //LOG_D("pub_sock topic:%s, payloadlen:%d", topic.cstring, message->payloadlen);
-
-            len = MQTTSerialize_publish(c->buf, c->buf_size, 0, message->qos, message->retained, message->id,
-                                        topic, (unsigned char *)message->payload, message->payloadlen);
-            if (len <= 0)
-            {
-                LOG_D("MQTTSerialize_publish len: %d", len);
-                goto _mqtt_disconnect;
-            }
-
-            if ((rc = sendPacket(c, len)) != PAHO_SUCCESS) // send the subscribe packet
-            {
-                LOG_D("MQTTSerialize_publish sendPacket rc: %d", rc);
-                goto _mqtt_disconnect;
+                if (strcmp((const char *)c->readbuf, "RECONNECT") == 0)
+                {
+                    disconnect_count++;
+                    LOG_D("RECONNECT");
+                    goto _mqtt_disconnect;
+                }
+                if (strcmp((const char *)c->readbuf, "REFRESH") == 0)
+                {
+                    disconnect_count++;
+                    LOG_D("REFRESH");
+                }
             }
         } /* pbulish sock handler. */
 
@@ -1177,7 +1163,7 @@ int paho_mqtt_start(MQTTClient *client)
 
     stack = (char *)tid + RT_ALIGN(sizeof(struct rt_thread), 8);
     result = rt_thread_init(tid,
-                            "MQTT",
+                            "paho",
                             paho_mqtt_thread, client, // fun, parameter
                             stack, stack_size,        // stack, size
                             priority, 2               //priority, tick
@@ -1217,7 +1203,7 @@ int MQTT_CMD(MQTTClient *c, const char *cmd)
     cmd_len = strlen(cmd) + 1;
     if (cmd_len >= sizeof(MQTTMessage))
     {
-        LOG_E("[%d]cmd too loog %d:", rt_tick_get(), cmd_len, sizeof(MQTTMessage));
+        LOG_E("[%d]cmd too long %d:", rt_tick_get(), cmd_len, sizeof(MQTTMessage));
         goto _exit;
     }
 

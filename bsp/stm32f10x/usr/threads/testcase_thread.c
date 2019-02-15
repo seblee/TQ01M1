@@ -1,4 +1,4 @@
-#include <rtthread.h> 
+#include <rtthread.h>
 #include "sys_conf.h"
 #include "global_var.h"
 #include "calc.h"
@@ -26,10 +26,7 @@ void testcase_thread_entry(void *parameter)
     RCC_GetClocksFreq(&clock_st);
     // rt_kprintf("sys_freq:%d\n",clock_st.SYSCLK_Frequency);
 
-    while (1)
-    {
-        rt_thread_delay(1000);
-    }
+    rt_thread_delay(1000);
 }
 
 static void show_all(void)

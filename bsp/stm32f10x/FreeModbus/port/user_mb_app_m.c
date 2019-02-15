@@ -50,7 +50,7 @@ static uint16_t usMRegHoldBuf[MB_MASTER_TOTAL_SLAVE_NUM][M_REG_HOLDING_NREGS];
 
 //  mbm_send _data
 
-  void mbm_fifo_init(UCHAR ucMB_Number)
+void mbm_fifo_init(UCHAR ucMB_Number)
 {
     uint8_t block_size;
     //		uint8_t Buff2=0;
@@ -100,14 +100,12 @@ void modbus_master_thread_entry(void *parameter)
 
 void mbm_fsm_thread_entry(void *parameter)
 {
-    //		extern sys_reg_st	g_sys;
-    //		rt_thread_delay(MBM_FSM_THREAD_DELAY);
-    //		mbm_fsm_init(&mbm_dev_inst[MB_MASTER_0]);								//initialize local modbus master register set
-    while (1)
-    {
-        //				mbm_fsm_update(&g_sys,&mbm_dev_inst[MB_MASTER_0],MB_MASTER_0);		//update modbus slave components into local modbus master register
-        rt_thread_delay(1000);
-    }
+    // extern sys_reg_st	g_sys;
+    // rt_thread_delay(MBM_FSM_THREAD_DELAY);
+    // mbm_fsm_init(&mbm_dev_inst[MB_MASTER_0]);								//initialize local modbus master register set
+
+    // mbm_fsm_update(&g_sys,&mbm_dev_inst[MB_MASTER_0],MB_MASTER_0);		//update modbus slave components into local modbus master register
+    rt_thread_delay(1000);
 }
 
 //******************************保持寄存器回调函数**********************************
@@ -437,7 +435,7 @@ static void mbm_send_fun(mbm_data_st *send_data)
   * @param  mbm_dev_inst: modbus master device data struct.
   * @retval none
   */
-  void mbm_fsm_update(sys_reg_st *gds_ptr, mbm_dev_st *mbm_dev_inst)
+void mbm_fsm_update(sys_reg_st *gds_ptr, mbm_dev_st *mbm_dev_inst)
 {
     uint16_t mbm_fsm_cstate;
     uint8_t i, len;
@@ -519,7 +517,7 @@ static void mbm_send_fun(mbm_data_st *send_data)
   * @param  mbm_dev_inst: modbus master device data struct.
   * @retval none
   */
-   void mbm_fsm_init(mbm_dev_st *mbm_dev_inst)
+void mbm_fsm_init(mbm_dev_st *mbm_dev_inst)
 {
     mbm_dev_inst->bitmap.poll = 0;
     mbm_dev_inst->bitmap.init = 0;

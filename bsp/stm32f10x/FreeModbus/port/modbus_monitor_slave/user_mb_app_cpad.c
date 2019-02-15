@@ -62,16 +62,16 @@ void cpad_modbus_slave_thread_entry(void *parameter)
             l_sys.u16Uart_Timeout = 0;
             cpad_MBRTUInit(1, UPORT_CPAD, 19200, MB_PAR_NONE);
         }
-        //				if(l_sys.SEL_Jump&Com_Pad)//串口屏
-        //				{
-        //					Cpad_Update();
-        //					rt_thread_delay(200);
-        //				}
-        //				else
-        //				{
+        // if(l_sys.SEL_Jump&Com_Pad)//串口屏
+        // {
+        // 	Cpad_Update();
+        // 	rt_thread_delay(200);
+        // }
+        // else
+        // {
         cpad_MBPoll();
         rt_thread_delay(10);
-        //				}
+        // }
     }
 }
 

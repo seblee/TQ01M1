@@ -20,11 +20,11 @@ static void daq_gvar_update(void);
 void daq_thread_entry(void *parameter)
 {
     rt_thread_delay(DAQ_THREAD_DELAY);
-    //		delay_init();//延时初始化，系统时钟初始化
+    // delay_init();//延时初始化，系统时钟初始化
     while (1)
     {
         daq_gvar_update();
-        //				rt_thread_delay(1000);
+        // rt_thread_delay(1000);
         rt_thread_delay(500);
     }
 }
@@ -42,5 +42,5 @@ static void daq_gvar_update(void)
     di_sts_update(&g_sys); //update g_din_inst
 
     AM_Sensor_update(&g_sys);
-    //		mbm_sts_update(&g_sys);													//update modbus master components status
+    // mbm_sts_update(&g_sys); // update modbus master components status
 }

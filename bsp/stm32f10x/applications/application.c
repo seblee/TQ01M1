@@ -41,8 +41,8 @@ enum
     MODBUS_MASTER_THREAD_PRIO,
     NET_THREAD_PRIO,
     MODULE_CTR_THREAD_PRIO,
-    //		TCOM_THREAD_PRIO,
-    //		TEAM_THREAD_PRIO,
+    // TCOM_THREAD_PRIO,
+    // TEAM_THREAD_PRIO,
     MBM_FSM_THREAD_PRIO,
     DI_THREAD_PRIO,
     DAQ_THREAD_PRIO,
@@ -57,31 +57,25 @@ enum
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t modbus_master_stack[512];
 static rt_uint8_t modbus_slave_stack[512];
-static rt_uint8_t monitor_slave_stack[1536];
-static rt_uint8_t mbm_fsm_stack[512];
+static rt_uint8_t monitor_slave_stack[2048];
 static rt_uint8_t di_stack[256];
 static rt_uint8_t daq_stack[512];
 static rt_uint8_t core_stack[512];
 static rt_uint8_t cpad_stack[512];
 static rt_uint8_t bkg_stack[512];
-static rt_uint8_t testcase_stack[512];
-static rt_uint8_t net_stack[3072];
 
 static struct rt_thread modbus_master_thread;
 static struct rt_thread modbus_slave_thread;
 static struct rt_thread CPAD_slave_thread;
-static struct rt_thread mbm_fsm_thread;
 static struct rt_thread di_thread;
 static struct rt_thread daq_thread;
 static struct rt_thread core_thread;
 static struct rt_thread cpad_thread;
 static struct rt_thread bkg_thread;
-static struct rt_thread testcase_thread;
-static struct rt_thread net_thread;
 
 void set_boot_flag(void);
 
-void rt_init_thread_entry(void* parameter)
+void rt_init_thread_entry(void *parameter)
 {
 #ifdef RT_USING_COMPONENTS_INIT
     /* initialization RT-Thread Components */
@@ -97,16 +91,13 @@ void rt_init_thread_entry(void* parameter)
     }
     else
         rt_kprintf("File System initialzation failed!\n");
-#endif  /* RT_USING_DFS */
+#endif /* RT_USING_DFS */
 
-    // #ifdef RT_USING_FINSH
-    //     finsh_set_device(RT_CONSOLE_DEVICE_NAME);
-    // #endif /* RT_USING_FINSH */
     hw_drivers_init();
     sys_global_var_init();
     sys_local_var_init();
-    //		drv_can_init();
-    //		init_work_mode();
+    // drv_can_init();
+    // init_work_mode();
     init_evnet_log();
     init_alarm_log();
 
@@ -181,19 +172,13 @@ int rt_application_init(void)
     //    {
     //        rt_thread_startup(&team_thread);
     //    }
+    rt_thread_t mbm_fsm_thread;
+    mbm_fsm_thread = rt_thread_create("mbm_fsm",
+                                      mbm_fsm_thread_entry, RT_NULL,
+                                      512, MBM_FSM_THREAD_PRIO, 5); // 初始化进程
 
-    result = rt_thread_init(&mbm_fsm_thread,
-                            "mbm_fsm",
-                            mbm_fsm_thread_entry,
-                            RT_NULL,
-                            (rt_uint8_t *)&mbm_fsm_stack[0],
-                            sizeof(mbm_fsm_stack),
-                            MBM_FSM_THREAD_PRIO,
-                            5);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&mbm_fsm_thread);
-    }
+    if (mbm_fsm_thread != RT_NULL)
+        rt_thread_startup(mbm_fsm_thread);
 
     result = rt_thread_init(&di_thread,
                             "di",
@@ -260,31 +245,21 @@ int rt_application_init(void)
         result = rt_thread_startup(&bkg_thread);
     }
 
-    result = rt_thread_init(&testcase_thread,
-                            "testcase",
-                            testcase_thread_entry,
-                            RT_NULL,
-                            (rt_uint8_t *)&testcase_stack[0],
-                            sizeof(testcase_stack),
-                            TESTCASE_THREAD_PRIO,
-                            5);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&testcase_thread);
-    }
+    rt_thread_t testcase_thread;
+    testcase_thread = rt_thread_create("testcase",
+                                       testcase_thread_entry, RT_NULL,
+                                       512, TESTCASE_THREAD_PRIO, 5); // 初始化进程
 
-    result = rt_thread_init(&net_thread,
-                            "net_test",
-                            net_thread_entry,
-                            RT_NULL,
-                            (rt_uint8_t *)&net_stack[0],
-                            sizeof(net_stack),
-                            NET_THREAD_PRIO,
-                            5);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&net_thread);
-    }
+    if (testcase_thread != RT_NULL)
+        rt_thread_startup(testcase_thread);
+
+    rt_thread_t net_thead;
+    net_thead = rt_thread_create("network",
+                                 net_thread_entry, RT_NULL,
+                                 3072, NET_THREAD_PRIO, 20); // 初始化进程
+
+    if (net_thead != RT_NULL)
+        rt_thread_startup(net_thead);
 
     return 0;
 }

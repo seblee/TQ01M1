@@ -39,27 +39,31 @@
 
 #define DEVICE_NAME device_info.device_name
 #define PRODUCT_KEY device_info.product_key
+
+#define NET_STACK_SIZE 3072
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 
 /********topic dup qos restained**************/
-iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS] = {
-    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_NOTICE"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_SET"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_GET"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_UPGRADE"}*/
+iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS] =
+    {
+        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_NOTICE"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_SET"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_GET"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_UPGRADE"}*/
 };
 /********topic dup qos restained**************/
-iot_topic_param_t iot_pub_topics[8] = {
-    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PLATFORM_INIT"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_STATUS"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_PUT"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_TIMING_REPORT"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_DEVICE_UPGRADE"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_INFORM"}*/
-    {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_PROGRESS"}*/
+iot_topic_param_t iot_pub_topics[8] =
+    {
+        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PLATFORM_INIT"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_STATUS"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_PUT"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_TIMING_REPORT"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_DEVICE_UPGRADE"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_INFORM"}*/
+        {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_PROGRESS"}*/
 };
 static MQTTClient client;
 extern sys_reg_st g_sys;
@@ -126,6 +130,31 @@ _exit:
     return;
 }
 //INIT_APP_EXPORT(net_thread_entry);
+void mqtt_send_cmd(const char *send_str)
+{
+    MQTT_CMD(&client, send_str);
+
+    return;
+}
+#ifdef RT_USING_FINSH
+#include <finsh.h>
+#ifdef FINSH_USING_MSH
+
+int mq_cmd(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        rt_kprintf("More than two input parameters err!!\n");
+        return 0;
+    }
+    mqtt_send_cmd(argv[1]);
+
+    return 0;
+}
+MSH_CMD_EXPORT(mq_cmd, publish mqtt msg);
+#endif /* FINSH_USING_MSH */
+#endif /* RT_USING_FINSH */
+
 /**
  ****************************************************************************
  * @Function : void network_Serialize_init_json(char **datapoint)
@@ -133,7 +162,7 @@ _exit:
  * @Program  : databuf:point of databuffer
  *             len:sizeof databuf
  * @Created  : 2018-09-20 by seblee
- * @Brief    : 
+ * @Brief    :
  * @Version  : V1.0
 **/
 void network_Serialize_init_json(char **datapoint)
@@ -302,7 +331,7 @@ void network_Serialize_para_json(char **datapoint)
  * @File     : network.c
  * @Program  : none
  * @Created  : 2018-09-25 by seblee
- * @Brief    : 
+ * @Brief    :
  * @Version  : V1.0
 **/
 rt_err_t network_water_notice_parse(const char *Str)
@@ -463,7 +492,7 @@ void network_get_interval(unsigned int *real, unsigned int *timing)
  * @File     : network.c
  * @Program  : none
  * @Created  : 2018-09-27 by seblee
- * @Brief    : 
+ * @Brief    :
  * @Version  : V1.0
 **/
 rt_err_t network_parameter_get_parse(const char *Str)
@@ -502,7 +531,7 @@ rt_err_t network_parameter_get_parse(const char *Str)
  * @File     : network.c
  * @Program  : none
  * @Created  : 2018-09-28 by seblee
- * @Brief    : 
+ * @Brief    :
  * @Version  : V1.0
 **/
 rt_err_t network_parameter_set_parse(const char *Str)

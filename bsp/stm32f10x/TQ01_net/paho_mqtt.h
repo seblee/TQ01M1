@@ -137,5 +137,6 @@ int eland_http_request(http_method method,
                        char *http_body,   //BODY
                        char *response);   //response 指針
 
- 
+int MQTT_CMD(MQTTClient *c, const char *cmd);
+void mqtt_send_cmd(const char *send_str);
 #endif /* __PAHO_MQTT_H__ */
