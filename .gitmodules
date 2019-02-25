@@ -1,5 +1,5 @@
-[submodule "bsp/stm32f10x/paho.mqtt.embedded-c"]
-	path = bsp/stm32f10x/paho.mqtt.embedded-c
+[submodule "bsp/stm32f10x/packages/pahomqtt-latest"]
+	path = bsp/stm32f10x/packages/pahomqtt-latest
 	url = git@github.com:seblee/paho.mqtt.embedded-c.git
 [submodule "bsp/stm32f10x/cJSON"]
 	path = bsp/stm32f10x/cJSON
@@ -10,4 +10,4 @@
  [submodule "bsp/stm32f10x/packages/mbedtls-v2.6.0"]
 	path = bsp/stm32f10x/packages/mbedtls-v2.6.0
 	url = git@github.com:seblee/mbedtls.git
- 
+	
