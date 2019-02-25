@@ -4,9 +4,10 @@
 [submodule "bsp/stm32f10x/cJSON"]
 	path = bsp/stm32f10x/cJSON
 	url = git@github.com:seblee/cJSON.git
-[submodule "bsp/stm32f10x/at_device-latest"]
-	path = bsp/stm32f10x/at_device-latest
+[submodule "bsp/stm32f10x/packages/at_device-latest"]
+	path = bsp/stm32f10x/packages/at_device-latest
 	url = git@github.com:seblee/at_device.git
-[submodule "bsp/stm32f10x/packages/mbedtls-v2.6.0"]
+ [submodule "bsp/stm32f10x/packages/mbedtls-v2.6.0"]
 	path = bsp/stm32f10x/packages/mbedtls-v2.6.0
 	url = git@github.com:seblee/mbedtls.git
+ 
