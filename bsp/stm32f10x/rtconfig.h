@@ -10,8 +10,7 @@
 
 /* RT_ALIGN_SIZE*/
 #define RT_ALIGN_SIZE 4
-
-/* PRIORITY_MAX */
+#define RT_THREAD_PRIORITY_32
 #define RT_THREAD_PRIORITY_MAX 32
 
 /* Tick per Second */
@@ -74,8 +73,6 @@
 
 #define RT_USING_COMPONENTS_INIT
 
-#define RT_USING_RTC
-#define RT_USING_ALARMS
 
 /* SECTION: finsh, a C-Express shell */
 #define RT_USING_FINSH
@@ -119,9 +116,13 @@
 #define RT_USING_SERIAL
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
+#define RT_USING_I2C
+#define RT_USING_RTC
+#define RT_USING_ALARMS
+
 
 /* SECTION: I2C */
-#define RT_USING_I2C
+
 
 /* SECTION: device filesystem */
 
@@ -147,8 +148,7 @@
 #define AT_USING_CLIENT
 #define AT_CLIENT_NUM_MAX 1
 #define AT_USING_SOCKET
-//#define AT_USING_CLI
-// #define AT_PRINT_RAW_CMD
+#define AT_CMD_MAX_LEN 128
 #define AT_SW_VERSION_NUM 0x10200
 
 /* IoT - internet of things */
