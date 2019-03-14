@@ -44,11 +44,9 @@ void cpad_MBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
     NVIC_InitTypeDef NVIC_InitStructure;
     USART_DeInit(USART2);
     //======================时钟初始化=======================================
-    //	RCC_APB2PeriphClockCmd(	RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD ,	ENABLE);
-    //	RCC_APB1PeriphClockCmd(	RCC_APB1Periph_UART5,ENABLE);
-    /* Enable UART GPIO clocks */
+    /* Enable UART2 GPIO clocks */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOD | RCC_APB2Periph_AFIO, ENABLE);
-    /* Enable UART clock */
+    /* Enable UART2 clock */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
     GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE); //USART2重映射
     //======================IO初始化=========================================
@@ -98,7 +96,7 @@ void cpad_MBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
 
     //=====================中断初始化======================================
     //设置NVIC优先级分组为Group2：0-3抢占式优先级，0-3的响应式优先级
-    //	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;

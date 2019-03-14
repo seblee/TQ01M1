@@ -58,8 +58,8 @@ enum
 #define DO_FAN_LOW_BPOS DO_FAN_BPOS //风机低档
 #define DO_UV2_BPOS DO_RSV1_BPOS    //紫外灯2,过流
 //L  双按键出水
-#define DO_WP2_BPOS DO_RSV2_BPOS //出水泵2
-#define DO_DV2_BPOS DO_RSV3_BPOS //出水阀2
+#define DO_WP2_BPOS DO_RSV2_BPOS      //出水泵2
+#define DO_DV2_BPOS DO_RSV3_BPOS      //出水阀2
 #define DO_HEAT_FAN_BPOS DO_RSV2_BPOS //扇热风机
 
 //application delay

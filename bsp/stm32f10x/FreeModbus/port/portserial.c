@@ -405,7 +405,7 @@ void vMBPortClose(void)
     USART_ITConfig(UART4, USART_IT_TXE | USART_IT_RXNE, DISABLE);
     USART_Cmd(UART4, DISABLE);
 }
-//默认一个从机 串口5 波特率可设置  奇偶检验可设置
+//默认一个从机 串口4 波特率可设置  奇偶检验可设置
 BOOL xMBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
                        eMBParity eParity)
 {

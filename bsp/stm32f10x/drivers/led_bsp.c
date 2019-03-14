@@ -88,8 +88,6 @@ void Led_Gpio_Init(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    //	  GPIO_SetBits(GPIOB, GPIO_Pin_15);
 }
 /*****************************************************************
 //   ws2811 LED显示 的 驱动 函数

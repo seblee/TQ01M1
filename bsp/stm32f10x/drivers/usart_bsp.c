@@ -15,8 +15,8 @@
  */
 
 #include "stm32f10x.h"
-#include "board.h"
 #include "usart_bsp.h"
+#include "board.h"
 #include "local_status.h"
 #include "port.h"
 

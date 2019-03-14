@@ -17,14 +17,16 @@
 #define RT_TICK_PER_SECOND 1000
 
 /* SECTION: RT_DEBUG */
-/* Thread Debug */
-#define RT_DEBUG
-#define RT_THREAD_DEBUG
+
 
 #define RT_USING_OVERFLOW_CHECK
 
 /* Using Hook */
 #define RT_USING_HOOK
+
+/* Thread Debug */
+#define RT_DEBUG
+#define RT_THREAD_DEBUG
 
 /* Using Software Timer */
 #define RT_USING_TIMER_SOFT
@@ -51,12 +53,11 @@
 /* SECTION: Memory Management */
 /* Using Memory Pool Management*/
 #define RT_USING_MEMPOOL
-
 /* Using Small MM */
 #define RT_USING_SMALL_MEM
-
 /* Using Dynamic Heap Management */
 #define RT_USING_HEAP
+
 
 /* Kernel Device Object */
 

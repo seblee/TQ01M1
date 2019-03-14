@@ -121,22 +121,19 @@ static void AM_SDA_OUT(uint8_t u8SN)
 static void AM_SDA_IN(uint8_t u8SN)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
-
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     switch (u8SN)
     {
     case 0x00:
     {
         GPIO_InitStructure.GPIO_Pin = II_AM_SDA_00_Pin;
-        //				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU ;
-        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
         GPIO_Init(II_AM_SDA_00_GPIO, &GPIO_InitStructure);
     }
     break;
     case 0x01:
     {
         GPIO_InitStructure.GPIO_Pin = II_AM_SDA_01_Pin;
-        //				GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU ;
-        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
         GPIO_Init(II_AM_SDA_01_GPIO, &GPIO_InitStructure);
     }
     break;
