@@ -78,8 +78,10 @@ struct MQTTClient
     int isQRcodegeted;
     int isparameterPutted;
     unsigned int keepAliveInterval;
+    char ping_outstanding;
     unsigned int TimingInterval;
     unsigned int RealtimeInterval;
+
     uint32_t tick_ping;
     uint32_t tick_timeing;
     uint32_t tick_realtime;
@@ -88,12 +90,12 @@ struct MQTTClient
     void (*online_callback)(MQTTClient *);
     void (*offline_callback)(MQTTClient *);
 
-    struct MessageHandlers
+    struct MessagesubHandlers
     {
         char *topicFilter;
         void (*callback)(MQTTClient *, MessageData *);
         enum QoS qos;
-    } messageHandlers[MAX_MESSAGE_HANDLERS]; /* Message handlers are indexed by subscription topic */
+    } messagesubHandlers[MAX_MESSAGE_HANDLERS]; /* Message handlers are indexed by subscription topic */
 
     void (*defaultMessageHandler)(MQTTClient *, MessageData *);
 
@@ -130,6 +132,8 @@ extern int paho_mqtt_start(MQTTClient *client);
  * @return the error code, 0 on subscribe successfully.
  */
 extern int MQTTPublish(MQTTClient *c, const char *topicName, MQTTMessage *message); /* copy */
+
+int keepalive(MQTTClient *c);
 
 int eland_http_request(http_method method,
                        char *request_uri, //uri

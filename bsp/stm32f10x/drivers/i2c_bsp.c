@@ -79,11 +79,8 @@ static rt_mutex_t iic_mutex;
 #if USE_MUTEX
 static void init_IIC_Mutex(void)
 {
-    rt_err_t erro;
-
     iic_mutex = rt_mutex_create("IIC_Mutex", RT_IPC_FLAG_PRIO);
-    erro = rt_mutex_init(iic_mutex, "IIC_Mutex", RT_IPC_FLAG_PRIO);
-    if (erro != RT_EOK)
+    if (iic_mutex == RT_NULL)
     {
         rt_kprintf("IICBSP: rt_mutex_init erro\n");
     }

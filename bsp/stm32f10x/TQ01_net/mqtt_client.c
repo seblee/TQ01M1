@@ -17,6 +17,7 @@
 #include "utils_hmac.h"
 #include "paho_mqtt.h"
 #include "sys_status.h"
+#include "crypto.h"
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -130,7 +131,7 @@ extern sys_reg_st g_sys;
 int mqtt_client_init(MQTTClient *client, iotx_device_info_pt device_info_p)
 {
     rt_err_t rc = RT_EOK;
-    iotx_conn_info_t device_connect;
+    static iotx_conn_info_t device_connect;
     MQTTPacket_connectData client_con = MQTTPacket_connectData_initializer;
 
     /* parameter check */
@@ -162,9 +163,9 @@ int mqtt_client_init(MQTTClient *client, iotx_device_info_pt device_info_p)
     client_con.clientID.cstring = (char *)device_connect.client_id;
     client_con.username.cstring = (char *)device_connect.username;
     client_con.password.cstring = (char *)device_connect.password;
-    LOG_D("clientID:%s", client_con.clientID.cstring);
-    LOG_D("username:%s", client_con.username.cstring);
-    LOG_D("password:%s", client_con.password.cstring);
+    // LOG_D("clientID:%s", client_con.clientID.cstring);
+    // LOG_D("username:%s", client_con.username.cstring);
+    // LOG_D("password:%s", client_con.password.cstring);
 
     {
         char mqtt_uri[100] = {0};
@@ -187,9 +188,9 @@ int mqtt_client_init(MQTTClient *client, iotx_device_info_pt device_info_p)
     LOG_D("client->uri:%s", client->uri);
     /* config connect param */
     memcpy(&client->condata, &client_con, sizeof(client_con));
-    LOG_D("client->clientID:%s", client->condata.clientID);
-    LOG_D("client->username:%s", client->condata.username);
-    LOG_D("client->password:%s", client->condata.password);
+    // LOG_D("client->clientID:%s", client->condata.clientID);
+    // LOG_D("client->username:%s", client->condata.username);
+    // LOG_D("client->password:%s", client->condata.password);
 
     /* config MQTT will param. */
     // client->condata.willFlag = 1;
@@ -228,10 +229,10 @@ int mqtt_client_init(MQTTClient *client, iotx_device_info_pt device_info_p)
         }
         rt_snprintf(topic_str_p, length, TOPIC_WATER_NOTICE, device_info_p->product_key, device_info_p->device_name);
         iot_sub_topics[WATER_NOTICE].topic_str = topic_str_p;
-        client->messageHandlers[WATER_NOTICE].topicFilter =
+        client->messagesubHandlers[WATER_NOTICE].topicFilter =
             (char *)iot_sub_topics[WATER_NOTICE].topic_str;
-        client->messageHandlers[WATER_NOTICE].callback = mqtt_WATER_NOTICE_callback;
-        client->messageHandlers[WATER_NOTICE].qos = iot_sub_topics[WATER_NOTICE].qos;
+        client->messagesubHandlers[WATER_NOTICE].callback = mqtt_WATER_NOTICE_callback;
+        client->messagesubHandlers[WATER_NOTICE].qos = iot_sub_topics[WATER_NOTICE].qos;
         LOG_D("topic_str:%s", iot_sub_topics[WATER_NOTICE].topic_str);
 
         length = strlen(TOPIC_PARAMETER_SET) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
@@ -244,10 +245,10 @@ int mqtt_client_init(MQTTClient *client, iotx_device_info_pt device_info_p)
         }
         rt_snprintf(topic_str_p, length, TOPIC_PARAMETER_SET, device_info_p->product_key, device_info_p->device_name);
         iot_sub_topics[PARAMETER_SET].topic_str = topic_str_p;
-        client->messageHandlers[PARAMETER_SET].topicFilter =
+        client->messagesubHandlers[PARAMETER_SET].topicFilter =
             (char *)iot_sub_topics[PARAMETER_SET].topic_str;
-        client->messageHandlers[PARAMETER_SET].callback = mqtt_PARAMETER_SET_callback;
-        client->messageHandlers[PARAMETER_SET].qos = iot_sub_topics[PARAMETER_SET].qos;
+        client->messagesubHandlers[PARAMETER_SET].callback = mqtt_PARAMETER_SET_callback;
+        client->messagesubHandlers[PARAMETER_SET].qos = iot_sub_topics[PARAMETER_SET].qos;
 
         length = strlen(TOPIC_PARAMETER_GET) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
         topic_str_p = rt_calloc(length + 1, 1);
@@ -259,10 +260,10 @@ int mqtt_client_init(MQTTClient *client, iotx_device_info_pt device_info_p)
         }
         rt_snprintf(topic_str_p, length, TOPIC_PARAMETER_GET, device_info_p->product_key, device_info_p->device_name);
         iot_sub_topics[PARAMETER_GET].topic_str = topic_str_p;
-        client->messageHandlers[PARAMETER_GET].topicFilter =
+        client->messagesubHandlers[PARAMETER_GET].topicFilter =
             (char *)iot_sub_topics[PARAMETER_GET].topic_str;
-        client->messageHandlers[PARAMETER_GET].callback = mqtt_PARAMETER_GET_callback;
-        client->messageHandlers[PARAMETER_GET].qos = iot_sub_topics[PARAMETER_GET].qos;
+        client->messagesubHandlers[PARAMETER_GET].callback = mqtt_PARAMETER_GET_callback;
+        client->messagesubHandlers[PARAMETER_GET].qos = iot_sub_topics[PARAMETER_GET].qos;
 
         length = strlen(IOT_OTA_UPGRADE) + strlen(device_info_p->product_key) + strlen(device_info_p->device_name);
         topic_str_p = rt_calloc(length + 1, 1);
@@ -274,10 +275,10 @@ int mqtt_client_init(MQTTClient *client, iotx_device_info_pt device_info_p)
         }
         rt_snprintf(topic_str_p, length, IOT_OTA_UPGRADE, device_info_p->product_key, device_info_p->device_name);
         iot_sub_topics[OTA_UPGRADE].topic_str = topic_str_p;
-        client->messageHandlers[OTA_UPGRADE].topicFilter =
+        client->messagesubHandlers[OTA_UPGRADE].topicFilter =
             (char *)iot_sub_topics[OTA_UPGRADE].topic_str;
-        client->messageHandlers[OTA_UPGRADE].callback = mqtt_sub_callback;
-        client->messageHandlers[OTA_UPGRADE].qos = iot_sub_topics[OTA_UPGRADE].qos;
+        client->messagesubHandlers[OTA_UPGRADE].callback = mqtt_sub_callback;
+        client->messagesubHandlers[OTA_UPGRADE].qos = iot_sub_topics[OTA_UPGRADE].qos;
     }
 
     /* set default subscribe event callback */
@@ -402,7 +403,9 @@ rt_err_t mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *dev
                 device_info->device_id, device_info->device_name, device_info->product_key);
     // LOG_D("host_name:%s", conn->host_name);
     // LOG_D("username:%s", conn->username);
-    // LOG_D("hmac_source:%s", hmac_source);
+    LOG_D("hmac_source:%s", hmac_source);
+    LOG_D("device_secret:%s", device_info->device_secret);
+
     utils_hmac_md5(hmac_source, strlen(hmac_source),
                    guider_sign,
                    device_info->device_secret,
@@ -411,14 +414,7 @@ rt_err_t mqtt_setup_connect_info(iotx_conn_info_t *conn, iotx_device_info_t *dev
                 "%s",
                 guider_sign);
     LOG_D("password:%s", conn->password);
-    // if (conn->style == IOT_WIFI_MODE)
-    //     rt_snprintf(conn->client_id, sizeof(conn->client_id),
-    //                 "%s"
-    //                 "|securemode=%d"
-    //                 ",signmethod=%s"
-    //                 "|",
-    //                 device_info->device_id, SECURE_TCP, MD5_METHOD);
-    // else if (conn->style == IOT_4G_MODE)
+
     rt_snprintf(conn->client_id, sizeof(conn->client_id),
                 "%s"
                 "|securemode=%d"

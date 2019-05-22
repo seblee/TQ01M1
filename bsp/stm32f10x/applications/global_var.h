@@ -21,7 +21,7 @@
 #define EE_WATER_MODE 46u
 #define EE_WATER_FLOW 47u
 #define EE_WIFI_SET 178u
-#define EE_WIFI_PASSWORD 190u
+#define EE_WIFI_PASSWORD 325u
 
 #define ST_HARDWARE 0 + 106
 

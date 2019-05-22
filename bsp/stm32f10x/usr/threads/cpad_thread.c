@@ -1,7 +1,5 @@
 #include <rtthread.h>
 #include "sys_conf.h"
-#include "stm32f10x_can.h"
-#include "can_bsp.h"
 #include "kits/fifo.h"
 #include "cpad_bsp.h"
 

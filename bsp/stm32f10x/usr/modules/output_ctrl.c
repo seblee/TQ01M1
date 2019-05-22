@@ -42,7 +42,7 @@ static void oc_do_update(uint32_t new_bitmap)
     u32DO[1] = new_bitmap;
     old_bitmap = Sts_Remap(u32DO[0], Rep_DO, 0);
     new_bitmap = Sts_Remap(u32DO[1], Rep_DO, 0);
-    //	  rt_kprintf("new_bitmap= %x,old_bitmap= %x,u32DO[0]=%x,u32DO[1]=%x\n",new_bitmap,old_bitmap,u32DO[0],u32DO[1]);
+    // rt_kprintf("new_bitmap= %x,old_bitmap= %x,u32DO[0]=%x,u32DO[1]=%x\n", new_bitmap, old_bitmap, u32DO[0], u32DO[1]);
     xor_bitmap = new_bitmap ^ old_bitmap;
 
     if (xor_bitmap != 0) //if output bitmap changed

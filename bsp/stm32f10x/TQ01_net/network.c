@@ -46,24 +46,22 @@
 /* Private variables ---------------------------------------------------------*/
 
 /********topic dup qos restained**************/
-iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS] =
-    {
-        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_NOTICE"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_SET"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_GET"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_UPGRADE"}*/
+iot_topic_param_t iot_sub_topics[MAX_MESSAGE_HANDLERS] = {
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_NOTICE"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_SET"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_GET"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_UPGRADE"}*/
 };
 /********topic dup qos restained**************/
-iot_topic_param_t iot_pub_topics[8] =
-    {
-        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PLATFORM_INIT"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_STATUS"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_PUT"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_TIMING_REPORT"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_DEVICE_UPGRADE"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_INFORM"}*/
-        {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_PROGRESS"}*/
+iot_topic_param_t iot_pub_topics[8] = {
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PLATFORM_INIT"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_WATER_STATUS"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_PARAMETER_PUT"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_REALTIME_REPORT"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_TIMING_REPORT"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"TOPIC_DEVICE_UPGRADE"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_INFORM"}*/
+    {RT_NULL, 0, QOS1, 0}, /*{"IOT_OTA_PROGRESS"}*/
 };
 static MQTTClient client;
 extern sys_reg_st g_sys;
@@ -83,11 +81,11 @@ static iotx_device_info_t device_info;
 void NetWork_DIR_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
+    RCC_APB2PeriphClockCmd(TQ01E1_PORT_RCC, ENABLE);
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Pin = SIM7600_DIR_PIN;
+    GPIO_InitStructure.GPIO_Pin = TQ01E1_DIR_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-    GPIO_Init(SIM7600_DIR_PORT, &GPIO_InitStructure);
+    GPIO_Init(TQ01E1_DIR_PORT, &GPIO_InitStructure);
     DIR_8266();
 }
 int esp8266_at_socket_device_init(void);
@@ -101,7 +99,7 @@ void net_thread_entry(void *parameter)
     /**NetWork_DIR_Init**/
     NetWork_DIR_Init();
 
-    rt_thread_delay(rt_tick_from_millisecond(2000));
+    rt_thread_delay(rt_tick_from_millisecond(4000));
 
     // result = network_Conversion_wifi_parpmeter(&g_sys.config.ComPara.Net_Conf, &temp);
     network_get_interval(&client.RealtimeInterval, &client.TimingInterval);
@@ -118,7 +116,6 @@ void net_thread_entry(void *parameter)
     /* config MQTT context param */
 
     result = mqtt_client_init(&client, &device_info);
-
     if (result != RT_EOK)
         goto _exit;
     module_thread_start(&g_sys.config.ComPara.Net_Conf);
@@ -223,17 +220,12 @@ void network_Serialize_init_json(char **datapoint)
 **/
 void network_Serialize_inform_json(char **datapoint)
 {
-
+    char versiontemp[10] = {0};
     /* declare a few. */
     cJSON *root = NULL, *result, *JS_paprms;
 
     /* Our "Video" datatype: */
     root = cJSON_CreateObject();
-    if (!root)
-    {
-        LOG_D("[%d] get root faild !");
-        goto __exit;
-    }
 
     result = cJSON_AddStringToObject(root, "id", "1");
     if (result == NULL)
@@ -245,7 +237,10 @@ void network_Serialize_inform_json(char **datapoint)
         LOG_D("[%d] construct JS_paprms faild !", rt_tick_get());
         goto __exit;
     }
-    result = cJSON_AddStringToObject(JS_paprms, "version", "0.0.2");
+
+    rt_snprintf(versiontemp, sizeof(versiontemp), "%02d.%02d.%02d", ((SOFTWARE_VER & 0xf000) >> 12), ((SOFTWARE_VER & 0x0f80) >> 7), ((SOFTWARE_VER & 0x007f) >> 0));
+
+    result = cJSON_AddStringToObject(JS_paprms, "version", versiontemp);
     if (result == NULL)
         LOG_D("[%d] JSON add err", rt_tick_get());
     cJSON_AddItemToObject(root, "params", JS_paprms);
@@ -253,8 +248,8 @@ void network_Serialize_inform_json(char **datapoint)
     *datapoint = cJSON_PrintUnformatted(root);
 __exit:
     cJSON_Delete(root);
-    // if (*datapoint)
-    //     LOG_D("[%d] JSON len:%d", rt_tick_get(), strlen(*datapoint));
+    if (*datapoint)
+        LOG_D("[%d] JSON len:%d---%s", rt_tick_get(), strlen(*datapoint), *datapoint);
 }
 
 /**

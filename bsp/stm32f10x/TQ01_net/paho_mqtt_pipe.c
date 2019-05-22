@@ -336,10 +336,7 @@ static int net_disconnect(MQTTClient *c)
 #else
     if (c->sock >= 0)
     {
-        int i = 0;
-    _reclose:
-        if ((closesocket(c->sock) != 0) && (i++ < 5))
-            goto _reclose;
+        closesocket(c->sock);
     }
     c->sock = -1;
 #endif
@@ -430,7 +427,7 @@ static int net_read(MQTTClient *c, unsigned char *buf, int len, int timeout)
             fd_set readset;
             struct timeval interval;
 
-            LOG_D("net_read %d:%d, timeout:%d", rt_tick_get(), bytes, len, timeout);
+            LOG_D("net_read,bytes%d,len:%d,timeout:%d", bytes, len, timeout);
             timeout = 0;
 
             interval.tv_sec = 1;
@@ -443,7 +440,7 @@ static int net_read(MQTTClient *c, unsigned char *buf, int len, int timeout)
         }
         else
         {
-            LOG_D("net_read %d:%d, break!", rt_tick_get(), bytes, len);
+            LOG_D("net_read,bytes%d,len:%d,timeout:%d", bytes, len, timeout);
             break;
         }
     }
@@ -520,6 +517,9 @@ static int MQTTConnect(MQTTClient *c)
         LOG_E("[%d]%s c-> is not connected", rt_tick_get(), __FUNCTION__);
         goto _exit;
     }
+    LOG_I("c->sock=%d", c->sock);
+
+    LOG_I("[%d]%s username:%s,password:%s", rt_tick_get(), __FUNCTION__, options->username.cstring, options->password.cstring);
 
     c->keepAliveInterval = options->keepAliveInterval;
 
@@ -554,30 +554,30 @@ static int MQTTConnect(MQTTClient *c)
             rc = -1;
             goto _exit;
         }
-    }
 
-    rc = MQTTPacket_readPacket(c);
-    if (rc < 0)
-    {
-        LOG_E("[%d]%s MQTTPacket_readPacket fail", rt_tick_get(), __FUNCTION__);
-        goto _exit;
-    }
-
-    if (rc == CONNACK)
-    {
-        unsigned char sessionPresent, connack_rc;
-
-        if (MQTTDeserialize_connack(&sessionPresent, &connack_rc, c->readbuf, c->readbuf_size) == 1)
+        rc = MQTTPacket_readPacket(c);
+        if (rc < 0)
         {
-            rc = connack_rc;
+            LOG_E("[%d]%s MQTTPacket_readPacket fail", rt_tick_get(), __FUNCTION__);
+            goto _exit;
+        }
+
+        if (rc == CONNACK)
+        {
+            unsigned char sessionPresent, connack_rc;
+
+            if (MQTTDeserialize_connack(&sessionPresent, &connack_rc, c->readbuf, c->readbuf_size) == 1)
+            {
+                rc = connack_rc;
+            }
+            else
+            {
+                rc = -1;
+            }
         }
         else
-        {
             rc = -1;
-        }
     }
-    else
-        rc = -1;
 
 _exit:
     if (rc == 0)
@@ -700,14 +700,14 @@ static int deliverMessage(MQTTClient *c, MQTTString *topicName, MQTTMessage *mes
     // we have to find the right message handler - indexed by topic
     for (i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
     {
-        if (c->messageHandlers[i].topicFilter != 0 && (MQTTPacket_equals(topicName, (char *)c->messageHandlers[i].topicFilter) ||
-                                                       isTopicMatched((char *)c->messageHandlers[i].topicFilter, topicName)))
+        if (c->messagesubHandlers[i].topicFilter != 0 && (MQTTPacket_equals(topicName, (char *)c->messagesubHandlers[i].topicFilter) ||
+                                                          isTopicMatched((char *)c->messagesubHandlers[i].topicFilter, topicName)))
         {
-            if (c->messageHandlers[i].callback != NULL)
+            if (c->messagesubHandlers[i].callback != NULL)
             {
                 MessageData md;
                 NewMessageData(&md, topicName, message);
-                c->messageHandlers[i].callback(c, &md);
+                c->messagesubHandlers[i].callback(c, &md);
                 rc = PAHO_SUCCESS;
             }
         }
@@ -729,8 +729,7 @@ static int MQTT_cycle(MQTTClient *c)
     // read the socket, see what work is due
     int packet_type = MQTTPacket_readPacket(c);
 
-    int len = 0,
-        rc = PAHO_SUCCESS;
+    int len = 0, rc = PAHO_SUCCESS;
 
     if (packet_type == -1)
     {
@@ -801,6 +800,7 @@ static int MQTT_cycle(MQTTClient *c)
         break;
     case PINGRESP:
         c->tick_ping = rt_tick_get();
+        c->ping_outstanding = 0;
         break;
     }
 
@@ -824,7 +824,6 @@ static void paho_mqtt_thread(void *param)
 {
     MQTTClient *c = (MQTTClient *)param;
     int i, rc, len = 0;
-    rt_uint32_t connect_count = 0, connected_count = 0, disconnect_count = 0;
     rt_uint32_t total, used, max_used;
 
     /* create publish pipe. */
@@ -833,6 +832,7 @@ static void paho_mqtt_thread(void *param)
         LOG_E("creat pipe err=%d", rt_get_errno());
         goto _mqtt_exit;
     }
+    LOG_I("c->pub_pipe[0]=%d", c->pub_pipe[0]);
 
 _mqtt_start:
     if ((module_state(RT_NULL) != MODULE_4G_READY) &&
@@ -842,7 +842,6 @@ _mqtt_start:
         rt_thread_delay(rt_tick_from_millisecond(5000));
         goto _net_disconnect;
     }
-    connect_count++;
     if (c->connect_callback)
     {
         c->connect_callback(c);
@@ -854,7 +853,6 @@ _mqtt_start:
         LOG_E("[%d]Net connect error(%d)", rt_tick_get(), rc);
         goto _mqtt_restart;
     }
-    connected_count++;
     rc = MQTTConnect(c);
     if (rc != 0)
     {
@@ -862,19 +860,17 @@ _mqtt_start:
         goto _mqtt_disconnect;
     }
 
-    // LOG_I("[%d]MQTT server connect success", rt_tick_get());
+    LOG_I("[%d]MQTT server connect success", rt_tick_get());
 
     for (i = 0; i < MAX_MESSAGE_HANDLERS; i++)
     {
-        const char *topic = c->messageHandlers[i].topicFilter;
-        enum QoS qos = c->messageHandlers[i].qos;
+        const char *topic = c->messagesubHandlers[i].topicFilter;
+        enum QoS qos = c->messagesubHandlers[i].qos;
 
         if (topic == RT_NULL)
             continue;
-        // LOG_I("Subscribe>>Qos:%d,Subscribe:%s", qos, topic);
-
         rc = MQTTSubscribe(c, topic, qos);
-        // LOG_I("Subscribe #%d %s %s!", i, topic, (rc < 0) || (rc == 0x80) ? ("fail") : ("OK"));
+        LOG_D("Subscribe #%d %s %s!", i, topic, (rc < 0) || (rc == 0x80) ? ("fail") : ("OK"));
 
         if (rc != 0)
         {
@@ -953,10 +949,9 @@ _mqtt_start:
             rt_memory_info(&total, &used, &max_used);
             struct tm ti;
             current_systime_get(&ti);
-            LOG_I("[%d]%04d-%02d-%02d %02d:%02d:%02d connect:%d connected:%d disconnect:%d,total:%d,used:%d,max_used:%d",
+            LOG_I("[%d]%04d-%02d-%02d %02d:%02d:%02d total:%d,used:%d,max_used:%d",
                   rt_tick_get(),
                   ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec,
-                  connect_count, connected_count, disconnect_count,
                   total, used, max_used);
         }
 
@@ -975,34 +970,21 @@ _mqtt_start:
             {
             case SENDINFORM:
                 len = mq_client_publish(c, OTA_INFORM);
+                // len = mq_client_publish(c, DEVICE_UPGRADE);
                 break;
             case SENDPING:
             {
-                len = MQTTSerialize_pingreq(c->buf, c->buf_size);
-                rc = sendPacket(c, len);
-                if (rc != 0)
-                {
-                    LOG_E("[%d]send ping rc: %d ", rt_tick_get(), rc);
+                rc = keepalive(c);
+                if (rc != PAHO_SUCCESS)
                     goto _mqtt_disconnect;
-                }
-
-                /* wait Ping Response. */
-                timeout.tv_sec = 5;
-                timeout.tv_usec = 0;
-
-                FD_ZERO(&readset);
-                FD_SET(c->sock, &readset);
-
-                res = select(c->sock + 1, &readset, RT_NULL, RT_NULL, &timeout);
-                if (res <= 0)
-                {
-                    LOG_E("[%d]wait Ping Response res: %d", rt_tick_get(), res);
-                    goto _mqtt_disconnect;
-                }
-                goto __receive_;
             } /* res == 0: timeount for ping. */
             // break;
             case SENDEDINIT:
+            // {
+            //     sendState++;
+            //     c->isQRcodegeted = 1;
+            //     continue;
+            // }
             case SENDINIT:
                 len = mq_client_publish(c, PLATFORM_INIT);
                 break;
@@ -1053,7 +1035,7 @@ _mqtt_start:
                 sendState++;
         }
 
-    __receive_:
+        
         if (res < 0)
         {
             LOG_E("[%d]select res: %d", rt_tick_get(), res);
@@ -1079,19 +1061,16 @@ _mqtt_start:
 
                 if (strcmp((const char *)c->readbuf, "DISCONNECT") == 0)
                 {
-                    disconnect_count++;
                     LOG_D("DISCONNECT");
                     goto _mqtt_disconnect_exit;
                 }
                 if (strcmp((const char *)c->readbuf, "RECONNECT") == 0)
                 {
-                    disconnect_count++;
                     LOG_D("RECONNECT");
                     goto _mqtt_disconnect;
                 }
                 if (strcmp((const char *)c->readbuf, "REFRESH") == 0)
                 {
-                    disconnect_count++;
                     LOG_D("REFRESH");
                 }
             }
@@ -1124,8 +1103,8 @@ _net_disconnect:
         LOG_I("total:%d,used:%d,max_used:%d", total, used, max_used);
         struct tm ti;
         current_systime_get(&ti);
-        LOG_I("%04d-%02d-%02d %02d:%02d:%02d connect:%d connected:%d disconnect:%d",
-              ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec, connect_count, connected_count, disconnect_count);
+        LOG_I("%04d-%02d-%02d %02d:%02d:%02d",
+              ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday, ti.tm_hour, ti.tm_min, ti.tm_sec);
     }
     rt_thread_delay(RT_TICK_PER_SECOND * 5);
     goto _mqtt_start;
@@ -1311,6 +1290,27 @@ static int mq_client_publish(MQTTClient *c, _topic_pub_enmu_t pub_type)
     rc = MQTTSerialize_publish(c->buf, c->buf_size, message.dup, message.qos, message.retained, message.id,
                                topic, (unsigned char *)message.payload, message.payloadlen);
     rt_free(msg_str);
+exit:
+    return rc;
+}
+
+int keepalive(MQTTClient *c)
+{
+    int rc = SUCCESS;
+    if (!c->isconnected)
+        goto exit;
+
+    if (c->keepAliveInterval == 0)
+        goto exit;
+
+    if (c->ping_outstanding)
+        rc = PAHO_FAILURE; /* PINGRESP not received in keepalive interval */
+    else
+    {
+        int len = MQTTSerialize_pingreq(c->buf, c->buf_size);
+        if (len > 0 && (rc = sendPacket(c, len)) == PAHO_SUCCESS) // send the ping packet
+            c->ping_outstanding = 1;
+    }
 exit:
     return rc;
 }

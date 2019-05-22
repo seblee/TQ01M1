@@ -31,10 +31,11 @@ typedef uint32_t time_t;
 //#define	SYS_HMI_VJL		1		//威金利
 
 #ifdef SYS_HMI_TQ
-#define CONF_REG_MAP_NUM 300
+#define CONF_REG_MAP_NUM 435
 #define CONF_REG_SID_START 200
 #define CONF_REG_SID_NUM 100
-#define SOFTWARE_VER 0x1031
+#define SOFTWARE_VER 0x1080
+#define SOFTWARE_VER_NAME "TQ01M1"
 
 #elif SYS_HMI_TQ_T10
 #define CONF_REG_MAP_NUM 300

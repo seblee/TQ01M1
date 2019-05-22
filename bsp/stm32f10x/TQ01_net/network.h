@@ -43,17 +43,12 @@
 
 #define MSG_LEN_MAX 1024
 
-#define SIM7600_DIR_PORT UART3_DIR_GPIO
-#define SIM7600_DIR_PIN UART3_DIR_GPIO_PIN
+#define TQ01E1_DIR_PORT GPIOE
+#define TQ01E1_DIR_PIN GPIO_Pin_6
+#define TQ01E1_PORT_RCC RCC_APB2Periph_GPIOE
 
-#define DIR_8266()                                       \
-    {                                                    \
-        GPIO_SetBits(SIM7600_DIR_PORT, SIM7600_DIR_PIN); \
-    }
-#define DIR_7600()                                         \
-    {                                                      \
-        GPIO_ResetBits(SIM7600_DIR_PORT, SIM7600_DIR_PIN); \
-    }
+#define DIR_8266() PEout(6) = 1
+#define DIR_7600() PEout(6) = 0
 
 #define aliyun_domain "%s.iot-as-mqtt.cn-shanghai.aliyuncs.com"
 #define aliyun_iot_port 1883
@@ -102,9 +97,9 @@ typedef struct
 typedef struct
 {
     const char *topic_str;
-    rt_uint8_t dup;
-    enum QoS qos;
-    rt_uint8_t restained;
+    const rt_uint8_t dup;
+    const enum QoS qos;
+    const rt_uint8_t restained;
 } iot_topic_param_t;
 
 typedef enum
@@ -148,9 +143,9 @@ void network_Serialize_inform_json(char **datapoint);
 
 void network_Serialize_para_json(char **datapoint);
 
-rt_err_t network_water_notice_parse(const char *Str);
-
 void network_Serialize_report_json(char **datapoint, rt_uint8_t topic_type);
+
+rt_err_t network_water_notice_parse(const char *Str);
 
 void network_get_interval(unsigned int *real, unsigned int *timing);
 

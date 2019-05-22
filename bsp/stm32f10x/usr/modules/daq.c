@@ -1,4 +1,4 @@
-#include <rtthread.h> 
+#include <rtthread.h>
 #include "daq.h"
 #include "sys_conf.h"
 #include "sys_status.h"
@@ -200,18 +200,18 @@ void ai_sts_update(sys_reg_st *gds_sys_ptr)
     uint16_t u16ADCRemapValue[AI_MAX_CNT]; //
 
     ain_mask_bitmap = gds_sys_ptr->config.dev_mask.ain;
-    //		ain_mask_bitmap =0x001F;
-    //rt_kprintf("ADC1ConvertedValue = %X,V[1] = %X,V[2] = %X,V[3] = %X,V[4] = %X\n",ADC1ConvertedValue[0],ADC1ConvertedValue[1],ADC1ConvertedValue[2],ADC1ConvertedValue[3],ADC1ConvertedValue[4]);
-    //	  for(i = 0;i < AI_MAX_CNT;i++)
-    //		{
-    //				ADCValProcess(ADC1ConvertedValue,ADC1Buff,i);
-    //		}
+    // ain_mask_bitmap = 0x001F;
+    // rt_kprintf("V[0]:%04d,V[1]:%04d,V[2]:%04d,V[3]:%04d,V[4]:%04d,V[5]:%04d,V[6]:%04d\n", ADC1ConvertedValue[0], ADC1ConvertedValue[1], ADC1ConvertedValue[2], ADC1ConvertedValue[3], ADC1ConvertedValue[4], ADC1ConvertedValue[5], ADC1ConvertedValue[6]);
+    // for (i = 0; i < AI_MAX_CNT; i++)
+    // {
+    //     ADCValProcess(ADC1ConvertedValue, ADC1Buff, i);
+    // }
     for (i = 0; i < AI_MAX_CNT; i++)
     {
         u16ADCRemapValue[i] = ADC1ConvertedValue[i];
     }
-    //rt_kprintf("ADC1ConvertedValue = %X,V[1] = %X,V[2] = %X,V[3] = %X,V[4] = %X\n",ADC1ConvertedValue[0],ADC1ConvertedValue[1],ADC1ConvertedValue[2],ADC1ConvertedValue[3],ADC1ConvertedValue[4]);
-    //rt_kprintf("u16ADCRemapValue = %X,R[1] = %X,R[2] = %X,R[3] = %X,R[4] = %X\n",u16ADCRemapValue[0],u16ADCRemapValue[1],u16ADCRemapValue[2],u16ADCRemapValue[3],u16ADCRemapValue[4]);
+    // rt_kprintf("ADC1ConvertedValue = %X,V[1] = %X,V[2] = %X,V[3] = %X,V[4] = %X\n", ADC1ConvertedValue[0], ADC1ConvertedValue[1], ADC1ConvertedValue[2], ADC1ConvertedValue[3], ADC1ConvertedValue[4]);
+    // rt_kprintf("u16ADCRemapValue = %X,R[1] = %X,R[2] = %X,R[3] = %X,R[4] = %X\n", u16ADCRemapValue[0], u16ADCRemapValue[1], u16ADCRemapValue[2], u16ADCRemapValue[3], u16ADCRemapValue[4]);
 
     for (i = AI_NTC1; i < AI_MAX_CNT; i++)
     {
@@ -223,7 +223,7 @@ void ai_sts_update(sys_reg_st *gds_sys_ptr)
         gds_sys_ptr->status.ComSta.u16Ain[AI_SENSOR1] = Calc_UV_ai(u16ADCRemapValue[AI_SENSOR1], K_FACTOR_UV, gds_sys_ptr->config.general.ai_cali[AI_SENSOR1]);
     }
 
-    //		rt_kprintf("ain[0] = %d,ain[1] = %d,ain[2] = %d,ain[3] = %d,ain[4] = %d\n",gds_sys_ptr->status.ComSta.u16Ain[0],gds_sys_ptr->status.ComSta.u16Ain[1],gds_sys_ptr->status.ComSta.u16Ain[2],gds_sys_ptr->status.ComSta.u16Ain[3],gds_sys_ptr->status.ComSta.u16Ain[4]);
+    // rt_kprintf("Sensor:%d,NTC1:%d,NTC2:%d,NTC3:%d,NTC4:%d,NTC5:%d,NTC6:%d\n", gds_sys_ptr->status.ComSta.u16Ain[0], gds_sys_ptr->status.ComSta.u16Ain[1], gds_sys_ptr->status.ComSta.u16Ain[2], gds_sys_ptr->status.ComSta.u16Ain[3], gds_sys_ptr->status.ComSta.u16Ain[4], gds_sys_ptr->status.ComSta.u16Ain[5], gds_sys_ptr->status.ComSta.u16Ain[6]);
 
     return;
 }

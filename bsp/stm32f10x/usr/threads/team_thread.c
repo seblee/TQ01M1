@@ -1,7 +1,6 @@
 #include <rtthread.h>
 #include "sys_conf.h"
 #include "team.h"
-#include "can_bsp.h"
 
 // void team_thread_entry(void *parameter)
 // {
