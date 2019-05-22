@@ -599,6 +599,7 @@ static int MQTTDisconnect(MQTTClient *c)
     c->isQRcodegeted = 0;
     c->isparameterPutted = 0;
     c->isInformed = 0;
+    c->ping_outstanding = 0;
     /***wait socket closed by remote***/
     rt_thread_delay(200);
     return rc;
@@ -977,14 +978,15 @@ _mqtt_start:
                 rc = keepalive(c);
                 if (rc != PAHO_SUCCESS)
                     goto _mqtt_disconnect;
+                continue;
             } /* res == 0: timeount for ping. */
             // break;
             case SENDEDINIT:
-            // {
-            //     sendState++;
-            //     c->isQRcodegeted = 1;
-            //     continue;
-            // }
+                // {
+                //     sendState++;
+                //     c->isQRcodegeted = 1;
+                //     continue;
+                // }
             case SENDINIT:
                 len = mq_client_publish(c, PLATFORM_INIT);
                 break;
@@ -1035,7 +1037,6 @@ _mqtt_start:
                 sendState++;
         }
 
-        
         if (res < 0)
         {
             LOG_E("[%d]select res: %d", rt_tick_get(), res);
