@@ -1186,7 +1186,7 @@ int16_t eeprom_tripple_write(uint16 reg_offset_addr, uint16 wr_data, uint16_t rd
   * @brief  write register map with constraints.
   * @param  reg_addr: reg map address.
   * @param  wr_data: write data. 
-	* @param  permission_flag:  
+  * @param  permission_flag:  
   *   This parameter can be one of the following values:
   *     @arg PERM_PRIVILEGED: write opertion can be performed dispite permission level
   *     @arg PERM_INSPECTION: write operation could only be performed when pass permission check

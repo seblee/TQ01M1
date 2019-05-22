@@ -473,30 +473,30 @@ typedef struct
 
 //Digtal input status
 /*
-bit map:
-bit0: 	compressor 1 hi temp valve
-bit1: 	compressor 2 hi temp valve
-bit2: 	compressor 1 low temp valve
-bit3: 	compressor 2 low temp valve
-bit4: 	compressor 1 discharge temp valve
-bit5:		compressor 2 discharge temp valve
-bit6: 	fan 1 overload valve
-bit7: 	fan 2 overload valve
-bit8:		fan 3 overload valve
-bit9:		air lost valve
-bit10:	filter clog valve
-bit11:	water overflow valve
-bit12:	remote shut valve
-bit13:	reserve1
-bit14:	reserve2
-bit15:	reserve3
+    bit map:
+    bit0:  compressor 1 hi temp valve
+    bit1:  compressor 2 hi temp valve
+    bit2:  compressor 1 low temp valve
+    bit3:  compressor 2 low temp valve
+    bit4:  compressor 1 discharge temp valve
+    bit5:  compressor 2 discharge temp valve
+    bit6:  fan 1 overload valve
+    bit7:  fan 2 overload valve
+    bit8:  fan 3 overload valve
+    bit9:  air lost valve
+    bit10: filter clog valve
+    bit11: water overflow valve
+    bit12: remote shut valve
+    bit13: reserve1
+    bit14: reserve2
+    bit15: reserve3
 
-bit16:	power phase A error 
-bit17:	power phase B error 
-bit18:	power phase C error 
-bit19:	humidifier water level high
-bit20:	humidifier heating current high
-bit21:	humidifier conductivity low
+    bit16: power phase A error 
+    bit17: power phase B error 
+    bit18: power phase C error 
+    bit19: humidifier water level high
+    bit20: humidifier heating current high
+    bit21: humidifier conductivity low
 */
 
 typedef struct
@@ -539,19 +539,19 @@ typedef struct
 //alarm system runtime log, record components accumulative running time
 /*
 @comp_id:
-	0:	compressor 1
-	1:	compressor 2
-	2:	fan 1
-	3:	fan 2
-	4:	fan 3
-	5:	heater 1
-	6:	heater 2
-	7:	humidifier
+    0: compressor 1
+    1: compressor 2
+    2: fan 1
+    3: fan 2
+    4: fan 3
+    5: heater 1
+    6: heater 2
+    7: humidifier
 @action:
-	0:	deactivated
-	1:	activated
+    0: deactivated
+    1: activated
 @trigger_time:
-	sys_time
+    sys_time
 */
 
 typedef struct
@@ -577,19 +577,19 @@ typedef struct
 //alarm system runtime log, record components change of output states
 /*
 @comp_id:
-	0:	compressor 1
-	1:	compressor 2
-	2:	fan 1
-	3:	fan 2
-	4:	fan 3
-	5:	heater 1
-	6:	heater 2
-	7:	humidifier
+    0: compressor 1
+    1: compressor 2
+    2: fan 1
+    3: fan 2
+    4: fan 3
+    5: heater 1
+    6: heater 2
+    7: humidifier
 @action:
-	0:	deactivated
-	1:	activated
+    0: deactivated
+    1: activated
 @trigger_time:
-	sys_time
+ sys_time
 */
 typedef struct
 {
@@ -605,21 +605,21 @@ typedef struct
 
 //alarms: acl definition
 /*
-@id:			alarm id
-@delay:		trigger&clear delay 
-@timeout:	delay timeout count down
-@trigger_time:	alarm trigger time
-@enable mode:	alarm enable mode
-`0x00:		enable
-`0x01:		suspend
-`0x02:		forbid
-@enable mask:	alarm enable mask
-'0x03:	all mode enable
-'0x02:	enable or forbid 
-'0x01:	enable or suspend
-'0x00:	only enable
-@alarm_param:	related paramter(eg. threshold)
-@void (*alarm_proc): designated alarm routine check function
+    @id:   alarm id
+    @delay:  trigger&clear delay 
+    @timeout: delay timeout count down
+    @trigger_time: alarm trigger time
+    @enable mode: alarm enable mode
+        `0x00:  enable
+        `0x01:  suspend
+        `0x02:  forbid
+    @enable mask: alarm enable mask
+        '0x03: all mode enable
+        '0x02: enable or forbid 
+        '0x01: enable or suspend
+        '0x00: only enable
+    @alarm_param: related paramter(eg. threshold)
+    @void (*alarm_proc): designated alarm routine check function
 */
 
 typedef struct
@@ -783,16 +783,16 @@ typedef struct
 typedef struct
 {
     mbm_tnh_st tnh[TEMP_HUM_SENSOR_NUM]; //温湿度
-                                         //	mbm_IPM_St      IPM;//IPM电表
-                                         //	mbm_PDU_St      PDU[4];//PDU
-                                         //	mbm_AC_St       AC;//空调
-                                         ////	mbm_UPS_APC_St			UPS;
-                                         ////#if (UPS_TYPE==UPS_EMERSON_ITA2)
-                                         ////	mbm_UPS_ITA2_St 		UPS;
-                                         ////#elif (UPS_TYPE==UPS_JYD_SIN)
-                                         ////	mbm_UPS_JYD_SIN_St	UPS;
-                                         ////#endif
-                                         //	mbm_UPS_HW_St		UPS;
+    // mbm_IPM_St IPM;                      //IPM电表
+    // mbm_PDU_St PDU[4];                   //PDU
+    // mbm_AC_St AC;                        //空调
+    // // mbm_UPS_APC_St   UPS;
+    // //#if (UPS_TYPE==UPS_EMERSON_ITA2)
+    // // mbm_UPS_ITA2_St   UPS;
+    // //#elif (UPS_TYPE==UPS_JYD_SIN)
+    // // mbm_UPS_JYD_SIN_St UPS;
+    // //#endif
+    // mbm_UPS_HW_St UPS;
     mbm_Error_St Err_M;
 } mbm_sts_st;
 
@@ -890,26 +890,26 @@ typedef struct
 typedef struct
 {
     sys_info_st sys_info;
-    status_general_st general;     //3
-    mbm_sts_st mbm;                //25
-    uint16_t ain[AI_MAX_CNT];      //
-    uint16_t aout[AO_MAX_CNT];     //6
-                                   //		uint16_t							CFM;														//总风量
-                                   //    uint16_t							pwmout[PWM_MAX_CNT];						//2
+    status_general_st general; //3
+    mbm_sts_st mbm;            //25
+    uint16_t ain[AI_MAX_CNT];  //
+    uint16_t aout[AO_MAX_CNT]; //6
+    // uint16_t CFM;                  //总风量
+    // uint16_t pwmout[PWM_MAX_CNT];  //2
     uint16_t din_bitmap[2];        //2
     uint16_t dout_bitmap[2];       //2
     uint16_t status_remap[4];      //4
     uint16_t alarm_bitmap[7];      //6
     uint16_t Alarm_COM_NTC_BIT[2]; //2
-                                   //		uint16_t							flash_program_flag;							//1
-                                   //		run_time_st						run_time[DO_MAX_CNT];
+    // uint16_t flash_program_flag;   //1
+    // run_time_st run_time[DO_MAX_CNT];
     alarm_state_cnt_st alarm_status_cnt;
     sys_tem_hum_st sys_tem_hum;
-    //		work_mode_st          sys_work_mode;
-    //		uint16_t              flow_diff_timer;
-    //		return_air_sta_st     return_air_status;
-    //		uint16_t							Hum_Water_Level;								//1
-    //		ControlPassword_st			ControlPassword;//5级密码管控
+    // work_mode_st sys_work_mode;
+    // uint16_t flow_diff_timer;
+    // return_air_sta_st return_air_status;
+    // uint16_t Hum_Water_Level;           //1
+    // ControlPassword_st ControlPassword; //5级密码管控
     ComSta_st ComSta;
 } status_st;
 
