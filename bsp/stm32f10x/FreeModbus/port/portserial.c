@@ -382,12 +382,12 @@ void vMBPortSerialEnable(BOOL xRxEnable, BOOL xTxEnable)
         /* 485通信时，等待串口移位寄存器中的数据发送完成后，再去使能485的接收、失能485的发送*/
         while (!USART_GetFlagStatus(UART4, USART_FLAG_TC))
             ;
-        SLAVE_RS485_RECEIVE_MODE;
+        // SLAVE_RS485_RECEIVE_MODE;
         USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
     }
     else
     {
-        SLAVE_RS485_SEND_MODE;
+        // SLAVE_RS485_SEND_MODE;
         USART_ITConfig(UART4, USART_IT_RXNE, DISABLE);
     }
     if (xTxEnable)

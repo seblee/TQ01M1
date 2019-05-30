@@ -590,10 +590,7 @@ static void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Pin = UART3_GPIO_TX;
     GPIO_Init(UART3_GPIO, &GPIO_InitStructure);
-    /* Configure UART DIR PIN */
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Pin = UART3_DIR_GPIO_PIN;
-    GPIO_Init(UART3_DIR_GPIO, &GPIO_InitStructure);
+   
 #endif /* RT_USING_UART3 */
 
 #if defined(RT_USING_UART4)
