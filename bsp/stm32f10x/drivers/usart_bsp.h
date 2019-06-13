@@ -15,7 +15,6 @@
 #include <rtthread.h>
 #include <stdint.h>
 
-
 /* USART1 */
 #define UART1_GPIO_TX GPIO_Pin_9
 #define UART1_GPIO_RX GPIO_Pin_10
@@ -47,8 +46,6 @@
 #define UART5_GPIO_RX GPIO_Pin_2
 #define UART5_GPIO_T GPIOC
 #define UART5_GPIO_R GPIOD
-#define UART5_DIR_GPIO GPIOD
-#define UART5_DIR_GPIO_PIN GPIO_Pin_3
 
 #define UART_ENABLE_IRQ(n)            NVIC_EnableIRQ((n))
 #define UART_DISABLE_IRQ(n)           NVIC_DisableIRQ((n))

@@ -618,10 +618,7 @@ static void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Pin = UART5_GPIO_TX;
     GPIO_Init(UART5_GPIO_T, &GPIO_InitStructure);
-    /* Configure UART DIR PIN */
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Pin = UART5_DIR_GPIO_PIN;
-    GPIO_Init(UART5_DIR_GPIO, &GPIO_InitStructure);
+     
 #endif /* RT_USING_UART5 */
 }
 

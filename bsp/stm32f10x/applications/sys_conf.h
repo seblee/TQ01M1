@@ -284,8 +284,9 @@ enum
     STERILIZE_STS_BPOS, //杀菌
     DEFROST1_STS_BPOS,  //除霜1
     DEFROST2_STS_BPOS,  //除霜2
-    FAN_STS_BPOS,
-    HEATING_STS_BPOS,
+    FAN_STS_BPOS,       //风机
+    HEATING_STS_BPOS,   //加热
+    EXITWATER_STS_BPOS, //外接水源
     NET_STS_BPOS,
     ALARM_STUSE_BPOS = 14,
     ALARM_BEEP_BPOS = 15,

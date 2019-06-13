@@ -246,7 +246,7 @@ rt_inline int _serial_poll_tx(struct rt_serial_device *serial, const rt_uint8_t 
 	
 		if(serial->config.reserved == 1)
 		{
-			CONSOLE_RS485_SND_MODE; 			
+			// CONSOLE_RS485_SND_MODE; 			
 		}	
 	
     while (length)
@@ -268,7 +268,7 @@ rt_inline int _serial_poll_tx(struct rt_serial_device *serial, const rt_uint8_t 
 		if(serial->config.reserved == 1)
 		{
 			while (!(uart->uart_device->SR & USART_FLAG_TC));
-			CONSOLE_RS485_RCV_MODE; 			
+			// CONSOLE_RS485_RCV_MODE; 			
 		}	
 
     return size - length;

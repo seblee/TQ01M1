@@ -47,8 +47,15 @@
 #define TQ01E1_DIR_PIN GPIO_Pin_6
 #define TQ01E1_PORT_RCC RCC_APB2Periph_GPIOE
 
+#define SIM7600_RESET_PORT GPIOD
+#define SIM7600_RESET_PIN GPIO_Pin_3
+#define SIM7600_RESET_PORT_RCC RCC_APB2Periph_GPIOD
+
 #define DIR_8266() PEout(6) = 1
 #define DIR_7600() PEout(6) = 0
+
+#define SIM7600_SET() PDout(3) = 1
+#define SIM7600_RESET() PDout(3) = 0
 
 #define aliyun_domain "%s.iot-as-mqtt.cn-shanghai.aliyuncs.com"
 #define aliyun_iot_port 1883

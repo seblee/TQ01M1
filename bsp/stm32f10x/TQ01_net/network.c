@@ -87,6 +87,13 @@ void NetWork_DIR_Init(void)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(TQ01E1_DIR_PORT, &GPIO_InitStructure);
     DIR_8266();
+
+    RCC_APB2PeriphClockCmd(SIM7600_RESET_PORT_RCC, ENABLE);
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Pin = SIM7600_RESET_PIN;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_Init(SIM7600_RESET_PORT, &GPIO_InitStructure);
+    SIM7600_SET();
 }
 int esp8266_at_socket_device_init(void);
 int sim7600_at_socket_device_init(void);
