@@ -52,11 +52,6 @@ enum
 
 #define SLE1_READ GPIO_ReadInputDataBit(SLE_GPIO, SLE1_PIN)
 #define SLE2_READ GPIO_ReadInputDataBit(SLE_GPIO, SLE2_PIN)
-
-#define LLJ_PIN GPIO_Pin_12
-#define LLJ_GPIO GPIOA
-#define TEST_LLJ_READ() GPIO_ReadInputDataBit(LLJ_GPIO, LLJ_PIN)
-
 enum
 {
     Com_Pad = 0x01,
@@ -66,10 +61,9 @@ enum
 #define DIN_WORD2 16 //2个字节
 #define DO_WORD2 16  //2个字节
 
-#define DO_MASK1 0xFFFF          //DO1 mask
-#define DO_MASK2 0x3F            //DO2 mask
-#define DO_POWER_CTR_ENABLE 0x37 //添加电源
-#define DO_POWER_CTR_ONLY 0x00   //只开电源
+#define DO_MASK1 0xFFFF        //DO1 mask
+#define DO_MASK2 0x3F          //DO2 mask
+#define DO_POWER_CTR_ONLY 0x00 //只开电源
 
 void drv_dio_init(void);
 void di_sts_update(sys_reg_st *gds_sys_ptr);

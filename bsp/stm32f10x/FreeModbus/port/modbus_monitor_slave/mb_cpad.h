@@ -71,7 +71,7 @@ PR_BEGIN_EXTERN_C
 /*! \ingroup modbus
  * \brief Use the default Modbus TCP port (502)
  */
-#define MB_TCP_PORT_USE_DEFAULT 0   
+#define MB_TCP_PORT_USE_DEFAULT 0
 
 /* ----------------------- Type definitions ---------------------------------*/
 
@@ -82,11 +82,11 @@ PR_BEGIN_EXTERN_C
  * is faster but has more hardware requirements and requires a network with
  * a low jitter. ASCII is slower and more reliable on slower links (E.g. modems)
  */
-    typedef enum
+typedef enum
 {
-    MB_RTU,                     /*!< RTU transmission mode. */
-    MB_ASCII,                   /*!< ASCII transmission mode. */
-    MB_TCP                      /*!< TCP mode. */
+    MB_RTU,   /*!< RTU transmission mode. */
+    MB_ASCII, /*!< ASCII transmission mode. */
+    MB_TCP    /*!< TCP mode. */
 } eMBMode;
 
 /*! \ingroup modbus
@@ -102,8 +102,8 @@ PR_BEGIN_EXTERN_C
  */
 typedef enum
 {
-    MB_REG_READ,                /*!< Read register values and pass to protocol stack. */
-    MB_REG_WRITE                /*!< Update register values. */
+    MB_REG_READ, /*!< Read register values and pass to protocol stack. */
+    MB_REG_WRITE /*!< Update register values. */
 } eMBRegisterMode;
 
 /*! \ingroup modbus
@@ -111,16 +111,15 @@ typedef enum
  */
 typedef enum
 {
-    MB_ENOERR,                  /*!< no error. */
-    MB_ENOREG,                  /*!< illegal register address. */
-    MB_EINVAL,                  /*!< illegal argument. */
-    MB_EPORTERR,                /*!< porting layer error. */
-    MB_ENORES,                  /*!< insufficient resources. */
-    MB_EIO,                     /*!< I/O error. */
-    MB_EILLSTATE,               /*!< protocol stack in illegal state. */
-    MB_ETIMEDOUT                /*!< timeout error occurred. */
+    MB_ENOERR,    /*!< no error. */
+    MB_ENOREG,    /*!< illegal register address. */
+    MB_EINVAL,    /*!< illegal argument. */
+    MB_EPORTERR,  /*!< porting layer error. */
+    MB_ENORES,    /*!< insufficient resources. */
+    MB_EIO,       /*!< I/O error. */
+    MB_EILLSTATE, /*!< protocol stack in illegal state. */
+    MB_ETIMEDOUT  /*!< timeout error occurred. */
 } eMBErrorCode;
-
 
 /* ----------------------- Function prototypes ------------------------------*/
 /*! \ingroup modbus
@@ -148,8 +147,8 @@ typedef enum
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode    MonitoreMBInit( eMBMode eMode, UCHAR ucSlaveAddress,
-                         UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode MonitoreMBInit(eMBMode eMode, UCHAR ucSlaveAddress,
+                            UCHAR ucPort, ULONG ulBaudRate, eMBParity eParity);
 
 /*! \ingroup modbus
  * \brief Initialize the Modbus protocol stack for Modbus TCP.
@@ -165,7 +164,7 @@ eMBErrorCode    MonitoreMBInit( eMBMode eMode, UCHAR ucSlaveAddress,
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode    MonitoreMBTCPInit( USHORT usTCPPort );
+eMBErrorCode MonitoreMBTCPInit(USHORT usTCPPort);
 
 /*! \ingroup modbus
  * \brief Release resources used by the protocol stack.
@@ -181,7 +180,7 @@ eMBErrorCode    MonitoreMBTCPInit( USHORT usTCPPort );
  *   If the protocol stack is not in the disabled state it returns
  *   eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode    MonitorMonitoreMBClose( void );
+eMBErrorCode MonitorMonitoreMBClose(void);
 
 /*! \ingroup modbus
  * \brief Enable the Modbus protocol stack.
@@ -193,7 +192,7 @@ eMBErrorCode    MonitorMonitoreMBClose( void );
  *   eMBErrorCode::MB_ENOERR. If it was not in the disabled state it 
  *   return eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode     MonitoreMBEnable( void );
+eMBErrorCode MonitoreMBEnable(void);
 
 /*! \ingroup modbus
  * \brief Disable the Modbus protocol stack.
@@ -204,7 +203,7 @@ eMBErrorCode     MonitoreMBEnable( void );
  *  eMBErrorCode::MB_ENOERR. If it was not in the enabled state it returns
  *  eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode    MonitoreMBDisable( void );
+eMBErrorCode MonitoreMBDisable(void);
 
 /*! \ingroup modbus
  * \brief The main pooling loop of the Modbus protocol stack.
@@ -218,7 +217,7 @@ eMBErrorCode    MonitoreMBDisable( void );
  *   returns eMBErrorCode::MB_EILLSTATE. Otherwise it returns 
  *   eMBErrorCode::MB_ENOERR.
  */
-eMBErrorCode    MonitoreMBPoll( void );
+eMBErrorCode MonitoreMBPoll(void);
 
 /*! \ingroup modbus
  * \brief Configure the slave id of the device.
@@ -238,9 +237,9 @@ eMBErrorCode    MonitoreMBPoll( void );
  *   mbconfig.h is to small it returns eMBErrorCode::MB_ENORES. Otherwise
  *   it returns eMBErrorCode::MB_ENOERR.
  */
-eMBErrorCode    MonitoreMBSetSlaveID( UCHAR ucSlaveID, BOOL xIsRunning,
-                               UCHAR const *pucAdditional,
-                               USHORT usAdditionalLen );
+eMBErrorCode MonitoreMBSetSlaveID(UCHAR ucSlaveID, BOOL xIsRunning,
+                                  UCHAR const *pucAdditional,
+                                  USHORT usAdditionalLen);
 
 /*! \ingroup modbus
  * \brief Registers a callback handler for a given function code.
@@ -262,8 +261,8 @@ eMBErrorCode    MonitoreMBSetSlaveID( UCHAR ucSlaveID, BOOL xIsRunning,
  *   case the values in mbconfig.h should be adjusted. If the argument was not
  *   valid it returns eMBErrorCode::MB_EINVAL.
  */
-eMBErrorCode    MonitoreMBRegisterCB( UCHAR ucFunctionCode, 
-                               pxMBFunctionHandler pxHandler );
+eMBErrorCode MonitoreMBRegisterCB(UCHAR ucFunctionCode,
+                                  pxMBFunctionHandler pxHandler);
 
 /* ----------------------- Callback -----------------------------------------*/
 
@@ -309,8 +308,8 @@ eMBErrorCode    MonitoreMBRegisterCB( UCHAR ucFunctionCode,
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    MonitoreMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress,
-                               USHORT usNRegs );
+eMBErrorCode MonitoreMBRegInputCB(UCHAR *pucRegBuffer, USHORT usAddress,
+                                  USHORT usNRegs);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Holding Register</em> value is
@@ -344,8 +343,8 @@ eMBErrorCode    MonitoreMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress,
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    MonitoreMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress,
-                                 USHORT usNRegs, eMBRegisterMode eMode );
+eMBErrorCode MonitoreMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress,
+                                    USHORT usNRegs, eMBRegisterMode eMode);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Coil Register</em> value is
@@ -379,8 +378,8 @@ eMBErrorCode    MonitoreMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress,
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    MonitoreMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress,
-                               USHORT usNCoils, eMBRegisterMode eMode );
+eMBErrorCode MonitoreMBRegCoilsCB(UCHAR *pucRegBuffer, USHORT usAddress,
+                                  USHORT usNCoils, eMBRegisterMode eMode);
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Input Discrete Register</em> value is
@@ -408,8 +407,8 @@ eMBErrorCode    MonitoreMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress,
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occurred. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    MonitoreMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress,
-                                  USHORT usNDiscrete );
+eMBErrorCode MonitoreMBRegDiscreteCB(UCHAR *pucRegBuffer, USHORT usAddress,
+                                     USHORT usNDiscrete);
 
 #ifdef __cplusplus
 PR_END_EXTERN_C

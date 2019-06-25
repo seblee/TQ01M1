@@ -3,8 +3,7 @@
 #include "calc.h"
 #include "sys_conf.h"
 #include "local_status.h"
-#include "req_execution.h"
-#include "alarm_acl_funcs.h"
+#include "req_execution.h" 
 #include "sys_status.h"
 #include "dio_bsp.h"
 #include "rtc_bsp.h"
@@ -184,20 +183,23 @@ static void Fan_Fsm_Out(uint8_t Fan_Gear)
     {
     case FAN_GEAR_START:
         req_bitmap_op(DO_FAN_LOW_BPOS, 1);
+        req_bitmap_op(DO_F24_BPOS, 1);
         break;
     case FAN_GEAR_NO:
         req_bitmap_op(DO_FAN_LOW_BPOS, 0);
+        req_bitmap_op(DO_F24_BPOS, 0);
         break;
     default:
         req_bitmap_op(DO_FAN_LOW_BPOS, 0);
+        req_bitmap_op(DO_F24_BPOS, 0);
         break;
     }
 }
 
 /**
   * @brief 	fan output control state FSM execution
-	* @param  none
-	* @retval none
+    * @param  none
+    * @retval none
   */
 //风机状态机执行函数
 static void fan_fsm_exe(uint8_t fan_signal)
@@ -206,6 +208,12 @@ static void fan_fsm_exe(uint8_t fan_signal)
     extern local_reg_st l_sys;
 
     //		rt_kprintf("FAN_FSM_STATE = %d,fan_signal = %d\n",l_sys.l_fsm_state[FAN_FSM_STATE],fan_signal);
+    if (get_alarm_bitmap(ACL_E7)) //风机告警
+    {
+        l_sys.l_fsm_state[FAN_FSM_STATE] = FSM_FAN_IDLE;
+        l_sys.Fan.Fan_Gear = FAN_GEAR_NO;    //
+        l_sys.comp_timeout[DO_FAN_BPOS] = 0; //reset timeout counter
+    }
     switch (l_sys.l_fsm_state[FAN_FSM_STATE])
     {
     case (FSM_FAN_IDLE):
@@ -751,12 +759,68 @@ static void compressor_req_exe(int16_t req_temp, int16_t req_hum)
 #define CF_DELAY 60
 enum
 {
-    FC_WL = 0x01, //水位
-    FC_PT = 0x02, //
-    FC_TH = 0x04, //温湿度
-    FC_WS = 0x08, //外接水源
-    FC_DF = 0x10, //化霜
+    FC_WL = 0x01,
+    FC_PT = 0x02,
+    FC_TH = 0x04,
+    FC_WS = 0x08,
+    FC_AL = 0x80, //告警
 };
+//外接水源
+uint8_t Exit_Water(void)
+{
+    extern sys_reg_st g_sys;
+    if (g_sys.config.ComPara.u16ExitWater_Mode == WATER_EXIT) //外接水源
+    {
+        return WATER_EXIT;
+    }
+    else if (g_sys.config.ComPara.u16ExitWater_Mode == WATER_FILL) //注水模式
+    {
+        return WATER_FILL;
+    }
+    else
+    {
+        return WATER_AIR;
+    }
+}
+
+//外接水源
+void External_Water_exe(uint8_t u8Type)
+{
+    //		uint16_t u16WL;
+    extern sys_reg_st g_sys;
+
+    if (Exit_Water() != WATER_AIR) //外接水源
+    {
+        //					//水位
+        //				u16WL=Get_Water_level();
+        //				if(u16WL&D_U)
+        //				{
+        //						req_bitmap_op(DO_FV_BPOS,0);//外接水源
+        //				}
+        //				else
+        //				{
+        //						req_bitmap_op(DO_FV_BPOS,1);//外接水源
+        //				}
+        if (u8Type == TRUE) //出水
+        {
+            req_bitmap_op(DO_FV_BPOS, 1); //外接水源
+        }
+        else
+        {
+            if ((Exit_Water() == WATER_EXIT) && (g_sys.config.ComPara.u16Disinfection_Mode == 0)) //外接水源
+            {
+                req_bitmap_op(DO_FV_BPOS, 0); //外接水源
+            }
+        }
+    }
+    else
+    {
+        req_bitmap_op(DO_FV_BPOS, 0);
+    }
+
+    return;
+}
+
 //风机,压机启动条件
 void Sys_Fan_CP_WL(void)
 {
@@ -767,6 +831,7 @@ void Sys_Fan_CP_WL(void)
     uint16_t Test = 0;
     static uint8_t u8Offset_CNT = 0;
     static uint8_t u8FCP_Start = 0;
+    static uint8_t u8WL_Start = FALSE;
 
     if (sys_get_pwr_sts() == 1)
     {
@@ -785,7 +850,8 @@ void Sys_Fan_CP_WL(void)
     //水位异常
     if ((u16WL & S_U) || (u16WL & D_U) || (u16WL & D_M))
     {
-        if (l_sys.Cold_Water == TRUE)
+        u8WL_Start = FALSE;
+        if (((l_sys.Cold_Water == TRUE) && (g_sys.config.ComPara.u16ColdWater_Mode == NORMAL_ICE)) && ((u16WL & S_U) == 0) && ((u16WL & D_U) == 0)) //制冰水模式
         {
             Test |= 0x02;
             l_sys.Fan_Close &= ~FC_WL;
@@ -803,9 +869,21 @@ void Sys_Fan_CP_WL(void)
     else
     {
         Test |= 0x08;
-        l_sys.Fan_Close &= ~FC_WL;
-        l_sys.Comp_Close[0] &= ~FC_WL;
-        l_sys.Comp_Close[1] &= ~FC_WL;
+        l_sys.Water_Full = FALSE;
+        if (l_sys.Water_Full == TRUE)
+        {
+            Test |= 0x10;
+            l_sys.Fan_Close |= FC_WL;
+            l_sys.Comp_Close[0] |= FC_WL;
+            l_sys.Comp_Close[1] |= FC_WL;
+        }
+        else
+        {
+            Test |= 0x20;
+            l_sys.Fan_Close &= ~FC_WL;
+            l_sys.Comp_Close[0] &= ~FC_WL;
+            l_sys.Comp_Close[1] &= ~FC_WL;
+        }
     }
 
     //		//长时间未到中水位
@@ -860,7 +938,7 @@ void Sys_Fan_CP_WL(void)
         }
     }
 
-    if (g_sys.config.ComPara.u16WaterSource_Mode) //外接水源
+    if (Exit_Water() != WATER_AIR) //外接水源
     {
         Test |= 0x800;
         l_sys.Fan_Close |= FC_WS;
@@ -881,9 +959,8 @@ void Sys_Fan_CP_WL(void)
         Test |= 0x2000;
     }
     g_sys.status.ComSta.REQ_TEST[0] = Test;
-    //		g_sys.status.ComSta.REQ_TEST[0]=Test;
 
-    // rt_kprintf("u16WL=%x,Test=%x,TH_Check_Interval=%d,din_bitmap[0]=%x,Fan_Close=%x,Comp_Close=%x\n", u16WL, Test, l_sys.TH_Check_Interval, g_sys.status.ComSta.u16Din_bitmap[0], l_sys.Fan_Close, l_sys.Comp_Close);
+    //		rt_kprintf("u16WL=%x,Test=%x,TH_Check_Interval=%d,din_bitmap[0]=%x,Fan_Close=%x,Comp_Close[0]=%x\n",u16WL,Test,l_sys.TH_Check_Interval,g_sys.status.ComSta.u16Din_bitmap[0],l_sys.Fan_Close,l_sys.Comp_Close[0]);
 
     return;
 }
@@ -895,19 +972,53 @@ void Pwp_req_exe(void)
     extern local_reg_st l_sys;
     uint16_t u16WL;
     static uint8_t u8PWP_S = FALSE;
+    uint16_t u16TEST;
 
+    u16TEST = 0;
     u16WL = Get_Water_level();
-    //净化泵
-    //		if((u16WL==0x03)||(u16WL==0x07)||(u16WL==0x0B)||(u16WL==0x0F)||(u16WL==0x1B)||(u16WL==0x1F))
+    if (Exit_Water() != WATER_AIR) //外接水源
+    {
+        u16TEST |= 0x01;
+        req_bitmap_op(DO_PWP_BPOS, 0);
+        req_bitmap_op(DO_DWV_BPOS, 0);                                                                                     //循环阀
+        if (((Exit_Water() == WATER_EXIT) && (g_sys.config.ComPara.u16Disinfection_Mode)) || (Exit_Water() == WATER_FILL)) //消毒模式或者注水模式
+        {
+            u16TEST |= 0x02;
+            if (Exit_Water() != WATER_EXIT)
+            {
+                g_sys.config.ComPara.u16Disinfection_Mode = 0;
+            }
+            if (u16WL & D_M) //饮水箱高水位,自动退出
+            {
+                u16TEST |= 0x04;
+                req_bitmap_op(DO_DWV_BPOS, 0);
+                req_bitmap_op(DO_FV_BPOS, 0); //外接水源
+                g_sys.config.ComPara.u16ExitWater_Mode = 0;
+                RAM_Write_Reg(EE_EXITWATER, g_sys.config.ComPara.u16ExitWater_Mode, 1);
+                //								g_sys.config.ComPara.u16Disinfection_Mode=0;
+                //								RAM_Write_Reg(EE_DISINFECTION,g_sys.config.ComPara.u16Disinfection_Mode,1);
+            }
+            else
+            {
+                u16TEST |= 0x08;
+                req_bitmap_op(DO_DWV_BPOS, 1);
+                req_bitmap_op(DO_FV_BPOS, 1); //外接水源
+            }
+        }
+        //		rt_kprintf("u16WL=%x,u16TEST=%x,u16ExitWater_Mode=%d\n",u16WL,u16TEST,g_sys.config.ComPara.u16ExitWater_Mode);
+
+        return;
+    }
+    else
+    {
+        req_bitmap_op(DO_FV_BPOS, 0);
+        g_sys.config.ComPara.u16Disinfection_Mode = 0;
+    }
     //源水箱中水位
     if ((u16WL & S_M) || (u16WL & S_U))
     {
         l_sys.Pwp_Open = TRUE;
     }
-    //		else if(g_sys.config.ComPara.u16Change_WaterTank)//更换源水箱
-    //		{
-    //				l_sys.Pwp_Open=TRUE;
-    //		}
     //外壳打开时，开净化泵
     else if ((sys_get_di_sts(DI_OPEN_BPOS) == 0) && (g_sys.config.ComPara.u16Water_Ctrl & OPEN_PWP))
     {
@@ -920,18 +1031,22 @@ void Pwp_req_exe(void)
     //开净化泵
     if ((l_sys.Pwp_Open == TRUE) || (u8PWP_S == TRUE))
     {
+
         req_bitmap_op(DO_PWP_BPOS, 1);
+        req_bitmap_op(DO_DWV_BPOS, 1); //出水时会关闭,杀菌时打开
         u8PWP_S = TRUE;
         if (((u16WL & S_M) == 0) && ((u16WL & S_L) == 0)) //到低水位退出
         {
-            l_sys.Pwp_Open = FALSE;
-            req_bitmap_op(DO_PWP_BPOS, 0);
             u8PWP_S = FALSE;
+            req_bitmap_op(DO_PWP_BPOS, 0);
+            req_bitmap_op(DO_DWV_BPOS, 0); //循环阀
         }
+        l_sys.Pwp_Open = u8PWP_S;
     }
     else
     {
         req_bitmap_op(DO_PWP_BPOS, 0);
+        req_bitmap_op(DO_DWV_BPOS, 0); //循环阀
     }
     return;
 }
@@ -999,12 +1114,12 @@ void WaterOut_Key(void)
     //冷水 2
     if ((sys_get_di_sts(DI_Cold_2_BPOS) == 1) && (g_sys.config.ComPara.u16Water_Ctrl & TWO_COLD)) //双路出冷水
     {
-        l_sys.OutWater_Key |= WATER_NORMAL_ICE_2;
+        l_sys.OutWater_Key |= WATER_ICE;
         l_sys.OutWater_Delay[2] = WATER_MAXTIME;
     }
     else
     {
-        l_sys.OutWater_Key &= ~WATER_NORMAL_ICE_2;
+        l_sys.OutWater_Key &= ~WATER_ICE;
         l_sys.OutWater_Delay[2] = 0;
     }
 
@@ -1081,43 +1196,107 @@ void WaterOut_Close(uint8_t u8Type, uint8_t u8Water)
     {
         l_sys.comp_timeout[DO_DV_BPOS] = 0; //出水计时
         l_sys.OutWater_Flag = FALSE;        //关闭出水
+        //外接水源
+        External_Water_exe(FALSE);
+        if (l_sys.Sterilize == FALSE)
+        {
+            UV_req_exe(FALSE); //UV
+        }
         if (l_sys.OutWater_OK)
         {
             l_sys.OutWater_OK = WATER_OUT;
-            u32CW = g_sys.status.ComSta.u16Cumulative_Water[0];
-            u32CW += g_sys.status.ComSta.u16Cur_Water;
-            g_sys.status.ComSta.u16Cumulative_Water[0] = u32CW;
-            g_sys.status.ComSta.u16Cumulative_Water[1] = u32CW >> 16;
+            if (g_sys.status.ComSta.u16Cur_Water)
+            {
+                u32CW = g_sys.status.ComSta.u16Cumulative_Water[0];
+                u32CW += g_sys.status.ComSta.u16Cur_Water;
+                g_sys.status.ComSta.u16Cumulative_Water[0] = u32CW;
+                g_sys.status.ComSta.u16Cumulative_Water[1] = u32CW >> 16;
 
-            g_sys.status.ComSta.u16Last_Water = g_sys.status.ComSta.u16Cur_Water;
-            g_sys.status.ComSta.u16Cur_Water = 0;
-            g_sys.config.ComPara.u16Water_Mode = 0;
-            g_sys.config.ComPara.u16Water_Flow = 0;
-
+                g_sys.status.ComSta.u16Last_Water = g_sys.status.ComSta.u16Cur_Water;
+                l_sys.u16WaterFlow += g_sys.status.ComSta.u16Cur_Water; //当次出水流量
+                g_sys.status.ComSta.u16Cur_Water = 0;
+                g_sys.config.ComPara.u16Water_Mode = 0;
+                g_sys.config.ComPara.u16Water_Flow = 0;
+            }
             if (u8Water == WATER_NORMAL_ICE)
             {
                 //常温水相关
-                req_bitmap_op(DO_UV2_BPOS, 0); //紫外灯
 
-                req_bitmap_op(DO_WP_BPOS, 0); //出水泵
-                req_bitmap_op(DO_DV_BPOS, 0); //出水阀
+                //						req_bitmap_op(DO_WP_BPOS,0);//出水泵
+                //						req_bitmap_op(DO_DV_BPOS,0);//出水阀
 
-                req_bitmap_op(DO_WP2_BPOS, 0); //出水泵2
-                req_bitmap_op(DO_DV2_BPOS, 0); //出水阀2
+                if (g_sys.config.ComPara.u16CloseDelay)
+                {
+                    l_sys.u8CloseDelay = g_sys.config.ComPara.u16CloseDelay;
+                    if (g_sys.config.ComPara.u16CloseFrist == PUMP_FIRET)
+                    {
+                        req_bitmap_op(DO_WP_BPOS, 0); //出水泵
+                    }
+                    else
+                    {
+                        req_bitmap_op(DO_DV_BPOS, 0); //出水阀
+                    }
+                }
+                else
+                {
+                    req_bitmap_op(DO_WP_BPOS, 0); //出水泵
+                    req_bitmap_op(DO_DV_BPOS, 0); //出水阀
+                }
             }
             else if (u8Water == WATER_HEAT)
             {
                 //热水相关
                 req_bitmap_op(DO_HWP_BPOS, 0); //热水出水泵
-                req_bitmap_op(DO_DV_BPOS, 0);  //出水阀
-            }
-            else if (u8Water == WATER_NORMAL_ICE_2)
-            {
-                //常温水相关
-                req_bitmap_op(DO_UV2_BPOS, 0); //紫外灯
 
-                req_bitmap_op(DO_WP2_BPOS, 0); //出水泵2
-                req_bitmap_op(DO_DV2_BPOS, 0); //出水阀2
+                if (g_sys.config.ComPara.u16CloseFrist != PUMP_FIRET)
+                {
+                    req_bitmap_op(DO_DV_BPOS, 0); //泵2
+                }
+                else
+                {
+                    if (l_sys.u8CloseDelay == 0)
+                    {
+                        req_bitmap_op(DO_DV_BPOS, 0); //泵2
+                    }
+                }
+            }
+            else if (u8Water == WATER_ICE)
+            {
+                if (g_sys.config.ComPara.u16ColdWater_Mode == BD_ICE) //冰胆模式
+                {
+                    if (g_sys.config.ComPara.u16CloseFrist == PUMP_FIRET)
+                    {
+                        req_bitmap_op(DO_WP_BPOS, 0); //泵2
+                    }
+                    else
+                    {
+                        if (l_sys.u8CloseDelay == 0)
+                        {
+                            req_bitmap_op(DO_WP_BPOS, 0); //泵2
+                        }
+                    }
+
+                    req_bitmap_op(DO_V3_BPOS, 0); //
+                }
+            }
+        }
+        else
+        {
+            if (l_sys.u8CloseDelay)
+            {
+                l_sys.u8CloseDelay--;
+                if ((g_sys.config.ComPara.u16CloseDelay) && (l_sys.u8CloseDelay == 0))
+                {
+                    l_sys.u8CloseDelay = 0;
+                    if (g_sys.config.ComPara.u16CloseFrist == PUMP_FIRET)
+                    {
+                        req_bitmap_op(DO_DV_BPOS, 0); //出水阀
+                    }
+                    else
+                    {
+                        req_bitmap_op(DO_WP_BPOS, 0); //出水泵
+                    }
+                }
             }
         }
 
@@ -1137,26 +1316,45 @@ void WaterOut_Close(uint8_t u8Type, uint8_t u8Water)
             }
         }
     }
+    return;
 }
+//饮水箱低水位判断
+uint8_t WaterOut_level(void)
+{
+    extern sys_reg_st g_sys;
+    extern local_reg_st l_sys;
+    uint16_t u16WL;
+
+    //水位
+    u16WL = Get_Water_level();
+    if (Exit_Water() != WATER_AIR) //外接水源
+    {
+        return TRUE;
+    }
+    else
+    {
+        if (!(u16WL & D_L))
+        {
+            return FALSE;
+        }
+        else
+        {
+            return TRUE;
+        }
+    }
+}
+
 //出水
 void WaterOut_req_exe(void)
 {
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
-    uint16_t u16WL;
     //		uint32_t u32CW;
     uint16_t u16Pls_Cnt;
     uint8_t u8Temp;
     static uint8_t u8HeatNum;
+    uint16_t u16Out_Temp;
 
-    //水位
-    u16WL = Get_Water_level();
-    //		rt_kprintf("u16Din_bitmap=%x,u16WL=%x,u16Water_Mode=%d,u16Water_Flow=%d\n",g_sys.status.ComSta.u16Din_bitmap[0],u16WL,g_sys.config.ComPara.u16Water_Mode,g_sys.config.ComPara.u16Water_Flow);
-
-    //		if(((u16WL&D_L)==0))//饮水箱低水位
-    //		{
-    //			return;
-    //		}
     g_sys.status.ComSta.REQ_TEST[1] = 0;
     req_bitmap_op(DO_RH1_BPOS, 1);                    //电加热
                                                       //					rt_kprintf("HeatWater_st=%d,HeatWater_Flow=%d,OutWater_OK=%d,u8HeatNum=%d,u16Cur_Water=%d\n",l_sys.HeatWater_st,l_sys.HeatWater_Flow,l_sys.OutWater_OK,u8HeatNum,g_sys.status.ComSta.u16Cur_Water);
@@ -1164,35 +1362,35 @@ void WaterOut_req_exe(void)
     {
         g_sys.status.ComSta.REQ_TEST[1] |= 0x01;
         WaterOut_Key();
-        if ((!(l_sys.OutWater_Key)) || (!(u16WL & D_L))) //饮水箱低水位
+        if ((!(l_sys.OutWater_Key)) || (WaterOut_level() == FALSE)) //饮水箱低水位
         {
             g_sys.status.ComSta.REQ_TEST[1] |= 0x02;
             u8HeatNum = 0;
-            //						l_sys.OutWater_OK=0x00;
             l_sys.HeatWater_st = HEAT_NO;
             l_sys.HeatWater_Flow = 0;
             WaterOut_Close(1, WATER_NORMAL_ICE);
             WaterOut_Close(1, WATER_HEAT);
+            WaterOut_Close(1, WATER_ICE);
             return;
         }
     }
     else //HMI出水
     {
-        if ((!(g_sys.config.ComPara.u16Water_Mode) && !(g_sys.config.ComPara.u16Water_Flow)) || (!(u16WL & D_L))) //饮水箱低水位,不允许出水
+        if ((!(g_sys.config.ComPara.u16Water_Mode) && !(g_sys.config.ComPara.u16Water_Flow)) || (WaterOut_level() == FALSE)) //饮水箱低水位,不允许出水
         {
             g_sys.status.ComSta.REQ_TEST[1] |= 0x04;
-            if (!(u16WL & D_L)) //饮水箱低水位
+            if (WaterOut_level() == FALSE) //饮水箱低水位
             {
                 g_sys.status.ComSta.REQ_TEST[1] |= 0x08;
                 g_sys.config.ComPara.u16Water_Mode = 0;
                 g_sys.config.ComPara.u16Water_Flow = 0;
             }
             u8HeatNum = 0;
-            //						l_sys.OutWater_OK=0x00;
             l_sys.HeatWater_st = HEAT_NO;
             l_sys.HeatWater_Flow = 0;
             WaterOut_Close(1, WATER_NORMAL_ICE);
             WaterOut_Close(1, WATER_HEAT);
+            WaterOut_Close(1, WATER_ICE);
             return;
         }
     }
@@ -1209,6 +1407,7 @@ void WaterOut_req_exe(void)
             if (l_sys.OutWater_OK == WATER_READ)
             {
                 g_sys.status.ComSta.REQ_TEST[1] |= 0x40;
+
                 if (l_sys.HeatWater_st == HEAT_OUTWATER) //开始出水
                 {
                     g_sys.status.ComSta.REQ_TEST[1] |= 0x80;
@@ -1293,6 +1492,8 @@ void WaterOut_req_exe(void)
                             }
                             if (Heat_Send(HEAT_WRITEPARA, OPEN_HEAT, u8Temp, g_sys.config.ComPara.u16Water_Flow))
                             {
+                                //提前显示出水中
+                                l_sys.OutWater_Flag = TRUE; //出水中
                             }
                             l_sys.comp_timeout[DO_RH1_BPOS] = RH_DEALY;
                         }
@@ -1346,7 +1547,8 @@ void WaterOut_req_exe(void)
             }
         }
     }
-    else if (((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_NORMAL_ICE) || (l_sys.OutWater_Key & WATER_NORMAL_ICE_2)) //常温水/冰水
+    else if ((((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) || (g_sys.config.ComPara.u16Water_Mode == WATER_ICE)) && (g_sys.config.ComPara.u16Water_Flow)) ||
+             (l_sys.OutWater_Key & WATER_NORMAL_ICE) || (l_sys.OutWater_Key & WATER_ICE)) //常温水/冰水
     {
         //外壳打开时，//关闭出水
         if (sys_get_di_sts(DI_OPEN_BPOS) == 0)
@@ -1354,6 +1556,7 @@ void WaterOut_req_exe(void)
             g_sys.status.ComSta.REQ_TEST[1] |= 0x4000;
             WaterOut_Close(1, WATER_NORMAL_ICE);
             WaterOut_Close(1, WATER_HEAT);
+            WaterOut_Close(1, WATER_ICE);
             return;
         }
         l_sys.comp_timeout[DO_DV_BPOS]++; //出水计时
@@ -1378,7 +1581,6 @@ void WaterOut_req_exe(void)
             {
                 //出水故障
             }
-            //						WaterOut_Close(0,WATER_HEAT);
         }
         //HMI出水时才判断流量
         if (((g_sys.status.ComSta.u16Cur_Water >= g_sys.config.ComPara.u16Water_Flow) && (g_sys.status.ComSta.u16Cur_Water)) && (!(g_sys.config.ComPara.u16Water_Ctrl & HMI_KEY))) //HMI出水
@@ -1387,21 +1589,45 @@ void WaterOut_req_exe(void)
         }
         else
         {
+            g_sys.status.ComSta.REQ_TEST[1] |= 0x8000;
             //出水1
-            if (((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_NORMAL_ICE))
+            //外接水源
+            External_Water_exe(TRUE);
+
+            if (Exit_Water() != WATER_AIR) //外接水源,直接出水
+            {
+                req_bitmap_op(DO_WP_BPOS, 0); //出水泵
+            }
+            else
             {
                 req_bitmap_op(DO_WP_BPOS, 1); //出水泵
-                req_bitmap_op(DO_DV_BPOS, 1); //出水阀
             }
-
-            if (l_sys.OutWater_Key & WATER_NORMAL_ICE_2)
+            req_bitmap_op(DO_DWV_BPOS, 0);                        //循环阀
+            if (g_sys.config.ComPara.u16ColdWater_Mode == BD_ICE) //冰胆模式
             {
-                req_bitmap_op(DO_WP2_BPOS, 1); //出水泵2
-                req_bitmap_op(DO_DV2_BPOS, 1); //出水阀2
+                if (((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_NORMAL_ICE))
+                {
+                    req_bitmap_op(DO_DV_BPOS, 1); //出水阀
+                    req_bitmap_op(DO_V3_BPOS, 0); //
+                    req_bitmap_op(DO_V4_BPOS, 0); //
+                }
+                else if (((g_sys.config.ComPara.u16Water_Mode == WATER_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_ICE))
+                {
+                    req_bitmap_op(DO_DV_BPOS, 0); //出水阀
+                    req_bitmap_op(DO_V3_BPOS, 1); //
+                    req_bitmap_op(DO_V4_BPOS, 0); //
+                }
+            }
+            else
+            {
+                if (((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_NORMAL_ICE))
+                {
+                    req_bitmap_op(DO_DV_BPOS, 1); //出水阀
+                }
             }
 
+            UV_req_exe(TRUE); //UV
             l_sys.OutWater_OK = WATER_READ;
-            req_bitmap_op(DO_UV2_BPOS, 1); //紫外灯
             l_sys.comp_timeout[DO_RH1_BPOS] = RH_DEALY;
             l_sys.OutWater_Flag = TRUE; //出水中
         }
@@ -1410,14 +1636,61 @@ void WaterOut_req_exe(void)
     {
         WaterOut_Close(1, WATER_NORMAL_ICE);
         WaterOut_Close(1, WATER_HEAT);
+        WaterOut_Close(1, WATER_ICE);
     }
     //最大出水限制
     if (l_sys.comp_timeout[DO_DV_BPOS] >= WATER_MAXTIME)
     {
         WaterOut_Close(1, WATER_NORMAL_ICE);
         WaterOut_Close(1, WATER_HEAT);
+        WaterOut_Close(1, WATER_ICE);
     }
     return;
+}
+//UV开关
+void UV_req_exe(uint8_t u8Type)
+{
+    extern sys_reg_st g_sys;
+    if (u8Type == TRUE)
+    {
+        if (g_sys.config.ComPara.u16Sterilize_Mode == 1) //
+        {
+            req_bitmap_op(DO_UV1_BPOS, 1); //紫外灯常开
+        }
+        else if (g_sys.config.ComPara.u16Sterilize_Mode == 2) //
+        {
+            req_bitmap_op(DO_UV24_BPOS, 1); //紫外灯常开
+        }
+        else if (g_sys.config.ComPara.u16Sterilize_Mode == 3) //
+        {
+            req_bitmap_op(DO_UV1_BPOS, 1);  //紫外灯常开
+            req_bitmap_op(DO_UV24_BPOS, 1); //紫外灯常开
+        }
+        else
+        {
+            req_bitmap_op(DO_UV1_BPOS, 1); //紫外灯常开
+        }
+    }
+    else
+    {
+        if (g_sys.config.ComPara.u16Sterilize_Mode == 1) //
+        {
+            req_bitmap_op(DO_UV1_BPOS, 0); //紫外灯常开
+        }
+        else if (g_sys.config.ComPara.u16Sterilize_Mode == 2) //
+        {
+            req_bitmap_op(DO_UV24_BPOS, 0); //紫外灯常开
+        }
+        else if (g_sys.config.ComPara.u16Sterilize_Mode == 3) //
+        {
+            req_bitmap_op(DO_UV1_BPOS, 0);  //紫外灯常开
+            req_bitmap_op(DO_UV24_BPOS, 0); //紫外灯常开
+        }
+        else
+        {
+            req_bitmap_op(DO_UV1_BPOS, 0); //紫外灯常开
+        }
+    }
 }
 
 //杀菌
@@ -1428,81 +1701,111 @@ void Sterilize_req_exe(void)
     uint16_t u16WL;
     static uint32_t u32Sterilize_Interval[2];
     static uint16_t u16Sterilize_Time[2];
-    uint8_t u8STR, i;
-    static uint8_t u8CNT = 0;
+    uint8_t u8STR;
+    uint16_t u16Temp;
 
-    //外壳打开时，关闭紫外灯
-    if (sys_get_di_sts(DI_OPEN_BPOS) == 0)
+    if (sys_get_di_sts(DI_OPEN_BPOS) == 0) //外壳打开时，关闭紫外灯
     {
-        req_bitmap_op(DO_UV1_BPOS, 0); //紫外灯
-        req_bitmap_op(DO_DWP_BPOS, 0); //杀菌泵
-        return;
-    }
-    //水位
-    u16WL = Get_Water_level();
-    if (((u16WL & D_L) == 0)) //饮水箱低水位
-    {
+        UV_req_exe(FALSE);            //UV
+        req_bitmap_op(DO_WP_BPOS, 0); //泵2
+        req_bitmap_op(DO_DV_BPOS, 0); //出水阀
         return;
     }
 
-    u8CNT++;
-    if (u8CNT >= 0xFF)
-    {
-        u8CNT = 0x00;
-    }
-    i = u8CNT % 2;
-    //		//两次间隔至少1S
-    if (i != 0)
+    u16Temp = 1;
+    //出水中
+    if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) == TRUE)) //Water out
     {
         return;
     }
 
+    if (Exit_Water() != WATER_AIR) //外接水源
+    {
+        req_bitmap_op(DO_PWP_BPOS, 0); //泵1
+        req_bitmap_op(DO_WP_BPOS, 0);  //泵2
+        return;
+    }
     //220V紫外灯
     u8STR = 0;
     u32Sterilize_Interval[u8STR]++;
 
-    if (u32Sterilize_Interval[u8STR] >= (g_sys.config.ComPara.u16Sterilize_Interval[u8STR] * 60))
+    //水位
+    u16WL = Get_Water_level();
+    if (((u16WL & D_L) == 0)) //饮水箱低水位
     {
+        req_bitmap_op(DO_WP_BPOS, 0); //泵2/循环泵
+        return;
+    }
+    u16Temp |= 0x02;
+    //			if(u32Sterilize_Interval[u8STR]>=(g_sys.config.ComPara.u16Sterilize_Interval[u8STR]*60*2))
+    if ((u32Sterilize_Interval[u8STR] >= (g_sys.config.ComPara.u16Sterilize_Interval[u8STR] * 60 * 2)) && (l_sys.Pwp_Open == FALSE)) //防止与进水泵冲突
+    {
+        u16Temp |= 0x04;
         u16Sterilize_Time[u8STR]++;
-        req_bitmap_op(DO_UV1_BPOS, 1); //紫外灯
-        req_bitmap_op(DO_DWP_BPOS, 1); //杀菌泵
+        l_sys.Sterilize = TRUE;        //UV
+        req_bitmap_op(DO_WP_BPOS, 1);  //出水泵
+        req_bitmap_op(DO_DWV_BPOS, 1); //出水时会关闭,杀菌时打开
+        if (g_sys.config.ComPara.u16CloseFrist != PUMP_FIRET)
+        {
+            req_bitmap_op(DO_DV_BPOS, 0); //出水阀
+        }
+        else
+        {
+            if (l_sys.u8CloseDelay == 0)
+            {
+                req_bitmap_op(DO_DV_BPOS, 0); //出水阀
+            }
+        }
+        if (g_sys.config.ComPara.u16ColdWater_Mode == BD_ICE) //冰胆模式
+        {
+            req_bitmap_op(DO_V3_BPOS, 0); //
+            req_bitmap_op(DO_V4_BPOS, 0); //
+        }
+    }
+    else
+    {
+        u16Temp |= 0x08;
+        //					if((l_sys.u8CloseDelay)&&(g_sys.config.ComPara.u16CloseFrist==PUMP_FIRET))
+        if ((l_sys.u8CloseDelay == 0) && (l_sys.u16BD_Time == 0))
+        {
+            req_bitmap_op(DO_WP_BPOS, 0); //出水泵
+        }
+        l_sys.Sterilize = FALSE;
     }
 
     if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) == FALSE)) //Water out
     {
-        if (u16Sterilize_Time[u8STR] >= g_sys.config.ComPara.u16Sterilize_Time[u8STR] * 60)
+        if (u16Sterilize_Time[u8STR] >= g_sys.config.ComPara.u16Sterilize_Time[u8STR] * 60 * 2)
         {
+            u16Temp |= 0x10;
             u32Sterilize_Interval[u8STR] = 0;
             u16Sterilize_Time[u8STR] = 0;
-            req_bitmap_op(DO_UV1_BPOS, 0); //紫外灯
-            req_bitmap_op(DO_DWP_BPOS, 0); //杀菌泵
+            l_sys.Sterilize = FALSE;
+            if (g_sys.config.ComPara.u16CloseFrist == PUMP_FIRET)
+            {
+                req_bitmap_op(DO_WP_BPOS, 0); //泵2
+            }
+            else
+            {
+                if (l_sys.u8CloseDelay == 0)
+                {
+                    req_bitmap_op(DO_WP_BPOS, 0); //泵2
+                }
+            }
+            //								req_bitmap_op(DO_WP_BPOS,0);//泵2
+            req_bitmap_op(DO_DWV_BPOS, 0); //出水时会关闭,杀菌时打开
         }
     }
-
-    //		//24V紫外灯
-    //		if(g_sys.config.ComPara.u16Sterilize_Mode&STERILIZE_BIT1)
-    //		{
-    //			u8STR=1;
-    //			u32Sterilize_Interval[u8STR]++;
-    //
-    //			if(u32Sterilize_Interval[u8STR]>=(g_sys.config.ComPara.u16Sterilize_Interval[u8STR]*60))
-    //			{
-    //					u16Sterilize_Time[u8STR]++;
-    //					req_bitmap_op(DO_UV2_BPOS,1);//紫外灯	2
-    //					req_bitmap_op(DO_DWP_BPOS,1);//杀菌泵
-    //			}
-    //			if((sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) == FALSE))				//Water out
-    //			{
-    //				if(u16Sterilize_Time[u8STR]>=g_sys.config.ComPara.u16Sterilize_Time[u8STR]*60)
-    //				{
-    //						u32Sterilize_Interval[u8STR]=0;
-    //						u16Sterilize_Time[u8STR]=0;
-    //						req_bitmap_op(DO_UV2_BPOS,0);//紫外灯	2
-    //						req_bitmap_op(DO_DWP_BPOS,0);//杀菌泵
-    //				}
-    //			}
-    //		}
-
+    //		rt_kprintf("u16Temp=%x,l_sys.Sterilize=%x\n", u16Temp,l_sys.Sterilize);
+    //		rt_kprintf("u16Temp=%x,Pwp_Open=%x,u32Sterilize_Interval=%d,u16Sterilize_Time=%d,l_sys.Sterilize=%x\n", u16Temp,l_sys.Pwp_Open,u32Sterilize_Interval[u8STR],u16Sterilize_Time[u8STR],l_sys.Sterilize);
+    if (l_sys.Sterilize == FALSE)
+    {
+        UV_req_exe(FALSE); //UV
+    }
+    else
+    {
+        UV_req_exe(TRUE); //UV
+    }
     return;
 }
 
@@ -1513,6 +1816,11 @@ void Defrost_req_exe(void)
     extern local_reg_st l_sys;
     int16_t i16NTC1;
     int16_t i16NTC2;
+
+    if (Exit_Water() != WATER_AIR) //外接水源
+    {
+        return;
+    }
 
     i16NTC1 = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC1];
     i16NTC2 = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC2];
@@ -1539,34 +1847,6 @@ void Defrost_req_exe(void)
     return;
 }
 
-//外接水源
-void External_Water_exe(void)
-{
-    extern sys_reg_st g_sys;
-    extern local_reg_st l_sys;
-    uint16_t u16WL;
-
-    if (g_sys.config.ComPara.u16WaterSource_Mode) //外接水源
-    {
-        //水位
-        u16WL = Get_Water_level();
-        if (u16WL & D_U)
-        {
-            req_bitmap_op(DO_FV_BPOS, 0); //外接水源
-        }
-        else
-        {
-            req_bitmap_op(DO_FV_BPOS, 1); //外接水源
-        }
-    }
-    else
-    {
-        req_bitmap_op(DO_FV_BPOS, 0);
-    }
-
-    return;
-}
-
 //制冰水
 void Cold_Water_exe(void)
 {
@@ -1576,16 +1856,24 @@ void Cold_Water_exe(void)
     uint16_t u16Temp;
     int16_t i16Water_Temp;
     static uint8_t u8Coldwater = 0;
+    static uint8_t u8FCW = 0;
 
-    i16Water_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC4];
-
+    if (Exit_Water() != WATER_AIR) //外接水源
+    {
+        return;
+    }
+    if (!(g_sys.config.dev_mask.din[0] & 0x40)) //3浮球
+    {
+        return;
+    }
     u16Temp = 0;
     l_sys.Cold_Water = FALSE;
-    if (g_sys.config.ComPara.u16ColdWater_Mode) //制冰水模式
+    u16WL = Get_Water_level();
+    if (g_sys.config.ComPara.u16ColdWater_Mode == NORMAL_ICE) //制冰水模式
     {
         u16Temp |= 0x01;
-        u16WL = Get_Water_level();
-        if (((u16WL & D_L) && (u16WL & D_MD)) && (i16Water_Temp != ABNORMAL_VALUE)) //到达制冷水位
+        i16Water_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC4];
+        if ((u16WL & D_L) && (u16WL & D_ML) && (i16Water_Temp != ABNORMAL_VALUE)) //到达制冷水位
         {
             u16Temp |= 0x02;
             if (i16Water_Temp > g_sys.config.ComPara.u16ColdWater_StartTemp) //开始制冰水
@@ -1619,6 +1907,97 @@ void Cold_Water_exe(void)
             req_bitmap_op(DO_CV_BPOS, 0); //制冰水关闭
         }
     }
+    else if (g_sys.config.ComPara.u16ColdWater_Mode == BD_ICE) //冰胆模式
+    {
+        return;
+
+        u16Temp |= 0x100;
+
+        if ((u16WL & D_L) && (u16WL & D_ML) && (u8FCW == FALSE)) //到达制冷水位
+        {
+            u16Temp |= 0x200;
+            u8FCW = TRUE;
+            l_sys.u16BD_Time = BD_TIME;
+        }
+        if (u8FCW == TRUE)
+        {
+            if (l_sys.u16BD_Time > 0)
+            {
+                u16Temp |= 0x400;
+                req_bitmap_op(DO_WP_BPOS, 1); //泵2
+                req_bitmap_op(DO_V4_BPOS, 1); //阀4
+
+                req_bitmap_op(DO_DWV_BPOS, 0); //阀1
+
+                if (g_sys.config.ComPara.u16CloseFrist == PUMP_FIRET)
+                {
+                    req_bitmap_op(DO_DV_BPOS, 0); //阀2
+                }
+                else
+                {
+                    if (l_sys.u8CloseDelay == 0)
+                    {
+                        req_bitmap_op(DO_DV_BPOS, 0); //阀2
+                    }
+                }
+                req_bitmap_op(DO_V3_BPOS, 0); //阀3
+            }
+            else
+            {
+                if (g_sys.config.ComPara.u16CloseFrist == PUMP_FIRET)
+                {
+                    req_bitmap_op(DO_WP_BPOS, 0); //泵2
+                }
+                else
+                {
+                    if (l_sys.u8CloseDelay == 0)
+                    {
+                        req_bitmap_op(DO_WP_BPOS, 0); //泵2
+                    }
+                }
+                req_bitmap_op(DO_V4_BPOS, 0); //阀4
+
+                i16Water_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC3];
+                if (i16Water_Temp == ABNORMAL_VALUE) //温度异常
+                {
+                    u16Temp |= 0x800;
+                    req_bitmap_op(DO_BD_BPOS, 0);     //BD
+                    req_bitmap_op(DO_BD_FAN_BPOS, 0); //BD_FAN
+                }
+                else
+                {
+                    u16Temp |= 0x1000;
+                    if (i16Water_Temp > g_sys.config.ComPara.u16ColdWater_StartTemp) //开始制冰水
+                    {
+                        u16Temp |= 0x2000;
+                        u8Coldwater = TRUE;
+                        req_bitmap_op(DO_BD_BPOS, 1);     //BD
+                        req_bitmap_op(DO_BD_FAN_BPOS, 1); //BD_FAN
+                        l_sys.u16BD_FAN_Delay = BD_DELAY;
+                    }
+                    else if (i16Water_Temp < g_sys.config.ComPara.u16ColdWater_StopTemp) //关闭
+                    {
+                        u16Temp |= 0x4000;
+                        u8Coldwater = FALSE;
+                        req_bitmap_op(DO_BD_BPOS, 0); //BD
+                        if (l_sys.u16BD_FAN_Delay == 0)
+                        {
+                            req_bitmap_op(DO_BD_FAN_BPOS, 0); //BD_FAN
+                        }
+                    }
+                    else //保持
+                        if (u8Coldwater == TRUE)
+                    {
+                        u16Temp |= 0x8000;
+                        l_sys.Cold_Water = TRUE;
+                        req_bitmap_op(DO_BD_BPOS, 1);     //BD
+                        req_bitmap_op(DO_BD_FAN_BPOS, 1); //BD_FAN
+                        l_sys.u16BD_FAN_Delay = BD_DELAY;
+                    }
+                }
+            }
+        }
+    }
     else
     {
         u16Temp |= 0x40;
@@ -1626,7 +2005,7 @@ void Cold_Water_exe(void)
         req_bitmap_op(DO_CV_BPOS, 0); //制冰水
     }
 
-    //		rt_kprintf("u16Temp=%x,i16Water_Temp=%d,u16ColdWater_StartTemp=%d\n", u16Temp, i16Water_Temp, g_sys.config.ComPara.u16ColdWater_StartTemp);
+    //		rt_kprintf("u16Temp=%x,i16Water_Temp=%d,u16ColdWater_StartTemp=%d,u16BD_Time=%d\n", u16Temp, i16Water_Temp, g_sys.config.ComPara.u16ColdWater_StartTemp,l_sys.u16BD_Time);
     return;
 }
 
@@ -1639,6 +2018,14 @@ void Heat_Fan_exe(void)
     static uint8_t u8Heatfan = 0;
     int16_t i16Heat_Temp;
 
+    if (g_sys.config.ComPara.u16ColdWater_Mode == BD_ICE) //冰胆模式
+    {
+        return;
+    }
+    if (Exit_Water() != WATER_AIR) //外接水源
+    {
+        return;
+    }
     i16Heat_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC3];
 
     if ((g_sys.config.ComPara.u16Water_Ctrl & TWO_COLD) == 0) //非双路出冷水
@@ -1673,17 +2060,15 @@ void req_execution(int16_t target_req_temp, int16_t target_req_hum)
     compressor_req_exe(target_req_temp, target_req_hum);
     //净化泵
     Pwp_req_exe();
-    //出水
-    WaterOut_req_exe();
-    //杀菌
-    Sterilize_req_exe();
-    //除霜
-    Defrost_req_exe();
-    //外接水源
-    External_Water_exe();
     //制冰水
     Cold_Water_exe();
-    //扇热风机
-    Heat_Fan_exe();
+    //杀菌
+    Sterilize_req_exe();
+    //出水
+    WaterOut_req_exe();
+    //除霜
+    Defrost_req_exe();
+    //		//扇热风机
+    //		Heat_Fan_exe();
     return;
 }

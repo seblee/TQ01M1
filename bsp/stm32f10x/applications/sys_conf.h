@@ -16,15 +16,15 @@ enum
     DO_COMP2_BPOS,     //压机2
     DO_RH1_BPOS,       //电加热1
     DO_FAN_BPOS,       //内风机
-    DO_UV1_BPOS,       //紫外灯1,定时杀菌
+    DO_LAMP_BPOS,      //紫外灯1,定时杀菌
     DO_WV_BPOS,        //冷煤制水阀(压机制冷)
     DO_CV_BPOS,        //冷煤制冰水阀
     DO_RSV1_BPOS,      //保留
-    DO_WP_BPOS,        //出水泵
+    DO_WP_BPOS,        //出水泵//泵2
     DO_HWP_BPOS,       //热水出水泵
-    DO_PWP_BPOS,       //净化泵
+    DO_PWP_BPOS,       //净化泵//泵1
     DO_DWP_BPOS,       //杀菌泵
-    DO_DV_BPOS,        //出水阀
+    DO_DV_BPOS,        //出水阀//阀2
     DO_FV_BPOS,        //外接进水阀
     DO_RSV2_BPOS,      //保留
     DO_EL1_BPOS,       //电子锁1
@@ -56,11 +56,21 @@ enum
     DO_MAX_CNT,
 };
 #define DO_FAN_LOW_BPOS DO_FAN_BPOS //风机低档
-#define DO_UV2_BPOS DO_RSV1_BPOS    //紫外灯2,过流
+#define DO_UV1_BPOS DO_RSV1_BPOS    //紫外灯2,过流
 //L  双按键出水
-#define DO_WP2_BPOS DO_RSV2_BPOS      //出水泵2
-#define DO_DV2_BPOS DO_RSV3_BPOS      //出水阀2
+#define DO_WP2_BPOS DO_RSV2_BPOS //出水泵2
+#define DO_DV2_BPOS DO_RSV3_BPOS //出水阀2
+ 
 #define DO_HEAT_FAN_BPOS DO_RSV2_BPOS //扇热风机
+//TEST
+#define DO_DWV_BPOS DO_DWP_BPOS    //循环阀//阀1
+#define DO_V3_BPOS DO_RSV2_BPOS    //阀3
+#define DO_V4_BPOS DO_RSV3_BPOS    //阀4
+#define DO_BD_BPOS DO_EL1_BPOS     //冰胆
+#define DO_BD_FAN_BPOS DO_EL2_BPOS //冰胆风扇
+
+#define DO_UV24_BPOS DO_RSV2_BPOS //24V紫外灯
+#define DO_F24_BPOS DO_EL1_BPOS   //24V风机
 
 //application delay
 #define MODBUS_MASTER_THREAD_DELAY 500
@@ -120,8 +130,8 @@ enum
     TEST_HEAT_WATER = 0x04,        //出热水
     TEST_PRPDUCE_COLDWATER = 0x05, //制冰水
     TEST_TANK = 0x06,              //抽空源水箱与饮水箱
-    TEST_UV = 0x07,                //UV测试
-    TEST_UR = 0x08,                //UV2测试
+    TEST_OUTWATER = 0x07,          //出水阀测试
+    TEST_UV = 0x08,                //UV测试
     TEST_Relay = 0x3C,             //继电器测试
     TEST_ALL_OUT = 0x5A,           //全开
 };
@@ -676,8 +686,8 @@ typedef struct
     uint16_t u16Water_Flow;            //出水流量
     uint16_t u16NormalWater_Temp;      //常温水温度
     uint16_t u16HotWater_Temp;         //热水温度
-    uint16_t u16WaterSource_Mode;      //外接水源模式
-    uint16_t u16Change_WaterTank;      //更换源水箱
+    uint16_t u16ExitWater_Mode;        //外接水源模式
+    uint16_t u16Disinfection_Mode;     //消毒模式
     uint16_t u16Rsv0[4];               //
     uint16_t u16Reset;                 //恢复出厂
     uint16_t u16Test_Mode_Type;        //测试模式选择
@@ -691,7 +701,7 @@ typedef struct
     uint16_t u16Clear_RT;              //清除部件时间
     uint16_t u16Clear_ALARM;           //清除告警
     uint16_t u16Set_Time[2];           //设置系统时间
-    uint16_t u16Start_Delay;           //开启延时
+    uint16_t u16Start_Delay;           //风机开启延时
     uint16_t u16Fan_Stop_Delay;        //风机关闭延时
     uint16_t u16Comp_Interval;         //压机间隔
     uint16_t u16ColdWater_Mode;        //冰水模式
@@ -699,7 +709,10 @@ typedef struct
     uint16_t u16ColdWater_StopTemp;    //制冰水停止温度
     uint16_t u16HeatFan_StartTemp;     //热风机启动温度
     uint16_t u16HeatFan_StopTemp;      //热风机停止温度
-    uint16_t u16Null;                  //null
+    uint16_t u16WaterFlow;             //出水流量后开始制水
+    uint16_t u16CloseFrist;            //null
+    uint16_t u16CloseDelay;            //null
+    uint16_t u16TestEV[2];             //null
     uint16_t device_info[100];         //三元组信息
 } ComPara_Conf_st;
 

@@ -174,6 +174,16 @@ void sys_running_mode_update(void)
     {
         sys_set_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS, 0);
     }
+    //外接水源
+    if (sys_get_do_sts(DO_FV_BPOS) == 1)
+    {
+        sys_set_remap_status(WORK_MODE_STS_REG_NO, EXITWATER_STS_BPOS, 1);
+    }
+    else
+    {
+        sys_set_remap_status(WORK_MODE_STS_REG_NO, EXITWATER_STS_BPOS, 0);
+    }
+    return;
 }
 
 uint16_t sys_get_pwr_sts(void)
@@ -364,14 +374,14 @@ uint16_t Get_Water_level(void)
         u16Water_level &= ~D_U;
     }
 
-    //D_MD
+    //D_ML
     if (sys_get_di_sts(DI_DRINK_MD_BPOS) == 0)
     {
-        u16Water_level |= D_MD;
+        u16Water_level |= D_ML;
     }
     else
     {
-        u16Water_level &= ~D_MD;
+        u16Water_level &= ~D_ML;
     }
 
     g_sys.status.ComSta.u16WL = u16Water_level;

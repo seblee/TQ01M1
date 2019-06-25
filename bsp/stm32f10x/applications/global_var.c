@@ -88,29 +88,29 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {40, &g_sys.config.ComPara.u16Stop_Humidity, 0, 999, 300, 2, 1, NULL},
     {41, &g_sys.config.ComPara.u16Start_Defrost_Temp, 0, 0xFFFF, (uint16_t)-30, 2, 1, NULL},
     {42, &g_sys.config.ComPara.u16Stop_Defrost_Temp, 0, 0xFFFF, 60, 2, 1, NULL},
-    {43, &g_sys.config.ComPara.u16Sterilize_Time[0], 1, 600, 5, 2, 1, NULL},
-    {44, &g_sys.config.ComPara.u16Sterilize_Interval[0], 1, 10000, 480, 2, 1, NULL},
-    {45, &g_sys.config.ComPara.u16Water_Ctrl, 0, 0xFFFF, 0x0000, 2, 1, NULL},
-    {EE_WATER_MODE, &g_sys.config.ComPara.u16Water_Mode, 0, 3, 0, 2, 1, NULL},
+    {43, &g_sys.config.ComPara.u16Sterilize_Time[0], 1, 600, 8, 2, 1, NULL},
+    {44, &g_sys.config.ComPara.u16Sterilize_Interval[0], 1, 10000, 60, 2, 1, NULL},
+    {45, &g_sys.config.ComPara.u16Water_Ctrl, 0, 0xFFFF, 0x0008, 2, 1, NULL},
+    {EE_WATER_MODE, &g_sys.config.ComPara.u16Water_Mode, 0, 4, 0, 2, 1, NULL},
     {EE_WATER_FLOW, &g_sys.config.ComPara.u16Water_Flow, 0, 65500, 1000, 2, 1, NULL},
     {48, &g_sys.config.ComPara.u16NormalWater_Temp, 0, 400, 230, 2, 1, NULL},
     {49, &g_sys.config.ComPara.u16HotWater_Temp, 0, 1000, 500, 2, 1, NULL},
-    {50, &g_sys.config.ComPara.u16WaterSource_Mode, 0, 1, 0, 2, 1, NULL},
-    {51, &g_sys.config.ComPara.u16Change_WaterTank, 0, 1, 0, 2, 1, NULL},
-    {52, &g_sys.config.ComPara.u16Sterilize_Mode, 0x01, 0x03, 0x03, 2, 1, NULL},
-    {53, &g_sys.config.ComPara.u16Sterilize_Time[1], 1, 600, 5, 2, 1, NULL},
-    {54, &g_sys.config.ComPara.u16Sterilize_Interval[1], 1, 10000, 480, 2, 1, NULL},
+    {EE_EXITWATER, &g_sys.config.ComPara.u16ExitWater_Mode, 0, 2, 0, 2, 1, NULL},
+    {EE_DISINFECTION, &g_sys.config.ComPara.u16Disinfection_Mode, 0, 1, 0, 2, 1, NULL},
+    {52, &g_sys.config.ComPara.u16Sterilize_Mode, 0, 0x03, 0x03, 2, 1, NULL},
+    {53, &g_sys.config.ComPara.u16Sterilize_Time[1], 1, 600, 15, 2, 1, NULL},
+    {54, &g_sys.config.ComPara.u16Sterilize_Interval[1], 1, 10000, 60, 2, 1, NULL},
     {55, NULL, 0, 3600, 0, 0, 1, NULL},
     {FACTORY_RESET, &g_sys.config.ComPara.u16Reset, 0, 0xFF, 0, 2, 1, NULL},
     {57, &g_sys.config.ComPara.u16Test_Mode_Type, 0, 0xFF, 0, 2, 1, NULL},       //121
     {MANUAL_TSET, &g_sys.config.ComPara.u16Manual_Test_En, 0, 2, 0, 2, 1, NULL}, //122
     {59, &l_sys.bitmap[0][BITMAP_MANUAL], 0, 0xffff, 0, 1, 1, NULL},
     {60, &g_sys.config.ComPara.u16TPower_En, 0, 1, 0, 2, 1, NULL},
-    {61, &g_sys.config.ComPara.u16TPower_On, 0, 0xFFFF, 0x01F4, 2, 1, NULL},
-    {62, &g_sys.config.ComPara.u16TPower_Off, 0, 0xFFFF, 0x0898, 2, 1, NULL},
-    {63, &g_sys.config.alarm[ACL_FILTER_OT].alarm_param, 100, 65000, 4320, 2, 1, NULL},
-    {64, NULL, 0, 3600, 0, 0, 1, NULL},
-    {65, &g_sys.config.alarm[ACL_FILTER_ELEMENT_0_OT].alarm_param, 100, 65535, 22000, 2, 1, NULL},
+    {61, &g_sys.config.ComPara.u16TPower_On, 0, 0xFFFF, 500, 2, 1, NULL},
+    {62, &g_sys.config.ComPara.u16TPower_Off, 0, 0xFFFF, 2300, 2, 1, NULL},
+    {63, &g_sys.config.alarm[ACL_FILTER_OT].alarm_param, 1, 65000, 4320, 2, 1, NULL},
+    {64, &g_sys.config.alarm[ACL_E9].alarm_param, 1, 65000, 240, 2, 1, NULL},
+    {65, &g_sys.config.alarm[ACL_FILTER_ELEMENT_0_OT].alarm_param, 1, 65535, 2500, 2, 1, NULL},
     {66, &g_sys.config.ComPara.u16Clear_RT, 0, 0xFF, 0, 2, 1, NULL},
     {67, &g_sys.config.ComPara.u16Clear_ALARM, 0, 0xFF, 0, 2, 1, NULL},
     {68, &g_sys.config.ComPara.u16Set_Time[0], 0, 0xFFFF, 0, 2, 1, NULL},
@@ -118,7 +118,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {70, &g_sys.config.ComPara.u16Start_Delay, 1, 600, 180, 1, 1, NULL},
     {71, &g_sys.config.ComPara.u16Fan_Stop_Delay, 1, 300, 60, 1, 1, NULL},
     {72, &g_sys.config.ComPara.u16Comp_Interval, 10, 600, 30, 2, 1, NULL},
-    {73, NULL, 0, 3600, 0, 0, 1, NULL},
+    {73, &g_sys.config.ComPara.u16WaterFlow, 0, 0xFFFF, 0, 2, 1, NULL},
     {74, NULL, 0, 3600, 0, 0, 1, NULL},
     {75, &g_sys.config.general.ai_cali[0], 0, 0xffff, 0, 2, 1, NULL},
     {76, &g_sys.config.general.ntc_cali[0], 0, 0xffff, 0, 2, 1, NULL},
@@ -129,27 +129,27 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {81, &g_sys.config.general.ntc_cali[3], 0, 0xffff, 0, 2, 1, NULL},
     {82, NULL, 0, 3600, 0, 0, 1, NULL},
     {83, (uint16_t *)&l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL], 0, 100, 0, 0, 1, NULL}, //147
-    {84, &g_sys.config.fan.set_speed, 0, 100, 55, 2, 1, NULL},
+    {84, &g_sys.config.fan.set_speed, 0, 100, 60, 2, 1, NULL},
     {85, NULL, 0, 3600, 0, 2, 1, NULL},
-    {86, &g_sys.config.ComPara.u16ColdWater_Mode, 0, 1, 0, 2, 1, NULL},
-    {87, &g_sys.config.ComPara.u16ColdWater_StartTemp, 50, 400, 150, 2, 1, NULL},
-    {88, &g_sys.config.ComPara.u16ColdWater_StopTemp, 10, 300, 70, 2, 1, NULL},
+    {86, &g_sys.config.ComPara.u16ColdWater_Mode, 0, 2, 0, 2, 1, NULL},
+    {87, &g_sys.config.ComPara.u16ColdWater_StartTemp, 50, 400, 150, 2, 1, ColdWater_StartTemp_Chek},
+    {88, &g_sys.config.ComPara.u16ColdWater_StopTemp, 10, 300, 70, 2, 1, ColdWater_StopTemp_Chek},
     {89, &g_sys.config.ComPara.u16HeatFan_StartTemp, 0, 1000, 600, 2, 1, NULL},
     {90, &g_sys.config.ComPara.u16HeatFan_StopTemp, 0, 1000, 400, 2, 1, NULL},
     {91, &g_sys.config.ComPara.u16FILTER_ELEMENT_Type, 0, 1, 0, 2, 1, NULL},
-    {92, &g_sys.config.alarm[ACL_FILTER_ELEMENT_1_OT].alarm_param, 100, 0xFFFF, 22000, 2, 1, NULL},
-    {93, &g_sys.config.alarm[ACL_FILTER_ELEMENT_2_OT].alarm_param, 100, 0xFFFF, 22000, 2, 1, NULL},
-    {94, &g_sys.config.alarm[ACL_FILTER_ELEMENT_3_OT].alarm_param, 100, 0xFFFF, 22000, 2, 1, NULL},
-    {95, &g_sys.config.alarm[ACL_FILTER_ELEMENT_4_OT].alarm_param, 100, 0xFFFF, 22000, 2, 1, NULL},
-    {96, &g_sys.config.alarm[ACL_UV1_OT].alarm_param, 100, 0xFFFF, 2000, 2, 1, NULL},
-    {97, &g_sys.config.alarm[ACL_UV2_OT].alarm_param, 100, 0xFFFF, 2000, 2, 1, NULL},
+    {92, &g_sys.config.alarm[ACL_FILTER_ELEMENT_1_OT].alarm_param, 1, 65535, 2500, 2, 1, NULL},
+    {93, &g_sys.config.alarm[ACL_FILTER_ELEMENT_2_OT].alarm_param, 1, 65535, 2500, 2, 1, NULL},
+    {94, &g_sys.config.alarm[ACL_FILTER_ELEMENT_3_OT].alarm_param, 1, 65535, 2500, 2, 1, NULL},
+    {95, &g_sys.config.alarm[ACL_FILTER_ELEMENT_4_OT].alarm_param, 1, 65535, 2500, 2, 1, NULL},
+    {96, &g_sys.config.alarm[ACL_UV1_OT].alarm_param, 1, 65535, 30000, 2, 1, NULL},
+    {97, NULL, 0, 3600, 0, 2, 1, NULL},
     {98, NULL, 0, 3600, 0, 2, 1, NULL},
-    {99, NULL, 0, 3600, 0, 2, 1, NULL},
-    {100, NULL, 0, 3600, 0, 2, 1, NULL},
+    {99, &g_sys.config.ComPara.u16TestEV[0], 0, 65535, 5, 2, 1, NULL},
+    {100, &g_sys.config.ComPara.u16TestEV[1], 0, 65535, 5, 2, 1, NULL},
     {101, &g_sys.config.Platform.Fixed_Report, 10, 1000, 60, 2, 1, NULL},
     {102, &g_sys.config.Platform.Real_Report, 5, 0xFFFF, 300, 2, 1, NULL},
-    {103, NULL, 0, 3600, 0, 2, 1, NULL},
-    {104, NULL, 0, 3600, 0, 2, 1, NULL},
+    {103, &g_sys.config.ComPara.u16CloseFrist, 0, 1, 0, 2, 1, NULL},
+    {104, &g_sys.config.ComPara.u16CloseDelay, 0, 10, 0, 2, 1, NULL},
     {105, NULL, 0, 3600, 0, 2, 1, NULL},
 #ifdef SYS_HMI_VJL
 
@@ -1013,11 +1013,13 @@ uint16_t sys_global_var_init(void)
     g_sys.config.ComPara.u16Manual_Test_En = 0;
     g_sys.config.general.alarm_bypass_en = 0;
     g_sys.config.ComPara.u16Test_Mode_Type = 0;
-    //更换水箱
-    g_sys.config.ComPara.u16Change_WaterTank = 0;
+
     //出水
+    g_sys.config.ComPara.u16ExitWater_Mode = 0;
     g_sys.config.ComPara.u16Water_Mode = 0;
     g_sys.config.ComPara.u16Water_Flow = 0;
+
+    //	rt_kprintf("EVENT_REC   start =%d ,end =%d ,size = %d\n", EVENT_REC_PT_ADDR, EE_REC_END, (EE_REC_END - EVENT_REC_PT_ADDR));
     return ret;
 }
 
@@ -1534,3 +1536,5 @@ FINSH_FUNCTION_EXPORT(write_reg_map, write data into conf registers.);
 FINSH_FUNCTION_EXPORT(set_load_flag, set sys init load option.);
 FINSH_FUNCTION_EXPORT(save_conf_reg, save current conf reg data.);
 FINSH_FUNCTION_EXPORT(read_eeprom, read eeprom content eeprom flag.);
+
+

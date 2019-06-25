@@ -144,8 +144,8 @@ static uint16_t acl15(alarm_acl_status_st *acl_ptr);
 static uint16_t acl16(alarm_acl_status_st *acl_ptr);
 static uint16_t acl17(alarm_acl_status_st *acl_ptr);
 static uint16_t acl18(alarm_acl_status_st *acl_ptr);
-//static	uint16_t acl19(alarm_acl_status_st* acl_ptr);
-//static	uint16_t acl20(alarm_acl_status_st* acl_ptr);
+static uint16_t acl19(alarm_acl_status_st *acl_ptr);
+static uint16_t acl20(alarm_acl_status_st *acl_ptr);
 
 //告警输出仲裁
 static void alarm_arbiration(void);
@@ -197,8 +197,8 @@ static uint16_t (*acl[ACL_TOTAL_NUM])(alarm_acl_status_st *) =
         acl16, //
         acl17, //
         acl18, //
-        //		acl19,//
-        //		acl20,//
+        acl19, //
+        acl20, //
 };
 
 #define DEV_TYPE_COMPRESSOR 0x0000
@@ -221,10 +221,10 @@ const uint16_t ACL_CONF[ACL_TOTAL_NUM][ALARM_ACL_MAX] =
         4, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER,  //ACL_E4
         5, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER,  //ACL_E5
         6, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER,  //ACL_E6
-        7, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER,  //ACL_E7
+        7, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER,  //ACL_FAN01_OD
         8, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER,  //ACL_E8
-        9, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER,  //ACL_WATER_LEAK
-        10, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER, //ACL_FAN01_OD
+        9, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER,  //ACL_E9
+        10, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER, //ACL_WATER_LEAK
         11, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_OTHER, //ACL_HI_PRESS1
         12, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, CRITICAL_ALARM_lEVEL, DEV_TYPE_POWER, //ACL_HI_PRESS2
         13, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, MIOOR_ALARM_LEVEL, DEV_TYPE_OTHER,    //ACL_FILTER_OT
@@ -233,8 +233,8 @@ const uint16_t ACL_CONF[ACL_TOTAL_NUM][ALARM_ACL_MAX] =
         16, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, MIOOR_ALARM_LEVEL, DEV_TYPE_OTHER,    //ACL_FILTER_ELEMENT_2_OT
         17, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, MIOOR_ALARM_LEVEL, DEV_TYPE_OTHER,    //ACL_FILTER_ELEMENT_3_OT
         18, ACL_ENMODE_OTHER, ACL_ENMODE_AUTO_RESET_ALARM, MIOOR_ALARM_LEVEL, DEV_TYPE_OTHER,    //ACL_FILTER_ELEMENT_4_OT
-        //		19,			ACL_ENMODE_OTHER,		ACL_ENMODE_AUTO_RESET_ALARM,  MIOOR_ALARM_LEVEL,        DEV_TYPE_OTHER,//ACL_UV1_OT
-        //		20,			ACL_ENMODE_OTHER,		ACL_ENMODE_AUTO_RESET_ALARM,  MIOOR_ALARM_LEVEL,        DEV_TYPE_OTHER,//ACL_UV2_OT
+                                                                                                 //		19,			ACL_ENMODE_OTHER,		ACL_ENMODE_AUTO_RESET_ALARM,  MIOOR_ALARM_LEVEL,        DEV_TYPE_OTHER,//ACL_UV1_OT
+                                                                                                 //		20,			ACL_ENMODE_OTHER,		ACL_ENMODE_AUTO_RESET_ALARM,  MIOOR_ALARM_LEVEL,        DEV_TYPE_OTHER,//ACL_UV2_OT
 };
 /*
   * @brief  alarm data structure initialization
@@ -388,15 +388,15 @@ uint16_t Alarm_acl_delay(uint8_t ACL_Num)
     case (ACL_E1):
     case (ACL_E2):
     case (ACL_E3):
-    case (ACL_E4):
     case (ACL_E5):
     case (ACL_E6):
-    case (ACL_E7):
     case (ACL_E8):
+    case (ACL_E9):
     {
         ACL_Delay = 5;
         break;
     }
+    case (ACL_E4):
     case (ACL_FAN01_OD):
     case (ACL_HI_PRESS1):
     case (ACL_HI_PRESS2):
@@ -414,7 +414,7 @@ uint16_t Alarm_acl_delay(uint8_t ACL_Num)
         //			case(ACL_UV1_OT):
         //			case(ACL_UV2_OT):
         {
-            ACL_Delay = 30;
+            ACL_Delay = 10;
             break;
         }
     default:
@@ -502,7 +502,7 @@ void alarm_acl_exe(void)
                 {
                     alarm_inst.alarm_sts[i].state = ALARM_FSM_ACTIVE;
                     //												rt_kprintf("i=%d,alarm_inst.alarm_sts[i].id=%X,alarm_inst.alarm_sts[i].alram_value=%d\n",i,alarm_inst.alarm_sts[i].id,alarm_inst.alarm_sts[i].alram_value);
-                    //y
+                    //yxq
                     add_alarmlog_fifo(log_id, ALARM_TRIGER, alarm_inst.alarm_sts[i].alram_value);
                     alarm_status_bitmap_op(alarm_inst.alarm_sts[i].id & 0x00ff, 1);
                     node_append(log_id, alarm_inst.alarm_sts[i].alram_value);
@@ -570,7 +570,7 @@ void alarm_acl_exe(void)
                 alarm_inst.alarm_sts[i].state = ALARM_FSM_INACTIVE;
                 alarm_inst.alarm_sts[i].timeout = 0;
             }
-            else if (acl_trigger_state == ALARM_ACL_CLEARED) //y
+            else if (acl_trigger_state == ALARM_ACL_CLEARED) //yxq
             {
 
                 if (alarm_inst.alarm_sts[i].timeout > 0)
@@ -580,7 +580,7 @@ void alarm_acl_exe(void)
                 }
                 else
                 {
-                    //y
+                    //yxq
                     add_alarmlog_fifo(log_id, ALARM_END, alarm_inst.alarm_sts[i].alram_value);
                     //
                     //												//删除状态节点
@@ -605,7 +605,7 @@ void alarm_acl_exe(void)
             }
             break;
         }
-        default: //y
+        default: //yxq
         {
             alarm_inst.alarm_sts[i].state = ALARM_FSM_INACTIVE;
 
@@ -664,7 +664,7 @@ static void alarm_arbiration(void)
         compress1_alarm = 0;
     }
 
-    if (get_alarm_bitmap(ACL_E7) || get_alarm_bitmap(ACL_FAN01_OD)) //风机
+    if (get_alarm_bitmap(ACL_E7)) //风机
     {
         close_dev = 1;
     }
@@ -985,9 +985,10 @@ static uint16_t acl00(alarm_acl_status_st *acl_ptr)
     }
     //		if(sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) != 0)
     //		if((g_sys.config.ComPara.u16Water_Mode)&&(g_sys.config.ComPara.u16Water_Flow))
-    if (((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_NORMAL_ICE) || (l_sys.OutWater_Key & WATER_NORMAL_ICE_2)) //常温水/冰水
+    //		if(((g_sys.config.ComPara.u16Water_Mode==WATER_NORMAL_ICE)&&(g_sys.config.ComPara.u16Water_Flow))||(l_sys.OutWater_Key&WATER_NORMAL_ICE)||(l_sys.OutWater_Key&WATER_ICE))//常温水/冰水
+    if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) == TRUE)) //Water out
     {
-        if (g_sys.status.ComSta.u16Cur_Water < 1) //无水流量
+        if (g_sys.status.ComSta.u16Cur_Water < 3) //无水流量
         {
             u8Delay++;
         }
@@ -1001,15 +1002,15 @@ static uint16_t acl00(alarm_acl_status_st *acl_ptr)
         data = 0;
         u8Delay = 0;
     }
-    if (u8Delay > 5)
+    if (u8Delay > 3)
     {
         data = 1;
     }
     else
     {
         data = 0;
-        u8Delay = 0;
     }
+    //		rt_kprintf("u16Cur_Water=%d,u8Delay=%d,data=%d\n",g_sys.status.ComSta.u16Cur_Water,u8Delay,data);
     return data;
 }
 
@@ -1061,9 +1062,161 @@ static uint16_t acl02(alarm_acl_status_st *acl_ptr)
     return data;
 }
 
-//ACL_E3
+//ACL_E3，浮球异常
 static uint16_t acl03(alarm_acl_status_st *acl_ptr)
 {
+    uint8_t data = 0;
+    uint16_t u16WL;
+
+    u16WL = Get_Water_level();
+
+    if (g_sys.config.dev_mask.din[0] & 0x40) //4浮球
+    {
+        if ((u16WL & D_U) && (((u16WL & D_M) == 0) || ((u16WL & D_ML) == 0) || ((u16WL & D_L) == 0)))
+        {
+            data = 1;
+        }
+        else if ((u16WL & D_M) && (((u16WL & D_ML) == 0) || ((u16WL & D_L) == 0)))
+        {
+            data = 1;
+        }
+        else if ((u16WL & D_ML) && ((u16WL & D_L) == 0))
+        {
+            data = 1;
+        }
+        else if ((u16WL & S_U) && (((u16WL & S_M) == 0) || ((u16WL & S_L) == 0)))
+        {
+
+            data = 1;
+        }
+        else if ((u16WL & S_M) && ((u16WL & S_L) == 0))
+        {
+
+            data = 1;
+        }
+        else if (g_sys.status.ComSta.u16Ain[AI_NTC4] == ABNORMAL_VALUE)
+        {
+
+            data = 1;
+        }
+        else
+        {
+            data = 0;
+        }
+    }
+    else //3浮球
+    {
+        if ((u16WL & D_U) && (((u16WL & D_M) == 0) || ((u16WL & D_L) == 0)))
+        {
+            data = 1;
+        }
+        else if ((u16WL & D_M) && ((u16WL & D_L) == 0))
+        {
+            data = 1;
+        }
+        else if ((u16WL & S_U) && (((u16WL & S_M) == 0) || ((u16WL & S_L) == 0)))
+        {
+
+            data = 1;
+        }
+        else if ((u16WL & S_M) && ((u16WL & S_L) == 0))
+        {
+
+            data = 1;
+        }
+        else
+        {
+            data = 0;
+        }
+    }
+    //		rt_kprintf("BUFF = %x,u16WL = %x\n",BUFF,u16WL);
+    return data;
+}
+
+// ACL_E4,门打开
+static uint16_t acl04(alarm_acl_status_st *acl_ptr)
+{
+
+    uint8_t data = 0;
+
+    // 解除 报警
+    if (acl_clear(acl_ptr))
+    {
+        return (ALARM_ACL_CLEARED);
+    }
+
+    data = sys_get_di_sts(DI_OPEN_BPOS);
+    data = io_calc(data, IO_OPEN);
+    return data;
+}
+//ACL_E5 温湿度传感器故障
+static uint16_t acl05(alarm_acl_status_st *acl_ptr)
+{
+    uint8_t req;
+    uint16_t u16mb_comp;
+
+    //uint16_t HUM_erro=0;
+    req = 0;
+    // 解除 报警
+    if (acl_clear(acl_ptr))
+    {
+        g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = 0;
+        return (ALARM_ACL_CLEARED);
+    }
+
+    //		u16mb_comp=g_sys.config.dev_mask.mb_comp;
+    u16mb_comp = 0x01;
+
+    if (g_sys.status.status_remap[MBM_COM_STS_REG_NO] != u16mb_comp)
+    {
+        g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = (g_sys.status.status_remap[MBM_COM_STS_REG_NO]) ^ (u16mb_comp);
+        req = 1;
+    }
+    else
+    {
+        g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = 0;
+        req = 0;
+    }
+    acl_ptr->alram_value = g_sys.status.status_remap[MBM_COM_STS_REG_NO];
+    //		rt_kprintf("status_remap[MBM_COM_STS_REG_NO] = %x,mb_comp = %x,req = %x\n",g_sys.status.status_remap[MBM_COM_STS_REG_NO],g_sys.config.dev_mask.mb_comp,req);
+    return (req);
+}
+
+//ACL_E6 ,NTC
+static uint16_t acl06(alarm_acl_status_st *acl_ptr)
+{
+    //		int16_t min;
+    //		int16_t max;
+    //		uint8_t req;
+    //		int16_t meter;
+    //
+    //		// 解除 报警
+    //		if(acl_clear(acl_ptr))
+    //		{
+    //				return(ALARM_ACL_CLEARED);
+    //		}
+    //
+    //		max = ACL_HUM_MAX;
+    //		min = ACL_HUM_MIN;
+    //		req =0;
+    //
+    //		 //TH
+    //		 if((g_sys.config.dev_mask.mb_comp) & (0x01<<0x00))
+    //		 {
+    //				meter =   g_sys.status.ComSta.u16TH[0].Hum;
+    //				if((compare_calc( meter,min,max,OUT_MIN_MAX_TYPE)))
+    //				{
+    //						sys_set_remap_status(SENSOR_STS_REG_NO,AI_SENSOR_ERR,1);
+    //				    req =1;
+    //				}
+    //				else
+    //				{
+
+    //						sys_set_remap_status(SENSOR_STS_REG_NO,AI_SENSOR_ERR,0);
+    //				}
+    //		 }
+    //		 acl_ptr->alram_value = g_sys.status.status_remap[SENSOR_STS_REG_NO];
+    //		 return(req);
     int16_t min;
     int16_t max;
     uint8_t req;
@@ -1139,96 +1292,6 @@ static uint16_t acl03(alarm_acl_status_st *acl_ptr)
     acl_ptr->alram_value = g_sys.status.status_remap[SENSOR_STS_REG_NO];
     return (req);
 }
-
-// ACL_E4
-static uint16_t acl04(alarm_acl_status_st *acl_ptr)
-{
-    uint32_t run_time = 0;
-    int16_t max;
-    //参数确定
-    if (acl_clear(acl_ptr))
-    {
-        return (ALARM_ACL_CLEARED);
-    }
-    //		if(sys_get_pwr_sts() == 0)
-    //		{
-    //				return(ALARM_ACL_CLEARED);
-    //		}
-    run_time = g_sys.status.ComSta.u16Runtime[1][DO_UV2_BPOS];
-    max = g_sys.config.alarm[ACL_UV2_OT].alarm_param;
-
-    alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-    return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
-}
-//ACL_E5 温湿度传感器故障
-static uint16_t acl05(alarm_acl_status_st *acl_ptr)
-{
-    uint8_t req;
-    uint16_t u16mb_comp;
-
-    //uint16_t HUM_erro=0;
-    req = 0;
-    // 解除 报警
-    if (acl_clear(acl_ptr))
-    {
-        g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = 0;
-        return (ALARM_ACL_CLEARED);
-    }
-
-    //		u16mb_comp=g_sys.config.dev_mask.mb_comp;
-    u16mb_comp = 0x01;
-
-    if (g_sys.status.status_remap[MBM_COM_STS_REG_NO] != u16mb_comp)
-    {
-        g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = (g_sys.status.status_remap[MBM_COM_STS_REG_NO]) ^ (u16mb_comp);
-        req = 1;
-    }
-    else
-    {
-        g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = 0;
-        req = 0;
-    }
-    acl_ptr->alram_value = g_sys.status.status_remap[MBM_COM_STS_REG_NO];
-    //		rt_kprintf("status_remap[MBM_COM_STS_REG_NO] = %x,mb_comp = %x,req = %x\n",g_sys.status.status_remap[MBM_COM_STS_REG_NO],g_sys.config.dev_mask.mb_comp,req);
-    return (req);
-}
-
-//ACL_E6
-static uint16_t acl06(alarm_acl_status_st *acl_ptr)
-{
-    int16_t min;
-    int16_t max;
-    uint8_t req;
-    int16_t meter;
-
-    // 解除 报警
-    if (acl_clear(acl_ptr))
-    {
-        return (ALARM_ACL_CLEARED);
-    }
-
-    max = ACL_HUM_MAX;
-    min = ACL_HUM_MIN;
-    req = 0;
-
-    //TH
-    if ((g_sys.config.dev_mask.mb_comp) & (0x01 << 0x00))
-    {
-        meter = g_sys.status.ComSta.u16TH[0].Hum;
-        if (compare_calc(meter, min, max, OUT_MIN_MAX_TYPE))
-        {
-            sys_set_remap_status(SENSOR_STS_REG_NO, AI_SENSOR_ERR, 1);
-            req = 1;
-        }
-        else
-        {
-
-            sys_set_remap_status(SENSOR_STS_REG_NO, AI_SENSOR_ERR, 0);
-        }
-    }
-    acl_ptr->alram_value = g_sys.status.status_remap[SENSOR_STS_REG_NO];
-    return (req);
-}
 //ACL_E7 风机未开 ACL_FAN01_OD
 static uint16_t acl07(alarm_acl_status_st *acl_ptr)
 {
@@ -1242,6 +1305,10 @@ static uint16_t acl07(alarm_acl_status_st *acl_ptr)
     if (sys_get_pwr_sts() == 0)
     {
         return (ALARM_ACL_CLEARED);
+    }
+    if (sys_get_do_sts(DO_FAN_BPOS) == 0)
+    {
+        return (ALARM_ACL_HOLD);
     }
     //		if((sys_get_remap_status(WORK_MODE_STS_REG_NO, COOLING_STS_BPOS) != 0)||(sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST1_STS_BPOS) != 0)||(sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST2_STS_BPOS) != 0))				//alarm alternation
     //		{
@@ -1258,35 +1325,6 @@ static uint16_t acl07(alarm_acl_status_st *acl_ptr)
 //ACL_E8 紫外杀菌灯未开
 static uint16_t acl08(alarm_acl_status_st *acl_ptr)
 {
-    //		uint8_t data=0;
-
-    //			// 解除 报警
-    //		if(acl_clear(acl_ptr))
-    //		{
-    //				return(ALARM_ACL_CLEARED);
-    //		}
-    //		if((sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) != 0))				//alarm alternation
-    //		{
-    //				//即热式热水器
-    //				if((g_sys.config.ComPara.u16Water_Mode==WATER_HEAT)||(l_sys.OutWater_Key&WATER_HEAT))//热水
-    //				{
-    //						if(!(g_sys.config.ComPara.u16Water_Ctrl&HEART_POT))//即热式出水
-    //						{
-    //								return(ALARM_ACL_CLEARED);
-    //						}
-    //				}
-    //				//220V紫外灯
-    //				if((g_sys.config.ComPara.u16Sterilize_Mode&STERILIZE_BIT0)&&(sys_get_do_sts(DO_UV1_BPOS)==0))
-    //				{
-    //					data=1;
-    //				}
-    //				//24V紫外灯
-    //				if((g_sys.config.ComPara.u16Sterilize_Mode&STERILIZE_BIT1)&&(sys_get_do_sts(DO_UV2_BPOS)==0))
-    //				{
-    //					data=1;
-    //				}
-    //		}
-    //		return data;
     uint32_t run_time = 0;
     int16_t max;
     //参数确定
@@ -1305,8 +1343,35 @@ static uint16_t acl08(alarm_acl_status_st *acl_ptr)
     return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
 }
 
-//ACL_WATER_LEAK
+//ACL_E9
 static uint16_t acl09(alarm_acl_status_st *acl_ptr)
+{
+    uint8_t data;
+
+    // 解除 报警
+    if (acl_clear(acl_ptr))
+    {
+        return (ALARM_ACL_CLEARED);
+    }
+    if (sys_get_do_sts(DO_PWP_BPOS) == 0)
+    {
+        return (ALARM_ACL_CLEARED);
+    }
+
+    if (l_sys.Pwp_Open_Time >= g_sys.config.alarm[ACL_E9].alarm_param)
+    {
+        data = 1;
+    }
+    else
+    {
+        data = 0;
+    }
+
+    return (data);
+}
+
+// ACL_WATER_LEAK
+static uint16_t acl10(alarm_acl_status_st *acl_ptr)
 {
     uint8_t data;
 
@@ -1320,29 +1385,6 @@ static uint16_t acl09(alarm_acl_status_st *acl_ptr)
     data = io_calc(data, IO_CLOSE);
 
     return (data);
-}
-
-// ACL_FAN01_OD
-static uint16_t acl10(alarm_acl_status_st *acl_ptr)
-{
-    //		uint8_t data;
-
-    //		// 解除 报警
-    //		if(acl_clear(acl_ptr))
-    //		{
-    //				return(ALARM_ACL_CLEARED);
-    //		}
-
-    //		if(sys_get_do_sts(DO_FAN_BPOS)==0)
-    //		{
-    //				return(ALARM_ACL_HOLD);
-    //		}
-
-    //		data = sys_get_di_sts(DI_FAN01_OD_BPOS);
-    //		data = io_calc( data,IO_CLOSE);
-
-    //		return(data);
-    return (ALARM_ACL_CLEARED);
 }
 //ACL_HI_PRESS1
 static uint16_t acl11(alarm_acl_status_st *acl_ptr)
@@ -1389,173 +1431,187 @@ static uint16_t acl12(alarm_acl_status_st *acl_ptr)
 //ACL_FILTER_OT
 static uint16_t acl13(alarm_acl_status_st *acl_ptr)
 {
-    uint32_t run_time = 0;
-    int16_t max;
+    uint16_t run_time = 0;
+    uint16_t max;
+    uint8_t data;
     //参数确定
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-    if (sys_get_pwr_sts() == 0)
-    {
-        return (ALARM_ACL_CLEARED);
-    }
-    //		run_time = dev_runingtime(g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].low,g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].high);
+
     run_time = g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_DUMMY_BPOS];
     max = g_sys.config.alarm[ACL_FILTER_OT].alarm_param;
 
+    if (run_time >= max)
+    {
+        data = 1;
+    }
+    else
+    {
+        data = 0;
+    }
     alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-    return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
+    return data;
 }
 //ACL_FILTER_ELEMENT_0_OT
 static uint16_t acl14(alarm_acl_status_st *acl_ptr)
 {
-    uint32_t run_time = 0;
-    int16_t max;
+    uint16_t run_time = 0;
+    uint16_t max;
+    uint8_t data;
     //参数确定
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-    if (sys_get_pwr_sts() == 0)
-    {
-        return (ALARM_ACL_CLEARED);
-    }
-    //		run_time = dev_runingtime(g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].low,g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].high);
+
     run_time = g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_ELEMENT_DUMMY_BPOS_0];
     max = g_sys.config.alarm[ACL_FILTER_ELEMENT_0_OT].alarm_param;
 
+    if (run_time >= max)
+    {
+        data = 1;
+    }
+    else
+    {
+        data = 0;
+    }
     alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-    return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
+    return data;
 }
 
 //ACL_FILTER_ELEMENT_1_OT
 static uint16_t acl15(alarm_acl_status_st *acl_ptr)
 {
-    uint32_t run_time = 0;
-    int16_t max;
+    uint16_t run_time = 0;
+    uint16_t max;
+    uint8_t data;
     //参数确定
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-    if (sys_get_pwr_sts() == 0)
-    {
-        return (ALARM_ACL_CLEARED);
-    }
-    //		run_time = dev_runingtime(g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].low,g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].high);
+
     run_time = g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_ELEMENT_DUMMY_BPOS_1];
     max = g_sys.config.alarm[ACL_FILTER_ELEMENT_1_OT].alarm_param;
 
+    if (run_time >= max)
+    {
+        data = 1;
+    }
+    else
+    {
+        data = 0;
+    }
     alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-    return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
+    return data;
 }
 
 //ACL_FILTER_ELEMENT_2_OT
 static uint16_t acl16(alarm_acl_status_st *acl_ptr)
 {
-    uint32_t run_time = 0;
-    int16_t max;
+    uint16_t run_time = 0;
+    uint16_t max;
+    uint8_t data;
     //参数确定
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-    if (sys_get_pwr_sts() == 0)
-    {
-        return (ALARM_ACL_CLEARED);
-    }
-    //		run_time = dev_runingtime(g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].low,g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].high);
+
     run_time = g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_ELEMENT_DUMMY_BPOS_2];
     max = g_sys.config.alarm[ACL_FILTER_ELEMENT_2_OT].alarm_param;
 
+    if (run_time >= max)
+    {
+        data = 1;
+    }
+    else
+    {
+        data = 0;
+    }
     alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-    return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
+    return data;
 }
 
 //ACL_FILTER_ELEMENT_3_OT
 static uint16_t acl17(alarm_acl_status_st *acl_ptr)
 {
-    uint32_t run_time = 0;
-    int16_t max;
+    uint16_t run_time = 0;
+    uint16_t max;
+    uint8_t data;
     //参数确定
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-    if (sys_get_pwr_sts() == 0)
-    {
-        return (ALARM_ACL_CLEARED);
-    }
-    //		run_time = dev_runingtime(g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].low,g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].high);
+
     run_time = g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_ELEMENT_DUMMY_BPOS_3];
     max = g_sys.config.alarm[ACL_FILTER_ELEMENT_3_OT].alarm_param;
 
+    if (run_time >= max)
+    {
+        data = 1;
+    }
+    else
+    {
+        data = 0;
+    }
     alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-    return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
+    return data;
 }
 
 //ACL_FILTER_ELEMENT_4_OT
 static uint16_t acl18(alarm_acl_status_st *acl_ptr)
 {
-    uint32_t run_time = 0;
-    int16_t max;
+    uint16_t run_time = 0;
+    uint16_t max;
+    uint8_t data;
     //参数确定
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-    if (sys_get_pwr_sts() == 0)
-    {
-        return (ALARM_ACL_CLEARED);
-    }
+
     run_time = g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_ELEMENT_DUMMY_BPOS_4];
     max = g_sys.config.alarm[ACL_FILTER_ELEMENT_4_OT].alarm_param;
 
+    if (run_time >= max)
+    {
+        data = 1;
+    }
+    else
+    {
+        data = 0;
+    }
     alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-    return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
+    return data;
 }
 
-// //ACL_UV1_OT
-// static uint16_t acl19(alarm_acl_status_st *acl_ptr)
-// {
-//     //					return(ALARM_ACL_CLEARED);
-//     uint32_t run_time = 0;
-//     int16_t max;
-//     //参数确定
-//     if (acl_clear(acl_ptr))
-//     {
-//         return (ALARM_ACL_CLEARED);
-//     }
-//     if (sys_get_pwr_sts() == 0)
-//     {
-//         return (ALARM_ACL_CLEARED);
-//     }
-//     //		run_time = dev_runingtime(g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].low,g_sys.status.run_time[DO_FILLTER_DUMMY_BPOS].high);
-//     run_time = g_sys.status.ComSta.u16Runtime[1][DO_UV1_BPOS];
-//     max = g_sys.config.alarm[ACL_UV1_OT].alarm_param;
-
-//     alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-//     return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
-// }
-// //ACL_UV2_OT
-// static uint16_t acl20(alarm_acl_status_st *acl_ptr)
-// {
-//     //				return(ALARM_ACL_CLEARED);
-//     uint32_t run_time = 0;
-//     int16_t max;
-//     //参数确定
-//     if (acl_clear(acl_ptr))
-//     {
-//         return (ALARM_ACL_CLEARED);
-//     }
-//     if (sys_get_pwr_sts() == 0)
-//     {
-//         return (ALARM_ACL_CLEARED);
-//     }
-//     run_time = g_sys.status.ComSta.u16Runtime[1][DO_UV2_BPOS];
-//     max = g_sys.config.alarm[ACL_UV2_OT].alarm_param;
-
-//     alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-//     return (compare_calc(run_time, 0, max, THR_MAX_TYPE));
-// }
+//ACL_RSV1_OT
+static uint16_t acl19(alarm_acl_status_st *acl_ptr)
+{
+    return (ALARM_ACL_CLEARED);
+}
+//ACL_UV2_OT
+static uint16_t acl20(alarm_acl_status_st *acl_ptr)
+{
+    return (ALARM_ACL_CLEARED);
+    //		uint32_t run_time=0;
+    //		int16_t max;
+    //		//????
+    //		if(acl_clear(acl_ptr))
+    //		{
+    //				return(ALARM_ACL_CLEARED);
+    //		}
+    //		if(sys_get_pwr_sts() == 0)
+    //		{
+    //				return(ALARM_ACL_CLEARED);
+    //		}
+    //		run_time = g_sys.status.ComSta.u16Runtime[1][DO_UV2_BPOS];
+    //		max = g_sys.config.alarm[ACL_UV2_OT].alarm_param;
+    //
+    //		alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
+    //		return(compare_calc( run_time,0,max,THR_MAX_TYPE));
+}

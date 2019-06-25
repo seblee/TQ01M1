@@ -47,8 +47,17 @@ enum
     WATER_NO = 0x00,
     WATER_NORMAL_ICE = 0x01,
     WATER_HEAT = 0x02,
-    WATER_NORMAL_ICE_2 = 0x04,
+    WATER_ICE = 0x04, //冰水
 };
+//冰水模式
+enum
+{
+    ICE_NO = 0x00,
+    NORMAL_ICE = 0x01, //阀冰水
+    BD_ICE = 0x02,     //冰胆
+};
+#define BD_TIME 180
+#define BD_DELAY 60
 
 //水路控制方案
 enum
@@ -61,6 +70,14 @@ enum
 #define ChildKey_Cnt 1
 #define ChildKey_Lose 5
 
+//水源模式
+enum
+{
+    WATER_AIR = 0x00,
+    WATER_FILL = 0x01, //注水
+    WATER_EXIT = 0x02, //
+};
+
 //水位
 enum
 {
@@ -70,7 +87,7 @@ enum
     D_L = 0x08, //制水
     D_M = 0x10, //满水
     D_U = 0x20,
-    D_MD = 0x40, //制冷水位,中水位
+    D_ML = 0x40, //制冷水位,中水位
 };
 
 //流量脉冲
@@ -127,7 +144,7 @@ enum
 #define STERILIZE_BIT0 0x01
 #define STERILIZE_BIT1 0x02
 //单次出水时间限制
-#define WATER_MAXTIME 600 * 2 //10分钟
+#define WATER_MAXTIME 300 * 2 //5分钟
 
 //定时保存时间
 #define FIXED_SAVETIME 900
@@ -143,8 +160,16 @@ enum
     FAN_MODE_TEMP_MAX_DIFF, //温差热点
     FAM_MODE_INV_COMP,      //变频跟踪
 };
+//Close first
+enum
+{
+    PUMP_FIRET = 0x00,
+    VALVE_FIRST = 0x01, //
+};
+
 void hum_capacity_calc(void);
 void req_execution(int16_t target_req_temp, int16_t target_req_hum);
 void req_bitmap_op(uint8_t component_bpos, uint8_t action);
 void Close_DIS_PWR(void);
+void UV_req_exe(uint8_t u8Type);
 #endif //__REQ_EXE_H__

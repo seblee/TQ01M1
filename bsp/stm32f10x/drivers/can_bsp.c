@@ -239,7 +239,7 @@
 //     TxMessage.StdId = 0;
 //     TxMessage.ExtId = 0;
 //     TxMessage.ExtId = prio << 27 | raf << 22 | sa << 14 | da << 6 | type;
-//     //    TxMessage.ExtId   |= CANID_EOSF_BITS; //single frame，the first frame is the end frame
+//     //    TxMessage.ExtId   |= CANID_EOSF_BITS; //single frame,the first frame is the end frame
 //     TxMessage.IDE = CAN_ID_EXT;
 //     TxMessage.RTR = CAN_RTR_DATA;
 //     TxMessage.DLC = length;
