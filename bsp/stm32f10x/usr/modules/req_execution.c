@@ -3,7 +3,7 @@
 #include "calc.h"
 #include "sys_conf.h"
 #include "local_status.h"
-#include "req_execution.h" 
+#include "req_execution.h"
 #include "sys_status.h"
 #include "dio_bsp.h"
 #include "rtc_bsp.h"
@@ -831,7 +831,7 @@ void Sys_Fan_CP_WL(void)
     uint16_t Test = 0;
     static uint8_t u8Offset_CNT = 0;
     static uint8_t u8FCP_Start = 0;
-    static uint8_t u8WL_Start = FALSE;
+    RT_USED static uint8_t u8WL_Start = FALSE;
 
     if (sys_get_pwr_sts() == 1)
     {
@@ -1692,120 +1692,65 @@ void UV_req_exe(uint8_t u8Type)
         }
     }
 }
-
+#include "mb_event_cpad.h"
 //杀菌
 void Sterilize_req_exe(void)
 {
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
-    uint16_t u16WL;
-    static uint32_t u32Sterilize_Interval[2];
-    static uint16_t u16Sterilize_Time[2];
-    uint8_t u8STR;
-    uint16_t u16Temp;
+    static uint32_t u32Sterilize_Interval[OD_Test_NUM];
+    static uint32_t u16Sterilize_Time[OD_Test_NUM];
+    static uint32_t DO_State;
 
-    if (sys_get_di_sts(DI_OPEN_BPOS) == 0) //外壳打开时，关闭紫外灯
-    {
-        UV_req_exe(FALSE);            //UV
-        req_bitmap_op(DO_WP_BPOS, 0); //泵2
-        req_bitmap_op(DO_DV_BPOS, 0); //出水阀
-        return;
-    }
+    uint32_t DO_state_temp = 0;
 
-    u16Temp = 1;
-    //出水中
-    if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) == TRUE)) //Water out
+    for (int i = 0; i < OD_Test_NUM; i++)
     {
-        return;
-    }
 
-    if (Exit_Water() != WATER_AIR) //外接水源
-    {
-        req_bitmap_op(DO_PWP_BPOS, 0); //泵1
-        req_bitmap_op(DO_WP_BPOS, 0);  //泵2
-        return;
-    }
-    //220V紫外灯
-    u8STR = 0;
-    u32Sterilize_Interval[u8STR]++;
-
-    //水位
-    u16WL = Get_Water_level();
-    if (((u16WL & D_L) == 0)) //饮水箱低水位
-    {
-        req_bitmap_op(DO_WP_BPOS, 0); //泵2/循环泵
-        return;
-    }
-    u16Temp |= 0x02;
-    //			if(u32Sterilize_Interval[u8STR]>=(g_sys.config.ComPara.u16Sterilize_Interval[u8STR]*60*2))
-    if ((u32Sterilize_Interval[u8STR] >= (g_sys.config.ComPara.u16Sterilize_Interval[u8STR] * 60 * 2)) && (l_sys.Pwp_Open == FALSE)) //防止与进水泵冲突
-    {
-        u16Temp |= 0x04;
-        u16Sterilize_Time[u8STR]++;
-        l_sys.Sterilize = TRUE;        //UV
-        req_bitmap_op(DO_WP_BPOS, 1);  //出水泵
-        req_bitmap_op(DO_DWV_BPOS, 1); //出水时会关闭,杀菌时打开
-        if (g_sys.config.ComPara.u16CloseFrist != PUMP_FIRET)
+        if (g_sys.config.ComPara.u16Sterilize_Enable[i])
         {
-            req_bitmap_op(DO_DV_BPOS, 0); //出水阀
-        }
-        else
-        {
-            if (l_sys.u8CloseDelay == 0)
+            u32Sterilize_Interval[i]++;
+            if (u32Sterilize_Interval[i] >= (g_sys.config.ComPara.u16Sterilize_Interval[i] * 60 * 2))
             {
-                req_bitmap_op(DO_DV_BPOS, 0); //出水阀
-            }
-        }
-        if (g_sys.config.ComPara.u16ColdWater_Mode == BD_ICE) //冰胆模式
-        {
-            req_bitmap_op(DO_V3_BPOS, 0); //
-            req_bitmap_op(DO_V4_BPOS, 0); //
-        }
-    }
-    else
-    {
-        u16Temp |= 0x08;
-        //					if((l_sys.u8CloseDelay)&&(g_sys.config.ComPara.u16CloseFrist==PUMP_FIRET))
-        if ((l_sys.u8CloseDelay == 0) && (l_sys.u16BD_Time == 0))
-        {
-            req_bitmap_op(DO_WP_BPOS, 0); //出水泵
-        }
-        l_sys.Sterilize = FALSE;
-    }
-
-    if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) == FALSE)) //Water out
-    {
-        if (u16Sterilize_Time[u8STR] >= g_sys.config.ComPara.u16Sterilize_Time[u8STR] * 60 * 2)
-        {
-            u16Temp |= 0x10;
-            u32Sterilize_Interval[u8STR] = 0;
-            u16Sterilize_Time[u8STR] = 0;
-            l_sys.Sterilize = FALSE;
-            if (g_sys.config.ComPara.u16CloseFrist == PUMP_FIRET)
-            {
-                req_bitmap_op(DO_WP_BPOS, 0); //泵2
+                u16Sterilize_Time[i]++;
+                DO_state_temp = 1;
             }
             else
             {
-                if (l_sys.u8CloseDelay == 0)
-                {
-                    req_bitmap_op(DO_WP_BPOS, 0); //泵2
-                }
+                DO_state_temp = 0;
             }
-            //								req_bitmap_op(DO_WP_BPOS,0);//泵2
-            req_bitmap_op(DO_DWV_BPOS, 0); //出水时会关闭,杀菌时打开
+
+            if (u16Sterilize_Time[i] >= g_sys.config.ComPara.u16Sterilize_Time[i] * 60 * 2)
+            {
+                u32Sterilize_Interval[i] = 0;
+                u16Sterilize_Time[i] = 0;
+                DO_state_temp = 0;
+            }
+        }
+        else
+        {
+            DO_state_temp = 0;
+            u32Sterilize_Interval[i] = 0;
+            u16Sterilize_Time[i] = 0;
+        }
+
+        if (((DO_State >> i) & 1) != DO_state_temp)
+        {
+            if (DO_state_temp)
+            {
+                unsigned char cache[2];
+                g_sys.config.ComPara.u16On_Off_Count[i]++;
+                cache[0] = (unsigned char)(g_sys.config.ComPara.u16On_Off_Count[i] >> 8);
+                cache[1] = (unsigned char)(g_sys.config.ComPara.u16On_Off_Count[i] & 0xff);
+
+                //RAM_Write_Reg(224 + i,g_sys.config.ComPara.u16On_Off_Count[i],1);
+                cpad_eMBRegHoldingCB(cache, 224 + i, 1, CPAD_MB_REG_MULTIPLE_WRITE);
+            }
+            DO_State ^= (1 << i);
+            req_bitmap_op(i, (uint8_t)DO_state_temp);
         }
     }
-    //		rt_kprintf("u16Temp=%x,l_sys.Sterilize=%x\n", u16Temp,l_sys.Sterilize);
-    //		rt_kprintf("u16Temp=%x,Pwp_Open=%x,u32Sterilize_Interval=%d,u16Sterilize_Time=%d,l_sys.Sterilize=%x\n", u16Temp,l_sys.Pwp_Open,u32Sterilize_Interval[u8STR],u16Sterilize_Time[u8STR],l_sys.Sterilize);
-    if (l_sys.Sterilize == FALSE)
-    {
-        UV_req_exe(FALSE); //UV
-    }
-    else
-    {
-        UV_req_exe(TRUE); //UV
-    }
+
     return;
 }
 
@@ -2052,22 +1997,22 @@ void Heat_Fan_exe(void)
 //总体需求执行逻辑
 void req_execution(int16_t target_req_temp, int16_t target_req_hum)
 {
-    //风机,压机启动条件
-    Sys_Fan_CP_WL();
-    //风机控制
-    fan_req_exe(target_req_temp, target_req_hum);
-    //压缩机控制
-    compressor_req_exe(target_req_temp, target_req_hum);
-    //净化泵
-    Pwp_req_exe();
-    //制冰水
-    Cold_Water_exe();
+    //    //风机,压机启动条件
+    //    Sys_Fan_CP_WL();
+    //    //风机控制
+    //    fan_req_exe(target_req_temp, target_req_hum);
+    //    //压缩机控制
+    //    compressor_req_exe(target_req_temp, target_req_hum);
+    //    //净化泵
+    //    Pwp_req_exe();
+    //    //制冰水
+    //    Cold_Water_exe();
     //杀菌
     Sterilize_req_exe();
-    //出水
-    WaterOut_req_exe();
-    //除霜
-    Defrost_req_exe();
+    //    //出水
+    //    WaterOut_req_exe();
+    //    //除霜
+    //    Defrost_req_exe();
     //		//扇热风机
     //		Heat_Fan_exe();
     return;

@@ -60,7 +60,7 @@ static rt_uint8_t modbus_slave_stack[512];
 static rt_uint8_t monitor_slave_stack[0x900];
 static rt_uint8_t di_stack[256];
 static rt_uint8_t daq_stack[512];
-static rt_uint8_t core_stack[512];
+static rt_uint8_t core_stack[0x1000];
 static rt_uint8_t cpad_stack[512];
 static rt_uint8_t bkg_stack[512];
 

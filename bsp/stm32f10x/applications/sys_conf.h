@@ -60,7 +60,7 @@ enum
 //L  双按键出水
 #define DO_WP2_BPOS DO_RSV2_BPOS //出水泵2
 #define DO_DV2_BPOS DO_RSV3_BPOS //出水阀2
- 
+
 #define DO_HEAT_FAN_BPOS DO_RSV2_BPOS //扇热风机
 //TEST
 #define DO_DWV_BPOS DO_DWP_BPOS    //循环阀//阀1
@@ -89,6 +89,7 @@ enum
 #define BKG_THREAD_DELAY 2200
 #define TESTCASE_THREAD_DELAY 1650
 
+#define OD_Test_NUM 18 //max 32
 ///////////////////////////////////////////////////////////////
 //AI configuration
 ///////////////////////////////////////////////////////////////
@@ -668,52 +669,55 @@ typedef struct
 //空气制水机参数
 typedef struct
 {
-    Net_Conf_st Net_Conf;              //网络配置
-    uint16_t u16SN_Code[4];            //SN码
-    uint16_t u16M_Type;                //设备类型
-    uint16_t u16Power_Mode;            //开关机
-    uint16_t u16Start_Temp;            //制水启动温度
-    uint16_t u16Start_Humidity;        //制水启动湿度
-    uint16_t u16Stop_Temp;             //制水停止温度
-    uint16_t u16Stop_Humidity;         //制水停止湿度
-    uint16_t u16Start_Defrost_Temp;    //除霜启动温度
-    uint16_t u16Stop_Defrost_Temp;     //除霜停止温度
-    uint16_t u16Sterilize_Mode;        //杀菌模式:BIT0-220V,BIT1-24V
-    uint16_t u16Sterilize_Time[2];     //杀菌时间
-    uint16_t u16Sterilize_Interval[2]; //杀菌间隔
-    uint16_t u16Water_Ctrl;            //水路控制方案
-    uint16_t u16Water_Mode;            //出水模式
-    uint16_t u16Water_Flow;            //出水流量
-    uint16_t u16NormalWater_Temp;      //常温水温度
-    uint16_t u16HotWater_Temp;         //热水温度
-    uint16_t u16ExitWater_Mode;        //外接水源模式
-    uint16_t u16Disinfection_Mode;     //消毒模式
-    uint16_t u16Rsv0[4];               //
-    uint16_t u16Reset;                 //恢复出厂
-    uint16_t u16Test_Mode_Type;        //测试模式选择
-    uint16_t u16Manual_Test_En;        //手动测试模式使能
-    uint16_t u16BITMAP_MANUAL;         //手动输出
-    uint16_t u16TPower_En;             //定时开关机
-    uint16_t u16TPower_On;             //定时开机时间
-    uint16_t u16TPower_Off;            //定时关机时间
-    uint16_t u16Rsv1[3];               //
-    uint16_t u16FILTER_ELEMENT_Type;   //滤芯告警类型:0-流量L;1-时间h
-    uint16_t u16Clear_RT;              //清除部件时间
-    uint16_t u16Clear_ALARM;           //清除告警
-    uint16_t u16Set_Time[2];           //设置系统时间
-    uint16_t u16Start_Delay;           //风机开启延时
-    uint16_t u16Fan_Stop_Delay;        //风机关闭延时
-    uint16_t u16Comp_Interval;         //压机间隔
-    uint16_t u16ColdWater_Mode;        //冰水模式
-    uint16_t u16ColdWater_StartTemp;   //制冰水温度
-    uint16_t u16ColdWater_StopTemp;    //制冰水停止温度
-    uint16_t u16HeatFan_StartTemp;     //热风机启动温度
-    uint16_t u16HeatFan_StopTemp;      //热风机停止温度
-    uint16_t u16WaterFlow;             //出水流量后开始制水
-    uint16_t u16CloseFrist;            //null
-    uint16_t u16CloseDelay;            //null
-    uint16_t u16TestEV[2];             //null
-    uint16_t device_info[100];         //三元组信息
+    Net_Conf_st Net_Conf;                        //网络配置
+    uint16_t u16SN_Code[4];                      //SN码
+    uint16_t u16M_Type;                          //设备类型
+    uint16_t u16Power_Mode;                      //开关机
+    uint16_t u16Start_Temp;                      //制水启动温度
+    uint16_t u16Start_Humidity;                  //制水启动湿度
+    uint16_t u16Stop_Temp;                       //制水停止温度
+    uint16_t u16Stop_Humidity;                   //制水停止湿度
+    uint16_t u16Start_Defrost_Temp;              //除霜启动温度
+    uint16_t u16Stop_Defrost_Temp;               //除霜停止温度
+    uint16_t u16Sterilize_Mode;                  //杀菌模式:BIT0-220V,BIT1-24V
+    uint16_t u16Sterilize_Time[OD_Test_NUM];     //杀菌时间
+    uint16_t u16Sterilize_Interval[OD_Test_NUM]; //杀菌间隔
+    uint16_t u16On_Off_Count[OD_Test_NUM];       //殺菌次數
+    uint16_t u16Sterilize_Enable[OD_Test_NUM];   //殺菌使能
+    uint16_t u16Water_Ctrl;                      //水路控制方案
+    uint16_t u16Water_Mode;                      //出水模式
+    uint16_t u16Water_Flow;                      //出水流量
+    uint16_t u16NormalWater_Temp;                //常温水温度
+    uint16_t u16HotWater_Temp;                   //热水温度
+    uint16_t u16ExitWater_Mode;                  //外接水源模式
+    uint16_t u16Disinfection_Mode;               //消毒模式
+    uint16_t u16Rsv0[4];                         //
+    uint16_t u16Reset;                           //恢复出厂
+    uint16_t u16Test_Mode_Type;                  //测试模式选择
+    uint16_t u16Manual_Test_En;                  //手动测试模式使能
+    uint16_t u16BITMAP_MANUAL;                   //手动输出
+    uint16_t u16TPower_En;                       //定时开关机
+    uint16_t u16TPower_On;                       //定时开机时间
+    uint16_t u16TPower_Off;                      //定时关机时间
+    uint16_t u16Rsv1[3];                         //
+    uint16_t u16FILTER_ELEMENT_Type;             //滤芯告警类型:0-流量L;1-时间h
+    uint16_t u16Clear_RT;                        //清除部件时间
+    uint16_t u16Clear_ALARM;                     //清除告警
+    uint16_t u16Set_Time[2];                     //设置系统时间
+    uint16_t u16Start_Delay;                     //风机开启延时
+    uint16_t u16Fan_Stop_Delay;                  //风机关闭延时
+    uint16_t u16Comp_Interval;                   //压机间隔
+    uint16_t u16ColdWater_Mode;                  //冰水模式
+    uint16_t u16ColdWater_StartTemp;             //制冰水温度
+    uint16_t u16ColdWater_StopTemp;              //制冰水停止温度
+    uint16_t u16HeatFan_StartTemp;               //热风机启动温度
+    uint16_t u16HeatFan_StopTemp;                //热风机停止温度
+    uint16_t OTA_operate;                        //bit0:autoupdate enable,bit1:startupdate bit2:OTA Faild
+    uint16_t u16WaterFlow;                       //出水流量后开始制水
+    uint16_t u16CloseFrist;                      //null
+    uint16_t u16CloseDelay;                      //null
+    uint16_t u16TestEV[2];                       //null
+    uint16_t device_info[100];                   //三元组信息
 } ComPara_Conf_st;
 
 typedef struct
