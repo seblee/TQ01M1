@@ -48,7 +48,7 @@ typedef uint32_t time_t;
 #define SOFTWARE_VER 0x110C
 #endif
 
-#define STATUS_REG_MAP_NUM 40
+#define STATUS_REG_MAP_NUM 60
 #define HARDWARE_VER 0x1000
 #define SERIAL_NO_3 0
 #define SERIAL_NO_2 0

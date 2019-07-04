@@ -208,24 +208,24 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {157, NULL, 0, 3600, 0, 0, 1, NULL},
     {158, NULL, 0, 3600, 0, 0, 1, NULL},
     {159, NULL, 0, 3600, 0, 0, 1, NULL},
-    {160, &g_sys.config.ComPara.u16On_Off_Count[0], 0, 0xffff, 0, 2, 1, NULL},
-    {161, &g_sys.config.ComPara.u16On_Off_Count[1], 0, 0xffff, 0, 2, 1, NULL},
-    {162, &g_sys.config.ComPara.u16On_Off_Count[2], 0, 0xffff, 0, 2, 1, NULL},
-    {163, &g_sys.config.ComPara.u16On_Off_Count[3], 0, 0xffff, 0, 2, 1, NULL},
-    {164, &g_sys.config.ComPara.u16On_Off_Count[4], 0, 0xffff, 0, 2, 1, NULL},
-    {165, &g_sys.config.ComPara.u16On_Off_Count[5], 0, 0xffff, 0, 2, 1, NULL},
-    {166, &g_sys.config.ComPara.u16On_Off_Count[6], 0, 0xffff, 0, 2, 1, NULL},
-    {167, &g_sys.config.ComPara.u16On_Off_Count[7], 0, 0xffff, 0, 2, 1, NULL},
-    {168, &g_sys.config.ComPara.u16On_Off_Count[8], 0, 0xffff, 0, 2, 1, NULL},
-    {169, &g_sys.config.ComPara.u16On_Off_Count[9], 0, 0xffff, 0, 2, 1, NULL},
-    {170, &g_sys.config.ComPara.u16On_Off_Count[10], 0, 0xffff, 0, 2, 1, NULL},
-    {171, &g_sys.config.ComPara.u16On_Off_Count[11], 0, 0xffff, 0, 2, 1, NULL},
-    {172, &g_sys.config.ComPara.u16On_Off_Count[12], 0, 0xffff, 0, 2, 1, NULL},
-    {173, &g_sys.config.ComPara.u16On_Off_Count[13], 0, 0xffff, 0, 2, 1, NULL},
-    {174, &g_sys.config.ComPara.u16On_Off_Count[14], 0, 0xffff, 0, 2, 1, NULL},
-    {175, &g_sys.config.ComPara.u16On_Off_Count[15], 0, 0xffff, 0, 2, 1, NULL},
-    {176, &g_sys.config.ComPara.u16On_Off_Count[16], 0, 0xffff, 0, 2, 1, NULL},
-    {177, &g_sys.config.ComPara.u16On_Off_Count[17], 0, 0xffff, 0, 2, 1, NULL},
+    {160, NULL, 0, 3600, 0, 0, 1, NULL},
+    {161, NULL, 0, 3600, 0, 0, 1, NULL},
+    {162, NULL, 0, 3600, 0, 0, 1, NULL},
+    {163, NULL, 0, 3600, 0, 0, 1, NULL},
+    {164, NULL, 0, 3600, 0, 0, 1, NULL},
+    {165, NULL, 0, 3600, 0, 0, 1, NULL},
+    {166, NULL, 0, 3600, 0, 0, 1, NULL},
+    {167, NULL, 0, 3600, 0, 0, 1, NULL},
+    {168, NULL, 0, 3600, 0, 0, 1, NULL},
+    {169, NULL, 0, 3600, 0, 0, 1, NULL},
+    {170, NULL, 0, 3600, 0, 0, 1, NULL},
+    {171, NULL, 0, 3600, 0, 0, 1, NULL},
+    {172, NULL, 0, 3600, 0, 0, 1, NULL},
+    {173, NULL, 0, 3600, 0, 0, 1, NULL},
+    {174, NULL, 0, 3600, 0, 0, 1, NULL},
+    {175, NULL, 0, 3600, 0, 0, 1, NULL},
+    {176, NULL, 0, 3600, 0, 0, 1, NULL},
+    {177, NULL, 0, 3600, 0, 0, 1, NULL},
     {178, NULL, 0, 3600, 0, 0, 1, NULL},
     {179, NULL, 0, 3600, 0, 0, 1, NULL},
     {180, &g_sys.config.ComPara.u16Sterilize_Enable[0], 0, 1, 0, 2, 1, NULL},
@@ -532,7 +532,26 @@ const sts_reg_map_st status_reg_map_inst[STATUS_REG_MAP_NUM] = {
     {37, &g_sys.status.ComSta.u16Cur_Water, 0},
     {38, &g_sys.status.ComSta.net_status, 0},
     {39, &g_sys.status.ComSta.u16PM25, 0},
-
+    {40, &g_sys.config.ComPara.u16On_Off_Count[0], 0},
+    {41, &g_sys.config.ComPara.u16On_Off_Count[1], 0},
+    {42, &g_sys.config.ComPara.u16On_Off_Count[2], 0},
+    {43, &g_sys.config.ComPara.u16On_Off_Count[3], 0},
+    {44, &g_sys.config.ComPara.u16On_Off_Count[4], 0},
+    {45, &g_sys.config.ComPara.u16On_Off_Count[5], 0},
+    {46, &g_sys.config.ComPara.u16On_Off_Count[6], 0},
+    {47, &g_sys.config.ComPara.u16On_Off_Count[7], 0},
+    {48, &g_sys.config.ComPara.u16On_Off_Count[8], 0},
+    {49, &g_sys.config.ComPara.u16On_Off_Count[9], 0},
+    {50, &g_sys.config.ComPara.u16On_Off_Count[10], 0},
+    {51, &g_sys.config.ComPara.u16On_Off_Count[11], 0},
+    {52, &g_sys.config.ComPara.u16On_Off_Count[12], 0},
+    {53, &g_sys.config.ComPara.u16On_Off_Count[13], 0},
+    {54, &g_sys.config.ComPara.u16On_Off_Count[14], 0},
+    {55, &g_sys.config.ComPara.u16On_Off_Count[15], 0},
+    {56, &g_sys.config.ComPara.u16On_Off_Count[16], 0},
+    {57, &g_sys.config.ComPara.u16On_Off_Count[17], 0},
+    {58, NULL, 0},
+    {59, NULL, 0},
 };
 
 /**
@@ -1409,6 +1428,12 @@ uint8_t reset_runtime(uint16_t param)
         g_sys.status.ComSta.u16Cumulative_Water[0] = 0;
         memset((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], 0x00, 4);
         I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], STS_REG_EE1_ADDR + sizeof(g_sys.status.ComSta.u16Runtime), 4); //u16Cumulative_Water,
+                                                                                                                                               //u16Cumulative_Water,
+        for (i = 0; i < OD_Test_NUM; i++)
+        {
+            g_sys.config.ComPara.u16On_Off_Count[i] = 0;
+        }
+        I2C_EE_BufWrite((uint8_t *)&g_sys.config.ComPara.u16On_Off_Count[0], STS_REG_CNT_ADDR, OD_Test_NUM * 2);
     }
     else
     {

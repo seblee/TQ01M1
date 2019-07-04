@@ -27,7 +27,10 @@ extern sys_reg_st g_sys;
 
 #define STS_REG_EE2_ADDR (STS_REG_EE1_ADDR + 200)
 
-#define WORK_MODE_EE_ADDR (STS_REG_EE2_ADDR + 4) //team_bitmap[TEAM_BITMAP_FINAL_OUT]
+#define STS_REG_CNT_ADDR (STS_REG_EE2_ADDR + 100)
+
+#define WORK_MODE_EE_ADDR (STS_REG_EE2_ADDR + 100) //team_bitmap[TEAM_BITMAP_FINAL_OUT]
+//#define WORK_MODE_EE_ADDR (STS_REG_EE2_ADDR + 4) //team_bitmap[TEAM_BITMAP_FINAL_OUT]
 
 #define CONTROLPASSWORD_EE_ADDR (WORK_MODE_EE_ADDR + sizeof(work_mode_st))
 

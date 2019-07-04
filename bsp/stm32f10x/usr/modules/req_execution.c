@@ -1353,7 +1353,6 @@ void WaterOut_req_exe(void)
     uint16_t u16Pls_Cnt;
     uint8_t u8Temp;
     static uint8_t u8HeatNum;
-    uint16_t u16Out_Temp;
 
     g_sys.status.ComSta.REQ_TEST[1] = 0;
     req_bitmap_op(DO_RH1_BPOS, 1);                    //电加热
@@ -1693,65 +1692,65 @@ void UV_req_exe(uint8_t u8Type)
     }
 }
 #include "mb_event_cpad.h"
+#include "i2c_bsp.h"
 //杀菌
 void Sterilize_req_exe(void)
 {
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
     static uint32_t u32Sterilize_Interval[OD_Test_NUM];
-    static uint32_t u16Sterilize_Time[OD_Test_NUM];
     static uint32_t DO_State;
+    static uint16_t TimeCount = 0;
 
     uint32_t DO_state_temp = 0;
+    static uint8_t flag = 1;
+    if (flag)
+    {
+        int8_t I2C_EE_BufRead(uint8_t * read_buffer, uint16_t read_addr, uint16_t num_byte_read);
+        I2C_EE_BufRead((uint8_t *)&g_sys.config.ComPara.u16On_Off_Count[0], STS_REG_CNT_ADDR, OD_Test_NUM * 2);
+        flag = 0;
+    }
 
     for (int i = 0; i < OD_Test_NUM; i++)
     {
-
         if (g_sys.config.ComPara.u16Sterilize_Enable[i])
         {
-            u32Sterilize_Interval[i]++;
-            if (u32Sterilize_Interval[i] >= (g_sys.config.ComPara.u16Sterilize_Interval[i] * 60 * 2))
+            if (u32Sterilize_Interval[i] < g_sys.config.ComPara.u16Sterilize_Time[i] * 2)
             {
-                u16Sterilize_Time[i]++;
                 DO_state_temp = 1;
+            }
+            else if (u32Sterilize_Interval[i] < (g_sys.config.ComPara.u16Sterilize_Interval[i] * 2 + g_sys.config.ComPara.u16Sterilize_Time[i] * 2))
+            {
+                DO_state_temp = 0;
             }
             else
             {
-                DO_state_temp = 0;
-            }
-
-            if (u16Sterilize_Time[i] >= g_sys.config.ComPara.u16Sterilize_Time[i] * 60 * 2)
-            {
                 u32Sterilize_Interval[i] = 0;
-                u16Sterilize_Time[i] = 0;
-                DO_state_temp = 0;
             }
+            u32Sterilize_Interval[i]++;
         }
         else
         {
             DO_state_temp = 0;
-            u32Sterilize_Interval[i] = 0;
-            u16Sterilize_Time[i] = 0;
+            u32Sterilize_Interval[i] = 0; 
         }
 
         if (((DO_State >> i) & 1) != DO_state_temp)
         {
             if (DO_state_temp)
             {
-                unsigned char cache[2];
                 g_sys.config.ComPara.u16On_Off_Count[i]++;
-                cache[0] = (unsigned char)(g_sys.config.ComPara.u16On_Off_Count[i] >> 8);
-                cache[1] = (unsigned char)(g_sys.config.ComPara.u16On_Off_Count[i] & 0xff);
-
-                //RAM_Write_Reg(224 + i,g_sys.config.ComPara.u16On_Off_Count[i],1);
-                cpad_eMBRegHoldingCB(cache, 224 + i, 1, CPAD_MB_REG_MULTIPLE_WRITE);
             }
             DO_State ^= (1 << i);
             req_bitmap_op(i, (uint8_t)DO_state_temp);
         }
     }
-
-    return;
+    if (TimeCount++ > 600)
+    {
+        int8_t I2C_EE_BufWrite(uint8_t * write_buffer, uint16_t write_addr, uint16_t num_byte_write);      
+        I2C_EE_BufWrite((uint8_t *)&g_sys.config.ComPara.u16On_Off_Count[0], STS_REG_CNT_ADDR, OD_Test_NUM * 2); 
+        TimeCount = 0;
+    } 
 }
 
 //除霜
