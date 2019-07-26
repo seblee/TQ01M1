@@ -382,12 +382,12 @@ void vMBPortSerialEnable(BOOL xRxEnable, BOOL xTxEnable)
         /* 485通信时，等待串口移位寄存器中的数据发送完成后，再去使能485的接收、失能485的发送*/
         while (!USART_GetFlagStatus(UART4, USART_FLAG_TC))
             ;
-        // SLAVE_RS485_RECEIVE_MODE;
+
         USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
     }
     else
     {
-        // SLAVE_RS485_SEND_MODE;
+
         USART_ITConfig(UART4, USART_IT_RXNE, DISABLE);
     }
     if (xTxEnable)
@@ -426,12 +426,7 @@ BOOL xMBPortSerialInit(UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits,
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-    //配置485发送和接收模式
-    //TODO   暂时先写B13 等之后组网测试时再修改
-    // GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
-    // GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    // GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
-    // GPIO_Init(GPIOA, &GPIO_InitStructure);
+
     //======================串口初始化=======================================
     USART_InitStructure.USART_BaudRate = ulBaudRate;
     //设置校验模式

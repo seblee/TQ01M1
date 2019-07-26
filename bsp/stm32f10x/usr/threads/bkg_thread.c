@@ -164,7 +164,7 @@ static void test_mode_init_data(void)
         if (u32Sterilize_Interval >= (g_sys.config.ComPara.u16Sterilize_Interval[0] * 60)) //开始杀菌
         {
             u16Sterilize_Time++;
-            l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_DWP_BPOS) | (0x0001 << DO_UV1_BPOS);
+            l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DWP_BPOS) | (0x0001 << DO_UV1_BPOS);
         }
         if (u16Sterilize_Time >= g_sys.config.ComPara.u16Sterilize_Time[0] * 60) //退出杀菌
         {
@@ -183,8 +183,8 @@ static void test_mode_init_data(void)
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
         l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
-        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_UV1_BPOS) | (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DV_BPOS) | (0x0001 << DO_WP2_BPOS) | (0x0001 << DO_PWP_BPOS);
-        l_sys.bitmap[1][BITMAP_MANUAL] = (0x0001 << (DO_DV2_BPOS >> 16));
+        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_UV1_BPOS) | (0x0001 << DO_WP_BPOS) | (0x0001 << DO_EV2_BPOS) | (0x0001 << DO_PWP_BPOS);
+        //				l_sys.bitmap[1][BITMAP_MANUAL] = (0x0001<<(DO_DV2_BPOS>>16));
         break;
     case TEST_TANK: //抽空源水箱与饮水箱
         g_sys.config.dev_mask.ain = 0xffff;
@@ -196,8 +196,8 @@ static void test_mode_init_data(void)
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
         l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
-        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DV_BPOS) | (0x0001 << DO_WP2_BPOS) | (0x0001 << DO_PWP_BPOS);
-        l_sys.bitmap[1][BITMAP_MANUAL] = (0x0001 << (DO_DV2_BPOS >> 16));
+        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_EV2_BPOS) | (0x0001 << DO_PWP_BPOS);
+        //				l_sys.bitmap[1][BITMAP_MANUAL] = (0x0001<<(DO_DV2_BPOS>>16));
         break;
     case TEST_HEAT_WATER: //出热水
         g_sys.config.dev_mask.ain = 0xffff;
@@ -225,8 +225,11 @@ static void test_mode_init_data(void)
         g_sys.config.dev_mask.dout[0] = DO_MASK1;
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
         l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
-
+#ifdef WV_TEST
+        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_COMP1_BPOS) | (0x0001 << DO_COMP2_BPOS) | (0x0001 << DO_FAN_BPOS) | (0x0001 << DO_CV_BPOS);
+#else
         l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_COMP1_BPOS) | (0x0001 << DO_COMP2_BPOS) | (0x0001 << DO_FAN_BPOS) | (0x0001 << DO_WV_BPOS) | (0x0001 << DO_CV_BPOS);
+#endif
         l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 80;
         break;
     case TEST_Relay: //测试继电器
@@ -302,17 +305,17 @@ static void test_mode_init_data(void)
         g_sys.config.dev_mask.dout[0] = DO_MASK1;
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
 
-        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_DV_BPOS);
+        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_EV2_BPOS);
         l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         if (u16Test_UV[2] > TEST_UV1_OPEN)
         {
             l_sys.bitmap[0][BITMAP_MANUAL] = 0x00;
-            l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_DV_BPOS);
+            l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_EV2_BPOS);
         }
         else
         {
-            l_sys.bitmap[0][BITMAP_MANUAL] &= ~(0x0001 << DO_DV_BPOS);
+            l_sys.bitmap[0][BITMAP_MANUAL] &= ~(0x0001 << DO_EV2_BPOS);
         }
         break;
     case TEST_OUTWATER: //出水阀测试
@@ -324,17 +327,17 @@ static void test_mode_init_data(void)
         g_sys.config.dev_mask.dout[0] = DO_MASK1;
         g_sys.config.dev_mask.dout[1] = DO_MASK2;
 
-        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_DV_BPOS);
+        l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_EV2_BPOS);
         l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         if (u16Test_UV[2] > g_sys.config.ComPara.u16TestEV[0])
         {
             l_sys.bitmap[0][BITMAP_MANUAL] = 0x00;
-            l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_DV_BPOS);
+            l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_EV2_BPOS);
         }
         else
         {
-            l_sys.bitmap[0][BITMAP_MANUAL] &= ~(0x0001 << DO_DV_BPOS);
+            l_sys.bitmap[0][BITMAP_MANUAL] &= ~(0x0001 << DO_EV2_BPOS);
         }
 
         // if (u16Test_UV[0] > TEST_TIME)
@@ -343,7 +346,7 @@ static void test_mode_init_data(void)
         //     g_sys.config.dev_mask.dout[0] = DO_MASK1;
         //     g_sys.config.dev_mask.dout[1] = DO_MASK2;
 
-        //     l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_DV_BPOS);
+        //     l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_EV2_BPOS);
         //     u16Test_UV[2]++;
         //     if (u16Test_UV[2] > (g_sys.config.ComPara.u16TestEV[0] + g_sys.config.ComPara.u16TestEV[1]))
         //     {
@@ -351,7 +354,7 @@ static void test_mode_init_data(void)
         //     }
         //     if (u16Test_UV[2] > g_sys.config.ComPara.u16TestEV[0])
         //     {
-        //         l_sys.bitmap[0][BITMAP_MANUAL] &= ~(0x0001 << DO_DV_BPOS);
+        //         l_sys.bitmap[0][BITMAP_MANUAL] &= ~(0x0001 << DO_EV2_BPOS);
         //     }
         // }
         // else
@@ -363,7 +366,7 @@ static void test_mode_init_data(void)
         //     l_sys.bitmap[0][BITMAP_MANUAL] = 0x00;
         //     if (u16Test_UV[2] <= g_sys.config.ComPara.u16TestEV[0])
         //     {
-        //         l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_DV_BPOS);
+        //         l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_EV2_BPOS);
         //     }
         // }
         break;
@@ -638,6 +641,13 @@ static void sys_comp_cooldown(void)
     {
         l_sys.Pwp_Open_Time++;
     }
+
+    //UV延迟
+    if (l_sys.u16UV_Delay)
+    {
+        l_sys.u16UV_Delay--;
+    }
+
     return;
 }
 

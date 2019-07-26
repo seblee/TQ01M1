@@ -30,6 +30,7 @@ enum
     DI_HI_PRESS1_BPOS,
     DI_HI_PRESS2_BPOS,
     DI_Cold_1_BPOS,
+
     DI_Heat_BPOS,
     DI_Child_BPOS,
     DI_OPEN_BPOS,

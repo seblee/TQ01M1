@@ -60,17 +60,22 @@ enum
 //L  双按键出水
 #define DO_WP2_BPOS DO_RSV2_BPOS //出水泵2
 #define DO_DV2_BPOS DO_RSV3_BPOS //出水阀2
- 
+
 #define DO_HEAT_FAN_BPOS DO_RSV2_BPOS //扇热风机
 //TEST
-#define DO_DWV_BPOS DO_DWP_BPOS    //循环阀//阀1
-#define DO_V3_BPOS DO_RSV2_BPOS    //阀3
-#define DO_V4_BPOS DO_RSV3_BPOS    //阀4
+#define DO_EV1_BPOS DO_DWP_BPOS  //循环阀//阀1
+#define DO_EV2_BPOS DO_DV_BPOS   //阀2
+#define DO_EV3_BPOS DO_RSV2_BPOS //阀3
+#define DO_EV4_BPOS DO_RSV3_BPOS //阀4
+
+#define DO_P1_BPOS DO_PWP_BPOS //泵1
+#define DO_P2_BPOS DO_WP_BPOS  //泵2
+
 #define DO_BD_BPOS DO_EL1_BPOS     //冰胆
 #define DO_BD_FAN_BPOS DO_EL2_BPOS //冰胆风扇
 
 #define DO_UV24_BPOS DO_RSV2_BPOS //24V紫外灯
-#define DO_F24_BPOS DO_EL1_BPOS   //24V风机
+#define DO_F24_BPOS DO_EL1_BPOS   //24V风机,T8机组
 
 //application delay
 #define MODBUS_MASTER_THREAD_DELAY 500
@@ -672,15 +677,16 @@ typedef struct
     uint16_t u16SN_Code[4];            //SN码
     uint16_t u16M_Type;                //设备类型
     uint16_t u16Power_Mode;            //开关机
-    uint16_t u16Start_Temp;            //制水启动温度
+    uint16_t u16Start_Temp[2];         //制水启动温度
     uint16_t u16Start_Humidity;        //制水启动湿度
-    uint16_t u16Stop_Temp;             //制水停止温度
+    uint16_t u16Stop_Temp[2];          //制水停止温度
     uint16_t u16Stop_Humidity;         //制水停止湿度
     uint16_t u16Start_Defrost_Temp;    //除霜启动温度
     uint16_t u16Stop_Defrost_Temp;     //除霜停止温度
     uint16_t u16Sterilize_Mode;        //杀菌模式:BIT0-220V,BIT1-24V
     uint16_t u16Sterilize_Time[2];     //杀菌时间
     uint16_t u16Sterilize_Interval[2]; //杀菌间隔
+    uint16_t u16UV_Delay;              //UV关闭延时,MIN
     uint16_t u16Water_Ctrl;            //水路控制方案
     uint16_t u16Water_Mode;            //出水模式
     uint16_t u16Water_Flow;            //出水流量
@@ -710,6 +716,8 @@ typedef struct
     uint16_t u16HeatFan_StartTemp;     //热风机启动温度
     uint16_t u16HeatFan_StopTemp;      //热风机停止温度
     uint16_t u16WaterFlow;             //出水流量后开始制水
+    uint16_t u16Storage;               //贮存
+    uint16_t u16StorageDealy[2];       //延时
     uint16_t u16CloseFrist;            //null
     uint16_t u16CloseDelay;            //null
     uint16_t u16TestEV[2];             //null

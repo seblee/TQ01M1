@@ -22,6 +22,9 @@
 #define EE_WATER_FLOW 47u
 #define EE_EXITWATER 50u
 #define EE_DISINFECTION 51u
+
+#define EE_STORAGE 120u
+
 #define EE_WIFI_SET 313u
 #define EE_WIFI_PASSWORD 325u
 

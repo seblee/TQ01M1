@@ -123,6 +123,11 @@ uint16_t sys_get_pwr_signal(void)
             }
         }
         ret = 1;
+        //贮存中
+        if (Sys_Get_Storage_Signal() == TRUE)
+        {
+            ret = 0;
+        }
     }
     return ret;
 }
@@ -163,9 +168,9 @@ void sys_running_mode_update(void)
         sys_set_remap_status(WORK_MODE_STS_REG_NO, COOLING_STS_BPOS, 0);
     }
 
-    //		rt_kprintf("DO_DV_BPOS=%d,DO_RH1_BPOS=%d,OutWater_OK=%d,u8HeatNum=%d,u16Cur_Water=%d\n",sys_get_do_sts(DO_DV_BPOS),l_sys.comp_timeout[DO_RH1_BPOS]);
+    // rt_kprintf("DO_EV2_BPOS=%d,DO_RH1_BPOS=%d,OutWater_OK=%d,u8HeatNum=%d,u16Cur_Water=%d\n", sys_get_do_sts(DO_EV2_BPOS), l_sys.comp_timeout[DO_RH1_BPOS]);
     //set Outwater status
-    //		if((sys_get_do_sts(DO_DV_BPOS) == 1)||(l_sys.comp_timeout[DO_RH1_BPOS]>0))
+    // if ((sys_get_do_sts(DO_EV2_BPOS) == 1) || (l_sys.comp_timeout[DO_RH1_BPOS] > 0))
     if (l_sys.OutWater_Flag == TRUE)
     {
         sys_set_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS, 1);
@@ -254,65 +259,6 @@ uint16_t Get_Water_level(void)
     extern sys_reg_st g_sys;
     uint16_t u16Water_level = 0;
 
-    //		//S_L
-    //		if(sys_get_di_sts(DI_SOURCE_DOWN_BPOS))
-    //		{
-    //				u16Water_level |=S_L;
-    //		}
-    //		else
-    //		{
-    //				u16Water_level &=~S_L;
-    //		}
-    //
-    //		//S_M
-    //		if(sys_get_di_sts(DI_SOURCE_MIDDLE_BPOS))
-    //		{
-    //				u16Water_level |=S_M;
-    //		}
-    //		else
-    //		{
-    //				u16Water_level &=~S_M;
-    //		}
-
-    //		//S_U
-    //		if(sys_get_di_sts(DI_SOURCE_MIDDLE_BPOS))
-    //		{
-    //				u16Water_level |=S_U;
-    //		}
-    //		else
-    //		{
-    //				u16Water_level &=~S_U;
-    //		}
-    //
-    //		//D_L
-    //		if(sys_get_di_sts(DI_DRINK_DOWN_BPOS))
-    //		{
-    //				u16Water_level |=D_L;
-    //		}
-    //		else
-    //		{
-    //				u16Water_level &=~D_L;
-    //		}
-    //
-    //		//D_M
-    //		if(sys_get_di_sts(DI_DRINK_MIDDLE_BPOS))
-    //		{
-    //				u16Water_level |=D_M;
-    //		}
-    //		else
-    //		{
-    //				u16Water_level &=~D_M;
-    //		}
-
-    //		//D_U
-    //		if(sys_get_di_sts(DI_DRINK_UP_BPOS))
-    //		{
-    //				u16Water_level |=D_U;
-    //		}
-    //		else
-    //		{
-    //				u16Water_level &=~D_U;
-    //		}
     //极性反转
     //S_L
     if (sys_get_di_sts(DI_SOURCE_DOWN_BPOS) == 0)
@@ -330,6 +276,10 @@ uint16_t Get_Water_level(void)
         u16Water_level |= S_M;
     }
     else
+    {
+        u16Water_level &= ~S_M;
+    }
+    if (!(g_sys.config.dev_mask.din[0] & S_M))
     {
         u16Water_level &= ~S_M;
     }

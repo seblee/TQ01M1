@@ -245,7 +245,7 @@ void network_Serialize_inform_json(char **datapoint)
         goto __exit;
     }
 
-    rt_snprintf(versiontemp, sizeof(versiontemp), "%02d.%02d.%02d", ((SOFTWARE_VER & 0xf000) >> 12), ((SOFTWARE_VER & 0x0f80) >> 7), ((SOFTWARE_VER & 0x007f) >> 0));
+    rt_snprintf(versiontemp, sizeof(versiontemp), "%02d.%02d.%02d", VER_0, VER_1, VER_2);
 
     result = cJSON_AddStringToObject(JS_paprms, "version", versiontemp);
     if (result == NULL)

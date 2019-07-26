@@ -2,6 +2,8 @@
 #define __REQ_EXE_H__
 #include "stdint.h"
 
+//#define WV_TEST 1	//制冷阀常闭，反向
+
 #define HUM_CURRENT_UNIT 1.19
 enum
 {
@@ -41,6 +43,23 @@ enum
     FSM_FAN_NORM,
     FSM_FAN_SHUT
 };
+
+/************************************************************************/
+//贮存状态机
+enum
+{
+    WATER_STROGE_IDLE = 0,
+    WATER_STROGE_1,
+    WATER_STROGE_2,
+    WATER_STROGE_3,
+    WATER_STROGE_4,
+    WATER_STROGE_5,
+    WATER_STROGE_6,
+    WATER_STROGE_7,
+    WATER_STROGE_8,
+    WATER_STROGE_STOP,
+};
+
 //出水模式
 enum
 {
@@ -56,6 +75,7 @@ enum
     NORMAL_ICE = 0x01, //阀冰水
     BD_ICE = 0x02,     //冰胆
 };
+
 #define BD_TIME 180
 #define BD_DELAY 60
 
@@ -101,18 +121,18 @@ enum
     L2000 = 5450,
 };
 //流量因子
-#define L300_FACTOR 0.405
-#define L500_FACTOR 0.4
-//#define L200_FACTOR   0.28
-//#define L300_FACTOR   0.33
-//#define L500_FACTOR   0.34
-#define L1000_FACTOR 0.36363636363636363636363636363636
-#define L1500_FACTOR 0.34482758620689655172413793103448
-#define L2000_FACTOR 0.36697247706422018348623853211009
+#define L300_FACTOR 0.405f
+#define L500_FACTOR 0.4f
+//#define L200_FACTOR   0.28f
+//#define L300_FACTOR   0.33f
+//#define L500_FACTOR   0.34f
+#define L1000_FACTOR 0.36363636363636363636363636363636f
+#define L1500_FACTOR 0.34482758620689655172413793103448f
+#define L2000_FACTOR 0.36697247706422018348623853211009f
 
 //加热器流量,500ml/MIN,60s*HEAT_FACTOR
-#define HEAT_FACTOR_S 8.3333333333333333333333333333333
-#define HEAT_FACTOR_500MS 4.1666666666666666666666666666667
+#define HEAT_FACTOR_S 8.3333333333333333333333333333333f
+#define HEAT_FACTOR_500MS 4.1666666666666666666666666666667f
 
 //出水状态
 enum
@@ -172,4 +192,5 @@ void req_execution(int16_t target_req_temp, int16_t target_req_hum);
 void req_bitmap_op(uint8_t component_bpos, uint8_t action);
 void Close_DIS_PWR(void);
 void UV_req_exe(uint8_t u8Type);
+uint8_t Sys_Get_Storage_Signal(void);
 #endif //__REQ_EXE_H__
