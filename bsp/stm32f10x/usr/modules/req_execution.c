@@ -75,14 +75,14 @@ void req_bitmap_op(uint8_t component_bpos, uint8_t action)
         l_sys.bitmap[byte_offset][BITMAP_REQ] |= (0x0001 << bit_offset);
     }
 
-    //			if(action == 0)
-    //			{
-    //					l_sys.bitmap[BITMAP_REQ] &= ~(0x0001<<component_bpos);
-    //			}
-    //			else
-    //			{
-    //					l_sys.bitmap[BITMAP_REQ] |= (0x0001<<component_bpos);
-    //			}
+    // if(action == 0)
+    // {
+    //     l_sys.bitmap[BITMAP_REQ] &= ~(0x0001<<component_bpos);
+    // }
+    // else
+    // {
+    //     l_sys.bitmap[BITMAP_REQ] |= (0x0001<<component_bpos);
+    // }
 }
 
 //需求模拟输出操作函数
@@ -126,9 +126,9 @@ static void req_ao_op(uint8_t component_bpos, int16_t value)
 
 //static void req_pwm_op(uint8_t component_bpos, int16_t value)
 //{
-//		extern local_reg_st l_sys;
+// extern local_reg_st l_sys;
 
-//		l_sys.pwm_list[component_bpos][BITMAP_REQ] = value;
+// l_sys.pwm_list[component_bpos][BITMAP_REQ] = value;
 //}
 //模拟输出跟踪函数，向设置目标，按照步长参数进行变化；
 static int16_t analog_step_follower(int16_t target, uint16_t dev_type)
@@ -207,7 +207,7 @@ static void fan_fsm_exe(uint8_t fan_signal)
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
 
-    //		rt_kprintf("FAN_FSM_STATE = %d,fan_signal = %d\n",l_sys.l_fsm_state[FAN_FSM_STATE],fan_signal);
+    // rt_kprintf("FAN_FSM_STATE = %d,fan_signal = %d\n",l_sys.l_fsm_state[FAN_FSM_STATE],fan_signal);
     if (get_alarm_bitmap(ACL_E7)) //风机告警
     {
         l_sys.l_fsm_state[FAN_FSM_STATE] = FSM_FAN_IDLE;
@@ -228,7 +228,7 @@ static void fan_fsm_exe(uint8_t fan_signal)
             l_sys.l_fsm_state[FAN_FSM_STATE] = FSM_FAN_IDLE;
             l_sys.comp_timeout[DO_FAN_BPOS] = l_sys.comp_timeout[DO_FAN_BPOS]; //remains timeout counter
         }
-        l_sys.Fan.Fan_Gear = FAN_GEAR_NO; //无输出						//disable fan output
+        l_sys.Fan.Fan_Gear = FAN_GEAR_NO; //无输出 //disable fan output
         break;
     }
     case (FSM_FAN_INIT):
@@ -244,7 +244,7 @@ static void fan_fsm_exe(uint8_t fan_signal)
             if (l_sys.comp_timeout[DO_FAN_BPOS] == 0)
             {
                 l_sys.l_fsm_state[FAN_FSM_STATE] = FSM_FAN_START_UP;
-                //									  l_sys.comp_timeout[DO_FAN_BPOS] = g_sys.config.fan.cold_start_delay;
+                // l_sys.comp_timeout[DO_FAN_BPOS] = g_sys.config.fan.cold_start_delay;
                 l_sys.comp_timeout[DO_FAN_BPOS] = 0;
                 l_sys.Fan.Fan_Gear = FAN_GEAR_START; //
             }
@@ -299,7 +299,7 @@ static void fan_fsm_exe(uint8_t fan_signal)
             if (l_sys.comp_timeout[DO_FAN_BPOS] == 0)
             {
                 l_sys.l_fsm_state[FAN_FSM_STATE] = FSM_FAN_IDLE;
-                l_sys.Fan.Fan_Gear = FAN_GEAR_NO;                                  //																			//enable fan output
+                l_sys.Fan.Fan_Gear = FAN_GEAR_NO;                                  // //enable fan output
                 l_sys.comp_timeout[DO_FAN_BPOS] = l_sys.comp_timeout[DO_FAN_BPOS]; //reset timeout counter
             }
             else //wait until startup delay elapses
@@ -319,14 +319,14 @@ static void fan_fsm_exe(uint8_t fan_signal)
     }
     }
 
-    //		if(g_sys.config.fan.type == FAN_TPYE_EC)
+    // if(g_sys.config.fan.type == FAN_TPYE_EC)
     {
         if ((sys_get_pwr_sts() != 0) && (l_sys.Fan.Fan_Gear != FAN_GEAR_NO))
         {
             l_sys.Fan.Fan_Gear = FAN_GEAR_LOW; //风机低挡
         }
     }
-    //		rt_kprintf("Fan_Gear = %d\n",l_sys.Fan.Fan_Gear);
+    // rt_kprintf("Fan_Gear = %d\n",l_sys.Fan.Fan_Gear);
     Fan_Fsm_Out(l_sys.Fan.Fan_Gear); //风机DO输出
 }
 
@@ -604,7 +604,7 @@ static void compressor_fsm(uint8_t compressor_id, uint8_t signal)
 
     compress_fsm_state = l_sys.l_fsm_state[l_fsm_state_id];
 
-    //		rt_kprintf("compressor_id=%d,signal=%d,,compress_fsm_state=%d,l_sys.Comp_Close=%d,l_sys.comp_startup_interval=%d\n",compressor_id,signal,compress_fsm_state,l_sys.Comp_Close,l_sys.comp_startup_interval);
+    // rt_kprintf("compressor_id=%d,signal=%d,,compress_fsm_state=%d,l_sys.Comp_Close=%d,l_sys.comp_startup_interval=%d\n", compressor_id, signal, compress_fsm_state, l_sys.Comp_Close, l_sys.comp_startup_interval);
 
     switch (compress_fsm_state)
     {
@@ -723,13 +723,13 @@ static void compressor_fsm(uint8_t compressor_id, uint8_t signal)
     }
     case (COMPRESSOR_FSM_STATE_STOP):
     {
-        //						l_sys.l_fsm_state[l_fsm_state_id] = COMPRESSOR_FSM_STATE_IDLE;
-        //						l_sys.comp_timeout[do_bpos] = g_sys.config.compressor.min_stoptime;
-        //						req_bitmap_op(do_bpos,0);
+        // l_sys.l_fsm_state[l_fsm_state_id] = COMPRESSOR_FSM_STATE_IDLE;
+        // l_sys.comp_timeout[do_bpos] = g_sys.config.compressor.min_stoptime;
+        // req_bitmap_op(do_bpos, 0);
         if (l_sys.comp_stop_interval == 0)
         {
             l_sys.l_fsm_state[l_fsm_state_id] = COMPRESSOR_FSM_STATE_IDLE;
-            //									l_sys.comp_timeout[do_bpos] = g_sys.config.compressor.min_stoptime;//取消最短停机时间
+            // l_sys.comp_timeout[do_bpos] = g_sys.config.compressor.min_stoptime; //取消最短停机时间
             l_sys.comp_timeout[do_bpos] = g_sys.config.ComPara.u16Start_Delay; //启动延时
             req_bitmap_op(do_bpos, 0);
             l_sys.comp_stop_interval = g_sys.config.ComPara.u16Comp_Interval;
@@ -787,21 +787,21 @@ uint8_t Exit_Water(void)
 //外接水源
 void External_Water_exe(uint8_t u8Type)
 {
-    //		uint16_t u16WL;
+    // uint16_t u16WL;
     extern sys_reg_st g_sys;
 
     if (Exit_Water() != WATER_AIR) //外接水源
     {
-        //					//水位
-        //				u16WL=Get_Water_level();
-        //				if(u16WL&D_U)
-        //				{
-        //						req_bitmap_op(DO_FV_BPOS,0);//外接水源
-        //				}
-        //				else
-        //				{
-        //						req_bitmap_op(DO_FV_BPOS,1);//外接水源
-        //				}
+        // //水位
+        // u16WL = Get_Water_level();
+        // if (u16WL & D_U)
+        // {
+        //     req_bitmap_op(DO_FV_BPOS, 0); //外接水源
+        // }
+        // else
+        // {
+        //     req_bitmap_op(DO_FV_BPOS, 1); //外接水源
+        // }
         if (u8Type == TRUE) //出水
         {
             req_bitmap_op(DO_FV_BPOS, 1); //外接水源
@@ -844,9 +844,9 @@ void Sys_Fan_CP_WL(void)
     }
 
     u16WL = Get_Water_level();
-    //		rt_kprintf("u16WL=%x,Test=%x,,TH_Check_Interval=%d,din_bitmap[0]=%x\n",u16WL,Test,l_sys.TH_Check_Interval,g_sys.status.ComSta.u16Din_bitmap[0]);
-    //		//TEST
-    //		u16WL=0x13;
+    // rt_kprintf("u16WL=%x,Test=%x,,TH_Check_Interval=%d,din_bitmap[0]=%x\n", u16WL, Test, l_sys.TH_Check_Interval, g_sys.status.ComSta.u16Din_bitmap[0]);
+    // //TEST
+    // u16WL = 0x13;
     //水位异常
     if ((u16WL & S_U) || (u16WL & D_U) || (u16WL & D_M))
     {
@@ -885,18 +885,18 @@ void Sys_Fan_CP_WL(void)
         }
     }
 
-    //		//长时间未到中水位
-    //		if(((u16WL&S_M)==0)&&(l_sys.PowerOn_Time>=POWERTIME))//90分钟小于中水位
-    //		{
-    //				Test|=0x08;
-    //				l_sys.Fan_Close |= FC_PT;
-    //				l_sys.Comp_Close |= FC_PT;
-    //		}
-    //		else
-    //		{
-    //				l_sys.Fan_Close &= ~FC_PT;
-    //				l_sys.Comp_Close &= ~FC_PT;
-    //		}
+    // //长时间未到中水位
+    // if (((u16WL & S_M) == 0) && (l_sys.PowerOn_Time >= POWERTIME)) //90分钟小于中水位
+    // {
+    //     Test |= 0x08;
+    //     l_sys.Fan_Close |= FC_PT;
+    //     l_sys.Comp_Close |= FC_PT;
+    // }
+    // else
+    // {
+    //     l_sys.Fan_Close &= ~FC_PT;
+    //     l_sys.Comp_Close &= ~FC_PT;
+    // }
 
     u8Offset_CNT++;
     if (u8Offset_CNT >= CF_DELAY)
@@ -974,7 +974,7 @@ void Sys_Fan_CP_WL(void)
 
     g_sys.status.ComSta.REQ_TEST[2] = Test;
 
-    //		rt_kprintf("u16WL=%x,Test=%x,TH_Check_Interval=%d,din_bitmap[0]=%x,Fan_Close=%x,Comp_Close[0]=%x\n",u16WL,Test,l_sys.TH_Check_Interval,g_sys.status.ComSta.u16Din_bitmap[0],l_sys.Fan_Close,l_sys.Comp_Close[0]);
+    // rt_kprintf("u16WL=%x,Test=%x,TH_Check_Interval=%d,din_bitmap[0]=%x,Fan_Close=%x,Comp_Close[0]=%x\n", u16WL, Test, l_sys.TH_Check_Interval, g_sys.status.ComSta.u16Din_bitmap[0], l_sys.Fan_Close, l_sys.Comp_Close[0]);
 
     return;
 }
@@ -1013,8 +1013,8 @@ void Pwp_req_exe(void)
                 req_bitmap_op(DO_FV_BPOS, 0); //外接水源
                 g_sys.config.ComPara.u16ExitWater_Mode = 0;
                 RAM_Write_Reg(EE_EXITWATER, g_sys.config.ComPara.u16ExitWater_Mode, 1);
-                //								g_sys.config.ComPara.u16Disinfection_Mode=0;
-                //								RAM_Write_Reg(EE_DISINFECTION,g_sys.config.ComPara.u16Disinfection_Mode,1);
+                // g_sys.config.ComPara.u16Disinfection_Mode = 0;
+                // RAM_Write_Reg(EE_DISINFECTION, g_sys.config.ComPara.u16Disinfection_Mode, 1);
             }
             else
             {
@@ -1032,7 +1032,6 @@ void Pwp_req_exe(void)
         req_bitmap_op(DO_FV_BPOS, 0);
         g_sys.config.ComPara.u16Disinfection_Mode = 0;
     }
-    //        rt_kprintf("u16WL=%x,u16TEST=%x\n",u16WL,u16TEST);
     //源水箱中水位
     if ((u16WL & S_M) || (u16WL & S_U))
     {
@@ -1078,11 +1077,11 @@ uint16_t PluseCalc_Water(uint16_t PluseCnt)
     uint16_t u16Water_Flow;
     float fWflow;
 
-    //		if(PluseCnt<L200)//小于0.15L
-    //		{
-    //			fWflow=	(float)PluseCnt*L200_FACTOR;
-    //		}
-    //		else
+    // if (PluseCnt < L200) //小于0.15L
+    // {
+    //     fWflow = (float)PluseCnt * L200_FACTOR;
+    // }
+    // else
     if (PluseCnt < L300) //小于0.3L
     {
         fWflow = (float)PluseCnt * L300_FACTOR;
@@ -1143,15 +1142,15 @@ void WaterOut_Key(void)
         l_sys.OutWater_Delay[2] = 0;
     }
 
-    //		//童锁
-    //		if((sys_get_di_sts(DI_K3_BPOS)==1))
-    //		{
-    //				l_sys.ChildLock_Cnt[0]++;
-    //		}
-    //		else
-    //		{
-    //				l_sys.ChildLock_Cnt[0]=0;
-    //		}
+    // //童锁
+    // if ((sys_get_di_sts(DI_K3_BPOS) == 1))
+    // {
+    //     l_sys.ChildLock_Cnt[0]++;
+    // }
+    // else
+    // {
+    //     l_sys.ChildLock_Cnt[0] = 0;
+    // }
 
     if (l_sys.ChildLock_Cnt[0] >= ChildKey_Cnt)
     {

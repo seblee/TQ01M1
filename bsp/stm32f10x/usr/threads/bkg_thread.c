@@ -500,7 +500,7 @@ static void run_time_process(void)
             l_sys.OutWater_OK = HEATER_IDLE;
             for (i = DO_FILLTER_ELEMENT_DUMMY_BPOS_0; i <= DO_FILLTER_ELEMENT_DUMMY_BPOS_5; i++)
             {
-                //								g_sys.status.ComSta.u16Runtime[0][i]+=g_sys.status.ComSta.u16Cumulative_Water[0];
+                // g_sys.status.ComSta.u16Runtime[0][i] += g_sys.status.ComSta.u16Cumulative_Water[0];
                 g_sys.status.ComSta.u16Runtime[0][i] += g_sys.status.ComSta.u16Last_Water;
                 Flow_calc(&g_sys.status.ComSta.u16Runtime[0][i], &g_sys.status.ComSta.u16Runtime[1][i]);
             }
@@ -515,7 +515,7 @@ static void run_time_process(void)
     {
         u16Sec = 0;
         I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Runtime, STS_REG_EE1_ADDR, sizeof(g_sys.status.ComSta.u16Runtime)); //when, fan is working update eeprom every minite
-        //累计流量
+        // 累计流量
         I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], STS_REG_EE1_ADDR + sizeof(g_sys.status.ComSta.u16Runtime), 4); //u16Cumulative_Water,
     }
     return;

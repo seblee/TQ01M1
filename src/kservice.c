@@ -20,8 +20,7 @@
  */
 
 #include <rtthread.h>
-#include <rthw.h>
-#include "local_status.h"
+#include <rthw.h> 
 #ifdef RT_USING_MODULE
 #include <dlmodule.h>
 #endif
@@ -536,8 +535,6 @@ void rt_show_version(void)
     rt_kprintf(" / | \\     %d.%d.%d build %s\n",
                RT_VERSION, RT_SUBVERSION, RT_REVISION, __DATE__);
     rt_kprintf(" 2006 - 2019 Copyright by rt-thread team\n");
-    rt_kprintf(" Software Version %d.%d.%d\n",((SOFTWARE_VER & 0xf000) >> 12), ((SOFTWARE_VER & 0x0f80) >> 7), ((SOFTWARE_VER & 0x007f) >> 0));
-    rt_kprintf(" Hardware Version %d.%d\n",(HARDWARE_VER>>8),HARDWARE_VER&0x00ff);
 }
 RTM_EXPORT(rt_show_version);
 

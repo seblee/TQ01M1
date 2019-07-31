@@ -23,7 +23,7 @@ void sys_set_remap_status(uint8_t reg_no, uint8_t sbit_pos, uint8_t bit_action)
 uint16_t sys_get_remap_status(uint8_t reg_no, uint8_t rbit_pos)
 {
     extern sys_reg_st g_sys;
-    //		return ((g_sys.status.status_remap[reg_no] >> rbit_pos) & 0x0001);
+    // return ((g_sys.status.status_remap[reg_no] >> rbit_pos) & 0x0001);
     return ((g_sys.status.ComSta.u16Status_remap[reg_no] >> rbit_pos) & 0x0001);
 }
 
@@ -34,7 +34,7 @@ uint8_t sys_get_di_sts(uint8_t din_channel)
 
     byte_offset = din_channel >> 4;
     bit_offset = din_channel & 0x0f;
-    //		if((g_sys.status.din_bitmap[byte_offset]>>bit_offset) & 0X0001)
+    // if ((g_sys.status.din_bitmap[byte_offset] >> bit_offset) & 0X0001)
     if ((g_sys.status.ComSta.u16Din_bitmap[byte_offset] >> bit_offset) & 0X0001)
     {
         return 1;
@@ -88,8 +88,8 @@ uint16_t sys_get_pwr_signal(void)
     uint16_t u16Systime;
     uint8_t ret;
 
-    //		if((get_work_mode_power_state() ==0)||
-    //				(g_sys.config.general.power_mode == 0))
+    // if ((get_work_mode_power_state() == 0) ||
+    //     (g_sys.config.general.power_mode == 0))
     if (g_sys.config.ComPara.u16Power_Mode == 0)
     {
         //定时开机
@@ -147,7 +147,7 @@ void sys_running_mode_update(void)
         sys_set_remap_status(WORK_MODE_STS_REG_NO, PWR_STS_BPOS, 0);
     }
 
-    //		g_sys.status.general.running_mode = (g_sys.config.ComPara.u16Test_Mode_En<<2)|(g_sys.config.ComPara.u16Manual_Mode_En<<1)|(g_sys.config.general.alarm_bypass_en<<0);
+    // g_sys.status.general.running_mode = (g_sys.config.ComPara.u16Test_Mode_En<<2)|(g_sys.config.ComPara.u16Manual_Mode_En<<1)|(g_sys.config.general.alarm_bypass_en<<0);
 
     if (sys_get_do_sts(DO_FAN_BPOS) == 1)
     {

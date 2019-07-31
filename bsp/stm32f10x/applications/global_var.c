@@ -627,9 +627,9 @@ uint16_t set_load_flag(uint8_t ee_load_flag)
 extern void rt_show_version(void);
 long sys_version(void)
 {
-    rt_show_version();
+    //rt_show_version();
     rt_kprintf("formwire:%s,%02d.%02d.%02d\n", SOFTWARE_VER_NAME, VER_0, VER_1, VER_2);
-
+    rt_kprintf(" Hardware Version %d.%d\n",(HARDWARE_VER>>8),HARDWARE_VER&0x00ff);
     return 0;
 }
 FINSH_FUNCTION_EXPORT(sys_version, show RT - Thread version information);

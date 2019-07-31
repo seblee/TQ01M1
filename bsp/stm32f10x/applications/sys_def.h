@@ -34,7 +34,7 @@ typedef uint32_t time_t;
 #define CONF_REG_MAP_NUM 435
 #define CONF_REG_SID_NUM 100
 #define CONF_REG_SID_START CONF_REG_MAP_NUM - CONF_REG_SID_NUM
-#define VER_0 (uint16)2  //V2100 0xf000
+#define VER_0 (uint16)1  //V2100 0xf000
 #define VER_1 (uint16)2  //V2100 0x0f80
 #define VER_2 (uint16)17 //V2100 0x007f
 #define SOFTWARE_VER (((VER_0 & 0x0f) << 12) | ((VER_1 & 0x001f) << 7) | (VER_2 & 0x007f))

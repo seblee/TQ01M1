@@ -905,7 +905,7 @@ static uint16_t io_calc(uint8_t data, uint8_t refer)
 
 /**
   * @brief  alarm 1 rule check function
-	* @param  str_ptr: alarm_acl_st* structure pointer 
+  * @param  str_ptr: alarm_acl_st* structure pointer 
   * @retval none
   */
 
@@ -1623,20 +1623,4 @@ static uint16_t acl19(alarm_acl_status_st *acl_ptr)
 static uint16_t acl20(alarm_acl_status_st *acl_ptr)
 {
     return (ALARM_ACL_CLEARED);
-    //		uint32_t run_time=0;
-    //		int16_t max;
-    //		//????
-    //		if(acl_clear(acl_ptr))
-    //		{
-    //				return(ALARM_ACL_CLEARED);
-    //		}
-    //		if(sys_get_pwr_sts() == 0)
-    //		{
-    //				return(ALARM_ACL_CLEARED);
-    //		}
-    //		run_time = g_sys.status.ComSta.u16Runtime[1][DO_UV2_BPOS];
-    //		max = g_sys.config.alarm[ACL_UV2_OT].alarm_param;
-    //
-    //		alarm_inst.alarm_sts[acl_ptr->id].alram_value = run_time;
-    //		return(compare_calc( run_time,0,max,THR_MAX_TYPE));
 }
