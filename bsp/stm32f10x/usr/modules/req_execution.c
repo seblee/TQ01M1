@@ -844,7 +844,7 @@ void Sys_Fan_CP_WL(void)
     }
 
     u16WL = Get_Water_level();
-    // rt_kprintf("u16WL=%x,Test=%x,,TH_Check_Interval=%d,din_bitmap[0]=%x\n", u16WL, Test, l_sys.TH_Check_Interval, g_sys.status.ComSta.u16Din_bitmap[0]);
+    rt_kprintf("u16WL=0x%04x,Test=%x,,TH_Check_Interval=%d,din_bitmap[0]=%x\n", u16WL, Test, l_sys.TH_Check_Interval, g_sys.status.ComSta.u16Din_bitmap[0]);
     // //TEST
     // u16WL = 0x13;
     //水位异常

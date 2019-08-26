@@ -253,13 +253,13 @@ int rt_application_init(void)
     if (testcase_thread != RT_NULL)
         rt_thread_startup(testcase_thread);
 
-    rt_thread_t net_thead;
-    net_thead = rt_thread_create("network",
-                                 net_thread_entry, RT_NULL,
-                                 3072, NET_THREAD_PRIO, 20); // 初始化进程
+    // rt_thread_t net_thead;
+    // net_thead = rt_thread_create("network",
+    //                              net_thread_entry, RT_NULL,
+    //                              3072, NET_THREAD_PRIO, 20); // 初始化进程
 
-    if (net_thead != RT_NULL)
-        rt_thread_startup(net_thead);
+    // if (net_thead != RT_NULL)
+    //     rt_thread_startup(net_thead);
 
     return 0;
 }
