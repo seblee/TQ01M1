@@ -53,7 +53,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {5, &g_sys.config.general.alarm_bypass_en, 0, 1, 0, 3, 1, NULL},
     {6, &g_sys.config.general.testing_mode_en, 0, 1, 0, 4, 1, NULL},
     {7, &g_sys.config.general.power_mode_mb_en, 0, 1, 1, 3, 1, NULL},
-    {8, &g_sys.config.dev_mask.din_bitmap_polarity[0], 0, 0xffff, 0xBFD0, 3, 1, NULL}, // DI极性
+    {8, &g_sys.config.dev_mask.din_bitmap_polarity[0], 0, 0xffff, 0xBF9B, 3, 1, NULL}, // DI极性
     {9, &g_sys.config.dev_mask.din_bitmap_polarity[1], 0, 0xffff, 0x00, 3, 1, NULL},
     {10, &g_sys.config.dev_mask.ain, 0, 0xffff, 0x001F, 3, 1, NULL},
     {11, &g_sys.config.dev_mask.din[0], 0, 0xFFFF, 0x3E7F, 3, 1, NULL}, // DI屏蔽位
