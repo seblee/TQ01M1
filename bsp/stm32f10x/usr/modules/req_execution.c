@@ -768,7 +768,6 @@ enum
 uint8_t Exit_Water(void)
 {
     extern sys_reg_st g_sys;
-    return WATER_EXIT;
     if (g_sys.config.ComPara.u16ExitWater_Mode == WATER_EXIT) //外接水源
     {
         return WATER_EXIT;
@@ -841,9 +840,8 @@ void Sys_Fan_CP_WL(void)
     }
 
     u16WL = Get_Water_level();
-    // rt_kprintf("u16WL=0x%04x,Test=%x,,TH_Check_Interval=%d,din_bitmap[0]=%x\n", u16WL, Test, l_sys.TH_Check_Interval, g_sys.status.ComSta.u16Din_bitmap[0]);
-    // //TEST
-    // u16WL = 0x13;
+    //TEST
+
     //水位异常
     if (((u16WL & S_U) && (Exit_Water() == WATER_AIR) && (l_sys.Cold_Water == FALSE)) || //制水水满了
         ((!(Exit_Water() == WATER_AIR)) && (l_sys.Cold_Water == FALSE)))                 //外接水源且不需要制冷水
@@ -857,9 +855,21 @@ void Sys_Fan_CP_WL(void)
              (l_sys.Cold_Water == TRUE))                          //需要制冷
     {
         Test |= 0x04;
+
         l_sys.Fan_Close &= ~FC_WL;
         l_sys.Comp_Close[0] &= ~FC_WL;
         l_sys.Comp_Close[1] &= ~FC_WL;
+    }
+    if (Exit_Water() == WATER_AIR)
+    {
+        if (!(u16WL & S_M))
+            l_sys.makeWater = 1;
+        else if (u16WL & S_U)
+            l_sys.makeWater = 0;
+    }
+    else
+    {
+        l_sys.makeWater = 0;
     }
 
     if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST1_STS_BPOS) != 0) || (sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST2_STS_BPOS) != 0)) //
@@ -888,7 +898,7 @@ void Pwp_req_exe(void)
 
     // RAM_Write_Reg(EE_EXITWATER, g_sys.config.ComPara.u16ExitWater_Mode, 1);
 
-    rt_kprintf("u16WL=0x%04x\n", u16WL);
+    // rt_kprintf("u16WL=0x%04x\n", u16WL);
 
     //源水箱中水位
     if ((!(u16WL & D_M)) && //饮水箱水位低于浮球2
@@ -1798,22 +1808,17 @@ void Cold_Water_exe(void)
     static uint8_t u8Coldwater = 0;
     static uint8_t u8FCW = 0;
 
-    if (Exit_Water() != WATER_AIR) //外接水源
-    {
-        return;
-    }
-    if (!(g_sys.config.dev_mask.din[0] & D_ML)) //3浮球
-    {
-        return;
-    }
     u16Temp = 0;
+    g_sys.config.ComPara.u16ColdWater_Mode = NORMAL_ICE;
     l_sys.Cold_Water = FALSE;
     u16WL = Get_Water_level();
     if (g_sys.config.ComPara.u16ColdWater_Mode == NORMAL_ICE) //制冰水模式
     {
         u16Temp |= 0x01;
         i16Water_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC4];
-        if ((u16WL & D_L) && (u16WL & D_ML) && (i16Water_Temp != ABNORMAL_VALUE)) //到达制冷水位
+
+        i16Water_Temp = 400;
+        if ((u16WL & D_M) && (i16Water_Temp != ABNORMAL_VALUE)) //到达制冷水位
         {
             u16Temp |= 0x02;
             if (i16Water_Temp > g_sys.config.ComPara.u16ColdWater_StartTemp) //开始制冰水
@@ -1821,45 +1826,39 @@ void Cold_Water_exe(void)
                 u16Temp |= 0x04;
                 l_sys.Cold_Water = TRUE;
                 u8Coldwater = TRUE;
-#ifdef WV_TEST
-                req_bitmap_op(DO_WV_BPOS, 0); //制冷
-#else
-                req_bitmap_op(DO_WV_BPOS, 1); //制冷
-#endif
-                req_bitmap_op(DO_CV_BPOS, 1); //制冰水
+                if (l_sys.makeWater == 0)
+                    req_bitmap_op(DO_WV_BPOS, 1); //制冷
+                else
+                    req_bitmap_op(DO_WV_BPOS, 0); //制冷
+                req_bitmap_op(DO_CV_BPOS, 1);     //制冰水
             }
             else if (i16Water_Temp < g_sys.config.ComPara.u16ColdWater_StopTemp) //关闭
             {
                 u16Temp |= 0x08;
                 u8Coldwater = FALSE;
-#ifdef WV_TEST
-                req_bitmap_op(DO_WV_BPOS, 1); //制冷
-#else
+
                 req_bitmap_op(DO_WV_BPOS, 0); //制冷
-#endif
                 req_bitmap_op(DO_CV_BPOS, 0); //制冰水
             }
             else //保持
-                if (u8Coldwater == TRUE)
             {
-                u16Temp |= 0x10;
-                l_sys.Cold_Water = TRUE;
-#ifdef WV_TEST
-                req_bitmap_op(DO_WV_BPOS, 0); //制冷
-#else
-                req_bitmap_op(DO_WV_BPOS, 1); //制冷
-#endif
-                req_bitmap_op(DO_CV_BPOS, 1); //制冰水
+                if (u8Coldwater == TRUE)
+                {
+                    u16Temp |= 0x10;
+                    l_sys.Cold_Water = TRUE;
+                    if (l_sys.makeWater == 0)
+                        req_bitmap_op(DO_WV_BPOS, 1); //制冷
+                    else
+                        req_bitmap_op(DO_WV_BPOS, 0); //制冷
+                    req_bitmap_op(DO_CV_BPOS, 1);     //制冰水
+                }
             }
         }
         else
         {
             u16Temp |= 0x20;
-#ifdef WV_TEST
-            req_bitmap_op(DO_WV_BPOS, 1); //制冷
-#else
-            req_bitmap_op(DO_WV_BPOS, 0);     //制冷
-#endif
+
+            req_bitmap_op(DO_WV_BPOS, 0); //制冷
             req_bitmap_op(DO_CV_BPOS, 0); //制冰水关闭
         }
     }
@@ -1957,15 +1956,12 @@ void Cold_Water_exe(void)
     else
     {
         u16Temp |= 0x40;
-#ifdef WV_TEST
-        req_bitmap_op(DO_WV_BPOS, 1); //制冷
-#else
-        req_bitmap_op(DO_WV_BPOS, 0);         //制冷
-#endif
+
+        req_bitmap_op(DO_WV_BPOS, 0); //制冷
         req_bitmap_op(DO_CV_BPOS, 0); //制冰水
     }
 
-    //		rt_kprintf("u16Temp=%x,i16Water_Temp=%d,u16ColdWater_StartTemp=%d,u16BD_Time=%d\n", u16Temp, i16Water_Temp, g_sys.config.ComPara.u16ColdWater_StartTemp,l_sys.u16BD_Time);
+    rt_kprintf("u16WL=0x%04x,fanclose:0x%02x,u16Temp=0x%04x,i16Water_Temp=%d,StartTemp=%d,StopTemp=%d\n", u16WL, l_sys.Fan_Close, u16Temp, i16Water_Temp, g_sys.config.ComPara.u16ColdWater_StartTemp, g_sys.config.ComPara.u16ColdWater_StopTemp);
     return;
 }
 
