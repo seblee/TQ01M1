@@ -494,19 +494,14 @@
               <FilePath>.\usr\modules\sys_status.c</FilePath>
             </File>
             <File>
-              <FileName>team.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\usr\modules\team.c</FilePath>
-            </File>
-            <File>
-              <FileName>password.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\usr\modules\password.c</FilePath>
-            </File>
-            <File>
               <FileName>reg_map_check.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\usr\modules\reg_map_check.c</FilePath>
+            </File>
+            <File>
+              <FileName>ledkey_opt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\usr\modules\ledkey_opt.c</FilePath>
             </File>
           </Files>
         </Group>

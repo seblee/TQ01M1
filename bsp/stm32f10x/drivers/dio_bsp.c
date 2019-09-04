@@ -561,20 +561,6 @@ void drv_dio_init(void)
 **/
 void di_sts_update(sys_reg_st *gds_sys_ptr)
 {
-    //			uint16_t din_mask_bitmap;
-    //		uint16_t din_bitmap_polarity;
-    //
-    //		din_mask_bitmap = (gds_sys_ptr->config.dev_mask.din[0]|(DIN_MASK_MASK))&(DIN_MASK_MASK1);
-    //				rt_kprintf("din_mask_bitmap = %X\n",din_mask_bitmap);
-    //	  din_bitmap_polarity = gds_sys_ptr->config.dev_mask.din_bitmap_polarity[0]&(DIN_POLARITY_MASK);
-    //					rt_kprintf("din_bitmap_polarity = %X\n",din_bitmap_polarity);
-    //	  //mask报警掩码
-    //		dio_dev_inst.din.bitmap[0] = (~(dio_dev_inst.din.bitmap[0]^din_bitmap_polarity));
-    //				rt_kprintf("dio_dev_inst.din.bitmap[0]1 = %X\n",dio_dev_inst.din.bitmap[0]);
-    //		// 数字输入掩码
-    //		gds_sys_ptr->status.din_bitmap[0] = din_mask_bitmap & dio_dev_inst.din.bitmap[0];
-    //					rt_kprintf("gds_sys_ptr->status.din_bitmap[0] = %X\n",gds_sys_ptr->status.din_bitmap[0]);
-
     uint16_t din_mask_bitmap[2];
     uint16_t din_bitmap_polarity[2];
 

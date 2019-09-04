@@ -827,7 +827,6 @@ void Sys_Fan_CP_WL(void)
     extern local_reg_st l_sys;
     uint16_t u16WL;
     uint16_t Test = 0;
-    static uint8_t u8FCP_Start = 0;
 
     if (sys_get_pwr_sts() == 1)
     {
@@ -875,7 +874,6 @@ void Sys_Fan_CP_WL(void)
     if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST1_STS_BPOS) != 0) || (sys_get_remap_status(WORK_MODE_STS_REG_NO, DEFROST2_STS_BPOS) != 0)) //
     {
         l_sys.TH_Check_Interval = 0; //除霜后，需要检测温湿度
-        u8FCP_Start = 0;
         Test |= 0x2000;
     }
 
@@ -980,9 +978,16 @@ void WaterOut_Key(void)
 {
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
+    static uint8_t keyState = 0;
 
-    //冷水 1
-    if ((sys_get_di_sts(DI_Cold_1_BPOS) == 1))
+    if (keyState < 20)
+        keyState++;
+    else
+        keyState = 0;
+
+    // 冷水 1
+    // if ((sys_get_di_sts(DI_Cold_1_BPOS) == 1))
+    if (keyState < 10)
     {
         l_sys.OutWater_Key |= WATER_NORMAL_ICE;
         l_sys.OutWater_Delay[0] = WATER_MAXTIME;
@@ -1005,16 +1010,6 @@ void WaterOut_Key(void)
         l_sys.OutWater_Key &= ~WATER_ICE;
         l_sys.OutWater_Delay[2] = 0;
     }
-
-    // //童锁
-    // if ((sys_get_di_sts(DI_K3_BPOS) == 1))
-    // {
-    //     l_sys.ChildLock_Cnt[0]++;
-    // }
-    // else
-    // {
-    //     l_sys.ChildLock_Cnt[0] = 0;
-    // }
 
     if (l_sys.ChildLock_Cnt[0] >= ChildKey_Cnt)
     {
@@ -1071,11 +1066,11 @@ uint8_t WaterOut_Close(uint8_t u8Type, uint8_t u8Water)
     uint8_t u8Temp;
     static uint8_t u8CloseNum;
 
-    if (u8Type == 0)
+    if (u8Type == WATER_NO)
     {
         u8CloseNum = 0;
     }
-    else if (u8Type == 1)
+    else if (u8Type == WATER_NORMAL_ICE)
     {
         l_sys.comp_timeout[DO_EV2_BPOS] = 0; //出水计时
         l_sys.OutWater_Flag = FALSE;         //关闭出水
@@ -1088,7 +1083,7 @@ uint8_t WaterOut_Close(uint8_t u8Type, uint8_t u8Water)
         if (l_sys.OutWater_OK)
         {
             l_sys.OutWater_OK = WATER_OUT;
-            if (g_sys.status.ComSta.u16Cur_Water)
+            if (g_sys.status.ComSta.u16Cur_Water) //记录出水量
             {
                 u32CW = g_sys.status.ComSta.u16Cumulative_Water[0];
                 u32CW += g_sys.status.ComSta.u16Cur_Water;
@@ -1104,9 +1099,6 @@ uint8_t WaterOut_Close(uint8_t u8Type, uint8_t u8Water)
             if (u8Water == WATER_NORMAL_ICE)
             {
                 //常温水相关
-
-                //						req_bitmap_op(DO_WP_BPOS,0);//出水泵
-                //						req_bitmap_op(DO_EV2_BPOS,0);//出水阀
 
                 if (g_sys.config.ComPara.u16CloseDelay)
                 {
@@ -1199,7 +1191,7 @@ uint8_t WaterOut_Close(uint8_t u8Type, uint8_t u8Water)
             }
         }
     }
-    else if (u8Type == 2)
+    else if (u8Type == WATER_HEAT)
     {
         if (u8Water == WATER_HEAT) //第一次上电，需要出100ml水后，临时关闭一下热水，然后继续出水
         {
@@ -1255,19 +1247,10 @@ void WaterOut_req_exe(void)
 {
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
-    //		uint32_t u32CW;
     uint16_t u16Pls_Cnt;
-    uint8_t u8Temp;
-    static uint8_t u8HeatNum;
-    static uint8_t u8HeatFirst = 0;
-    //    uint16_t u16Out_Temp;
 
     g_sys.status.ComSta.REQ_TEST[1] = 0;
-    req_bitmap_op(DO_RH1_BPOS, 1); //电加热
-    if (l_sys.u8Storage_Status == TRUE)
-    {
-        return;
-    }                                                 //					rt_kprintf("HeatWater_st=%d,HeatWater_Flow=%d,OutWater_OK=%d,u8HeatNum=%d,u16Cur_Water=%d\n",l_sys.HeatWater_st,l_sys.HeatWater_Flow,l_sys.OutWater_OK,u8HeatNum,g_sys.status.ComSta.u16Cur_Water);
+
     if (g_sys.config.ComPara.u16Water_Ctrl & HMI_KEY) //按键出水
     {
         g_sys.status.ComSta.REQ_TEST[1] |= 0x01;
@@ -1275,221 +1258,23 @@ void WaterOut_req_exe(void)
         if ((!(l_sys.OutWater_Key)) || (WaterOut_level() == FALSE)) //饮水箱低水位
         {
             g_sys.status.ComSta.REQ_TEST[1] |= 0x02;
-            u8HeatNum = 0;
+
             l_sys.HeatWater_st = HEAT_NO;
             l_sys.HeatWater_Flow = 0;
             WaterOut_Close(1, WATER_NORMAL_ICE);
             WaterOut_Close(1, WATER_HEAT);
             WaterOut_Close(1, WATER_ICE);
-            return;
+            goto exit;
         }
     }
-    else //HMI出水
+
+    if ((((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) || (g_sys.config.ComPara.u16Water_Mode == WATER_ICE)) && (g_sys.config.ComPara.u16Water_Flow)) ||
+        (l_sys.OutWater_Key & WATER_NORMAL_ICE) || (l_sys.OutWater_Key & WATER_ICE)) //常温水/冰水
     {
-        if ((!(g_sys.config.ComPara.u16Water_Mode) && !(g_sys.config.ComPara.u16Water_Flow)) || (WaterOut_level() == FALSE)) //饮水箱低水位,不允许出水
-        {
-            g_sys.status.ComSta.REQ_TEST[1] |= 0x04;
-            if (WaterOut_level() == FALSE) //饮水箱低水位
-            {
-                g_sys.status.ComSta.REQ_TEST[1] |= 0x08;
-                g_sys.config.ComPara.u16Water_Mode = 0;
-                g_sys.config.ComPara.u16Water_Flow = 0;
-            }
-            u8HeatNum = 0;
-            l_sys.HeatWater_st = HEAT_NO;
-            l_sys.HeatWater_Flow = 0;
-            WaterOut_Close(1, WATER_NORMAL_ICE);
-            WaterOut_Close(1, WATER_HEAT);
-            WaterOut_Close(1, WATER_ICE);
-            return;
-        }
-    }
-    //		rt_kprintf("HeatWater_st=%d,HeatWater_Flow=%d,OutWater_OK=%d,u8HeatNum=%d,u16Cur_Water=%d,OutWater_Key=%x\n",l_sys.HeatWater_st,l_sys.HeatWater_Flow,l_sys.OutWater_OK,u8HeatNum,g_sys.status.ComSta.u16Cur_Water,l_sys.OutWater_Key);
-    if (((g_sys.config.ComPara.u16Water_Mode == WATER_HEAT) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_HEAT)) //热水
-    {
-        g_sys.status.ComSta.REQ_TEST[1] |= 0x10;
         l_sys.comp_timeout[DO_EV2_BPOS]++; //出水计时
-
-        if (!(g_sys.config.ComPara.u16Water_Ctrl & HEART_POT)) //即热式出水
-        {
-            WaterOut_Close(0, WATER_HEAT);
-            g_sys.status.ComSta.REQ_TEST[1] |= 0x20;
-            if (l_sys.OutWater_OK == WATER_READ)
-            {
-                g_sys.status.ComSta.REQ_TEST[1] |= 0x40;
-
-                if (l_sys.HeatWater_st == HEAT_OUTWATER) //开始出水
-                {
-                    g_sys.status.ComSta.REQ_TEST[1] |= 0x80;
-                    //									WaterOut_Close(0,WATER_HEAT);
-
-                    g_sys.status.ComSta.u16Cur_Water = l_sys.HeatWater_Flow;
-                    if (g_sys.status.ComSta.u16Cur_Water)
-                    {
-                        g_sys.status.ComSta.u16Last_Water = g_sys.status.ComSta.u16Cur_Water;
-                    }
-                    l_sys.OutWater_Flag = TRUE; //出水中
-                }
-                else //时间计算,500ml/MIN,
-                {
-                    g_sys.status.ComSta.REQ_TEST[1] |= 0x100;
-                    l_sys.HeatWater_Time += 1; //500ms执行一次
-                    if (l_sys.HeatWater_Time)  //延时2秒
-                    {
-                        WaterOut_Close(0, WATER_HEAT);
-
-                        l_sys.HeatWater_Flow = (l_sys.HeatWater_Time - 2) * HEAT_FACTOR_500MS;
-                        g_sys.status.ComSta.u16Cur_Water = l_sys.HeatWater_Flow;
-                        if (g_sys.status.ComSta.u16Cur_Water)
-                        {
-                            g_sys.status.ComSta.u16Last_Water = g_sys.status.ComSta.u16Cur_Water;
-                        }
-                        l_sys.OutWater_Flag = TRUE; //出水中
-                    }
-                }
-            }
-
-            if ((l_sys.OutWater_OK == HEATER_SEND) || (l_sys.OutWater_OK == WATER_READ))
-            {
-                if ((!l_sys.comp_timeout[DO_RH1_BPOS]) && (!g_sys.status.ComSta.u16Cur_Water))
-                {
-                    //出水故障
-                }
-            }
-
-            //				rt_kprintf("HeatWater_st=%d,HeatWater_Flow=%d,OutWater_OK=%d,u8HeatNum=%d,u16Cur_Water=%d\n",l_sys.HeatWater_st,l_sys.HeatWater_Flow,l_sys.OutWater_OK,u8HeatNum,g_sys.status.ComSta.u16Cur_Water);
-            //HMI出水时才判断流量
-            if (((g_sys.status.ComSta.u16Cur_Water >= g_sys.config.ComPara.u16Water_Flow) && (g_sys.status.ComSta.u16Cur_Water)) && (!(g_sys.config.ComPara.u16Water_Ctrl & HMI_KEY))) //HMI出水
-            {
-                WaterOut_Close(1, WATER_HEAT);
-            }
-            else
-            {
-                if ((u8HeatFirst < 3) && (g_sys.status.ComSta.u16Cur_Water >= 45)) //第一次上电，先出约100ML
-                {
-                    WaterOut_Close(2, WATER_HEAT);
-                    u8HeatFirst++;
-                    //										if(WaterOut_Close(2, WATER_HEAT)==TRUE)
-                    //										{
-                    //												rt_thread_delay(3000);	//延时3秒
-                    //												WaterOut_Close(0, WATER_HEAT);
-                    //												u8HeatFirst=1;
-                    //												return;
-                    //										}
-                    return;
-                }
-
-                g_sys.status.ComSta.REQ_TEST[1] |= 0x200;
-                if (((g_sys.config.ComPara.u16Water_Mode) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_HEAT))
-                {
-                    l_sys.OutWater_Flag = TRUE; //出水中
-                    //串口通信
-                    if ((l_sys.OutWater_OK == HEATER_SEND) && (u8HeatNum >= 3))
-                    {
-                        g_sys.status.ComSta.REQ_TEST[1] |= 0x400;
-                        l_sys.OutWater_OK = WATER_READ;
-                        rt_kprintf("u8HeatNum=%d,OutWater_OK=%d\n", u8HeatNum, l_sys.OutWater_OK);
-                        if (Heat_Send(HEAT_READPARA, 0, 0, 0))
-                        {
-                            g_ComStat[UART_HEAT] = SEND_Over; //发送完成
-                            g_sys.status.ComSta.TEST = 0;
-                        }
-                    }
-                    else
-                    {
-                        if (u8HeatNum < WRITEHEAT_MAX) //
-                        {
-                            g_sys.status.ComSta.REQ_TEST[1] |= 0x800;
-                            u8HeatNum++;
-                            l_sys.OutWater_OK = HEATER_SEND;
-                            l_sys.HeatWater_st = HEAT_NO;
-                            if (g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE)
-                            {
-                                u8Temp = g_sys.config.ComPara.u16NormalWater_Temp / 10;
-                            }
-                            else
-                            {
-                                u8Temp = g_sys.config.ComPara.u16HotWater_Temp / 10;
-                            }
-
-                            if (l_sys.OutWater_Key & WATER_HEAT) //按键热水,流量不限制
-                            {
-                                g_sys.config.ComPara.u16Water_Flow = 5000;
-                            }
-                            if (Heat_Send(HEAT_WRITEPARA, OPEN_HEAT, u8Temp, g_sys.config.ComPara.u16Water_Flow))
-                            {
-                                //提前显示出水中
-                                l_sys.OutWater_Flag = TRUE; //出水中
-                            }
-                            l_sys.comp_timeout[DO_RH1_BPOS] = RH_DEALY;
-                        }
-                        else
-                        {
-                        }
-                    }
-                }
-                rt_kprintf("u8HeatNum=%d,OutWater_OK=%d,u16Water_Mode=%d,REQ_TEST[1]=%x\n", u8HeatNum, l_sys.OutWater_OK, g_sys.config.ComPara.u16Water_Mode, g_sys.status.ComSta.REQ_TEST[1]);
-            }
-        }
-        else //热灌
-        {
-            u16Pls_Cnt = Read_Pluse_Cnt();
-            //流量计算
-            if (l_sys.OutWater_OK != WATER_READ)
-            {
-                Clear_Pluse_Cnt(&u16Pls_Cnt); //清计数器
-            }
-            g_sys.status.ComSta.u16Pluse_CNT = u16Pls_Cnt;
-            g_sys.status.ComSta.u16Cur_Water = PluseCalc_Water(u16Pls_Cnt);
-            if (g_sys.status.ComSta.u16Cur_Water)
-            {
-                g_sys.status.ComSta.u16Last_Water = g_sys.status.ComSta.u16Cur_Water;
-            }
-            if (l_sys.OutWater_OK == WATER_READ)
-            {
-                if ((!l_sys.comp_timeout[DO_RH1_BPOS]) && (!g_sys.status.ComSta.u16Cur_Water))
-                {
-                    //出水故障
-                }
-                //								WaterOut_Close(0,WATER_HEAT);
-            }
-            //				rt_kprintf("u16Pluse_CNT=%d,u16Cur_Water=%d,u16Pls_Cnt=%d\n",g_sys.status.ComSta.u16Pluse_CNT,g_sys.status.ComSta.u16Cur_Water,u16Pls_Cnt);
-            if ((g_sys.config.ComPara.u16Water_Mode == WATER_HEAT) || (l_sys.OutWater_Key & WATER_HEAT)) //热水
-            {
-                //                g_sys.status.ComSta.REQ_TEST[1] |= 0x1000;
-                //HMI出水时才判断流量
-                if (((g_sys.status.ComSta.u16Cur_Water >= g_sys.config.ComPara.u16Water_Flow) && (g_sys.status.ComSta.u16Cur_Water)) && (!(g_sys.config.ComPara.u16Water_Ctrl & HMI_KEY))) //HMI出水
-                {
-                    WaterOut_Close(1, WATER_HEAT);
-                }
-                else
-                {
-                    //                    g_sys.status.ComSta.REQ_TEST[1] |= 0x2000;
-                    l_sys.OutWater_OK = WATER_READ;
-                    req_bitmap_op(DO_HWP_BPOS, 1); //热水出水泵
-                                                   //										req_bitmap_op(DO_EV2_BPOS,1);//出水阀
-                    l_sys.comp_timeout[DO_RH1_BPOS] = RH_DEALY;
-                    l_sys.OutWater_Flag = TRUE; //出水中
-                }
-            }
-        }
-    }
-    else if ((((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) || (g_sys.config.ComPara.u16Water_Mode == WATER_ICE)) && (g_sys.config.ComPara.u16Water_Flow)) ||
-             (l_sys.OutWater_Key & WATER_NORMAL_ICE) || (l_sys.OutWater_Key & WATER_ICE)) //常温水/冰水
-    {
-        //外壳打开时，//关闭出水
-        if (sys_get_di_sts(DI_OPEN_BPOS) == 0)
-        {
-            g_sys.status.ComSta.REQ_TEST[1] |= 0x4000;
-            WaterOut_Close(1, WATER_NORMAL_ICE);
-            WaterOut_Close(1, WATER_HEAT);
-            WaterOut_Close(1, WATER_ICE);
-            return;
-        }
-        l_sys.comp_timeout[DO_EV2_BPOS]++; //出水计时
-
+        g_sys.status.ComSta.REQ_TEST[1] |= 0x04;
         u16Pls_Cnt = Read_Pluse_Cnt();
-        //		    rt_kprintf("OutWater_OK=%d,u16Pls_Cnt=%d\n",l_sys.OutWater_OK,u16Pls_Cnt);
+        // rt_kprintf("OutWater_OK=%d,u16Pls_Cnt=%d\n", l_sys.OutWater_OK, u16Pls_Cnt);
         //流量计算
         if (l_sys.OutWater_OK != WATER_READ)
         {
@@ -1512,48 +1297,17 @@ void WaterOut_req_exe(void)
         //HMI出水时才判断流量
         if (((g_sys.status.ComSta.u16Cur_Water >= g_sys.config.ComPara.u16Water_Flow) && (g_sys.status.ComSta.u16Cur_Water)) && (!(g_sys.config.ComPara.u16Water_Ctrl & HMI_KEY))) //HMI出水
         {
+            g_sys.status.ComSta.REQ_TEST[1] |= 0x08;
             WaterOut_Close(1, WATER_NORMAL_ICE);
         }
         else
         {
-            g_sys.status.ComSta.REQ_TEST[1] |= 0x8000;
+            g_sys.status.ComSta.REQ_TEST[1] |= 0x10;
             //出水1
-            //外接水源
-            External_Water_exe(TRUE);
 
-            if (Exit_Water() != WATER_AIR) //外接水源,直接出水
-            {
-                req_bitmap_op(DO_WP_BPOS, 0); //出水泵
-            }
-            else
-            {
-                req_bitmap_op(DO_WP_BPOS, 1); //出水泵
-            }
-            req_bitmap_op(DO_EV1_BPOS, 0);                        //循环阀
-            if (g_sys.config.ComPara.u16ColdWater_Mode == BD_ICE) //冰胆模式
-            {
-                if (((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_NORMAL_ICE))
-                {
-                    req_bitmap_op(DO_EV2_BPOS, 1); //出水阀
-                    req_bitmap_op(DO_EV3_BPOS, 0); //
-                    req_bitmap_op(DO_EV4_BPOS, 0); //
-                }
-                else if (((g_sys.config.ComPara.u16Water_Mode == WATER_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_ICE))
-                {
-                    req_bitmap_op(DO_EV2_BPOS, 0); //出水阀
-                    req_bitmap_op(DO_EV3_BPOS, 1); //
-                    req_bitmap_op(DO_EV4_BPOS, 0); //
-                }
-            }
-            else
-            {
-                if (((g_sys.config.ComPara.u16Water_Mode == WATER_NORMAL_ICE) && (g_sys.config.ComPara.u16Water_Flow)) || (l_sys.OutWater_Key & WATER_NORMAL_ICE))
-                {
-                    req_bitmap_op(DO_EV2_BPOS, 1); //出水阀
-                }
-            }
-
-            UV_req_exe(TRUE); //UV
+            req_bitmap_op(DO_WP_BPOS, 1);  //出水泵
+            req_bitmap_op(DO_EV2_BPOS, 1); //出水阀
+            UV_req_exe(TRUE);              //UV
             l_sys.OutWater_OK = WATER_READ;
             l_sys.comp_timeout[DO_RH1_BPOS] = RH_DEALY;
             l_sys.OutWater_Flag = TRUE; //出水中
@@ -1561,6 +1315,7 @@ void WaterOut_req_exe(void)
     }
     else //关闭出水
     {
+        g_sys.status.ComSta.REQ_TEST[1] |= 0x20;
         WaterOut_Close(1, WATER_NORMAL_ICE);
         WaterOut_Close(1, WATER_HEAT);
         WaterOut_Close(1, WATER_ICE);
@@ -1568,10 +1323,13 @@ void WaterOut_req_exe(void)
     //最大出水限制
     if (l_sys.comp_timeout[DO_EV2_BPOS] >= WATER_MAXTIME)
     {
+        g_sys.status.ComSta.REQ_TEST[1] |= 0x40;
         WaterOut_Close(1, WATER_NORMAL_ICE);
         WaterOut_Close(1, WATER_HEAT);
         WaterOut_Close(1, WATER_ICE);
     }
+exit:
+    // rt_kprintf("u16Water_Ctrl=%d,OutWater_OK=%d,OutWater_Key=%d,u16Cur_Water=%d,REQ_TEST=0x%04x\n", g_sys.config.ComPara.u16Water_Ctrl, l_sys.OutWater_OK, l_sys.OutWater_Key, g_sys.status.ComSta.u16Cur_Water, g_sys.status.ComSta.REQ_TEST[1]);
     return;
 }
 //UV开关
@@ -1806,7 +1564,6 @@ void Cold_Water_exe(void)
     uint16_t u16Temp;
     int16_t i16Water_Temp;
     static uint8_t u8Coldwater = 0;
-    static uint8_t u8FCW = 0;
 
     u16Temp = 0;
     g_sys.config.ComPara.u16ColdWater_Mode = NORMAL_ICE;
@@ -1817,7 +1574,6 @@ void Cold_Water_exe(void)
         u16Temp |= 0x01;
         i16Water_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC4];
 
-        i16Water_Temp = 400;
         if ((u16WL & D_M) && (i16Water_Temp != ABNORMAL_VALUE)) //到达制冷水位
         {
             u16Temp |= 0x02;
@@ -1862,97 +1618,6 @@ void Cold_Water_exe(void)
             req_bitmap_op(DO_CV_BPOS, 0); //制冰水关闭
         }
     }
-    else if (g_sys.config.ComPara.u16ColdWater_Mode == BD_ICE) //冰胆模式
-    {
-        return;
-
-        u16Temp |= 0x100;
-
-        if ((u16WL & D_L) && (u16WL & D_ML) && (u8FCW == FALSE)) //到达制冷水位
-        {
-            u16Temp |= 0x200;
-            u8FCW = TRUE;
-            l_sys.u16BD_Time = BD_TIME;
-        }
-        if (u8FCW == TRUE)
-        {
-            if (l_sys.u16BD_Time > 0)
-            {
-                u16Temp |= 0x400;
-                req_bitmap_op(DO_WP_BPOS, 1);  //泵2
-                req_bitmap_op(DO_EV4_BPOS, 1); //阀4
-
-                req_bitmap_op(DO_EV1_BPOS, 0); //阀1
-
-                if (g_sys.config.ComPara.u16CloseFrist == PUMP_FIRET)
-                {
-                    req_bitmap_op(DO_EV2_BPOS, 0); //阀2
-                }
-                else
-                {
-                    if (l_sys.u8CloseDelay == 0)
-                    {
-                        req_bitmap_op(DO_EV2_BPOS, 0); //阀2
-                    }
-                }
-                req_bitmap_op(DO_EV3_BPOS, 0); //阀3
-            }
-            else
-            {
-                if (g_sys.config.ComPara.u16CloseFrist == PUMP_FIRET)
-                {
-                    req_bitmap_op(DO_WP_BPOS, 0); //泵2
-                }
-                else
-                {
-                    if (l_sys.u8CloseDelay == 0)
-                    {
-                        req_bitmap_op(DO_WP_BPOS, 0); //泵2
-                    }
-                }
-                req_bitmap_op(DO_EV4_BPOS, 0); //阀4
-
-                i16Water_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC3];
-                if (i16Water_Temp == ABNORMAL_VALUE) //温度异常
-                {
-                    u16Temp |= 0x800;
-                    req_bitmap_op(DO_BD_BPOS, 0);     //BD
-                    req_bitmap_op(DO_BD_FAN_BPOS, 0); //BD_FAN
-                }
-                else
-                {
-                    u16Temp |= 0x1000;
-                    if (i16Water_Temp > g_sys.config.ComPara.u16ColdWater_StartTemp) //开始制冰水
-                    {
-                        u16Temp |= 0x2000;
-                        u8Coldwater = TRUE;
-                        req_bitmap_op(DO_BD_BPOS, 1);     //BD
-                        req_bitmap_op(DO_BD_FAN_BPOS, 1); //BD_FAN
-                        l_sys.u16BD_FAN_Delay = BD_DELAY;
-                    }
-                    else if (i16Water_Temp < g_sys.config.ComPara.u16ColdWater_StopTemp) //关闭
-                    {
-                        u16Temp |= 0x4000;
-                        u8Coldwater = FALSE;
-                        req_bitmap_op(DO_BD_BPOS, 0); //BD
-                        if (l_sys.u16BD_FAN_Delay == 0)
-                        {
-                            req_bitmap_op(DO_BD_FAN_BPOS, 0); //BD_FAN
-                        }
-                    }
-                    else //保持
-                        if (u8Coldwater == TRUE)
-                    {
-                        u16Temp |= 0x8000;
-                        l_sys.Cold_Water = TRUE;
-                        req_bitmap_op(DO_BD_BPOS, 1);     //BD
-                        req_bitmap_op(DO_BD_FAN_BPOS, 1); //BD_FAN
-                        l_sys.u16BD_FAN_Delay = BD_DELAY;
-                    }
-                }
-            }
-        }
-    }
     else
     {
         u16Temp |= 0x40;
@@ -1961,7 +1626,7 @@ void Cold_Water_exe(void)
         req_bitmap_op(DO_CV_BPOS, 0); //制冰水
     }
 
-    rt_kprintf("u16WL=0x%04x,fanclose:0x%02x,u16Temp=0x%04x,i16Water_Temp=%d,StartTemp=%d,StopTemp=%d\n", u16WL, l_sys.Fan_Close, u16Temp, i16Water_Temp, g_sys.config.ComPara.u16ColdWater_StartTemp, g_sys.config.ComPara.u16ColdWater_StopTemp);
+    // rt_kprintf("u16WL=0x%04x,makeWater:0x%02x,u16Temp=0x%04x,i16Water_Temp=%d,StartTemp=%d,StopTemp=%d\n", u16WL, l_sys.makeWater, u16Temp, i16Water_Temp, g_sys.config.ComPara.u16ColdWater_StartTemp, g_sys.config.ComPara.u16ColdWater_StopTemp);
     return;
 }
 
@@ -2187,14 +1852,14 @@ void req_execution(int16_t target_req_temp, int16_t target_req_hum)
     //制冰水
     Cold_Water_exe();
     //杀菌
-    Sterilize_req_exe();
+    // Sterilize_req_exe();
     //出水
-    // WaterOut_req_exe();
+    WaterOut_req_exe();
     //除霜
     Defrost_req_exe();
     //贮存
     Storage_exe();
-    //		//扇热风机
-    //		Heat_Fan_exe();
+    // //扇热风机
+    // Heat_Fan_exe();
     return;
 }

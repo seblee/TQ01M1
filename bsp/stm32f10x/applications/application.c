@@ -55,8 +55,7 @@ enum
 };
 
 ALIGN(RT_ALIGN_SIZE)
-static rt_uint8_t modbus_master_stack[512];
-static rt_uint8_t modbus_slave_stack[512];
+static rt_uint8_t modbus_master_stack[512]; 
 static rt_uint8_t monitor_slave_stack[0x900];
 static rt_uint8_t di_stack[256];
 static rt_uint8_t daq_stack[512];
@@ -64,8 +63,7 @@ static rt_uint8_t core_stack[512];
 static rt_uint8_t cpad_stack[512];
 static rt_uint8_t bkg_stack[512];
 
-static struct rt_thread modbus_master_thread;
-static struct rt_thread modbus_slave_thread;
+static struct rt_thread modbus_master_thread; 
 static struct rt_thread CPAD_slave_thread;
 static struct rt_thread di_thread;
 static struct rt_thread daq_thread;
@@ -107,6 +105,7 @@ void rt_init_thread_entry(void *parameter)
     }
 }
 
+int ledKeyStart(void);
 int rt_application_init(void)
 {
     rt_thread_t init_thread;
@@ -133,18 +132,18 @@ int rt_application_init(void)
     }
 
     //modbus_slave_thread_entry
-    result = rt_thread_init(&modbus_slave_thread,
-                            "mb_slave",
-                            modbus_slave_thread_entry,
-                            RT_NULL,
-                            (rt_uint8_t *)&modbus_slave_stack[0],
-                            sizeof(modbus_slave_stack),
-                            MODBUS_SLAVE_THREAD_PRIO,
-                            20);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&modbus_slave_thread);
-    }
+    // result = rt_thread_init(&modbus_slave_thread,
+    //                         "mb_slave",
+    //                         modbus_slave_thread_entry,
+    //                         RT_NULL,
+    //                         (rt_uint8_t *)&modbus_slave_stack[0],
+    //                         sizeof(modbus_slave_stack),
+    //                         MODBUS_SLAVE_THREAD_PRIO,
+    //                         20);
+    // if (result == RT_EOK)
+    // {
+    //     rt_thread_startup(&modbus_slave_thread);
+    // }
 
     //CPAD_slave_thread_entry
     result = rt_thread_init(&CPAD_slave_thread,
@@ -261,6 +260,9 @@ int rt_application_init(void)
     // if (net_thead != RT_NULL)
     //     rt_thread_startup(net_thead);
 
+    int ledKeyStart(void);
+    ledKeyStart();
+    
     return 0;
 }
 
