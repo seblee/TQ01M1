@@ -980,25 +980,6 @@ void WaterOut_Key(void)
     extern local_reg_st l_sys;
     static uint8_t keyState = 0;
 
-    if (keyState < 20)
-        keyState++;
-    else
-        keyState = 0;
-
-    // 冷水 1
-    // if ((sys_get_di_sts(DI_Cold_1_BPOS) == 1))
-    if (keyState < 10)
-    {
-        l_sys.OutWater_Key |= WATER_NORMAL_ICE;
-        l_sys.OutWater_Delay[0] = WATER_MAXTIME;
-    }
-    else
-    {
-
-        l_sys.OutWater_Key &= ~WATER_NORMAL_ICE;
-        l_sys.OutWater_Delay[0] = 0;
-    }
-
     //冷水 2
     if ((sys_get_di_sts(DI_Cold_2_BPOS) == 1) && (g_sys.config.ComPara.u16Water_Ctrl & TWO_COLD)) //双路出冷水
     {
@@ -1258,7 +1239,7 @@ void WaterOut_req_exe(void)
         if ((!(l_sys.OutWater_Key)) || (WaterOut_level() == FALSE)) //饮水箱低水位
         {
             g_sys.status.ComSta.REQ_TEST[1] |= 0x02;
-
+            l_sys.OutWater_Key &= ~WATER_NORMAL_ICE;
             l_sys.HeatWater_st = HEAT_NO;
             l_sys.HeatWater_Flow = 0;
             WaterOut_Close(1, WATER_NORMAL_ICE);
@@ -1566,7 +1547,7 @@ void Cold_Water_exe(void)
     static uint8_t u8Coldwater = 0;
 
     u16Temp = 0;
-    g_sys.config.ComPara.u16ColdWater_Mode = NORMAL_ICE;
+
     l_sys.Cold_Water = FALSE;
     u16WL = Get_Water_level();
     if (g_sys.config.ComPara.u16ColdWater_Mode == NORMAL_ICE) //制冰水模式

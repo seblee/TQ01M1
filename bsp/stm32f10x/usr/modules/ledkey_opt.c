@@ -16,7 +16,7 @@
 **/
 
 #include "ledkey_opt.h"
-
+#include "local_status.h"
 #define SAMPLE_UART_NAME "uart4"
 /* 串口接收消息结构*/
 struct rx_msg
@@ -29,8 +29,32 @@ static rt_device_t serial;
 /* 消息队列控制块 */
 static struct rt_messagequeue rx_mq;
 
-unsigned char keyState[3] = {0};
 unsigned char recOK = 0;
+static unsigned char tx_buffer[10] = {0xa7, 0xf3, 0xaa, 0x04, 0x06};
+
+/**********************key led*********************************************************/
+_TKS_FLAGA_type keyState[2];
+volatile _TKS_FLAGA_type keyTrg[2];
+
+#define KEY1 keyTrg[0].bits.b2
+#define KEY2 keyTrg[0].bits.b3
+#define KEY3 keyTrg[0].bits.b1
+
+#define KEY1Restain keyTrg[1].bits.b2
+#define KEY2Restain keyTrg[1].bits.b3
+#define KEY3Restain keyTrg[1].bits.b1
+
+_USR_FLAGA_type ledState[2];
+#define led1State ledState[0].sbits.s0
+#define led2State ledState[0].sbits.s1
+#define led3State ledState[0].sbits.s2
+#define led4State ledState[0].sbits.s3
+#define led5State ledState[1].sbits.s0
+#define led6State ledState[1].sbits.s1
+#define led7State ledState[1].sbits.s2
+#define led8State ledState[1].sbits.s3
+
+/*************************function******************************************************/
 
 /* 接收数据回调函数 */
 static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
@@ -48,25 +72,31 @@ static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
     }
     return result;
 }
+/***
+ * 
+ * 
+ * 
+ **/
+
 static void receiveData(unsigned char data)
 {
     static unsigned char count = 0;
-    if ((count == 0) && (data == 0xa5))
+    if ((count == 0) && (data == 0xA7))
     {
         count++;
     }
-    else if ((count == 1) && (data == 0x52))
+    else if ((count == 1) && (data == 0xF2))
     {
         count++;
     }
     else if (count == 2)
     {
-        keyState[0] = data;
+        keyState[0].byte = data;
         count++;
     }
     else if (count == 3)
     {
-        keyState[1] = data;
+        keyState[1].byte = data;
         count = 0;
         recOK = 1;
     }
@@ -75,14 +105,100 @@ static void receiveData(unsigned char data)
         count = 0;
     }
 }
+/****
+ * 
+ * 
+ * 
+ * 
+**/
+#include "req_execution.h"
+#include "local_status.h"
+#include "global_var.h"
+extern local_reg_st l_sys;
+extern sys_reg_st g_sys;
+void keyRecOperation(_TKS_FLAGA_type *keyState)
+{
 
+    static rt_uint8_t k_count[2] = {0};
+    keyTrg[0].byte = keyState->byte & (keyState->byte ^ k_count[0]);
+    k_count[0] = keyState->byte;
+    keyTrg[1].byte = (keyState + 1)->byte & ((keyState + 1)->byte ^ k_count[1]);
+    k_count[1] = (keyState + 1)->byte;
+    if (KEY1)
+    {
+        rt_kprintf("key1\n");
+    }
+    if (KEY2)
+    {
+        l_sys.OutWater_Key ^= WATER_NORMAL_ICE;
+    }
+    if (KEY3)
+    {
+        if (g_sys.config.ComPara.u16ColdWater_Mode)
+        {
+            led7State = LED_OFF;
+            g_sys.config.ComPara.u16ColdWater_Mode = ICE_NO;
+        }
+        else
+        {
+            led7State = LED_ON;
+            g_sys.config.ComPara.u16ColdWater_Mode = NORMAL_ICE;
+        }
+        // RAM_Write_Reg(86, g_sys.config.ComPara.u16ColdWater_Mode, 1);
+        rt_kprintf("key3\n");
+    }
+    if (KEY1Restain)
+    {
+        rt_kprintf("KEY1Restain\n");
+    }
+    if (KEY2Restain)
+    {
+        rt_kprintf("KEY2Restain\n");
+    }
+    if (KEY3Restain)
+    {
+        rt_kprintf("KEY3Restain\n");
+    }
+}
+/**
+ * 
+ * 
+ * 
+**/
+#include "sys_status.h"
+void ledSendOperation(void)
+{
+    if (l_sys.OutWater_OK == WATER_READ)
+    {
+        led6State = LED_FLASH;
+    }
+    else
+    {
+        led6State = LED_ON;
+    }
+    if (sys_get_do_sts(DO_UV1_BPOS))
+    {
+        led4State = LED_FLASH;
+    }
+    else
+    {
+        led4State = LED_OFF;
+    }
+
+    tx_buffer[2] = ledState[0].byte;
+    tx_buffer[3] = ledState[1].byte;
+}
+/***
+ * 
+ * 
+ * 
+ */
 static void serial_thread_entry(void *parameter)
 {
     struct rx_msg msg;
     rt_err_t result;
     rt_uint32_t rx_length;
     static unsigned char rx_buffer[RT_SERIAL_RB_BUFSZ + 1];
-    static unsigned char tx_buffer[10] = {0xa5, 0x53, 0x03, 0x04, 0x06};
 
     rt_kprintf("**************************************start ledkey thread**************************************\r\n");
 
@@ -101,9 +217,10 @@ static void serial_thread_entry(void *parameter)
             }
             if (recOK)
             {
+                keyRecOperation(keyState);
+                ledSendOperation();
                 rt_device_write(serial, 0, tx_buffer, 5);
                 recOK = 0;
-                rt_kprintf("keyState:%02x,%02x\n", keyState[0], keyState[1]);
             }
 
             /* 打印数据 */

@@ -984,9 +984,6 @@ static uint16_t acl00(alarm_acl_status_st *acl_ptr)
     {
         return (ALARM_ACL_CLEARED);
     }
-    //		if(sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) != 0)
-    //		if((g_sys.config.ComPara.u16Water_Mode)&&(g_sys.config.ComPara.u16Water_Flow))
-    //		if(((g_sys.config.ComPara.u16Water_Mode==WATER_NORMAL_ICE)&&(g_sys.config.ComPara.u16Water_Flow))||(l_sys.OutWater_Key&WATER_NORMAL_ICE)||(l_sys.OutWater_Key&WATER_ICE))//常温水/冰水
     if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) == TRUE)) //Water out
     {
         if (g_sys.status.ComSta.u16Cur_Water < 3) //无水流量

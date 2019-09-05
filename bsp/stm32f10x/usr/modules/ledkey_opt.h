@@ -19,4 +19,41 @@
 
 #include <rtthread.h>
 
+typedef struct
+{
+    unsigned char b0 : 1;
+    unsigned char b1 : 1;
+    unsigned char b2 : 1;
+    unsigned char b3 : 1;
+    unsigned char b4 : 1;
+    unsigned char b5 : 1;
+    unsigned char b6 : 1;
+    unsigned char b7 : 1;
+} _FLAG_bits;
+
+typedef union {
+    _FLAG_bits bits;
+    unsigned char byte;
+} _TKS_FLAGA_type;
+
+typedef struct
+{
+    unsigned char s0 : 2;
+    unsigned char s1 : 2;
+    unsigned char s2 : 2;
+    unsigned char s3 : 2;
+} _STATE_bits;
+
+typedef union {
+    _STATE_bits sbits;
+    unsigned char byte;
+} _USR_FLAGA_type;
+
+enum
+{
+    LED_OFF = 0x00,
+    LED_ON = 0x01,
+    LED_FLASH = 0x02,
+};
+
 #endif
