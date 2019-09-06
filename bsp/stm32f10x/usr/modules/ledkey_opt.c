@@ -31,6 +31,7 @@ static struct rt_messagequeue rx_mq;
 
 unsigned char recOK = 0;
 static unsigned char tx_buffer[10] = {0xa7, 0xf3, 0xaa, 0x04, 0x06};
+static unsigned char rx_buffer[10] = {0xa7, 0xf3, 0xaa, 0x04, 0x06};
 
 /**********************key led*********************************************************/
 _TKS_FLAGA_type keyState[2];
@@ -81,22 +82,35 @@ static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
 static void receiveData(unsigned char data)
 {
     static unsigned char count = 0;
+    static unsigned char checkSum = 0;
     if ((count == 0) && (data == 0xA7))
     {
+        rx_buffer[count] = data;
+        checkSum = data;
         count++;
     }
     else if ((count == 1) && (data == 0xF2))
     {
+        checkSum += data;
+        rx_buffer[count] = data;
         count++;
     }
     else if (count == 2)
     {
-        keyState[0].byte = data;
+        checkSum += data;
+        rx_buffer[count] = data;
         count++;
     }
     else if (count == 3)
     {
-        keyState[1].byte = data;
+        checkSum += data;
+        rx_buffer[count] = data;
+        count++;
+    }
+    else if ((count == 4) && (checkSum == data))
+    {
+        keyState[0].byte = rx_buffer[2];
+        keyState[1].byte = rx_buffer[3];
         count = 0;
         recOK = 1;
     }
@@ -136,19 +150,28 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
     {
         if (g_sys.config.ComPara.u16ColdWater_Mode)
         {
-            led7State = LED_OFF;
             g_sys.config.ComPara.u16ColdWater_Mode = ICE_NO;
         }
         else
         {
-            led7State = LED_ON;
             g_sys.config.ComPara.u16ColdWater_Mode = NORMAL_ICE;
         }
-        // RAM_Write_Reg(86, g_sys.config.ComPara.u16ColdWater_Mode, 1);
+        RAM_Write_Reg(86, g_sys.config.ComPara.u16ColdWater_Mode, 1);
         rt_kprintf("key3\n");
     }
     if (KEY1Restain)
     {
+        if (g_sys.config.ComPara.u16ExitWater_Mode == WATER_EXIT)
+        {
+            led5State = LED_OFF;
+            g_sys.config.ComPara.u16ExitWater_Mode = WATER_AIR;
+        }
+        else
+        {
+            led5State = LED_ON;
+            g_sys.config.ComPara.u16ExitWater_Mode = WATER_EXIT;
+        }
+        RAM_Write_Reg(EE_EXITWATER, g_sys.config.ComPara.u16ExitWater_Mode, 1);
         rt_kprintf("KEY1Restain\n");
     }
     if (KEY2Restain)
@@ -168,14 +191,37 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
 #include "sys_status.h"
 void ledSendOperation(void)
 {
-    if (l_sys.OutWater_OK == WATER_READ)
+    if (l_sys.makeWater && sys_get_do_sts(DO_COMP1_BPOS))
     {
-        led6State = LED_FLASH;
+        led1State = LED_FLASH;
+    }
+    else if (l_sys.makeWater)
+    {
+        led1State = LED_ON;
     }
     else
     {
-        led6State = LED_ON;
+        led1State = LED_OFF;
     }
+
+    if (l_sys.Pwp_Open)
+    {
+        led2State = LED_FLASH;
+    }
+    else
+    {
+        led2State = LED_OFF;
+    }
+
+    if (WaterOut_level())
+    {
+        led3State = LED_OFF;
+    }
+    else
+    {
+        led3State = LED_FLASH;
+    }
+
     if (sys_get_do_sts(DO_UV1_BPOS))
     {
         led4State = LED_FLASH;
@@ -185,8 +231,42 @@ void ledSendOperation(void)
         led4State = LED_OFF;
     }
 
+    if (g_sys.config.ComPara.u16ExitWater_Mode == WATER_EXIT)
+    {
+        led5State = LED_ON;
+    }
+    else
+    {
+        led5State = LED_OFF;
+    }
+
+    if (l_sys.OutWater_OK == WATER_READ)
+    {
+        led6State = LED_FLASH;
+    }
+    else
+    {
+        led6State = LED_ON;
+    }
+
+    if (g_sys.config.ComPara.u16ColdWater_Mode)
+    {
+        led7State = LED_ON;
+    }
+    else
+    {
+        led7State = LED_OFF;
+    }
+
     tx_buffer[2] = ledState[0].byte;
     tx_buffer[3] = ledState[1].byte;
+    tx_buffer[4] = 0;
+    tx_buffer[5] = 0;
+    tx_buffer[5] += tx_buffer[0];
+    tx_buffer[5] += tx_buffer[1];
+    tx_buffer[5] += tx_buffer[2];
+    tx_buffer[5] += tx_buffer[3];
+    tx_buffer[5] += tx_buffer[4];
 }
 /***
  * 
@@ -219,7 +299,7 @@ static void serial_thread_entry(void *parameter)
             {
                 keyRecOperation(keyState);
                 ledSendOperation();
-                rt_device_write(serial, 0, tx_buffer, 5);
+                rt_device_write(serial, 0, tx_buffer, 6);
                 recOK = 0;
             }
 

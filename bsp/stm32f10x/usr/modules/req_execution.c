@@ -899,8 +899,8 @@ void Pwp_req_exe(void)
     // rt_kprintf("u16WL=0x%04x\n", u16WL);
 
     //源水箱中水位
-    if ((!(u16WL & D_M)) && //饮水箱水位低于浮球2
-        (u16WL & S_M))      //源水箱水位高于浮球2
+    if ((!(u16WL & D_M)) &&                              //饮水箱水位低于浮球2
+        ((u16WL & S_M) || (Exit_Water() == WATER_EXIT))) //源水箱水位高于浮球2 或者外接水源
     {
         l_sys.Pwp_Open = TRUE;
     }
@@ -910,24 +910,29 @@ void Pwp_req_exe(void)
     {
         req_bitmap_op(DO_PWP_BPOS, 1); //进水泵
         if (Exit_Water() == WATER_EXIT)
+        {
             req_bitmap_op(DO_FV_BPOS, 1); //外接水源
+        }
+        else
+        {
+            req_bitmap_op(DO_FV_BPOS, 0);
+        }
+
         u8PWP_S = TRUE;
         //自动停止
-        if ((u16WL & D_U) ||  //饮水箱水位低于浮球3
-            (!(u16WL & S_L))) //源水箱水位高于浮球1
+        if ((u16WL & D_U) ||                                 //饮水箱水位低于浮球3
+            (!(u16WL & S_L) && (Exit_Water() == WATER_AIR))) //源水箱水位高于浮球1 非外接水源模式
         {
             u8PWP_S = FALSE;
             req_bitmap_op(DO_PWP_BPOS, 0); //进水泵
-            if (Exit_Water() == WATER_EXIT)
-                req_bitmap_op(DO_FV_BPOS, 0); //外接水源
+            req_bitmap_op(DO_FV_BPOS, 0);  //外接水源
         }
         l_sys.Pwp_Open = u8PWP_S;
     }
     else
     {
         req_bitmap_op(DO_PWP_BPOS, 0); //进水泵
-        if (Exit_Water() == WATER_EXIT)
-            req_bitmap_op(DO_FV_BPOS, 0); //外接水源
+        req_bitmap_op(DO_FV_BPOS, 0);  //外接水源
     }
     return;
 }
@@ -978,7 +983,6 @@ void WaterOut_Key(void)
 {
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
-    static uint8_t keyState = 0;
 
     //冷水 2
     if ((sys_get_di_sts(DI_Cold_2_BPOS) == 1) && (g_sys.config.ComPara.u16Water_Ctrl & TWO_COLD)) //双路出冷水
@@ -1055,8 +1059,7 @@ uint8_t WaterOut_Close(uint8_t u8Type, uint8_t u8Water)
     {
         l_sys.comp_timeout[DO_EV2_BPOS] = 0; //出水计时
         l_sys.OutWater_Flag = FALSE;         //关闭出水
-        //外接水源
-        External_Water_exe(FALSE);
+
         if (l_sys.Sterilize == FALSE)
         {
             UV_req_exe(FALSE); //UV
@@ -1206,20 +1209,14 @@ uint8_t WaterOut_level(void)
 
     //水位
     u16WL = Get_Water_level();
-    if (Exit_Water() != WATER_AIR) //外接水源
+
+    if (!(u16WL & D_L))
     {
-        return TRUE;
+        return FALSE;
     }
     else
     {
-        if (!(u16WL & D_L))
-        {
-            return FALSE;
-        }
-        else
-        {
-            return TRUE;
-        }
+        return TRUE;
     }
 }
 
