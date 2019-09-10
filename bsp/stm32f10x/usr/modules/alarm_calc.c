@@ -1375,7 +1375,7 @@ static uint16_t acl09(alarm_acl_status_st *acl_ptr)
     {
         return (ALARM_ACL_CLEARED);
     }
-    if (sys_get_do_sts(DO_PWP_BPOS) == 0)
+    if (l_sys.Pwp_Open == FALSE)
     {
         return (ALARM_ACL_CLEARED);
     }

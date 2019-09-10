@@ -633,7 +633,7 @@ static void sys_comp_cooldown(void)
     }
 
     //净化泵打开时间
-    if (sys_get_do_sts(DO_PWP_BPOS) == 0)
+    if (l_sys.Pwp_Open == FALSE)
     {
         l_sys.Pwp_Open_Time = 0;
     }

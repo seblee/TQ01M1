@@ -109,7 +109,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {61, &g_sys.config.ComPara.u16TPower_On, 0, 0xFFFF, 500, 2, 1, NULL},
     {62, &g_sys.config.ComPara.u16TPower_Off, 0, 0xFFFF, 2300, 2, 1, NULL},
     {63, &g_sys.config.alarm[ACL_FILTER_OT].alarm_param, 1, 65000, 4320, 2, 1, NULL},
-    {64, &g_sys.config.alarm[ACL_E9].alarm_param, 1, 65000, 240, 2, 1, NULL},
+    {64, &g_sys.config.alarm[ACL_E9].alarm_param, 1, 65000, 1000, 2, 1, NULL},
     {65, &g_sys.config.alarm[ACL_FILTER_ELEMENT_0_OT].alarm_param, 1, 65535, 2500, 2, 1, NULL},
     {66, &g_sys.config.ComPara.u16Clear_RT, 0, 0xFF, 0, 2, 1, NULL},
     {CLEAR_ALARM, &g_sys.config.ComPara.u16Clear_ALARM, 0, 0xFF, 0, 2, 1, NULL},
