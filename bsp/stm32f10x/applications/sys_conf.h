@@ -71,8 +71,8 @@ enum
 #define DO_P1_BPOS DO_PWP_BPOS //泵1
 #define DO_P2_BPOS DO_WP_BPOS  //泵2
 
-#define DO_BD_BPOS DO_EL1_BPOS     //冰胆
-#define DO_BD_FAN_BPOS DO_EL2_BPOS //冰胆风扇
+#define DO_BD_BPOS DO_EL1_BPOS       //冰胆
+#define DO_PUMB_CIR_BPOS DO_EL2_BPOS //循环泵
 
 #define DO_UV24_BPOS DO_RSV2_BPOS //24V紫外灯
 #define DO_F24_BPOS DO_EL1_BPOS   //24V风机,T8机组
@@ -93,7 +93,6 @@ enum
 #define CPAD_THREAD_DELAY 1600
 #define BKG_THREAD_DELAY 2200
 #define TESTCASE_THREAD_DELAY 1650
-
 ///////////////////////////////////////////////////////////////
 //AI configuration
 ///////////////////////////////////////////////////////////////

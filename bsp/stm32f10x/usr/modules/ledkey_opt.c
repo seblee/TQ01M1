@@ -40,12 +40,14 @@ volatile _TKS_FLAGA_type keyTrg[2];
 #define KEY1 keyTrg[0].bits.b2
 #define KEY2 keyTrg[0].bits.b3
 #define KEY3 keyTrg[0].bits.b1
+#define KEY4 keyTrg[0].bits.b0
 
 #define KEY1Restain keyTrg[1].bits.b2
 #define KEY2Restain keyTrg[1].bits.b3
 #define KEY3Restain keyTrg[1].bits.b1
+#define KEY4Restain keyTrg[1].bits.b0
 
-_USR_FLAGA_type ledState[2];
+_USR_FLAGA_type ledState[3];
 #define led1State ledState[0].sbits.s0
 #define led2State ledState[0].sbits.s1
 #define led3State ledState[0].sbits.s2
@@ -54,6 +56,7 @@ _USR_FLAGA_type ledState[2];
 #define led6State ledState[1].sbits.s1
 #define led7State ledState[1].sbits.s2
 #define led8State ledState[1].sbits.s3
+#define led9State ledState[2].sbits.s0
 
 /*************************function******************************************************/
 
@@ -159,6 +162,11 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
         RAM_Write_Reg(86, g_sys.config.ComPara.u16ColdWater_Mode, 1);
         rt_kprintf("key3\n");
     }
+    if (KEY4)
+    {
+        rt_kprintf("key4\n");
+    }
+
     if (KEY1Restain)
     {
         if (g_sys.config.ComPara.u16ExitWater_Mode == WATER_EXIT)
@@ -181,6 +189,14 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
     if (KEY3Restain)
     {
         rt_kprintf("KEY3Restain\n");
+    }
+
+    if (KEY4Restain)
+    {
+        g_sys.config.ComPara.u16Power_Mode ^= 1;
+
+        write_reg_map(POWER_ON_ADDR, g_sys.config.ComPara.u16Power_Mode);
+        rt_kprintf("KEY4Restain\n");
     }
 }
 /**
@@ -258,9 +274,18 @@ void ledSendOperation(void)
         led7State = LED_OFF;
     }
 
+    if (g_sys.config.ComPara.u16Power_Mode)
+    {
+        led9State = LED_ON;
+    }
+    else
+    {
+        led9State = LED_OFF;
+    }
+
     tx_buffer[2] = ledState[0].byte;
     tx_buffer[3] = ledState[1].byte;
-    tx_buffer[4] = 0;
+    tx_buffer[4] = ledState[2].byte;
     tx_buffer[5] = 0;
     tx_buffer[5] += tx_buffer[0];
     tx_buffer[5] += tx_buffer[1];

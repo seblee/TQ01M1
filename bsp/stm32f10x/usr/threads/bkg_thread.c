@@ -184,7 +184,6 @@ static void test_mode_init_data(void)
         l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_UV1_BPOS) | (0x0001 << DO_WP_BPOS) | (0x0001 << DO_EV2_BPOS) | (0x0001 << DO_PWP_BPOS);
-        //				l_sys.bitmap[1][BITMAP_MANUAL] = (0x0001<<(DO_DV2_BPOS>>16));
         break;
     case TEST_TANK: //抽空源水箱与饮水箱
         g_sys.config.dev_mask.ain = 0xffff;
@@ -197,7 +196,6 @@ static void test_mode_init_data(void)
         l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_EV2_BPOS) | (0x0001 << DO_PWP_BPOS);
-        //				l_sys.bitmap[1][BITMAP_MANUAL] = (0x0001<<(DO_DV2_BPOS>>16));
         break;
     case TEST_HEAT_WATER: //出热水
         g_sys.config.dev_mask.ain = 0xffff;
