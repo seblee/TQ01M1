@@ -88,8 +88,8 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {40, &g_sys.config.ComPara.u16Stop_Humidity, 0, 999, 300, 2, 1, NULL},
     {41, &g_sys.config.ComPara.u16Start_Defrost_Temp, 0, 0xFFFF, (uint16_t)-30, 2, 1, NULL},
     {42, &g_sys.config.ComPara.u16Stop_Defrost_Temp, 0, 0xFFFF, 60, 2, 1, NULL},
-    {43, &g_sys.config.ComPara.u16Sterilize_Time[0], 1, 600, 8, 2, 1, NULL},
-    {44, &g_sys.config.ComPara.u16Sterilize_Interval[0], 1, 10000, 60, 2, 1, NULL},
+    {43, &g_sys.config.ComPara.u16Sterilize_Time[0], 1, 600, 30, 2, 1, NULL},
+    {44, &g_sys.config.ComPara.u16Sterilize_Interval[0], 1, 10000, 30, 2, 1, NULL},
     {45, &g_sys.config.ComPara.u16Water_Ctrl, 0, 0xFFFF, 0x0002, 2, 1, NULL},
     {EE_WATER_MODE, &g_sys.config.ComPara.u16Water_Mode, 0, 4, 0, 2, 1, NULL},
     {EE_WATER_FLOW, &g_sys.config.ComPara.u16Water_Flow, 0, 65500, 1000, 2, 1, NULL},
@@ -1072,6 +1072,10 @@ uint16_t sys_local_var_init(void)
     l_sys.ec_fan_suc_temp = 0;
 
     l_sys.TH_Check_Delay = 5; //上电后延迟5秒
+    /***默认启动制水***/
+    l_sys.Comp_Close[0] = 0;
+    l_sys.Comp_Close[1] = 0;
+    l_sys.makeWater = 1;
     return 1;
 }
 

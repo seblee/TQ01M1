@@ -976,64 +976,25 @@ static uint8_t acl_clear(alarm_acl_status_st *acl_ptr)
 //ACL_E0 无出水告警
 static uint16_t acl00(alarm_acl_status_st *acl_ptr)
 {
-    uint8_t data;
-    static uint8_t u8Delay;
-
     // 解除 报警
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-    if ((sys_get_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS) == TRUE)) //Water out
-    {
-        if (g_sys.status.ComSta.u16Cur_Water < 3) //无水流量
-        {
-            u8Delay++;
-        }
-        else
-        {
-            u8Delay = 0;
-        }
-    }
-    else
-    {
-        data = 0;
-        u8Delay = 0;
-    }
-    if (u8Delay > 3)
-    {
-        data = 1;
-    }
-    else
-    {
-        data = 0;
-    }
-    //		rt_kprintf("u16Cur_Water=%d,u8Delay=%d,data=%d\n",g_sys.status.ComSta.u16Cur_Water,u8Delay,data);
-    return data;
+
+    return (ALARM_ACL_CLEARED);
 }
 
 //ACL_E1 饮水箱水位>上浮球
 static uint16_t acl01(alarm_acl_status_st *acl_ptr)
 {
-    uint8_t data;
-    uint16_t u16WL;
-
     // 解除 报警
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-    //水位
-    u16WL = Get_Water_level();
-    if ((u16WL & D_U))
-    {
-        data = 1;
-    }
-    else
-    {
-        data = 0;
-    }
-    return data;
+
+    return (ALARM_ACL_CLEARED);
 }
 
 //ACL_E2 源水箱水位>上浮球
@@ -1083,17 +1044,13 @@ static uint16_t acl03(alarm_acl_status_st *acl_ptr)
     data = 0;
     if (g_sys.config.dev_mask.din[0] & D_ML) //4浮球
     {
-        if ((u16WL & D_U) && (((u16WL & D_M) == 0) || ((u16WL & D_ML) == 0) || ((u16WL & D_L) == 0)))
+        if ((u16WL & D_U) && (((u16WL & D_M) == 0) || (u16WL & D_L) == 0))
         {
             data |= 0x01;
         }
-        else if ((u16WL & D_M) && (((u16WL & D_ML) == 0) || ((u16WL & D_L) == 0)))
+        else if ((u16WL & D_M) && (u16WL & D_L) == 0)
         {
             data |= 0x02;
-        }
-        else if ((u16WL & D_ML) && ((u16WL & D_L) == 0))
-        {
-            data |= 0x04;
         }
         else if (((u16WL & S_U) && (((u16WL & S_M) == 0) || ((u16WL & S_L) == 0))) && (g_sys.config.dev_mask.din[0] & S_M))
         {
@@ -1158,50 +1115,17 @@ static uint16_t acl03(alarm_acl_status_st *acl_ptr)
 // ACL_E4,门打开
 static uint16_t acl04(alarm_acl_status_st *acl_ptr)
 {
-
-    uint8_t data = 0;
-
     // 解除 报警
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-
-    data = sys_get_di_sts(DI_OPEN_BPOS);
-    data = io_calc(data, IO_OPEN);
-    return data;
+    return (ALARM_ACL_CLEARED);
 }
 //ACL_E5 温湿度传感器故障
 static uint16_t acl05(alarm_acl_status_st *acl_ptr)
 {
-    uint8_t req;
-    uint16_t u16mb_comp;
-
-    //uint16_t HUM_erro=0;
-    req = 0;
-    // 解除 报警
-    if (acl_clear(acl_ptr))
-    {
-        g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = 0;
-        return (ALARM_ACL_CLEARED);
-    }
-
-    //		u16mb_comp=g_sys.config.dev_mask.mb_comp;
-    u16mb_comp = 0x01;
-
-    if (g_sys.status.status_remap[MBM_COM_STS_REG_NO] != u16mb_comp)
-    {
-        g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = (g_sys.status.status_remap[MBM_COM_STS_REG_NO]) ^ (u16mb_comp);
-        req = 1;
-    }
-    else
-    {
-        g_sys.status.Alarm_COM_NTC_BIT[ALARM_COM] = 0;
-        req = 0;
-    }
-    acl_ptr->alram_value = g_sys.status.status_remap[MBM_COM_STS_REG_NO];
-    //		rt_kprintf("status_remap[MBM_COM_STS_REG_NO] = %x,mb_comp = %x,req = %x\n",g_sys.status.status_remap[MBM_COM_STS_REG_NO],g_sys.config.dev_mask.mb_comp,req);
-    return (req);
+    return (ALARM_ACL_CLEARED);
 }
 
 //ACL_E6 ,NTC

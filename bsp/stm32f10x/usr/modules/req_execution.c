@@ -1392,14 +1392,15 @@ void Sterilize_req_exe(void)
     u16WL = Get_Water_level();
     if (l_sys.OutWater_OK == WATER_READ)
     {
+        
         return;
     }
 
     u16Temp |= 0x02;
-    if ((u32Sterilize_Interval[u8STR] >= 20 /* (g_sys.config.ComPara.u16Sterilize_Interval[u8STR] * 60 * 2)*/) && (u16WL & D_L) && (!l_sys.OutWater_Key))
+    if ((u32Sterilize_Interval[u8STR] >= (g_sys.config.ComPara.u16Sterilize_Interval[u8STR] * 60 * 2)) && (u16WL & D_L) && (!l_sys.OutWater_Key))
     {
         u16Temp |= 0x04;
-        if (u16Sterilize_Time[u8STR]++ >= 20 /* g_sys.config.ComPara.u16Sterilize_Time[u8STR]*/)
+        if (u16Sterilize_Time[u8STR]++ >= g_sys.config.ComPara.u16Sterilize_Time[u8STR] * 60 * 2)
         {
             u16Sterilize_Time[u8STR] = 0;
             u32Sterilize_Interval[u8STR] = 0;
