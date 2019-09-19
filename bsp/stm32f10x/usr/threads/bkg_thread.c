@@ -338,35 +338,6 @@ static void test_mode_init_data(void)
             l_sys.bitmap[0][BITMAP_MANUAL] &= ~(0x0001 << DO_EV2_BPOS);
         }
 
-        // if (u16Test_UV[0] > TEST_TIME)
-        // {
-        //     u16Test_UV[0] = 0;
-        //     g_sys.config.dev_mask.dout[0] = DO_MASK1;
-        //     g_sys.config.dev_mask.dout[1] = DO_MASK2;
-
-        //     l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_EV2_BPOS);
-        //     u16Test_UV[2]++;
-        //     if (u16Test_UV[2] > (g_sys.config.ComPara.u16TestEV[0] + g_sys.config.ComPara.u16TestEV[1]))
-        //     {
-        //         u16Test_UV[2] = 0;
-        //     }
-        //     if (u16Test_UV[2] > g_sys.config.ComPara.u16TestEV[0])
-        //     {
-        //         l_sys.bitmap[0][BITMAP_MANUAL] &= ~(0x0001 << DO_EV2_BPOS);
-        //     }
-        // }
-        // else
-        // {
-        //     g_sys.config.dev_mask.dout[0] = DO_MASK1;
-        //     g_sys.config.dev_mask.dout[1] = DO_MASK2;
-        //     l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
-
-        //     l_sys.bitmap[0][BITMAP_MANUAL] = 0x00;
-        //     if (u16Test_UV[2] <= g_sys.config.ComPara.u16TestEV[0])
-        //     {
-        //         l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_EV2_BPOS);
-        //     }
-        // }
         break;
     default:
         u8Test[0] = 0;

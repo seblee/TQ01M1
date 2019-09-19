@@ -25,9 +25,9 @@ enum
     DO_PWP_BPOS,       //净化泵//泵1
     DO_DWP_BPOS,       //杀菌泵
     DO_DV_BPOS,        //出水阀//阀2
-    DO_FV_BPOS,        //外接进水阀
+    DO_FV_BPOS,        //外接进水阀 阀3
     DO_RSV2_BPOS,      //保留
-    DO_EL1_BPOS,       //电子锁1
+    DO_EL1_BPOS,       //电子锁1 阀4
 
     DO_EL2_BPOS,      //电子锁2
     DO_RSV3_BPOS,     //预留
@@ -58,24 +58,21 @@ enum
 #define DO_FAN_LOW_BPOS DO_FAN_BPOS //风机低档
 #define DO_UV1_BPOS DO_RSV1_BPOS    //紫外灯2,过流
 //L  双按键出水
-#define DO_WP2_BPOS DO_RSV2_BPOS //出水泵2
 #define DO_DV2_BPOS DO_RSV3_BPOS //出水阀2
 
 #define DO_HEAT_FAN_BPOS DO_RSV2_BPOS //扇热风机
 //TEST
-#define DO_EV1_BPOS DO_DWP_BPOS  //循环阀//阀1
-#define DO_EV2_BPOS DO_DV_BPOS   //阀2
-#define DO_EV3_BPOS DO_RSV2_BPOS //阀3
-#define DO_EV4_BPOS DO_RSV3_BPOS //阀4
+#define DO_EV1_BPOS DO_DWP_BPOS //循环阀//阀1
+#define DO_EV2_BPOS DO_DV_BPOS  //阀2
+#define DO_EV3_BPOS DO_FV_BPOS  //阀3
+#define DO_EV4_BPOS DO_EL1_BPOS //阀4
 
 #define DO_P1_BPOS DO_PWP_BPOS //泵1
 #define DO_P2_BPOS DO_WP_BPOS  //泵2
 
-#define DO_BD_BPOS DO_EL1_BPOS       //冰胆
 #define DO_PUMB_CIR_BPOS DO_EL2_BPOS //循环泵
 
 #define DO_UV24_BPOS DO_RSV2_BPOS //24V紫外灯
-#define DO_F24_BPOS DO_EL1_BPOS   //24V风机,T8机组
 
 //application delay
 #define MODBUS_MASTER_THREAD_DELAY 500

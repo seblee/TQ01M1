@@ -139,6 +139,7 @@ typedef struct
     uint8_t Pwp_Open;        //净化泵开关信号
     uint16_t Pwp_Open_Time;  //净化泵打开时间
     uint8_t Sterilize;       //杀菌
+    uint8_t Purification;    //净化
     uint8_t OutWater_Flag;   //出水中
     uint8_t OutWater_OK;     //出水完成
     uint8_t HeatWater_st;    //加热器出水状态

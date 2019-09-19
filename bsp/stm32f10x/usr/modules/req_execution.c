@@ -183,15 +183,12 @@ static void Fan_Fsm_Out(uint8_t Fan_Gear)
     {
     case FAN_GEAR_START:
         req_bitmap_op(DO_FAN_LOW_BPOS, 1);
-        req_bitmap_op(DO_F24_BPOS, 1);
         break;
     case FAN_GEAR_NO:
         req_bitmap_op(DO_FAN_LOW_BPOS, 0);
-        req_bitmap_op(DO_F24_BPOS, 0);
         break;
     default:
         req_bitmap_op(DO_FAN_LOW_BPOS, 0);
-        req_bitmap_op(DO_F24_BPOS, 0);
         break;
     }
 }
@@ -791,30 +788,21 @@ void External_Water_exe(uint8_t u8Type)
     if (Exit_Water() != WATER_AIR) //外接水源
     {
         // //水位
-        // u16WL = Get_Water_level();
-        // if (u16WL & D_U)
-        // {
-        //     req_bitmap_op(DO_FV_BPOS, 0); //外接水源
-        // }
-        // else
-        // {
-        //     req_bitmap_op(DO_FV_BPOS, 1); //外接水源
-        // }
         if (u8Type == TRUE) //出水
         {
-            req_bitmap_op(DO_FV_BPOS, 1); //外接水源
+            req_bitmap_op(DO_EV3_BPOS, 1); //外接水源
         }
         else
         {
             if ((Exit_Water() == WATER_EXIT) && (g_sys.config.ComPara.u16Disinfection_Mode == 0)) //外接水源
             {
-                req_bitmap_op(DO_FV_BPOS, 0); //外接水源
+                req_bitmap_op(DO_EV3_BPOS, 0); //外接水源
             }
         }
     }
     else
     {
-        req_bitmap_op(DO_FV_BPOS, 0);
+        req_bitmap_op(DO_EV3_BPOS, 0);
     }
 
     return;
@@ -903,6 +891,8 @@ void Pwp_req_exe(void)
         ((u16WL & S_M) || (Exit_Water() == WATER_EXIT))) //源水箱水位高于浮球2 或者外接水源
     {
         l_sys.Pwp_Open = TRUE;
+        if (l_sys.Purification)
+            return;
     }
 
     //开净化泵
@@ -911,12 +901,13 @@ void Pwp_req_exe(void)
         req_bitmap_op(DO_PWP_BPOS, 1); //进水泵
         if (Exit_Water() == WATER_EXIT)
         {
-            req_bitmap_op(DO_FV_BPOS, 1); //外接水源
+            req_bitmap_op(DO_EV3_BPOS, 1); //外接水源
         }
         else
         {
-            req_bitmap_op(DO_FV_BPOS, 0);
+            req_bitmap_op(DO_EV3_BPOS, 0);
         }
+        req_bitmap_op(DO_EV4_BPOS, 0);
 
         u8PWP_S = TRUE;
         //自动停止
@@ -925,14 +916,18 @@ void Pwp_req_exe(void)
         {
             u8PWP_S = FALSE;
             req_bitmap_op(DO_PWP_BPOS, 0); //进水泵
-            req_bitmap_op(DO_FV_BPOS, 0);  //外接水源
+            req_bitmap_op(DO_EV3_BPOS, 0); //外接水源
+            req_bitmap_op(DO_EV4_BPOS, 0);
         }
         l_sys.Pwp_Open = u8PWP_S;
     }
     else
     {
+        if (l_sys.Purification)
+            return;
         req_bitmap_op(DO_PWP_BPOS, 0); //进水泵
-        req_bitmap_op(DO_FV_BPOS, 0);  //外接水源
+        req_bitmap_op(DO_EV3_BPOS, 0); //外接水源
+        req_bitmap_op(DO_EV4_BPOS, 0);
     }
     return;
 }
@@ -1383,17 +1378,17 @@ void Sterilize_req_exe(void)
     uint16_t u16Temp;
 
     u16Temp = 1;
-
     //220V紫外灯
     u8STR = 0;
+    if ((g_sys.config.ComPara.u16Sterilize_Interval[u8STR] == 0) && (g_sys.config.ComPara.u16Sterilize_Time[u8STR] == 0))
+        goto Purification;
     u32Sterilize_Interval[u8STR]++;
 
     //水位
     u16WL = Get_Water_level();
     if (l_sys.OutWater_OK == WATER_READ)
     {
-        
-        return;
+        goto Purification;
     }
 
     u16Temp |= 0x02;
@@ -1427,7 +1422,41 @@ void Sterilize_req_exe(void)
     {
         UV_req_exe(TRUE); //UV
     }
-    return;
+Purification:
+    u8STR = 1;
+    if ((g_sys.config.ComPara.u16Sterilize_Interval[u8STR] == 0) && (g_sys.config.ComPara.u16Sterilize_Time[u8STR] == 0))
+    {
+        u16Temp |= 0x40;
+        l_sys.Purification = FALSE;
+        return;
+    }
+    u32Sterilize_Interval[u8STR]++;
+
+    u16Temp |= 0x10;
+    if ((u32Sterilize_Interval[u8STR] >= (g_sys.config.ComPara.u16Sterilize_Interval[u8STR] * 60 * 2)) && (u16WL & S_L) && (!l_sys.Pwp_Open))
+    {
+        u16Temp |= 0x20;
+        if (u16Sterilize_Time[u8STR]++ >= g_sys.config.ComPara.u16Sterilize_Time[u8STR] * 60 * 2)
+        {
+            u16Sterilize_Time[u8STR] = 0;
+            u32Sterilize_Interval[u8STR] = 0;
+        }
+        l_sys.Purification = TRUE;     //UV
+        req_bitmap_op(DO_PWP_BPOS, 1); //进水泵
+        req_bitmap_op(DO_EV3_BPOS, 0); //外接水源
+        req_bitmap_op(DO_EV4_BPOS, 1);
+    }
+    else
+    {
+        u16Temp |= 0x40;
+        if (!l_sys.Pwp_Open)
+        {
+            req_bitmap_op(DO_PWP_BPOS, 0); //进水泵
+            req_bitmap_op(DO_EV3_BPOS, 0); //外接水源
+            req_bitmap_op(DO_EV4_BPOS, 0);
+        }
+        l_sys.Purification = FALSE;
+    }
 }
 
 //除霜

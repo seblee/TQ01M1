@@ -168,9 +168,7 @@ void sys_running_mode_update(void)
         sys_set_remap_status(WORK_MODE_STS_REG_NO, COOLING_STS_BPOS, 0);
     }
 
-    // rt_kprintf("DO_EV2_BPOS=%d,DO_RH1_BPOS=%d,OutWater_OK=%d,u8HeatNum=%d,u16Cur_Water=%d\n", sys_get_do_sts(DO_EV2_BPOS), l_sys.comp_timeout[DO_RH1_BPOS]);
     //set Outwater status
-    // if ((sys_get_do_sts(DO_EV2_BPOS) == 1) || (l_sys.comp_timeout[DO_RH1_BPOS] > 0))
     if (l_sys.OutWater_Flag == TRUE)
     {
         sys_set_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS, 1);
@@ -180,7 +178,7 @@ void sys_running_mode_update(void)
         sys_set_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS, 0);
     }
     //外接水源
-    if (sys_get_do_sts(DO_FV_BPOS) == 1)
+    if (sys_get_do_sts(DO_EV3_BPOS) == 1)
     {
         sys_set_remap_status(WORK_MODE_STS_REG_NO, EXITWATER_STS_BPOS, 1);
     }
