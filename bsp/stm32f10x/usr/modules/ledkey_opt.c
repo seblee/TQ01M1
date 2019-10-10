@@ -220,7 +220,7 @@ void ledSendOperation(void)
         led1State = LED_OFF;
     }
 
-    if (l_sys.Pwp_Open)
+    if (l_sys.Pwp_Open || l_sys.Purification)
     {
         led2State = LED_FLASH;
     }
