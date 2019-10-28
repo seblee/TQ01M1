@@ -1223,7 +1223,7 @@ void WaterOut_req_exe(void)
     uint16_t u16Pls_Cnt;
 
     g_sys.status.ComSta.REQ_TEST[1] = 0;
-
+    g_sys.config.ComPara.u16Water_Ctrl = HMI_KEY;
     if (g_sys.config.ComPara.u16Water_Ctrl & HMI_KEY) //按键出水
     {
         g_sys.status.ComSta.REQ_TEST[1] |= 0x01;

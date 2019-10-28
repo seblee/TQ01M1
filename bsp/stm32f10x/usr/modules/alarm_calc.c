@@ -1000,32 +1000,13 @@ static uint16_t acl01(alarm_acl_status_st *acl_ptr)
 //ACL_E2 源水箱水位>上浮球
 static uint16_t acl02(alarm_acl_status_st *acl_ptr)
 {
-    uint8_t data;
-    uint16_t u16WL;
-
     // 解除 报警
     if (acl_clear(acl_ptr))
     {
         return (ALARM_ACL_CLEARED);
     }
-    if (!(g_sys.config.dev_mask.din[0] & S_M)) //源水箱2浮球
-    {
-        data = 0;
-    }
-    else
-    {
-        //水位
-        u16WL = Get_Water_level();
-        if ((u16WL & S_U))
-        {
-            data = 1;
-        }
-        else
-        {
-            data = 0;
-        }
-    }
-    return data;
+
+    return (ALARM_ACL_CLEARED);
 }
 
 //ACL_E3，浮球异常
