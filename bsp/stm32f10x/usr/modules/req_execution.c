@@ -978,9 +978,9 @@ void WaterOut_Key(void)
 {
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
-
+    uint16_t Water_Ctrl = HMI_KEY;
     //冷水 2
-    if ((sys_get_di_sts(DI_Cold_2_BPOS) == 1) && (g_sys.config.ComPara.u16Water_Ctrl & TWO_COLD)) //双路出冷水
+    if ((sys_get_di_sts(DI_Cold_2_BPOS) == 1) && (Water_Ctrl & TWO_COLD)) //双路出冷水
     {
         l_sys.OutWater_Key |= WATER_ICE;
         l_sys.OutWater_Delay[2] = WATER_MAXTIME;
@@ -1221,10 +1221,11 @@ void WaterOut_req_exe(void)
     extern sys_reg_st g_sys;
     extern local_reg_st l_sys;
     uint16_t u16Pls_Cnt;
+    uint16_t Water_Ctrl = HMI_KEY;
 
     g_sys.status.ComSta.REQ_TEST[1] = 0;
-    g_sys.config.ComPara.u16Water_Ctrl = HMI_KEY;
-    if (g_sys.config.ComPara.u16Water_Ctrl & HMI_KEY) //按键出水
+
+    if (Water_Ctrl & HMI_KEY) //按键出水
     {
         g_sys.status.ComSta.REQ_TEST[1] |= 0x01;
         WaterOut_Key();
@@ -1273,7 +1274,7 @@ void WaterOut_req_exe(void)
             }
         }
         //HMI出水时才判断流量
-        if (((g_sys.status.ComSta.u16Cur_Water >= g_sys.config.ComPara.u16Water_Flow) && (g_sys.status.ComSta.u16Cur_Water)) && (!(g_sys.config.ComPara.u16Water_Ctrl & HMI_KEY))) //HMI出水
+        if (((g_sys.status.ComSta.u16Cur_Water >= g_sys.config.ComPara.u16Water_Flow) && (g_sys.status.ComSta.u16Cur_Water)) && (!(Water_Ctrl & HMI_KEY))) //HMI出水
         {
             g_sys.status.ComSta.REQ_TEST[1] |= 0x08;
             WaterOut_Close(1, WATER_NORMAL_ICE);
@@ -1521,17 +1522,17 @@ void Cold_Water_exe(void)
             u16Temp |= 0x02;
             if (i16Water_Temp > g_sys.config.ComPara.u16ColdWater_StartTemp) //开始制冰水
             {
+                l_sys.ColdWaterState = 2;
                 u16Temp |= 0x04;
                 l_sys.Cold_Water = TRUE;
                 u8Coldwater = TRUE;
-                if (l_sys.makeWater == 0)
-                    req_bitmap_op(DO_WV_BPOS, 1); //制冷
-                else
-                    req_bitmap_op(DO_WV_BPOS, 0); //制冷
-                req_bitmap_op(DO_CV_BPOS, 1);     //制冰水
+
+                req_bitmap_op(DO_WV_BPOS, 1); //制冷
+                req_bitmap_op(DO_CV_BPOS, 1); //制冰水
             }
             else if (i16Water_Temp < g_sys.config.ComPara.u16ColdWater_StopTemp) //关闭
             {
+                l_sys.ColdWaterState = 4;
                 u16Temp |= 0x08;
                 u8Coldwater = FALSE;
 
@@ -1542,20 +1543,22 @@ void Cold_Water_exe(void)
             {
                 if (u8Coldwater == TRUE)
                 {
+                    l_sys.ColdWaterState = 3;
                     u16Temp |= 0x10;
                     l_sys.Cold_Water = TRUE;
-                    if (l_sys.makeWater == 0)
-                        req_bitmap_op(DO_WV_BPOS, 1); //制冷
-                    else
-                        req_bitmap_op(DO_WV_BPOS, 0); //制冷
-                    req_bitmap_op(DO_CV_BPOS, 1);     //制冰水
+                    req_bitmap_op(DO_WV_BPOS, 1); //制冷
+                    req_bitmap_op(DO_CV_BPOS, 1); //制冰水
+                }
+                else
+                {
+                    l_sys.ColdWaterState = 5;
                 }
             }
         }
         else
         {
             u16Temp |= 0x20;
-
+            l_sys.ColdWaterState = 1;
             req_bitmap_op(DO_WV_BPOS, 0); //制冷
             req_bitmap_op(DO_CV_BPOS, 0); //制冰水关闭
         }
@@ -1580,7 +1583,7 @@ void Heat_Fan_exe(void)
 
     static uint8_t u8Heatfan = 0;
     int16_t i16Heat_Temp;
-
+    uint16_t Water_Ctrl = HMI_KEY;
     if (g_sys.config.ComPara.u16ColdWater_Mode == BD_ICE) //冰胆模式
     {
         return;
@@ -1591,7 +1594,7 @@ void Heat_Fan_exe(void)
     }
     i16Heat_Temp = (int16_t)g_sys.status.ComSta.u16Ain[AI_NTC3];
 
-    if ((g_sys.config.ComPara.u16Water_Ctrl & TWO_COLD) == 0) //非双路出冷水
+    if ((Water_Ctrl & TWO_COLD) == 0) //非双路出冷水
     {
         if ((i16Heat_Temp == ABNORMAL_VALUE) || (i16Heat_Temp > g_sys.config.ComPara.u16HeatFan_StartTemp)) //
         {

@@ -42,18 +42,27 @@ typedef struct
     unsigned char s1 : 2;
     unsigned char s2 : 2;
     unsigned char s3 : 2;
-} _STATE_bits;
+} _STATE_2bits;
+
+typedef struct
+{
+    unsigned char s0 : 4;
+    unsigned char s1 : 4;
+} _STATE_4bits;
 
 typedef union {
-    _STATE_bits sbits;
+    _STATE_2bits s2bits;
+    _STATE_4bits s4bits;
     unsigned char byte;
 } _USR_FLAGA_type;
 
 enum
 {
-    LED_OFF = 0x00,
-    LED_ON = 0x01,
-    LED_FLASH = 0x02,
+    STATE_LED_OFF,
+    STATE_LED_ON,
+    STATE_LED_FLASH_2HZ,
+    STATE_LED_FLASH_1HZ,
+    STATE_LED_FLASH_0_5HZ,
 };
 
 #endif

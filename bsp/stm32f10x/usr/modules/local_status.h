@@ -147,6 +147,7 @@ typedef struct
     uint16_t HeatWater_Time; //加热器出水时间
     uint8_t makeWater;       //制水信号
     uint8_t Cold_Water;      //制冰水信号
+    uint8_t ColdWaterState;  //制冰水状态
     uint16_t u16BD_Time;
     uint16_t u16BD_FAN_Delay;
     uint8_t SEL_Jump; //跳线选择

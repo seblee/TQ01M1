@@ -47,21 +47,24 @@ volatile _TKS_FLAGA_type keyTrg[2];
 #define KEY3Restain keyTrg[1].bits.b1
 #define KEY4Restain keyTrg[1].bits.b0
 
-_USR_FLAGA_type ledState[3];
-#define led1State ledState[0].sbits.s0
-#define led2State ledState[0].sbits.s1
-#define led3State ledState[0].sbits.s2
-#define led4State ledState[0].sbits.s3
-#define led5State ledState[1].sbits.s0
-#define led6State ledState[1].sbits.s1
-#define led7State ledState[1].sbits.s2
-#define led8State ledState[1].sbits.s3
-#define led9State ledState[2].sbits.s0
+_USR_FLAGA_type ledState[5];
+#define led1State ledState[0].s4bits.s0
+#define led2State ledState[0].s4bits.s1
+#define led3State ledState[1].s4bits.s0
+#define led4State ledState[1].s4bits.s1
+#define led5State ledState[2].s4bits.s0
+#define led6State ledState[2].s4bits.s1
+#define led7State ledState[3].s4bits.s0
+#define led8State ledState[3].s4bits.s1
+#define led9State ledState[4].s4bits.s0
+
+unsigned char beepCount = 0;
 
 /*************************function******************************************************/
 
 /* 接收数据回调函数 */
-static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
+static rt_err_t
+uart_input(rt_device_t dev, rt_size_t size)
 {
     struct rx_msg msg;
     rt_err_t result;
@@ -171,12 +174,12 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
     {
         if (g_sys.config.ComPara.u16ExitWater_Mode == WATER_EXIT)
         {
-            led5State = LED_OFF;
+            led5State = STATE_LED_OFF;
             g_sys.config.ComPara.u16ExitWater_Mode = WATER_AIR;
         }
         else
         {
-            led5State = LED_ON;
+            led5State = STATE_LED_ON;
             g_sys.config.ComPara.u16ExitWater_Mode = WATER_EXIT;
         }
         RAM_Write_Reg(EE_EXITWATER, g_sys.config.ComPara.u16ExitWater_Mode, 1);
@@ -207,91 +210,123 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
 #include "sys_status.h"
 void ledSendOperation(void)
 {
-    if (l_sys.makeWater && sys_get_do_sts(DO_COMP1_BPOS))
+    if (l_sys.makeWater && sys_get_do_sts(DO_COMP1_BPOS) && (l_sys.Cold_Water != TRUE))
     {
-        led1State = LED_FLASH;
+        led1State = STATE_LED_FLASH_1HZ;
     }
     else if (l_sys.makeWater)
     {
-        led1State = LED_ON;
+        led1State = STATE_LED_ON;
     }
     else
     {
-        led1State = LED_OFF;
+        led1State = STATE_LED_OFF;
     }
 
     if (l_sys.Pwp_Open || l_sys.Purification)
     {
-        led2State = LED_FLASH;
+        led2State = STATE_LED_FLASH_1HZ;
     }
     else
     {
-        led2State = LED_OFF;
+        led2State = STATE_LED_OFF;
     }
 
     if (WaterOut_level())
     {
-        led3State = LED_OFF;
+        led3State = STATE_LED_OFF;
     }
     else
     {
-        led3State = LED_FLASH;
+        led3State = STATE_LED_FLASH_1HZ;
     }
 
     if (sys_get_do_sts(DO_UV1_BPOS))
     {
-        led4State = LED_FLASH;
+        led4State = STATE_LED_FLASH_1HZ;
     }
     else
     {
-        led4State = LED_OFF;
+        led4State = STATE_LED_OFF;
     }
 
     if (g_sys.config.ComPara.u16ExitWater_Mode == WATER_EXIT)
     {
-        led5State = LED_ON;
+        led5State = STATE_LED_ON;
     }
     else
     {
-        led5State = LED_OFF;
+        led5State = STATE_LED_OFF;
     }
 
     if (l_sys.OutWater_OK == WATER_READ)
     {
-        led6State = LED_FLASH;
+        led6State = STATE_LED_FLASH_2HZ;
     }
     else
     {
-        led6State = LED_ON;
+        led6State = STATE_LED_ON;
     }
 
-    if (g_sys.config.ComPara.u16ColdWater_Mode)
+    if (g_sys.config.ComPara.u16ColdWater_Mode == ICE_NO)
     {
-        led7State = LED_ON;
+        led7State = STATE_LED_OFF;
     }
     else
     {
-        led7State = LED_OFF;
+        static int16_t ColdWaterStateBak = 0;
+        if (l_sys.ColdWaterState == 1)
+        {
+            led7State = STATE_LED_FLASH_0_5HZ;
+        }
+        else if (l_sys.ColdWaterState == 2)
+        {
+            led7State = STATE_LED_FLASH_2HZ;
+        }
+        else if ((l_sys.ColdWaterState == 3) || (l_sys.ColdWaterState == 5))
+        {
+            led7State = STATE_LED_ON;
+        }
+        else if (l_sys.ColdWaterState == 4)
+        {
+            led7State = STATE_LED_ON;
+            if (ColdWaterStateBak == 3)
+            {
+                beepCount += 3;
+            }
+        }
+        ColdWaterStateBak = l_sys.ColdWaterState;
     }
+
+    led8State = STATE_LED_OFF;
 
     if (g_sys.config.ComPara.u16Power_Mode)
     {
-        led9State = LED_ON;
+        led9State = STATE_LED_ON;
     }
     else
     {
-        led9State = LED_OFF;
+        led9State = STATE_LED_OFF;
     }
 
+    tx_buffer[0] = 0xa7;
+    tx_buffer[1] = 0xf6;
     tx_buffer[2] = ledState[0].byte;
     tx_buffer[3] = ledState[1].byte;
     tx_buffer[4] = ledState[2].byte;
-    tx_buffer[5] = 0;
-    tx_buffer[5] += tx_buffer[0];
-    tx_buffer[5] += tx_buffer[1];
-    tx_buffer[5] += tx_buffer[2];
-    tx_buffer[5] += tx_buffer[3];
-    tx_buffer[5] += tx_buffer[4];
+    tx_buffer[5] = ledState[3].byte;
+    tx_buffer[6] = ledState[4].byte;
+    tx_buffer[7] = beepCount & 0x0f;
+    beepCount = 0;
+
+    tx_buffer[8] = tx_buffer[0];
+    tx_buffer[8] += tx_buffer[1];
+    tx_buffer[8] += tx_buffer[2];
+    tx_buffer[8] += tx_buffer[3];
+    tx_buffer[8] += tx_buffer[4];
+    tx_buffer[8] += tx_buffer[5];
+    tx_buffer[8] += tx_buffer[6];
+    tx_buffer[8] += tx_buffer[7];
 }
 /***
  * 
@@ -324,7 +359,7 @@ static void serial_thread_entry(void *parameter)
             {
                 keyRecOperation(keyState);
                 ledSendOperation();
-                rt_device_write(serial, 0, tx_buffer, 6);
+                rt_device_write(serial, 0, tx_buffer, 9);
                 recOK = 0;
             }
 

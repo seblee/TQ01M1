@@ -399,9 +399,9 @@
               <FilePath>applications\application.c</FilePath>
             </File>
             <File>
-              <FileName>readme.txt</FileName>
+              <FileName>ReadMe.txt</FileName>
               <FileType>5</FileType>
-              <FilePath>.\readme.txt</FilePath>
+              <FilePath>.\KL38-Release\ReadMe.txt</FilePath>
             </File>
           </Files>
         </Group>
