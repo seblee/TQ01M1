@@ -3,6 +3,8 @@
 #include "stdint.h"
 
 //#define WV_TEST 1	//制冷阀常闭，反向
+//#define BD_COLD 	1	//冰胆制冷
+#define PUMP_TEST 1	//制冷阀常闭，反向
 
 #define HUM_CURRENT_UNIT 1.19
 enum
@@ -67,6 +69,7 @@ enum
     WATER_NORMAL_ICE = 0x01,
     WATER_HEAT = 0x02,
     WATER_ICE = 0x04, //冰水
+    WATER_HEATPOT = 0x08,//热灌
 };
 //冰水模式
 enum
@@ -75,6 +78,9 @@ enum
     NORMAL_ICE = 0x01, //阀冰水
     BD_ICE = 0x02,     //冰胆
 };
+
+#define COLD_FV_DELAY 	2   //1S
+#define COLD_START_DELAY 	60   //1M
 
 #define BD_TIME 180
 #define BD_DELAY 60
@@ -187,10 +193,14 @@ enum
     VALVE_FIRST = 0x01, //
 };
 
+//时间
+#define INTERAL_TIME 24*3600*2//间隔24小时
+#define CLOSE_TIME 5
+
 void hum_capacity_calc(void);
 void req_execution(int16_t target_req_temp, int16_t target_req_hum);
 void req_bitmap_op(uint8_t component_bpos, uint8_t action);
-void Close_DIS_PWR(void);
-void UV_req_exe(uint8_t u8Type);
+void Close_DIS_PWR(uint8_t u8Type);
+void UV_req_exe(uint8_t u8Type,uint8_t u8Delay);
 uint8_t Sys_Get_Storage_Signal(void);
 #endif //__REQ_EXE_H__

@@ -148,6 +148,12 @@ static void test_mode_init_data(void)
         l_sys.bitmap[1][BITMAP_MANUAL] = DO_POWER_CTR_ONLY;
 
         l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_COMP1_BPOS) | (0x0001 << DO_COMP2_BPOS) | (0x0001 << DO_FAN_BPOS);
+#ifdef SYS_M_L50L
+#else
+        {
+            l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_F24_BPOS); //T8 24Vfan
+        }
+#endif
         l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 50;
         break;
     case TEST_PURIFICATION: //净化
@@ -164,7 +170,22 @@ static void test_mode_init_data(void)
         if (u32Sterilize_Interval >= (g_sys.config.ComPara.u16Sterilize_Interval[0] * 60)) //开始杀菌
         {
             u16Sterilize_Time++;
-            l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DWP_BPOS) | (0x0001 << DO_UV1_BPOS);
+            if (g_sys.config.ComPara.u16Sterilize_Mode == 1) //
+            {
+                l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DWP_BPOS) | (0x0001 << DO_UV1_BPOS);
+            }
+            else if (g_sys.config.ComPara.u16Sterilize_Mode == 2) //
+            {
+                l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DWP_BPOS) | (0x0001 << DO_UV24_BPOS);
+            }
+            else if (g_sys.config.ComPara.u16Sterilize_Mode == 3) //
+            {
+                l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DWP_BPOS) | (0x0001 << DO_UV1_BPOS) | (0x0001 << DO_UV24_BPOS);
+            }
+            else
+            {
+                l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_WP_BPOS) | (0x0001 << DO_DWP_BPOS) | (0x0001 << DO_UV1_BPOS);
+            }
         }
         if (u16Sterilize_Time >= g_sys.config.ComPara.u16Sterilize_Time[0] * 60) //退出杀菌
         {
@@ -228,7 +249,15 @@ static void test_mode_init_data(void)
 #ifdef WV_TEST
         l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_COMP1_BPOS) | (0x0001 << DO_COMP2_BPOS) | (0x0001 << DO_FAN_BPOS) | (0x0001 << DO_CV_BPOS);
 #else
+
         l_sys.bitmap[0][BITMAP_MANUAL] = (0x0001 << DO_COMP1_BPOS) | (0x0001 << DO_COMP2_BPOS) | (0x0001 << DO_FAN_BPOS) | (0x0001 << DO_WV_BPOS) | (0x0001 << DO_CV_BPOS);
+
+#endif
+#ifdef SYS_M_L50L
+#else
+        {
+            l_sys.bitmap[0][BITMAP_MANUAL] |= (0x0001 << DO_F24_BPOS); //T8 24Vfan
+        }
 #endif
         l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL] = 80;
         break;
@@ -633,7 +662,7 @@ static void sys_comp_cooldown(void)
     }
 
     //净化泵打开时间
-    if (sys_get_do_sts(DO_PWP_BPOS) == 0)
+    if (l_sys.Pwp_Open == FALSE)
     {
         l_sys.Pwp_Open_Time = 0;
     }
@@ -648,6 +677,10 @@ static void sys_comp_cooldown(void)
         l_sys.u16UV_Delay--;
     }
 
+    if (l_sys.Cold_Delay[0]) //延时开启制冰水
+    {
+        l_sys.Cold_Delay[0]--;
+    }
     return;
 }
 

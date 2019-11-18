@@ -20,7 +20,7 @@
  */
 
 #include <rtthread.h>
-#include <rthw.h> 
+#include <rthw.h>
 #ifdef RT_USING_MODULE
 #include <dlmodule.h>
 #endif

@@ -288,7 +288,7 @@ void USART2_IRQHandler(void)
     //接收中断
     if (USART_GetITStatus(USART2, USART_IT_RXNE) == SET)
     {
-        l_sys.u16Uart_Timeout = 0;
+        memset(l_sys.u16Uart_Timeout, 0x00, 4);
         USART_ClearITPendingBit(USART2, USART_IT_RXNE);
         if (l_sys.SEL_Jump & Com_Pad) //串口屏
         {

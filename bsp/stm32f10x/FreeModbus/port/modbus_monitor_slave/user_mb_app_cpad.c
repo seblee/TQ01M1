@@ -56,10 +56,10 @@ void cpad_modbus_slave_thread_entry(void *parameter)
     rt_kprintf("cpad_modbus_slave_thread_entry\n");
     while (1)
     {
-        l_sys.u16Uart_Timeout++;
-        if (l_sys.u16Uart_Timeout >= 500)
+        l_sys.u16Uart_Timeout[0]++;
+        if (l_sys.u16Uart_Timeout[0] >= 500)
         {
-            l_sys.u16Uart_Timeout = 0;
+            l_sys.u16Uart_Timeout[0] = 0;
             cpad_MBRTUInit(1, UPORT_CPAD, 19200, MB_PAR_NONE);
         }
         // if(l_sys.SEL_Jump&Com_Pad)//串口屏
@@ -114,9 +114,16 @@ uint8_t COM_SINGLE_eMBRegHoldingCB(uint16_t usAddress, uint16_t usValue)
         }
         else if (temp == 0x2D) //重启
         {
-            Close_DIS_PWR();
+            Close_DIS_PWR(1);
             rt_thread_delay(1000);
             NVIC_SystemReset();
+            return MB_ENOERR;
+        }
+        else if (temp == 0x1E) //屏重启
+        {
+            Close_DIS_PWR(1);
+            rt_thread_delay(1000);
+            Close_DIS_PWR(0);
             return MB_ENOERR;
         }
         else

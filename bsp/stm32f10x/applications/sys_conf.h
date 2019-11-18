@@ -669,6 +669,14 @@ typedef struct
     uint16_t u16Wifi_Password[10]; //wifi密码/ASIIC
 } Net_Conf_st;
 #define WIFI_SET 0x5AA5
+//低噪音参数
+typedef struct
+{
+    uint16_t u16LN_Enable;  //低噪音使能
+    uint16_t u16LN_Mode;    //低噪音模式
+    uint16_t u16LN_Time[2]; //低噪音时间段
+    uint16_t u16LN_Fan;     //低噪音风速
+} LowNoise_Conf_st;
 
 //空气制水机参数
 typedef struct
@@ -692,6 +700,7 @@ typedef struct
     uint16_t u16Water_Flow;            //出水流量
     uint16_t u16NormalWater_Temp;      //常温水温度
     uint16_t u16HotWater_Temp;         //热水温度
+    uint16_t u16HotWater_Cali;          //热水温度校正
     uint16_t u16ExitWater_Mode;        //外接水源模式
     uint16_t u16Disinfection_Mode;     //消毒模式
     uint16_t u16Rsv0[4];               //
@@ -720,7 +729,9 @@ typedef struct
     uint16_t u16StorageDealy[2];       //延时
     uint16_t u16CloseFrist;            //null
     uint16_t u16CloseDelay;            //null
+    LowNoise_Conf_st LN;               //低噪音
     uint16_t u16TestEV[2];             //null
+    uint16_t u16Heater_PM25;           //0-加热器,1-PM25
     uint16_t device_info[100];         //三元组信息
 } ComPara_Conf_st;
 
@@ -741,6 +752,9 @@ typedef struct
 {
     uint16_t Fixed_Report; //定时上报间隔
     uint16_t Real_Report;  //实时上报间隔
+	uint16_t Restart_Enable; //最高位使能重启,低位表示次数
+    uint16_t Restart_Delay;  //重启延时
+    uint16_t Net_ERR;  		 //网络异常
 } Platform_st;
 
 typedef struct
@@ -895,7 +909,7 @@ typedef struct
     uint16_t u16Last_Water;
     uint16_t u16Cumulative_Water[2]; //累计取水
     uint16_t u16PM25;
-    uint16_t u16Rev1[3];
+    uint16_t u16TDS[4];
     uint16_t u16Runtime[2][DO_MAX_CNT]; //使用时间
     uint16_t u16WL;                     //水位
     System_Time_st Sys_Time;            //系统时间
@@ -905,7 +919,7 @@ typedef struct
     uint16_t TEST4;
     uint16_t TEST5;
     uint16_t TEST6;
-    uint16_t REQ_TEST[3];
+    uint16_t REQ_TEST[4];
     uint16_t net_status;
 } ComSta_st;
 

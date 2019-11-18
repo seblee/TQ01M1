@@ -26,8 +26,9 @@ enum
     ACL_E7,
     ACL_E8, //紫外灯杀菌未开
     ACL_E9, //源水箱故障
-
     ACL_WATER_LEAK,          //漏水
+    ACL_E11, //排气高温
+    ACL_E12, //排气高温锁死
     ACL_HI_PRESS1,           //高压1
     ACL_HI_PRESS2,           //高压2
     ACL_FILTER_OT,           //滤网
@@ -44,6 +45,12 @@ enum
 };
 #define ACL_FAN01_OD ACL_E7 //风机故障
 #define ACL_UV1_OT ACL_E8   //紫外灯1超时
+#define ACL_SYS01_EXHAUST_HI		 		ACL_E11
+#define ACL_SYS01_EXHAUST_HI_LOCK 	ACL_E12
+
+
+#define RT_MS 	1000
+
 //Alair,20161227
 enum
 {
@@ -77,5 +84,6 @@ uint8_t get_alarm_bitmap(uint8_t alarm_id);
 uint8_t clear_alarm(void);
 uint8_t get_alarm_bitmap_mask(uint8_t component_bpos);
 uint8_t get_alarm_bitmap_op(uint8_t component_bpos);
+uint8_t alarm_Off(void);
 
 #endif //__ALAMRS_H__

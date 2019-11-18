@@ -147,7 +147,7 @@ void sys_running_mode_update(void)
         sys_set_remap_status(WORK_MODE_STS_REG_NO, PWR_STS_BPOS, 0);
     }
 
-    // g_sys.status.general.running_mode = (g_sys.config.ComPara.u16Test_Mode_En<<2)|(g_sys.config.ComPara.u16Manual_Mode_En<<1)|(g_sys.config.general.alarm_bypass_en<<0);
+    // g_sys.status.general.running_mode = (g_sys.config.ComPara.u16Test_Mode_En << 2) | (g_sys.config.ComPara.u16Manual_Mode_En << 1) | (g_sys.config.general.alarm_bypass_en << 0);
 
     if (sys_get_do_sts(DO_FAN_BPOS) == 1)
     {
@@ -169,9 +169,9 @@ void sys_running_mode_update(void)
     }
 
     // rt_kprintf("DO_EV2_BPOS=%d,DO_RH1_BPOS=%d,OutWater_OK=%d,u8HeatNum=%d,u16Cur_Water=%d\n", sys_get_do_sts(DO_EV2_BPOS), l_sys.comp_timeout[DO_RH1_BPOS]);
-    //set Outwater status
+    // set Outwater status
     // if ((sys_get_do_sts(DO_EV2_BPOS) == 1) || (l_sys.comp_timeout[DO_RH1_BPOS] > 0))
-    if (l_sys.OutWater_Flag == TRUE)
+    if (l_sys.OutWater_Flag)
     {
         sys_set_remap_status(WORK_MODE_STS_REG_NO, OUTWATER_STS_BPOS, 1);
     }
@@ -279,10 +279,6 @@ uint16_t Get_Water_level(void)
     {
         u16Water_level &= ~S_M;
     }
-    if (!(g_sys.config.dev_mask.din[0] & S_M))
-    {
-        u16Water_level &= ~S_M;
-    }
 
     //S_U
     if (sys_get_di_sts(DI_SOURCE_UP_BPOS) == 0)
@@ -290,6 +286,10 @@ uint16_t Get_Water_level(void)
         u16Water_level |= S_U;
     }
     else
+    {
+        u16Water_level &= ~S_U;
+    }
+    if (!(g_sys.config.dev_mask.din[0] & S_U)) //无上浮球
     {
         u16Water_level &= ~S_U;
     }

@@ -116,7 +116,7 @@ const Bit_remap_st DO_remap_table[] = {
     {1, 1}, //
     {2, 2}, //
     {3, 3}, //
-#ifdef SYS_HMI_TQ_T10
+#ifdef SYS_M_T10
     {4, 16}, ////T10,UV_24V,DO5与DO17互换
 #else
     {4, 4},   //
@@ -132,7 +132,7 @@ const Bit_remap_st DO_remap_table[] = {
     {13, 13}, //
     {14, 14}, //
     {15, 15}, //
-#ifdef SYS_HMI_TQ_T10
+#ifdef SYS_M_T10
     {16, 4}, //
 #else
     {16, 16}, //

@@ -145,6 +145,7 @@ typedef struct
     uint16_t HeatWater_Flow; //加热器出水流量
     uint16_t HeatWater_Time; //加热器出水时间
     uint8_t Cold_Water;      //制冰水信号
+    uint8_t Cold_Delay[2];      //制水延迟
     uint16_t u16BD_Time;
     uint16_t u16BD_FAN_Delay;
     uint8_t SEL_Jump; //跳线选择
@@ -159,12 +160,12 @@ typedef struct
     uint16_t OutWater_Delay[3]; //按键出水延时
     uint8_t ChildLock_Key;      //童锁
     uint8_t ChildLock_Cnt[2];   //童锁计数器
-    uint16_t u16Uart_Timeout;   //串口重启
+    uint16_t u16Uart_Timeout[2];   //串口重启
     uint8_t u8CloseDelay;       //关闭延迟
-    uint16_t u16UV_Delay;       //关闭延迟
+		uint16_t	u16UV_Delay;//关闭延迟	
     uint16_t u16WaterFlow;      //出水流量
-    uint8_t u8Storage_Status;   //贮存状态
-    uint8_t u8Storage_Fsm;      //贮存状态机
+    uint8_t u8Storage_Status;    //贮存状态
+		uint8_t u8Storage_Fsm;    	//贮存状态机
 } local_reg_st;
 
 enum

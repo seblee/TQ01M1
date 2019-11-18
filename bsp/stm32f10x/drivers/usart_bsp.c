@@ -22,7 +22,6 @@
 
 #include <rtdevice.h>
 
-
 static uint16_t u16FrameCheckSum;
 static uint8_t u8FrameDataLength;
 uint8_t g_ComBuff[UART_NUM][PROTOCOL_FRAME_MaxLen];
@@ -534,7 +533,7 @@ static void RCC_Configuration(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 #endif /* RT_USING_UART4 */
 
-#if defined(RT_USING_UART5) 
+#if defined(RT_USING_UART5)
     /* Enable UART GPIO clocks */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
@@ -590,7 +589,7 @@ static void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Pin = UART3_GPIO_TX;
     GPIO_Init(UART3_GPIO, &GPIO_InitStructure);
-   
+
 #endif /* RT_USING_UART3 */
 
 #if defined(RT_USING_UART4)
@@ -618,7 +617,7 @@ static void GPIO_Configuration(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Pin = UART5_GPIO_TX;
     GPIO_Init(UART5_GPIO_T, &GPIO_InitStructure);
-     
+
 #endif /* RT_USING_UART5 */
 }
 
@@ -739,7 +738,7 @@ void rt_hw_usart_init(void)
 #if defined(RT_USING_UART4)
     uart = &uart4;
 
-    config.baud_rate = BAUD_RATE_115200;
+    config.baud_rate = BAUD_RATE_9600;
 
     serial4.ops = &stm32_uart_ops;
     serial4.config = config;
@@ -905,12 +904,14 @@ uint8_t UART_Send(uint8_t *u8Buf, uint8_t u8Len)
 //串口发送数据
 uint8_t Heat_Send(uint8_t u8Type, uint8_t u8OC, uint8_t u8Temp, uint16_t u16WL)
 {
+    extern sys_reg_st g_sys;
     uint8_t u8SendBuf[HEATWRITE_NUM + 2] = {0};
     uint8_t u8Head = 0xAA;
     uint8_t u8Addr = 0x01;
     uint16_t u16Sum = 0x00;
     uint8_t i;
-
+    if (g_sys.config.ComPara.u16Heater_PM25)
+        return 1;
     if (u8Type == HEAT_READPARA)
     {
         u8SendBuf[0] = 0xA5;
@@ -943,7 +944,7 @@ uint8_t xPortSerialGetByte(char *pucByte, uint8_t ucMB_Number)
         *pucByte = USART_ReceiveData(USART1);
         break;
     case UART_PM25:
-        *pucByte = USART_ReceiveData(UART5);
+        // *pucByte = USART_ReceiveData(UART4);
         break;
     default:
         break;
@@ -1133,10 +1134,11 @@ uint8_t HeatPortSerialReceiveFSM(uint8_t port)
     }
     return 1;
 }
+#include "zph01_opt.h"
 
 void USART1_IRQHandler(void)
 {
-
+    extern sys_reg_st g_sys;
     rt_interrupt_enter();
     //溢出错误
     if (USART_GetFlagStatus(USART1, USART_FLAG_ORE) == SET)
@@ -1146,7 +1148,15 @@ void USART1_IRQHandler(void)
     //接收中断
     if (USART_GetITStatus(USART1, USART_IT_RXNE) == SET)
     {
-        HeatPortSerialReceiveFSM(UART_HEAT);
+        if (g_sys.config.ComPara.u16Heater_PM25)
+        {
+            zph01ReceiveData(USART_ReceiveData(USART1));
+        }
+        else
+        {
+            HeatPortSerialReceiveFSM(UART_HEAT);
+        }
+
         USART_ClearITPendingBit(USART1, USART_IT_RXNE);
     }
     //发送中断

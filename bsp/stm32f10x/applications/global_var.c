@@ -53,10 +53,10 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {5, &g_sys.config.general.alarm_bypass_en, 0, 1, 0, 3, 1, NULL},
     {6, &g_sys.config.general.testing_mode_en, 0, 1, 0, 4, 1, NULL},
     {7, &g_sys.config.general.power_mode_mb_en, 0, 1, 1, 3, 1, NULL},
-    {8, &g_sys.config.dev_mask.din_bitmap_polarity[0], 0, 0xffff, 0xBFDB, 3, 1, NULL}, // DI极性
+    {8, &g_sys.config.dev_mask.din_bitmap_polarity[0], 0, 0xffff, 0xBEDB, 3, 1, NULL}, // DI极性
     {9, &g_sys.config.dev_mask.din_bitmap_polarity[1], 0, 0xffff, 0x00, 3, 1, NULL},
-    {10, &g_sys.config.dev_mask.ain, 0, 0xffff, 0x001F, 3, 1, NULL},
-    {11, &g_sys.config.dev_mask.din[0], 0, 0xFFFF, 0x3E7F, 3, 1, NULL}, // DI屏蔽位
+    {10, &g_sys.config.dev_mask.ain, 0, 0xffff, 0x801F, 3, 1, NULL},
+    {11, &g_sys.config.dev_mask.din[0], 0, 0xFFFF, 0x3F7F, 3, 1, NULL}, // DI屏蔽位
     {12, &g_sys.config.dev_mask.din[1], 0, 0xffff, 0x0000, 3, 1, NULL},
     {13, &g_sys.config.dev_mask.aout, 0, 0x003f, 0x0001, 3, 1, NULL},
     {14, &g_sys.config.dev_mask.mb_comp, 0, 0xFFFF, 0x01, 3, 1, NULL},
@@ -80,7 +80,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {32, NULL, 0, 3600, 0, 0, 1, NULL},
     {33, NULL, 0, 3600, 0, 0, 1, NULL},
     {34, NULL, 0, 3600, 0, 0, 1, NULL},
-    {35, &g_sys.config.ComPara.u16M_Type, 0, 100, 0, 2, 1, NULL},
+    {35, &g_sys.config.ComPara.u16M_Type, 0, 100, M_L28, 2, 1, NULL},
     {36, &g_sys.config.ComPara.u16Power_Mode, 0, 1, 1, 2, 1, NULL},
     {37, &g_sys.config.ComPara.u16Start_Temp[0], 0, 800, 150, 2, 1, NULL},
     {38, &g_sys.config.ComPara.u16Start_Humidity, 0, 999, 350, 2, 1, NULL},
@@ -100,7 +100,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {52, &g_sys.config.ComPara.u16Sterilize_Mode, 0, 0x03, 0x03, 2, 1, NULL},
     {53, &g_sys.config.ComPara.u16Sterilize_Time[1], 1, 600, 15, 2, 1, NULL},
     {54, &g_sys.config.ComPara.u16Sterilize_Interval[1], 1, 10000, 60, 2, 1, NULL},
-    {55, &g_sys.config.ComPara.u16UV_Delay, 0, 1000, 5, 2, 1, NULL},
+    {55, &g_sys.config.ComPara.u16UV_Delay,					 						 0,				   1000,			  5,					  2,					1,      NULL   	},
     {FACTORY_RESET, &g_sys.config.ComPara.u16Reset, 0, 0xFF, 0, 2, 1, NULL},
     {57, &g_sys.config.ComPara.u16Test_Mode_Type, 0, 0xFF, 0, 2, 1, NULL},       //121
     {MANUAL_TSET, &g_sys.config.ComPara.u16Manual_Test_En, 0, 2, 0, 2, 1, NULL}, //122
@@ -127,7 +127,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {79, &g_sys.config.general.temp_sensor_cali[0].temp, 0, 0xffff, 0, 2, 1, NULL},
     {80, &g_sys.config.general.temp_sensor_cali[0].hum, 0, 0xffff, 0, 2, 1, NULL},
     {81, &g_sys.config.general.ntc_cali[3], 0, 0xffff, 0, 2, 1, NULL},
-    {82, NULL, 0, 3600, 0, 0, 1, NULL},
+    {82, &g_sys.config.ComPara.u16HotWater_Cali, 0, 0xffff, 0, 2, 1, NULL},
     {83, (uint16_t *)&l_sys.ao_list[AO_EC_FAN][BITMAP_MANUAL], 0, 100, 0, 0, 1, NULL}, //147
     {84, &g_sys.config.fan.set_speed, 0, 100, 60, 2, 1, NULL},
     {85, NULL, 0, 3600, 0, 2, 1, NULL},
@@ -142,35 +142,35 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {94, &g_sys.config.alarm[ACL_FILTER_ELEMENT_3_OT].alarm_param, 1, 65535, 2500, 2, 1, NULL},
     {95, &g_sys.config.alarm[ACL_FILTER_ELEMENT_4_OT].alarm_param, 1, 65535, 2500, 2, 1, NULL},
     {96, &g_sys.config.alarm[ACL_UV1_OT].alarm_param, 1, 65535, 30000, 2, 1, NULL},
-    {97, &g_sys.config.ComPara.u16Start_Temp[1], 0, 800, 380, 2, 1, NULL},
-    {98, &g_sys.config.ComPara.u16Stop_Temp[1], 0, 800, 400, 2, 1, NULL},
-    {99, &g_sys.config.ComPara.u16TestEV[0], 0, 65535, 5, 2, 1, NULL},
-    {100, &g_sys.config.ComPara.u16TestEV[1], 0, 65535, 5, 2, 1, NULL},
+    {97, &g_sys.config.ComPara.u16Start_Temp[1], 	0, 800, 380, 2, 1, NULL},
+    {98, &g_sys.config.ComPara.u16Stop_Temp[1], 	0, 800, 400, 2, 1, NULL},   
+    {99, &g_sys.config.Platform.Restart_Enable, 0, 0xFFFF, 0x8003, 2, 1, NULL},
+    {100, &g_sys.config.Platform.Restart_Delay, 1, 0xFFFF, 0x0C03, 2, 1, NULL},
     {101, &g_sys.config.Platform.Fixed_Report, 10, 1000, 60, 2, 1, NULL},
     {102, &g_sys.config.Platform.Real_Report, 5, 0xFFFF, 300, 2, 1, NULL},
     {103, &g_sys.config.ComPara.u16CloseFrist, 0, 1, 0, 2, 1, NULL},
     {104, &g_sys.config.ComPara.u16CloseDelay, 0, 10, 0, 2, 1, NULL},
-    {105, NULL, 0, 3600, 0, 2, 1, NULL},
+    {105, &g_sys.config.Platform.Net_ERR, 0, 1, 0, 2, 1, NULL},
 #ifdef SYS_HMI_VJL
 
 #else
-    {106, NULL, 0, 3600, 0, 0, 1, NULL},
-    {107, NULL, 0, 3600, 0, 0, 1, NULL},
-    {108, NULL, 0, 3600, 0, 0, 1, NULL},
-    {109, NULL, 0, 3600, 0, 0, 1, NULL},
-    {110, NULL, 0, 3600, 0, 0, 1, NULL},
+    {106, &g_sys.config.ComPara.LN.u16LN_Enable, 0, 1, 0, 2, 1, NULL},
+    {107, &g_sys.config.ComPara.LN.u16LN_Mode, 0, 1, 0, 2, 1, NULL},
+    {108, &g_sys.config.ComPara.LN.u16LN_Time[0], 0, 2359, 100, 2, 1, NULL},
+    {109, &g_sys.config.ComPara.LN.u16LN_Time[1], 0, 2359, 600, 2, 1, NULL},
+    {110, &g_sys.config.ComPara.LN.u16LN_Fan, 0, 100, 45, 2, 1, NULL},
     {111, NULL, 0, 3600, 0, 0, 1, NULL},
-    {112, NULL, 0, 3600, 0, 0, 1, NULL},
-    {113, NULL, 0, 3600, 0, 0, 1, NULL},
+    {112, &g_sys.config.ComPara.u16TestEV[0], 0, 65535, 5, 2, 1, NULL},
+    {113, &g_sys.config.ComPara.u16TestEV[1], 0, 65535, 5, 2, 1, NULL},
     {114, NULL, 0, 3600, 0, 0, 1, NULL},
-    {115, NULL, 0, 3600, 0, 0, 1, NULL},
+    {115, &g_sys.config.ComPara.u16Heater_PM25, 0, 1, 0, 2, 1, NULL},
     {116, NULL, 0, 3600, 0, 0, 1, NULL},
     {117, NULL, 0, 3600, 0, 0, 1, NULL},
     {118, NULL, 0, 3600, 0, 0, 1, NULL},
     {119, NULL, 0, 3600, 0, 0, 1, NULL},
-    {EE_STORAGE, &g_sys.config.ComPara.u16Storage, 0, 1, 0, 2, 1, NULL},
-    {121, &g_sys.config.ComPara.u16StorageDealy[0], 1, 10000, 80, 2, 1, NULL},
-    {122, &g_sys.config.ComPara.u16StorageDealy[1], 1, 10000, 10, 2, 1, NULL},
+    {EE_STORAGE, &g_sys.config.ComPara.u16Storage, 		0, 1,     0,   2, 1, NULL},
+    {121, &g_sys.config.ComPara.u16StorageDealy[0], 	1, 10000, 80, 2, 1, NULL},
+    {122, &g_sys.config.ComPara.u16StorageDealy[1], 	1, 10000, 10, 2, 1, NULL},
     {123, NULL, 0, 3600, 0, 0, 1, NULL},
     {124, NULL, 0, 3600, 0, 0, 1, NULL},
     {125, NULL, 0, 3600, 0, 0, 1, NULL},
@@ -178,7 +178,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {127, NULL, 0, 3600, 0, 0, 1, NULL},
     {128, NULL, 0, 3600, 0, 0, 1, NULL},
     {129, NULL, 0, 3600, 0, 0, 1, NULL},
-    {130, NULL, 0, 3600, 0, 0, 1, NULL},
+    {130, &g_sys.config.alarm[ACL_E11].alarm_param, 	100, 1500, 1150, 2, 1, NULL},
     {131, NULL, 0, 3600, 0, 0, 1, NULL},
     {132, NULL, 0, 3600, 0, 0, 1, NULL},
     {133, NULL, 0, 3600, 0, 0, 1, NULL},
@@ -526,12 +526,22 @@ const sts_reg_map_st status_reg_map_inst[STATUS_REG_MAP_NUM] = {
     {31, &g_sys.status.ComSta.REQ_TEST[0], 0},
     {32, &g_sys.status.ComSta.REQ_TEST[1], 0},
     {33, &g_sys.status.ComSta.REQ_TEST[2], 0},
-    {34, NULL, 0},
+    {34, &g_sys.status.ComSta.REQ_TEST[3], 0},
     {35, &g_sys.status.ComSta.u16WL, 0},
     {36, &g_sys.status.ComSta.u16Status_remap[1], 0},
     {37, &g_sys.status.ComSta.u16Cur_Water, 0},
     {38, &g_sys.status.ComSta.net_status, 0},
     {39, &g_sys.status.ComSta.u16PM25, 0},
+    {40, &g_sys.status.ComSta.u16TDS[0], 0},
+    {41, &g_sys.status.ComSta.u16TDS[1], 0},
+    {42, &g_sys.status.ComSta.u16TDS[2], 0},
+    {43, &g_sys.status.ComSta.u16TDS[3], 0},
+    {44, NULL, 0},
+    {45, NULL, 0},
+    {46, NULL, 0},
+    {47, NULL, 0},
+    {48, NULL, 0},
+    {49, NULL, 0},
 };
 
 /**
@@ -1018,6 +1028,8 @@ uint16_t sys_global_var_init(void)
     g_sys.config.ComPara.u16ExitWater_Mode = 0;
     g_sys.config.ComPara.u16Water_Mode = 0;
     g_sys.config.ComPara.u16Water_Flow = 0;
+		//网络异常
+		g_sys.config.Platform.Net_ERR=0;
 
     //	rt_kprintf("EVENT_REC   start =%d ,end =%d ,size = %d\n", EVENT_REC_PT_ADDR, EE_REC_END, (EE_REC_END - EVENT_REC_PT_ADDR));
     return ret;

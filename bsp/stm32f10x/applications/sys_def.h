@@ -26,32 +26,53 @@ typedef uint32_t time_t;
 #define DEBUG_ON_FLAG 0
 #define DEBUG_OFF_FLAG 123
 
-#define SYS_HMI_TQ 1 //天泉
-//#define	SYS_HMI_TQ_T10		1			//T10小机
+//机型
+enum
+{
+	M_L28 = 0, //L28、L50、T8
+	M_T10,
+	M_V50,
+	M_L50L,
+};
+
+#define SYS_M_L28 1 //天泉
+//#define	SYS_M_T10			1			//T10小机
+//#define	SYS_M_L50L		1			//L50L
+//#define SYS_M_V50 			1 		//V50
 //#define	SYS_HMI_VJL		1		//威金利
 
-#ifdef SYS_HMI_TQ
+#ifdef SYS_M_L28
 #define CONF_REG_MAP_NUM 435
 #define CONF_REG_SID_NUM 100
 #define CONF_REG_SID_START CONF_REG_MAP_NUM - CONF_REG_SID_NUM
-#define VER_0 (uint16)1  //V2100 0xf000
-#define VER_1 (uint16)2  //V2100 0x0f80
-#define VER_2 (uint16)17 //V2100 0x007f
-#define SOFTWARE_VER (((VER_0 & 0x0f) << 12) | ((VER_1 & 0x001f) << 7) | (VER_2 & 0x007f))
-#define SOFTWARE_VER_NAME "TQ01M1"
+#define VER_0 (uint16)2	 //V2100 0xf000
+#define VER_1 (uint16)2	 //V2100 0x0f80
+#define VER_2 (uint16)23 //V2100 0x007f
 
-#elif SYS_HMI_TQ_T10
+#elif SYS_M_T10
 #define CONF_REG_MAP_NUM 300
 #define CONF_REG_SID_START 200
 #define CONF_REG_SID_NUM 100
 #define SOFTWARE_VER 0x1104
+
+#elif SYS_M_V50
+#define CONF_REG_MAP_NUM 435
+#define CONF_REG_SID_NUM 100
+#define CONF_REG_SID_START CONF_REG_MAP_NUM - CONF_REG_SID_NUM
+// V2502
+#define VER_0 (uint16)2	 //
+#define VER_1 (uint16)5	 //
+#define VER_2 (uint16)02 //
 
 #elif SYS_HMI_VJL
 #define CONF_REG_MAP_NUM 106
 #define SOFTWARE_VER 0x110C
 #endif
 
-#define STATUS_REG_MAP_NUM 40
+#define SOFTWARE_VER (((VER_0 & 0x0f) << 12) | ((VER_1 & 0x001f) << 7) | (VER_2 & 0x007f))
+#define SOFTWARE_VER_NAME "TQ01M1"
+
+#define STATUS_REG_MAP_NUM 50
 #define HARDWARE_VER 0x1000
 #define SERIAL_NO_3 0
 #define SERIAL_NO_2 0

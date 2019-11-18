@@ -5,7 +5,7 @@
 // void team_thread_entry(void *parameter)
 // {
 //     rt_thread_delay(TEAM_THREAD_DELAY);
-//     // rt_kprintf("team_thread_entry successfully.\n");
+//     //		rt_kprintf("team_thread_entry successfully.\n");
 //     while (1)
 //     {
 //         team_fsm_trans();

@@ -491,7 +491,7 @@ BOOL xMBPortSerialGetByte(CHAR *pucByte)
  * a new character can be sent. The protocol stack will then call 
  * xMBPortSerialPutByte( ) to send the character.
  */
-static void prvvUARTTxReadyISR(void)
+  void prvvUARTTxReadyISR(void)
 {
     pxMBFrameCBTransmitterEmpty();
 }
@@ -502,12 +502,13 @@ static void prvvUARTTxReadyISR(void)
  * protocol stack will then call xMBPortSerialGetByte( ) to retrieve the
  * character.
  */
-static void prvvUARTRxISR(void)
+  void prvvUARTRxISR(void)
 {
     pxMBFrameCBByteReceived();
 }
+#ifndef RT_USING_UART4
 /*******************************************************************************
- * Function Name  : USART3_IRQHandler
+ * Function Name  : USART4_IRQHandler
  * Description    : This function handles USART3 global interrupt request.
  * Input          : None
  * Output         : None
@@ -535,3 +536,4 @@ void UART4_IRQHandler(void)
     }
     rt_interrupt_leave();
 }
+#endif

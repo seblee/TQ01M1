@@ -44,6 +44,7 @@ enum
     // TCOM_THREAD_PRIO,
     // TEAM_THREAD_PRIO,
     MBM_FSM_THREAD_PRIO,
+    TDS_THREAD_PRIO,
     DI_THREAD_PRIO,
     DAQ_THREAD_PRIO,
     CORE_THREAD_PRIO,
@@ -56,22 +57,24 @@ enum
 
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t modbus_master_stack[512];
-static rt_uint8_t modbus_slave_stack[512];
+//static rt_uint8_t modbus_slave_stack[512];
 static rt_uint8_t monitor_slave_stack[0x900];
 static rt_uint8_t di_stack[256];
 static rt_uint8_t daq_stack[512];
 static rt_uint8_t core_stack[512];
 static rt_uint8_t cpad_stack[512];
 static rt_uint8_t bkg_stack[512];
+static rt_uint8_t TDS_stack[512];
 
 static struct rt_thread modbus_master_thread;
-static struct rt_thread modbus_slave_thread;
+//static struct rt_thread modbus_slave_thread;
 static struct rt_thread CPAD_slave_thread;
 static struct rt_thread di_thread;
 static struct rt_thread daq_thread;
 static struct rt_thread core_thread;
 static struct rt_thread cpad_thread;
 static struct rt_thread bkg_thread;
+static struct rt_thread TDS_thread;
 
 void set_boot_flag(void);
 
@@ -132,19 +135,19 @@ int rt_application_init(void)
         rt_thread_startup(&modbus_master_thread);
     }
 
-    //modbus_slave_thread_entry
-    result = rt_thread_init(&modbus_slave_thread,
-                            "mb_slave",
-                            modbus_slave_thread_entry,
-                            RT_NULL,
-                            (rt_uint8_t *)&modbus_slave_stack[0],
-                            sizeof(modbus_slave_stack),
-                            MODBUS_SLAVE_THREAD_PRIO,
-                            20);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&modbus_slave_thread);
-    }
+//    //modbus_slave_thread_entry
+//    result = rt_thread_init(&modbus_slave_thread,
+//                            "mb_slave",
+//                            modbus_slave_thread_entry,
+//                            RT_NULL,
+//                            (rt_uint8_t *)&modbus_slave_stack[0],
+//                            sizeof(modbus_slave_stack),
+//                            MODBUS_SLAVE_THREAD_PRIO,
+//                            20);
+//    if (result == RT_EOK)
+//    {
+//        rt_thread_startup(&modbus_slave_thread);
+//    }
 
     //CPAD_slave_thread_entry
     result = rt_thread_init(&CPAD_slave_thread,
@@ -160,26 +163,28 @@ int rt_application_init(void)
         rt_thread_startup(&CPAD_slave_thread);
     }
 
-    //    result = rt_thread_init(&team_thread,
-    //                            "teamwork",
-    //                            team_thread_entry,
-    //                            RT_NULL,
-    //                            (rt_uint8_t*)&team_stack[0],
-    //                            sizeof(team_stack),
-    //                            TEAM_THREAD_PRIO,
-    //                            5);
-    //    if (result == RT_EOK)
-    //    {
-    //        rt_thread_startup(&team_thread);
-    //    }
-    rt_thread_t mbm_fsm_thread;
-    mbm_fsm_thread = rt_thread_create("mbm_fsm",
-                                      mbm_fsm_thread_entry, RT_NULL,
-                                      512, MBM_FSM_THREAD_PRIO, 5); // 初始化进程
+//    rt_thread_t mbm_fsm_thread;
+//    mbm_fsm_thread = rt_thread_create("mbm_fsm",
+//                                      mbm_fsm_thread_entry, RT_NULL,
+//                                      512, MBM_FSM_THREAD_PRIO, 5); // 初始化进程
 
-    if (mbm_fsm_thread != RT_NULL)
-        rt_thread_startup(mbm_fsm_thread);
-
+//    if (mbm_fsm_thread != RT_NULL)
+//        rt_thread_startup(mbm_fsm_thread);
+		
+		//TDS读取
+    result = rt_thread_init(&TDS_thread,
+                            "TDS",
+                            TDS_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&TDS_stack[0],
+                            sizeof(TDS_stack),
+                            TDS_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&TDS_thread);
+    }
+		
     result = rt_thread_init(&di_thread,
                             "di",
                             di_thread_entry,
