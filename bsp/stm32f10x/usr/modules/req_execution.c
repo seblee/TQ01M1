@@ -13,6 +13,9 @@
 #include "pwm_bsp.h"
 #include "usart_bsp.h"
 
+#define DEFROST_DELAY 180   //X*500ms
+#define COLDWATER_DELAY 120 //X*500ms
+
 enum
 {
     RUNING_STATUS_COOLING_BPOS = 0,
@@ -849,7 +852,8 @@ void Sys_Fan_CP_WL(void)
     }
     if (Exit_Water() == WATER_AIR)
     {
-        if (!(u16WL & S_M))
+        if ((!(u16WL & S_M)) ||
+            ((!(u16WL & S_U)) && ((l_sys.Cold_Water == TRUE))))
             l_sys.makeWater = 1;
         else if (u16WL & S_U)
             l_sys.makeWater = 0;
@@ -1468,6 +1472,8 @@ void Defrost_req_exe(void)
     int16_t i16NTC1;
     int16_t i16NTC2;
 
+    static uint16_t timeCount[2] = {0, 0};
+
     if (Exit_Water() != WATER_AIR) //外接水源
     {
         return;
@@ -1479,19 +1485,35 @@ void Defrost_req_exe(void)
     //set Deforost status
     if (i16NTC1 < (int16_t)g_sys.config.ComPara.u16Start_Defrost_Temp)
     {
-        sys_set_remap_status(WORK_MODE_STS_REG_NO, DEFROST1_STS_BPOS, 1);
+        if (timeCount[0] < DEFROST_DELAY)
+        {
+            timeCount[0]++;
+        }
+        else
+        {
+            sys_set_remap_status(WORK_MODE_STS_REG_NO, DEFROST1_STS_BPOS, 1);
+        }
     }
     else if (i16NTC1 > (int16_t)g_sys.config.ComPara.u16Stop_Defrost_Temp)
     {
+        timeCount[0] = 0;
         sys_set_remap_status(WORK_MODE_STS_REG_NO, DEFROST1_STS_BPOS, 0);
     }
 
     if (i16NTC2 < (int16_t)g_sys.config.ComPara.u16Start_Defrost_Temp)
     {
-        sys_set_remap_status(WORK_MODE_STS_REG_NO, DEFROST2_STS_BPOS, 1);
+        if (timeCount[1] < DEFROST_DELAY)
+        {
+            timeCount[1]++;
+        }
+        else
+        {
+            sys_set_remap_status(WORK_MODE_STS_REG_NO, DEFROST2_STS_BPOS, 1);
+        }
     }
     else if (i16NTC2 > (int16_t)g_sys.config.ComPara.u16Stop_Defrost_Temp)
     {
+        timeCount[1] = 0;
         sys_set_remap_status(WORK_MODE_STS_REG_NO, DEFROST2_STS_BPOS, 0);
     }
 
@@ -1508,6 +1530,8 @@ void Cold_Water_exe(void)
     int16_t i16Water_Temp;
     static uint8_t u8Coldwater = 0;
 
+    static uint16_t coldWaterCount = 0;
+
     u16Temp = 0;
 
     l_sys.Cold_Water = FALSE;
@@ -1522,16 +1546,26 @@ void Cold_Water_exe(void)
             u16Temp |= 0x02;
             if (i16Water_Temp > g_sys.config.ComPara.u16ColdWater_StartTemp) //开始制冰水
             {
-                l_sys.ColdWaterState = 2;
-                u16Temp |= 0x04;
-                l_sys.Cold_Water = TRUE;
-                u8Coldwater = TRUE;
+                if (coldWaterCount < COLDWATER_DELAY)
+                {
+                    coldWaterCount++;
+                    // if (l_sys.ColdWaterState == 1)
+                    //     l_sys.ColdWaterState = 5;
+                }
+                else
+                {
+                    l_sys.ColdWaterState = 2;
+                    u16Temp |= 0x04;
+                    l_sys.Cold_Water = TRUE;
+                    u8Coldwater = TRUE;
 
-                req_bitmap_op(DO_WV_BPOS, 1); //制冷
-                req_bitmap_op(DO_CV_BPOS, 1); //制冰水
+                    req_bitmap_op(DO_WV_BPOS, 1); //制冷
+                    req_bitmap_op(DO_CV_BPOS, 1); //制冰水
+                }
             }
             else if (i16Water_Temp < g_sys.config.ComPara.u16ColdWater_StopTemp) //关闭
             {
+                coldWaterCount = 0;
                 l_sys.ColdWaterState = 4;
                 u16Temp |= 0x08;
                 u8Coldwater = FALSE;
@@ -1541,6 +1575,7 @@ void Cold_Water_exe(void)
             }
             else //保持
             {
+                coldWaterCount = 0;
                 if (u8Coldwater == TRUE)
                 {
                     l_sys.ColdWaterState = 3;
@@ -1557,6 +1592,7 @@ void Cold_Water_exe(void)
         }
         else
         {
+            coldWaterCount = 0;
             u16Temp |= 0x20;
             l_sys.ColdWaterState = 1;
             req_bitmap_op(DO_WV_BPOS, 0); //制冷

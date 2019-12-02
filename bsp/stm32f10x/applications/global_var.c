@@ -100,7 +100,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {52, &g_sys.config.ComPara.u16Sterilize_Mode, 0, 0x03, 0x03, 2, 1, NULL},
     {53, &g_sys.config.ComPara.u16Sterilize_Time[1], 1, 600, 8, 2, 1, NULL},
     {54, &g_sys.config.ComPara.u16Sterilize_Interval[1], 1, 10000, 240, 2, 1, NULL},
-    {55, &g_sys.config.ComPara.u16UV_Delay, 0, 1000, 5, 2, 1, NULL},
+    {55, &g_sys.config.ComPara.u16UV_Delay, 0, 1000, 0, 2, 1, NULL},
     {FACTORY_RESET, &g_sys.config.ComPara.u16Reset, 0, 0xFF, 0, 2, 1, NULL},
     {57, &g_sys.config.ComPara.u16Test_Mode_Type, 0, 0xFF, 0, 2, 1, NULL},       //121
     {MANUAL_TSET, &g_sys.config.ComPara.u16Manual_Test_En, 0, 2, 0, 2, 1, NULL}, //122
