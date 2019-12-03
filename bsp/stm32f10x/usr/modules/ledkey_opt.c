@@ -295,6 +295,11 @@ void ledSendOperation(void)
                 beepCount += 3;
             }
         }
+        else
+        {
+            led7State = STATE_LED_ON;
+        }
+
         ColdWaterStateBak = l_sys.ColdWaterState;
     }
 

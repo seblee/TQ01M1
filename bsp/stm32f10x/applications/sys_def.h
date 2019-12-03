@@ -36,7 +36,7 @@ typedef uint32_t time_t;
 #define CONF_REG_SID_START CONF_REG_MAP_NUM - CONF_REG_SID_NUM
 #define VER_0 (uint16)3 // 0xf000
 #define VER_1 (uint16)0 // 0x0f80
-#define VER_2 (uint16)4 // 0x007f
+#define VER_2 (uint16)5 // 0x007f
 #define SOFTWARE_VER (((VER_0 & 0x0f) << 12) | ((VER_1 & 0x001f) << 7) | (VER_2 & 0x007f))
 #define SOFTWARE_VER_NAME "KL38"
 
