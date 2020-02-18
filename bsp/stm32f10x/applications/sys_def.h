@@ -7,7 +7,7 @@
 #else
 #define NULL ((void *)0)
 #endif
-#endif //   NULL
+#endif  //   NULL
 
 #include <stdint.h>
 
@@ -21,7 +21,7 @@ typedef uint32_t time_t;
 
 #define SYS_DEBUG 1
 
-#define DEBUG_TIMEOUT_MAX 5000 //上电DEBUG_TIMEOUT_MAX时间后关闭调试串口
+#define DEBUG_TIMEOUT_MAX 5000  //上电DEBUG_TIMEOUT_MAX时间后关闭调试串口
 #define DEBUG_TIMEOUT_NA 0xffff
 #define DEBUG_ON_FLAG 0
 #define DEBUG_OFF_FLAG 123
@@ -29,25 +29,26 @@ typedef uint32_t time_t;
 //机型
 enum
 {
-	M_L28 = 0, //L28、L50、T8
-	M_T10,
-	M_V50,
-	M_L50L,
+    M_L28 = 0,  // L28、L50、T8
+    M_T10,
+    M_V50,
+    M_L50L,
 };
 
-#define SYS_M_L28 1 //天泉
-//#define	SYS_M_T10			1			//T10小机
-//#define	SYS_M_L50L		1			//L50L
-//#define SYS_M_V50 			1 		//V50
-//#define	SYS_HMI_VJL		1		//威金利
+#define SYS_M_L28 1  //天泉
+// #define SYS_M_T10 1	  //T10小机
+// #define SYS_M_L50L 1  //L50L
+// #define SYS_M_V50 1	  //V50
+// #define SYS_HMI_VJL 1 //威金利
 
 #ifdef SYS_M_L28
 #define CONF_REG_MAP_NUM 435
 #define CONF_REG_SID_NUM 100
 #define CONF_REG_SID_START CONF_REG_MAP_NUM - CONF_REG_SID_NUM
-#define VER_0 (uint16)2	 //V2100 0xf000
-#define VER_1 (uint16)2	 //V2100 0x0f80
-#define VER_2 (uint16)23 //V2100 0x007f
+// 02.02.18
+#define VER_0 (uint16)2   // V2100 0xf000
+#define VER_1 (uint16)2   // V2100 0x0f80
+#define VER_2 (uint16)26  // V2100 0x007f
 
 #elif SYS_M_T10
 #define CONF_REG_MAP_NUM 300
@@ -60,9 +61,9 @@ enum
 #define CONF_REG_SID_NUM 100
 #define CONF_REG_SID_START CONF_REG_MAP_NUM - CONF_REG_SID_NUM
 // V2502
-#define VER_0 (uint16)2	 //
-#define VER_1 (uint16)5	 //
-#define VER_2 (uint16)02 //
+#define VER_0 (uint16)2   //
+#define VER_1 (uint16)5   //
+#define VER_2 (uint16)02  //
 
 #elif SYS_HMI_VJL
 #define CONF_REG_MAP_NUM 106
@@ -83,27 +84,27 @@ enum
 #define PERM_PRIVILEGED 1
 #define PERM_INSPECT 0
 
-//base year
+// base year
 #define BASE_YEAR 2000
-//main components
+// main components
 #define MAX_COMPRESSOR_NUM 2
 #define MAX_FAN_NUM 3
 #define MAX_HEATER_NUM 2
-//accesories
+// accesories
 #define TEMP_HUM_SENSOR_NUM 8
 #define MBM_DEV_P_NUM 2
 #define NTC_NUM 4
 #define CURRENT_SENSE_CHAN 3
 #define VOLTAGE_SENSE_CHAN 3
-//alarm defs
+// alarm defs
 #define MAX_ALARM_ACL_NUM 50
 #define MAX_ALARM_HISTORY_NUM 200
 #define MAX_ALARM_STATUS_NUM 50
-//sys log defs
+// sys log defs
 #define MAX_SYS_STATUS_LOG_NUM 100
 #define MAX_SYS_RUMTIME_LOG_NUM 100
 
-//cpad err code
+// cpad err code
 #define CPAD_ERR_NOERR 0
 #define CPAD_ERR_ADDR_OR 1
 #define CPAD_ERR_DATA_OR 2
@@ -113,4 +114,4 @@ enum
 
 #define CPAD_ERR_UNKNOWN 0x1f
 
-#endif //__SYS_DEF
+#endif  //__SYS_DEF

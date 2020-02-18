@@ -498,11 +498,6 @@
               <FileType>1</FileType>
               <FilePath>.\usr\modules\reg_map_check.c</FilePath>
             </File>
-            <File>
-              <FileName>zph01_opt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\usr\modules\zph01_opt.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -582,6 +577,11 @@
               <FileName>Comm_TDS.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\usr\modules\Comm_TDS.c</FilePath>
+            </File>
+            <File>
+              <FileName>zph01_opt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\drivers\zph01_opt.c</FilePath>
             </File>
           </Files>
         </Group>

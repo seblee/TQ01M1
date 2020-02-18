@@ -157,7 +157,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {106, &g_sys.config.ComPara.LN.u16LN_Enable, 0, 1, 0, 2, 1, NULL},
     {107, &g_sys.config.ComPara.LN.u16LN_Mode, 0, 1, 0, 2, 1, NULL},
     {108, &g_sys.config.ComPara.LN.u16LN_Time[0], 0, 2359, 100, 2, 1, NULL},
-    {109, &g_sys.config.ComPara.LN.u16LN_Time[1], 0, 2359, 600, 2, 1, NULL},
+    {109, &g_sys.config.ComPara.LN.u16LN_Time[1], 0, 2359, 100, 2, 1, NULL},
     {110, &g_sys.config.ComPara.LN.u16LN_Fan, 0, 100, 45, 2, 1, NULL},
     {111, NULL, 0, 3600, 0, 0, 1, NULL},
     {112, &g_sys.config.ComPara.u16TestEV[0], 0, 65535, 5, 2, 1, NULL},
@@ -173,7 +173,7 @@ const conf_reg_map_st conf_reg_map_inst[CONF_REG_MAP_NUM] = {
     {122, &g_sys.config.ComPara.u16StorageDealy[1], 	1, 10000, 10, 2, 1, NULL},
     {123, NULL, 0, 3600, 0, 0, 1, NULL},
     {124, NULL, 0, 3600, 0, 0, 1, NULL},
-    {125, NULL, 0, 3600, 0, 0, 1, NULL},
+    {125, &g_sys.config.ComPara.u16TH_Interal, 				0, 1000,   30,  2, 1, NULL},
     {126, NULL, 0, 3600, 0, 0, 1, NULL},
     {127, NULL, 0, 3600, 0, 0, 1, NULL},
     {128, NULL, 0, 3600, 0, 0, 1, NULL},
@@ -520,7 +520,7 @@ const sts_reg_map_st status_reg_map_inst[STATUS_REG_MAP_NUM] = {
     {25, &g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_ELEMENT_DUMMY_BPOS_1], 0},
     {26, &g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_ELEMENT_DUMMY_BPOS_2], 0},
     {27, &g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_ELEMENT_DUMMY_BPOS_3], 0},
-    {28, &g_sys.status.ComSta.u16Runtime[1][DO_FILLTER_ELEMENT_DUMMY_BPOS_4], 0},
+    {28, &g_sys.status.ComSta.u16Cumulative_Water[2], 0},
     {29, &g_sys.status.ComSta.u16Runtime[1][DO_UV1_BPOS], 0},
     {30, NULL, 0},
     {31, &g_sys.status.ComSta.REQ_TEST[0], 0},
@@ -563,11 +563,9 @@ static init_state_em get_ee_status(void)
     //TEST
     if (l_sys.SEL_Jump & Start_Init) //上电初始化
     {
-        reset_runtime(0xFF); //清零所有运行时间
         ee_pflag = EE_FLAG_LOAD_DEBUT;
     }
     //		//TEST
-    // reset_runtime(0xFF); //清零所有运行时间
     // ee_pflag = EE_FLAG_LOAD_DEBUT;
     switch (ee_pflag)
     {
@@ -933,7 +931,7 @@ static void init_load_status(void)
     //		I2C_EE_BufRead((uint8_t *)&g_sys.status.run_time,STS_REG_EE1_ADDR,sizeof(g_sys.status.run_time));	//read legacy checksum data
     I2C_EE_BufRead((uint8_t *)&g_sys.status.ComSta.u16Runtime, STS_REG_EE1_ADDR, sizeof(g_sys.status.ComSta.u16Runtime));
     //累计流量
-    I2C_EE_BufRead((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], STS_REG_EE1_ADDR + sizeof(g_sys.status.ComSta.u16Runtime), 4); //u16Cumulative_Water,
+    I2C_EE_BufRead((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], STS_REG_EE1_ADDR + sizeof(g_sys.status.ComSta.u16Runtime), 6); //u16Cumulative_Water,
 }
 
 /**
@@ -992,8 +990,8 @@ uint16_t sys_global_var_init(void)
             save_conf_reg(0);
             save_conf_reg(1);
             set_load_flag(0);
-            // reset dev run time
-            reset_runtime(0xff);
+//            // reset dev run time
+//            reset_runtime(0xff);
             rt_kprintf("INIT_LOAD_DEBUT loaded successfully.\n");
         }
         else
@@ -1417,9 +1415,9 @@ uint8_t reset_runtime(uint16_t param)
             g_sys.status.ComSta.u16Runtime[0][i] = 0;
             g_sys.status.ComSta.u16Runtime[1][i] = 0;
         }
-        g_sys.status.ComSta.u16Cumulative_Water[0] = 0;
-        memset((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], 0x00, 4);
-        I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], STS_REG_EE1_ADDR + sizeof(g_sys.status.ComSta.u16Runtime), 4); //u16Cumulative_Water,
+				l_sys.u32WaterFlow =0;
+        memset((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], 0x00, 6);
+        I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], STS_REG_EE1_ADDR + sizeof(g_sys.status.ComSta.u16Runtime), 6); //u16Cumulative_Water,
     }
     else
     {

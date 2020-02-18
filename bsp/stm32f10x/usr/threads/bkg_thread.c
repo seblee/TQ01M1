@@ -42,10 +42,10 @@ void power_loss_delay(void)
 }
 
 /**
-  * @brief 	output control module components cooldown 
-	* @param  none
-	* @retval none
-  */
+ * @brief 	output control module components cooldown 
+ * @param  none
+ * @retval none
+*/
 void bkg_thread_entry(void *parameter)
 {
     //初始化温湿度曲线记录
@@ -521,6 +521,14 @@ static void run_time_process(void)
                 time_calc(&g_sys.status.ComSta.u16Runtime[0][i], &g_sys.status.ComSta.u16Runtime[1][i]);
             }
         }
+        if (l_sys.OutWater_OK == WATER_OUT)
+        {
+            l_sys.OutWater_OK = HEATER_IDLE;
+            //总流量
+            g_sys.status.ComSta.u16Cumulative_Water[2] += g_sys.status.ComSta.u16Last_Water;
+            Flow_calc(&g_sys.status.ComSta.u16Cumulative_Water[2], &g_sys.status.ComSta.u16Cumulative_Water[0]);
+            Flow_calc(&g_sys.status.ComSta.u16Cumulative_Water[0], &g_sys.status.ComSta.u16Cumulative_Water[1]);
+        }
     }
     else //流量计算
     {
@@ -529,10 +537,13 @@ static void run_time_process(void)
             l_sys.OutWater_OK = HEATER_IDLE;
             for (i = DO_FILLTER_ELEMENT_DUMMY_BPOS_0; i <= DO_FILLTER_ELEMENT_DUMMY_BPOS_5; i++)
             {
-                // g_sys.status.ComSta.u16Runtime[0][i] += g_sys.status.ComSta.u16Cumulative_Water[0];
                 g_sys.status.ComSta.u16Runtime[0][i] += g_sys.status.ComSta.u16Last_Water;
                 Flow_calc(&g_sys.status.ComSta.u16Runtime[0][i], &g_sys.status.ComSta.u16Runtime[1][i]);
             }
+            //总流量
+            g_sys.status.ComSta.u16Cumulative_Water[2] += g_sys.status.ComSta.u16Last_Water;                     //ml
+            Flow_calc(&g_sys.status.ComSta.u16Cumulative_Water[2], &g_sys.status.ComSta.u16Cumulative_Water[0]); //L
+            Flow_calc(&g_sys.status.ComSta.u16Cumulative_Water[0], &g_sys.status.ComSta.u16Cumulative_Water[1]);
         }
     }
 
@@ -544,8 +555,8 @@ static void run_time_process(void)
     {
         u16Sec = 0;
         I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Runtime, STS_REG_EE1_ADDR, sizeof(g_sys.status.ComSta.u16Runtime)); //when, fan is working update eeprom every minite
-        // 累计流量
-        I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], STS_REG_EE1_ADDR + sizeof(g_sys.status.ComSta.u16Runtime), 4); //u16Cumulative_Water,
+        //累计流量
+        I2C_EE_BufWrite((uint8_t *)&g_sys.status.ComSta.u16Cumulative_Water[0], STS_REG_EE1_ADDR + sizeof(g_sys.status.ComSta.u16Runtime), 6); //u16Cumulative_Water,
     }
     return;
 }

@@ -24,21 +24,21 @@ enum
     ACL_E5, //
     ACL_E6,
     ACL_E7,
-    ACL_E8, //紫外灯杀菌未开
-    ACL_E9, //源水箱故障
+    ACL_E8, //紫外灯杀菌未开UV1
+    ACL_E9, //源水箱故障，复合滤芯堵塞	
     ACL_WATER_LEAK,          //漏水
     ACL_E11, //排气高温
     ACL_E12, //排气高温锁死
-    ACL_HI_PRESS1,           //高压1
-    ACL_HI_PRESS2,           //高压2
     ACL_FILTER_OT,           //滤网
     ACL_FILTER_ELEMENT_0_OT, //滤芯1
     ACL_FILTER_ELEMENT_1_OT, //滤芯2
     ACL_FILTER_ELEMENT_2_OT, //滤芯3
     ACL_FILTER_ELEMENT_3_OT, //滤芯4
     ACL_FILTER_ELEMENT_4_OT, //滤芯5
-    ACL_RSV1_OT,             //
-    ACL_UV2_OT,
+    ACL_UV2_OT,             //
+    ACL_RS_NETERR,
+    ACL_HI_PRESS1,             //
+    ACL_HI_PRESS2,
     //异常
     ACL_TOTAL_NUM,
 
@@ -47,7 +47,6 @@ enum
 #define ACL_UV1_OT ACL_E8   //紫外灯1超时
 #define ACL_SYS01_EXHAUST_HI		 		ACL_E11
 #define ACL_SYS01_EXHAUST_HI_LOCK 	ACL_E12
-
 
 #define RT_MS 	1000
 

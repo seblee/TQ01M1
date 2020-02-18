@@ -92,7 +92,7 @@ uint8_t COM_SINGLE_eMBRegHoldingCB(uint16_t usAddress, uint16_t usValue)
         temp = usValue;
         if (temp == 0x3C) //恢复原始参数
         {
-            reset_runtime(0xFF); //清零所有运行时间
+//            reset_runtime(0xFF); //清零所有运行时间
             set_load_flag(0x02);
             rt_thread_delay(1000);
             NVIC_SystemReset();
@@ -124,6 +124,13 @@ uint8_t COM_SINGLE_eMBRegHoldingCB(uint16_t usAddress, uint16_t usValue)
             Close_DIS_PWR(1);
             rt_thread_delay(1000);
             Close_DIS_PWR(0);
+            return MB_ENOERR;
+        }
+				else
+        if (temp == 0x15) //清零运行时间
+        {
+            reset_runtime(0xFF); //清零所有运行时间
+            rt_thread_delay(100);
             return MB_ENOERR;
         }
         else
