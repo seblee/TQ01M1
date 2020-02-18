@@ -519,11 +519,6 @@
               <FilePath>.\drivers\cpad_bsp.c</FilePath>
             </File>
             <File>
-              <FileName>usart_bsp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\drivers\usart_bsp.c</FilePath>
-            </File>
-            <File>
               <FileName>pwm_bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\drivers\pwm_bsp.c</FilePath>
@@ -549,6 +544,11 @@
               <FilePath>drivers\stm32f10x_it.c</FilePath>
             </File>
             <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\drivers\i2c.c</FilePath>
+            </File>
+            <File>
               <FileName>i2c_bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\drivers\i2c_bsp.c</FilePath>
@@ -572,11 +572,6 @@
               <FileName>pcf8563.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\drivers\pcf8563.c</FilePath>
-            </File>
-            <File>
-              <FileName>Comm_TDS.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\usr\modules\Comm_TDS.c</FilePath>
             </File>
             <File>
               <FileName>zph01_opt.c</FileName>
@@ -989,6 +984,16 @@
               <FilePath>..\..\components\drivers\i2c\i2c_dev.c</FilePath>
             </File>
             <File>
+              <FileName>i2c-bit-ops.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\drivers\i2c\i2c-bit-ops.c</FilePath>
+            </File>
+            <File>
+              <FileName>pin.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\drivers\misc\pin.c</FilePath>
+            </File>
+            <File>
               <FileName>serial.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\components\drivers\serial\serial.c</FilePath>
@@ -1333,6 +1338,11 @@
         <Group>
           <GroupName>libc</GroupName>
           <Files>
+            <File>
+              <FileName>usart_bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\drivers\usart_bsp.c</FilePath>
+            </File>
             <File>
               <FileName>libc.c</FileName>
               <FileType>1</FileType>

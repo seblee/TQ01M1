@@ -47,45 +47,45 @@
 
 //IO口操作,只对单一的IO口!
 //确保n的值小于16!
-#define PAout(n)    BIT_ADDR(GPIOA_ODR_Addr, n) //输出
-#define PAin(n)     BIT_ADDR(GPIOA_IDR_Addr, n)  //输入
+#define PAout(n) BIT_ADDR(GPIOA_ODR_Addr, n) //输出
+#define PAin(n) BIT_ADDR(GPIOA_IDR_Addr, n)  //输入
 
-#define PBout(n)    BIT_ADDR(GPIOB_ODR_Addr, n) //输出
-#define PBin(n)     BIT_ADDR(GPIOB_IDR_Addr, n)  //输入
+#define PBout(n) BIT_ADDR(GPIOB_ODR_Addr, n) //输出
+#define PBin(n) BIT_ADDR(GPIOB_IDR_Addr, n)  //输入
 
-#define PCout(n)    BIT_ADDR(GPIOC_ODR_Addr, n) //输出
-#define PCin(n)     BIT_ADDR(GPIOC_IDR_Addr, n)  //输入
+#define PCout(n) BIT_ADDR(GPIOC_ODR_Addr, n) //输出
+#define PCin(n) BIT_ADDR(GPIOC_IDR_Addr, n)  //输入
 
-#define PDout(n)    BIT_ADDR(GPIOD_ODR_Addr, n) //输出
-#define PDin(n)     BIT_ADDR(GPIOD_IDR_Addr, n)  //输入
+#define PDout(n) BIT_ADDR(GPIOD_ODR_Addr, n) //输出
+#define PDin(n) BIT_ADDR(GPIOD_IDR_Addr, n)  //输入
 
-#define PEout(n)    BIT_ADDR(GPIOE_ODR_Addr, n) //输出
-#define PEin(n)     BIT_ADDR(GPIOE_IDR_Addr, n)  //输入
+#define PEout(n) BIT_ADDR(GPIOE_ODR_Addr, n) //输出
+#define PEin(n) BIT_ADDR(GPIOE_IDR_Addr, n)  //输入
 
-#define PFout(n)    BIT_ADDR(GPIOF_ODR_Addr, n) //输出
-#define PFin(n)     BIT_ADDR(GPIOF_IDR_Addr, n)  //输入
+#define PFout(n) BIT_ADDR(GPIOF_ODR_Addr, n) //输出
+#define PFin(n) BIT_ADDR(GPIOF_IDR_Addr, n)  //输入
 
-#define PGout(n)    BIT_ADDR(GPIOG_ODR_Addr, n) //输出
-#define PGin(n)     BIT_ADDR(GPIOG_IDR_Addr, n)  //输入
+#define PGout(n) BIT_ADDR(GPIOG_ODR_Addr, n) //输出
+#define PGin(n) BIT_ADDR(GPIOG_IDR_Addr, n)  //输入
 
 /* board configuration */
 
 /* whether use board external SRAM memory */
 // <e>Use external SRAM memory on the board
 //  <i>Enable External SRAM memory
-#define STM32_EXT_SRAM          0
+#define STM32_EXT_SRAM 0
 //  <o>Begin Address of External SRAM
 //      <i>Default: 0x68000000
-#define STM32_EXT_SRAM_BEGIN    0x68000000 /* the begining address of external SRAM */
+#define STM32_EXT_SRAM_BEGIN 0x68000000 /* the begining address of external SRAM */
 //  <o>End Address of External SRAM
 //      <i>Default: 0x68080000
-#define STM32_EXT_SRAM_END      0x68080000 /* the end address of external SRAM */
+#define STM32_EXT_SRAM_END 0x68080000 /* the end address of external SRAM */
 // </e>
 
 // <o> Internal SRAM memory size[Kbytes] <8-64>
 //  <i>Default: 64
-#define STM32_SRAM_SIZE         52
-#define STM32_SRAM_END          (0x20000000 + STM32_SRAM_SIZE * 1024)
+#define STM32_SRAM_SIZE 52
+#define STM32_SRAM_END (0x20000000 + STM32_SRAM_SIZE * 1024)
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
@@ -93,7 +93,7 @@
 //#define RT_USING_UART1
 //#define RT_USING_UART2
 #define RT_USING_UART3
-#define RT_USING_UART4
+// #define RT_USING_UART4
 #define RT_USING_UART5
 
 void rt_hw_board_init(void);

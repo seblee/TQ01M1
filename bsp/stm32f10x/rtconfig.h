@@ -18,7 +18,6 @@
 
 /* SECTION: RT_DEBUG */
 
-
 #define RT_USING_OVERFLOW_CHECK
 
 /* Using Hook */
@@ -58,7 +57,6 @@
 /* Using Dynamic Heap Management */
 #define RT_USING_HEAP
 
-
 /* Kernel Device Object */
 
 #define RT_USING_DEVICE
@@ -73,7 +71,6 @@
 /* RT-Thread Components */
 
 #define RT_USING_COMPONENTS_INIT
-
 
 /* SECTION: finsh, a C-Express shell */
 #define RT_USING_FINSH
@@ -118,12 +115,10 @@
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_I2C
+#define RT_USING_I2C_BITOPS
+#define RT_USING_PIN
 #define RT_USING_RTC
 #define RT_USING_ALARMS
-
-
-/* SECTION: I2C */
-
 
 /* SECTION: device filesystem */
 
