@@ -51,6 +51,7 @@ static const struct  rt_i2c_bit_ops stm32_i2c_bit_ops =
     stm32_get_scl,
     stm32_udelay,
     20,
+    100,
 };
 
 static void RCC_Configuration(void)

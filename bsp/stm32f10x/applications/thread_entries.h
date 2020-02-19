@@ -15,4 +15,5 @@ void bkg_thread_entry(void *parameter);
 void di_thread_entry(void *parameter);
 
 void net_thread_entry(void *parameter);
+int i2cBleThreadInit(void);
 #endif //__THREADS_ENTRIES

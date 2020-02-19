@@ -11,3 +11,6 @@
 	path = bsp/stm32f10x/packages/mbedtls-v2.6.0
 	url = git@github.com:seblee/mbedtls.git
 	
+[submodule "bsp/stm32f10x/packages/i2c-tools"]
+	path = bsp/stm32f10x/packages/i2c-tools
+	url = https://github.com/wuhanstudio/rt-i2c-tools.git

@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD, USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>applications;.;drivers;Libraries\STM32F10x_StdPeriph_Driver\inc;Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;.\Libraries\STM32_Cryptographic_Library\inc;..\..\components\CMSIS\Include;..\..\include;..\..\libcpu\arm\cortex-m3;..\..\libcpu\arm\common;..\..\components\drivers\include;..\..\components\dfs\include;..\..\components\dfs\filesystems\devfs;..\..\components\dfs\filesystems\elmfat;..\..\components\drivers\include;..\..\components\finsh;..\..\components\init;..\..\components\net\at\include;..\..\components\net\at\at_socket;.\FreeModbus\modbus\include;.\FreeModbus\port;.\FreeModbus\modbus\rtu;.\usr\modules;.\kits;.\FreeModbus\port\modbus_monitor_slave;.\sim7600\SIM_COM;..\..\components\net\sal_socket\include;..\..\components\net\sal_socket\include\socket;..\..\components\net\sal_socket\impl;..\..\components\net\sal_socket\include\dfs_net;..\..\components\net\sal_socket\include\dfs_net\sys_select;..\..\components\net\sal_socket\include\socket\sys_socket;.\TQ01_net;.\packages\at_device-latest;.\packages\pcf8563;.\packages\cJSON;.\packages\pahomqtt-latest\MQTTPacket\src;..\..\components\libc\compilers\armlibc;..\..\components\libc\compilers\common</IncludePath>
+              <IncludePath>applications;.;drivers;Libraries\STM32F10x_StdPeriph_Driver\inc;Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;.\Libraries\STM32_Cryptographic_Library\inc;..\..\components\CMSIS\Include;..\..\include;..\..\libcpu\arm\cortex-m3;..\..\libcpu\arm\common;..\..\components\drivers\include;..\..\components\dfs\include;..\..\components\dfs\filesystems\devfs;..\..\components\dfs\filesystems\elmfat;..\..\components\drivers\include;..\..\components\finsh;..\..\components\init;..\..\components\net\at\include;..\..\components\net\at\at_socket;.\FreeModbus\modbus\include;.\FreeModbus\port;.\FreeModbus\modbus\rtu;.\FreeModbus\port\modbus_monitor_slave;.\usr\modules;.\kits;.\TQ01_net;.\packages\at_device-latest;.\packages\pcf8563;.\packages\cJSON;.\packages\pahomqtt-latest\MQTTPacket\src;.\packages\i2c-tools;.\packages\i2c-tools\src;..\..\components\net\sal_socket\include;..\..\components\net\sal_socket\include\socket;..\..\components\net\sal_socket\impl;..\..\components\net\sal_socket\include\dfs_net;..\..\components\net\sal_socket\include\dfs_net\sys_select;..\..\components\net\sal_socket\include\socket\sys_socket;..\..\components\libc\compilers\armlibc;..\..\components\libc\compilers\common</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -498,6 +498,11 @@
               <FileType>1</FileType>
               <FilePath>.\usr\modules\reg_map_check.c</FilePath>
             </File>
+            <File>
+              <FileName>ble_key.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\usr\modules\ble_key.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -577,6 +582,11 @@
               <FileName>zph01_opt.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\drivers\zph01_opt.c</FilePath>
+            </File>
+            <File>
+              <FileName>gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\drivers\gpio.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1372,6 +1382,26 @@
               <FileName>gmtime_r.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\components\libc\compilers\common\gmtime_r.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>i2c-tools</GroupName>
+          <Files>
+            <File>
+              <FileName>i2c_tools.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\packages\i2c-tools\src\i2c_tools.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>i2c_utils.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\packages\i2c-tools\src\i2c_utils.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>SoftwareI2C.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>.\packages\i2c-tools\src\SoftwareI2C.cpp</FilePath>
             </File>
           </Files>
         </Group>
