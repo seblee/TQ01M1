@@ -54,8 +54,8 @@ const pin_map_st in_pin_map_inst[Pin_Map_In] = //数字输入Pin_Map
         {GPIO_Pin_12, GPIOD}, //DI6
         {GPIO_Pin_11, GPIOD}, //DI7
         {GPIO_Pin_13, GPIOD}, //DI5//中下水位
-        {GPIO_Pin_14, GPIOD}, //DI8
-        {GPIO_Pin_15, GPIOD}, //DI9
+        {GPIO_Pin_2, GPIOE}, //DI8
+        {GPIO_Pin_3, GPIOE}, //DI9
         {GPIO_Pin_10, GPIOD}, //DI10
         {GPIO_Pin_15, GPIOB}, //DI11
         {GPIO_Pin_14, GPIOB}, //DI12

@@ -4,9 +4,13 @@
 #include <rtthread.h>
 #include <rtdevice.h>
 
-#define I2C1_GPIO 		GPIOC
-#define I2C1_GPIO_SCL 	GPIO_Pin_10
-#define I2C1_GPIO_SDA 	GPIO_Pin_11
+#define I2C1_GPIO 		GPIOD
+#define I2C1_GPIO_SCL 	GPIO_Pin_15
+#define I2C1_GPIO_SDA 	GPIO_Pin_14
+
+//#define I2C1_GPIO 		GPIOB
+//#define I2C1_GPIO_SCL 	GPIO_Pin_10
+//#define I2C1_GPIO_SDA 	GPIO_Pin_11
 #define RCC_I2C 		RCC_APB2Periph_GPIOC
 
 int rt_hw_i2c_init(void);

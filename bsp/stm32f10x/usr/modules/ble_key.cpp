@@ -19,14 +19,12 @@
 #include <rtdevice.h>
 #include "ble_key.h"
 #include "i2c_utils.h"
-
 #ifdef I2C_TOOLS_USE_SW_I2C
-#define SDA_PORT_NUM 79
-#define SCL_PORT_NUM 78
-
+#define SDA_PORT_NUM 61
+#define SCL_PORT_NUM 62
 #else
 #define I2C_DEVICE_NAME "i2c1"
-static struct rt_i2c_bus_device *i2c_bus = RT_NULL; /* I2C总线设备句柄 */
+// static struct rt_i2c_bus_device *i2c_bus = RT_NULL; /* I2C总线设备句柄 */
 #endif
 
 static void i2c_thread_entry(void *para)
@@ -36,13 +34,13 @@ static void i2c_thread_entry(void *para)
     while (1)
     {
         /* 调用I2C设备接口传输数据 */
-        if (i2c_write(12, buf, 10) == 1)
+        if (i2c_write(0x50, buf, 1) == 1)
         {
-            rt_kprintf("RT_I2C_WR OK \n");
+            rt_kprintf("i2c_read OK buf[0]:%02x \n", buf[0]);
         }
         else
         {
-            rt_kprintf("RT_I2C_WR err \n");
+            rt_kprintf("i2c_read err \n");
         }
         rt_thread_delay(rt_tick_from_millisecond(1000));
     }
@@ -62,7 +60,7 @@ int i2cBleThreadInit(void)
     if (i2c_init(name))
     {
         rt_kprintf("[i2c] failed to find bus %s\n", name);
-        return;
+        return RT_ERROR;
     }
 
 #endif
@@ -80,4 +78,4 @@ int i2cBleThreadInit(void)
     }
     return RT_EOK;
 }
-INIT_APP_EXPORT(i2cBleThreadInit);
+// INIT_APP_EXPORT(i2cBleThreadInit);
