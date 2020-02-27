@@ -64,5 +64,12 @@ enum
     STATE_LED_FLASH_1HZ,
     STATE_LED_FLASH_0_5HZ,
 };
+enum
+{
+    CMD_IDEL,
+    CMD_KEY,
+    CMD_LED,
+    CMD_REG,
+};
 
 #endif

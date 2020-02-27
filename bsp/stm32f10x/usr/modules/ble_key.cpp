@@ -30,21 +30,21 @@
 #endif
 
 unsigned char recOK = 0;
-static unsigned char tx_buffer[10] = {1, 2, 3, 4, 5, 0, 7, 8, 9, 10};
-static unsigned char rx_buffer[10] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+static unsigned char tx_buffer[20] = {1, 2, 3, 4, 5, 0, 7, 8, 9, 20};
+static unsigned char rx_buffer[20] = {20, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 /**********************key led beep*********************************************************/
 _TKS_FLAGA_type keyState[2];
 volatile _TKS_FLAGA_type keyTrg[2];
 
-#define KEY1 keyTrg[0].bits.b2
-#define KEY2 keyTrg[0].bits.b3
-#define KEY3 keyTrg[0].bits.b1
-#define KEY4 keyTrg[0].bits.b0
+#define KEY1 keyTrg[0].bits.b0
+#define KEY2 keyTrg[0].bits.b1
+#define KEY3 keyTrg[0].bits.b2
+#define KEY4 keyTrg[0].bits.b3
 
-#define KEY1Restain keyTrg[1].bits.b2
-#define KEY2Restain keyTrg[1].bits.b3
-#define KEY3Restain keyTrg[1].bits.b1
-#define KEY4Restain keyTrg[1].bits.b0
+#define KEY1Restain keyTrg[1].bits.b0
+#define KEY2Restain keyTrg[1].bits.b1
+#define KEY3Restain keyTrg[1].bits.b2
+#define KEY4Restain keyTrg[1].bits.b3
 
 _USR_FLAGA_type ledState[5];
 #define led1State ledState[0].s4bits.s0
@@ -58,8 +58,12 @@ _USR_FLAGA_type ledState[5];
 #define led9State ledState[4].s4bits.s0
 
 unsigned char beepCount = 0;
-
+/****************************************************************************/
 void refreshTxData(void);
+rt_uint8_t getCheckSum(rt_uint8_t *data);
+void keyRecOperation(_TKS_FLAGA_type *keyState);
+void operateRxData(rt_uint8_t *rxData);
+/****************************************************************************/
 
 static void i2c_thread_entry(void *para)
 {
@@ -68,9 +72,9 @@ static void i2c_thread_entry(void *para)
     {
         /* 调用I2C设备接口传输数据 */
         refreshTxData();
-        if (i2c_write(I2C_ADDRESS, tx_buffer, 10) == 1)
+        if (i2c_write(I2C_ADDRESS, tx_buffer, 20) == 1)
         {
-           // rt_kprintf("i2c_write OK \n");
+            // rt_kprintf("i2c_write OK \n");
         }
         else
         {
@@ -79,9 +83,9 @@ static void i2c_thread_entry(void *para)
             continue;
         }
         rt_thread_delay(rt_tick_from_millisecond(50));
-        if (i2c_read(I2C_ADDRESS, 0, rx_buffer, 10) == 10)
+        if (i2c_read(I2C_ADDRESS, 0, rx_buffer, 20) == 20)
         {
-           rt_kprintf("i2c_read OK %02x,%02x\n",rx_buffer[0],rx_buffer[1]);
+            operateRxData(rx_buffer);
         }
         else
         {
@@ -129,4 +133,88 @@ INIT_APP_EXPORT(i2cBleThreadInit);
 
 void refreshTxData(void)
 {
+    tx_buffer[0] = 0xff;
+    tx_buffer[1] = 0xa5;
+    tx_buffer[2] = CMD_LED;
+    tx_buffer[3] = 5;
+    for (rt_uint8_t i = 0; i < tx_buffer[3]; i++)
+    {
+        tx_buffer[4 + i] = ledState[i].byte;
+    }
+    tx_buffer[tx_buffer[3] + 4] = getCheckSum(tx_buffer);
+}
+
+void operateRxData(rt_uint8_t *rxData)
+{
+    if (getCheckSum(rxData) == *(rxData + *(rxData + 3) + 4))
+    {
+        switch (*(rxData + 2))
+        {
+        case CMD_IDEL:
+            break;
+        case CMD_KEY:
+            rt_kprintf("i2c_read CMD_KEY \n");
+            keyState[0].byte = *(rxData + 4);
+            keyState[1].byte = *(rxData + 5);
+            keyRecOperation(keyState);
+            break;
+        case CMD_LED:
+            break;
+        case CMD_REG:
+            break;
+        default:
+            break;
+        }
+    }
+}
+rt_uint8_t getCheckSum(rt_uint8_t *data)
+{
+    rt_uint8_t checkSum = 0;
+    for (rt_uint8_t i = 0; i < (*(data + 3) + 4); i++)
+    {
+        checkSum += *(data + i);
+    }
+    return checkSum;
+}
+
+void keyRecOperation(_TKS_FLAGA_type *keyState)
+{
+    static rt_uint8_t k_count[2] = {0};
+    keyTrg[0].byte = keyState->byte & (keyState->byte ^ k_count[0]);
+    k_count[0] = keyState->byte;
+    keyTrg[1].byte = (keyState + 1)->byte & ((keyState + 1)->byte ^ k_count[1]);
+    k_count[1] = (keyState + 1)->byte;
+    if (KEY1)
+    {
+        rt_kprintf("key1\n");
+    }
+    if (KEY2)
+    {
+        rt_kprintf("key2\n");
+    }
+    if (KEY3)
+    {
+        rt_kprintf("key3\n");
+    }
+    if (KEY4)
+    {
+        rt_kprintf("key4\n");
+    }
+
+    if (KEY1Restain)
+    {
+        rt_kprintf("KEY1Restain\n");
+    }
+    if (KEY2Restain)
+    {
+        rt_kprintf("KEY2Restain\n");
+    }
+    if (KEY3Restain)
+    {
+        rt_kprintf("KEY3Restain\n");
+    }
+    if (KEY4Restain)
+    {
+        rt_kprintf("KEY4Restain\n");
+    }
 }
