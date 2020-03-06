@@ -36,7 +36,6 @@ static rt_uint8_t rx_buffer[20] = {20, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 #define PARA_ADDR_START 64
 #define STATE_ADDR_START 500
 static rt_uint8_t regMap[8 + 22][14] = {0};
-static rt_uint8_t regIndex = 0;
 /**********************key led beep*********************************************************/
 _TKS_FLAGA_type keyState[3];
 volatile _TKS_FLAGA_type keyTrg[3];
@@ -187,6 +186,10 @@ void operateRxData(rt_uint8_t *rxData)
         case CMD_LED:
             break;
         case CMD_REG:
+        {
+            rt_uint16_t address = *(rxData + 4) << 8 + *(rxData + 5);
+            cpad_eMBRegHoldingCB(rxData + 6, address, 6, CPAD_MB_REG_MULTIPLE_WRITE);
+        }
             rt_kprintf("i2c_read CMD_REG \n");
             break;
         default:
@@ -249,7 +252,6 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
 
     if (BLEON)
     {
-        rt_kprintf("BLEON\n");
     }
     if (BLEONTrg)
     {
@@ -264,14 +266,13 @@ rt_uint8_t *getRegData(void)
     for (rt_uint8_t i = 0; i < 30; i++)
     {
         rt_uint16_t address = (i < 22) ? (i * 6 + PARA_ADDR_START) : ((i - 22) * 6 + STATE_ADDR_START);
-
         cpad_eMBRegHoldingCB(temp, address, 6, CPAD_MB_REG_READ);
-
         if (rt_memcmp(&regMap[i][2], temp, 12) != 0)
         {
-            rt_memcpy(&regMap[i][2], temp, 12);
             regMap[i][0] = (address >> 8);
             regMap[i][1] = address & 0xff;
+            rt_memcpy(&regMap[i][2], temp, 12);
+            rt_kprintf("index:%04d\n", address - ((i < 22) ? PARA_ADDR_START : 0));
             return &regMap[i][0];
         }
     }

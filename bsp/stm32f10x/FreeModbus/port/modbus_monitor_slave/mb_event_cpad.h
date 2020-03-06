@@ -8,6 +8,9 @@
 #include "mbport_cpad.h"
 
 #include "sys_def.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef enum
 {
     MB_ENOERR,    /*!< no error. */
@@ -43,7 +46,7 @@ typedef enum
 #define CPAD_S_REG_HOLDING_START 0
 //#define 				 CPAD_S_REG_HOLDING_NREGS           (64+106+40)//CMD
 #define CPAD_S_REG_HOLDING_NREGS (STATUS_REG_MAP_OFFSET + 300) //CMD
-#define CPAD_REG_HOLDING_WRITE_NREGS STATUS_REG_MAP_OFFSET + 1 //可写范围
+#define CPAD_REG_HOLDING_WRITE_NREGS STATUS_REG_MAP_OFFSET + 1 //å�¯å†™èŒƒå›´
 
 #define T5_HEAD 0x5AA5
 #define T5_WRITE 0x82
@@ -57,4 +60,9 @@ eMBErrorCode cpad_eMBRegHoldingCB(UCHAR *pucRegBuffer, USHORT usAddress, USHORT 
 
 void Cpad_Update(void);
 void Cpad_Send(uint8_t u8RW, uint16_t u16Addr, uint8_t u8Num, uint16_t u16Offset);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

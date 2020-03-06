@@ -95,4 +95,9 @@ void cpad_vMBPortTimersDisable(void);
 
 /* ----------------------- Callback for the protocol stack ------------------*/
 
+
+#ifdef __cplusplus
+PR_END_EXTERN_C
+#endif
+
 #endif
