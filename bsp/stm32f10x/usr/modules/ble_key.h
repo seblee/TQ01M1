@@ -85,10 +85,9 @@ extern _USR_FLAGA_type ledState[5];
 #define hotWaterLed ledState[0].s4bits.s1
 #define refrigerateLed ledState[1].s4bits.s0
 #define childLockLed ledState[1].s4bits.s1
-#define levelH ledState[2].s4bits.s0
-#define levelM ledState[2].s4bits.s1
-#define levelL ledState[3].s4bits.s0
-#define led8State ledState[3].s4bits.s1
-#define led9State ledState[4].s4bits.s0
+#define warningLed ledState[2].s4bits.s0
+#define levelH ledState[2].s4bits.s1
+#define levelM ledState[3].s4bits.s0
+#define levelL ledState[3].s4bits.s1
 
 #endif

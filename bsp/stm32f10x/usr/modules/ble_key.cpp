@@ -67,7 +67,6 @@ _USR_FLAGA_type ledState[5];
 #define led6State ledState[2].s4bits.s1
 #define led7State ledState[3].s4bits.s0
 #define led8State ledState[3].s4bits.s1
-#define led9State ledState[4].s4bits.s0
 
 rt_uint8_t beepCount = 0;
 /****************************************************************************/
@@ -76,7 +75,7 @@ rt_uint8_t getCheckSum(rt_uint8_t *data);
 void keyRecOperation(_TKS_FLAGA_type *keyState);
 void operateRxData(rt_uint8_t *rxData);
 rt_uint8_t *getRegData(void);
-static void caculateWaterLevelLed(void);
+static void caculateLed(void);
 /****************************************************************************/
 
 static void i2c_thread_entry(void *para)
@@ -166,7 +165,7 @@ void refreshTxData(void)
     {
         tx_buffer[2] = CMD_LED;
         tx_buffer[3] = 5;
-        caculateWaterLevelLed();
+        caculateLed();
         for (rt_uint8_t i = 0; i < tx_buffer[3]; i++)
         {
             tx_buffer[4 + i] = ledState[i].byte;
@@ -194,7 +193,7 @@ void operateRxData(rt_uint8_t *rxData)
             break;
         case CMD_REG:
         {
-            rt_uint16_t address = *(rxData + 4) << 8 + *(rxData + 5);
+            rt_uint16_t address = (*(rxData + 4) << 8) + *(rxData + 5);
             cpad_eMBRegHoldingCB(rxData + 6, address, 6, CPAD_MB_REG_MULTIPLE_WRITE);
         }
             rt_kprintf("i2c_read CMD_REG \n");
@@ -229,10 +228,10 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
     k_count[2] = (keyState + 2)->byte;
     if (KEY1Trg) //出水
     {
-        if (l_sys.OutWater_Key & WATER_NORMAL_ICE)
-            l_sys.OutWater_Key &= ~WATER_NORMAL_ICE;
-        else
-            l_sys.OutWater_Key |= WATER_NORMAL_ICE;
+        // if (l_sys.OutWater_Key & WATER_NORMAL_ICE)
+        //     l_sys.OutWater_Key &= ~WATER_NORMAL_ICE;
+        // else
+        //     l_sys.OutWater_Key |= WATER_NORMAL_ICE;
 
         rt_kprintf("key1\n");
     }
@@ -307,19 +306,81 @@ rt_uint8_t *getRegData(void)
     return RT_NULL;
 }
 
-static void caculateWaterLevelLed(void)
+static void caculateLed(void)
 {
+    // WaterLevel
     rt_uint16_t u16WL = Get_Water_level();
     if (u16WL & D_L)
     {
         levelL = STATE_LED_ON;
+        if (l_sys.OutWater_Key & WATER_NORMAL_ICE)
+        {
+            normalWaterLed = STATE_LED_FLASH_2HZ;
+        }
+        else
+        {
+            normalWaterLed = STATE_LED_ON;
+        }
+        if (l_sys.OutWater_Key & WATER_HEAT)
+        {
+            hotWaterLed = STATE_LED_FLASH_2HZ;
+        }
+        else
+        {
+            hotWaterLed = STATE_LED_ON;
+        }
     }
     else
     {
+        normalWaterLed = STATE_LED_OFF;
+        hotWaterLed = STATE_LED_OFF;
         levelL = STATE_LED_OFF;
     }
 
-    if (u16WL & D_M)
+    if (g_sys.config.ComPara.u16ColdWater_Mode == ICE_NO)
+    {
+        refrigerateLed = STATE_LED_OFF;
+    }
+    else
+    {
+        static rt_uint8_t ColdWaterStateBak = 0;
+        if (l_sys.ColdWaterState == 1)
+        {
+            refrigerateLed = STATE_LED_FLASH_0_5HZ;
+        }
+        else if (l_sys.ColdWaterState == 2)
+        {
+            refrigerateLed = STATE_LED_FLASH_2HZ;
+        }
+        else if ((l_sys.ColdWaterState == 3) || (l_sys.ColdWaterState == 5))
+        {
+            refrigerateLed = STATE_LED_ON;
+        }
+        else if (l_sys.ColdWaterState == 4)
+        {
+            refrigerateLed = STATE_LED_ON;
+            if (ColdWaterStateBak == 3)
+            {
+                beepCount += 3;
+            }
+        }
+        else
+        {
+            refrigerateLed = STATE_LED_ON;
+        }
+        ColdWaterStateBak = l_sys.ColdWaterState;
+    }
+
+    if ((g_sys.status.alarm_bitmap[0] == 0) && (g_sys.status.alarm_bitmap[1] == 0))
+    {
+        warningLed = STATE_LED_OFF;
+    }
+    else
+    {
+        warningLed = STATE_LED_ON;
+    }
+
+    if (u16WL & D_ML)
     {
         levelM = STATE_LED_ON;
     }
@@ -328,7 +389,7 @@ static void caculateWaterLevelLed(void)
         levelM = STATE_LED_OFF;
     }
 
-    if (u16WL & D_U)
+    if (u16WL & D_M)
     {
         levelH = STATE_LED_ON;
     }

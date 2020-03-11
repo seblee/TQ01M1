@@ -2129,6 +2129,7 @@ void Cold_Water_exe(void)
                 u16Temp |= 0x04;
 
                 l_sys.Cold_Water = TRUE;
+                l_sys.ColdWaterState = 2;
                 if (u8Coldwater == FALSE)
                 {
                     u8Coldwater = TRUE;
@@ -2142,6 +2143,7 @@ void Cold_Water_exe(void)
             else if (i16Water_Temp < g_sys.config.ComPara.u16ColdWater_StopTemp) //关闭
             {
                 u16Temp |= 0x08;
+                l_sys.ColdWaterState = 4;
                 if (u8Coldwater == TRUE)
                 {
                     u8Coldwater = FALSE;
@@ -2153,15 +2155,23 @@ void Cold_Water_exe(void)
                 }
             }
             else //保持
-                if (u8Coldwater == TRUE)
             {
-                u16Temp |= 0x10;
-                l_sys.Cold_Water = TRUE;
+                if (u8Coldwater == TRUE)
+                {
+                    l_sys.ColdWaterState = 3;
+                    u16Temp |= 0x10;
+                    l_sys.Cold_Water = TRUE;
+                }
+                else
+                {
+                    l_sys.ColdWaterState = 5;
+                }
             }
         }
         else
         {
             u16Temp |= 0x20;
+            l_sys.ColdWaterState = 1;
             if (u8Coldwater == TRUE)
             {
                 u8Coldwater = FALSE;

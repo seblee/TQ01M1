@@ -147,6 +147,7 @@ typedef struct
     uint16_t HeatWater_Flow; //加热器出水流量
     uint16_t HeatWater_Time; //加热器出水时间
     uint8_t Cold_Water;      //制冰水信号
+    uint8_t ColdWaterState;  //制冰水状态
     uint8_t Cold_Delay[2];      //制水延迟
     uint16_t u16BD_Time;
     uint16_t u16BD_FAN_Delay;
@@ -165,10 +166,10 @@ typedef struct
     uint16_t u16Uart_Timeout[2];   //串口重启
     uint8_t u8RSInteral_Neterr;		//网络异常
     uint8_t u8CloseDelay;       //关闭延迟
-		uint16_t	u16UV_Delay;//关闭延迟	
+    uint16_t	u16UV_Delay;//关闭延迟	
     uint32_t u32WaterFlow;      //出水流量
     uint8_t u8Storage_Status;    //贮存状态
-		uint8_t u8Storage_Fsm;    	//贮存状态机
+    uint8_t u8Storage_Fsm;    	//贮存状态机
 } local_reg_st;
 
 enum
