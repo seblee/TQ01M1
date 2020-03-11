@@ -120,113 +120,113 @@ int rt_application_init(void)
 
     if (init_thread != RT_NULL)
         rt_thread_startup(init_thread);
-    // result = rt_thread_init(&modbus_master_thread,
-    //                         "mb_master",
-    //                         modbus_master_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&modbus_master_stack[0],
-    //                         sizeof(modbus_master_stack),
-    //                         MODBUS_MASTER_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&modbus_master_thread);
-    // }
+    result = rt_thread_init(&modbus_master_thread,
+                            "mb_master",
+                            modbus_master_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&modbus_master_stack[0],
+                            sizeof(modbus_master_stack),
+                            MODBUS_MASTER_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&modbus_master_thread);
+    }
 
-    // //CPAD_slave_thread_entry
-    // result = rt_thread_init(&CPAD_slave_thread,
-    //                         "CPAD_slave",
-    //                         cpad_modbus_slave_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&monitor_slave_stack[0],
-    //                         sizeof(monitor_slave_stack),
-    //                         MONITOR_SLAVE_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&CPAD_slave_thread);
-    // }
+    //CPAD_slave_thread_entry
+    result = rt_thread_init(&CPAD_slave_thread,
+                            "CPAD_slave",
+                            cpad_modbus_slave_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&monitor_slave_stack[0],
+                            sizeof(monitor_slave_stack),
+                            MONITOR_SLAVE_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&CPAD_slave_thread);
+    }
 
-    // result = rt_thread_init(&di_thread,
-    //                         "di",
-    //                         di_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&di_stack[0],
-    //                         sizeof(di_stack),
-    //                         DI_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&di_thread);
-    // }
+    result = rt_thread_init(&di_thread,
+                            "di",
+                            di_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&di_stack[0],
+                            sizeof(di_stack),
+                            DI_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&di_thread);
+    }
 
-    // result = rt_thread_init(&daq_thread,
-    //                         "daq",
-    //                         daq_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&daq_stack[0],
-    //                         sizeof(daq_stack),
-    //                         DAQ_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&daq_thread);
-    // }
+    result = rt_thread_init(&daq_thread,
+                            "daq",
+                            daq_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&daq_stack[0],
+                            sizeof(daq_stack),
+                            DAQ_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&daq_thread);
+    }
 
-    // result = rt_thread_init(&core_thread,
-    //                         "core",
-    //                         core_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&core_stack[0],
-    //                         sizeof(core_stack),
-    //                         CORE_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&core_thread);
-    // }
+    result = rt_thread_init(&core_thread,
+                            "core",
+                            core_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&core_stack[0],
+                            sizeof(core_stack),
+                            CORE_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&core_thread);
+    }
 
-    // result = rt_thread_init(&cpad_thread,
-    //                         "cpad",
-    //                         cpad_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&cpad_stack[0],
-    //                         sizeof(cpad_stack),
-    //                         CPAD_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     rt_thread_startup(&cpad_thread);
-    // }
+    result = rt_thread_init(&cpad_thread,
+                            "cpad",
+                            cpad_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&cpad_stack[0],
+                            sizeof(cpad_stack),
+                            CPAD_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&cpad_thread);
+    }
 
-    // result = rt_thread_init(&bkg_thread,
-    //                         "background",
-    //                         bkg_thread_entry,
-    //                         RT_NULL,
-    //                         (rt_uint8_t *)&bkg_stack[0],
-    //                         sizeof(bkg_stack),
-    //                         BKG_THREAD_PRIO,
-    //                         5);
-    // if (result == RT_EOK)
-    // {
-    //     result = rt_thread_startup(&bkg_thread);
-    // }
+    result = rt_thread_init(&bkg_thread,
+                            "background",
+                            bkg_thread_entry,
+                            RT_NULL,
+                            (rt_uint8_t *)&bkg_stack[0],
+                            sizeof(bkg_stack),
+                            BKG_THREAD_PRIO,
+                            5);
+    if (result == RT_EOK)
+    {
+        result = rt_thread_startup(&bkg_thread);
+    }
 
-    // rt_thread_t testcase_thread;
-    // testcase_thread = rt_thread_create("testcase",
-    //                                    testcase_thread_entry, RT_NULL,
-    //                                    512, TESTCASE_THREAD_PRIO, 5); // 初始化进程
+    rt_thread_t testcase_thread;
+    testcase_thread = rt_thread_create("testcase",
+                                       testcase_thread_entry, RT_NULL,
+                                       512, TESTCASE_THREAD_PRIO, 5); // 初始化进程
 
-    // if (testcase_thread != RT_NULL)
-    //     rt_thread_startup(testcase_thread);
+    if (testcase_thread != RT_NULL)
+        rt_thread_startup(testcase_thread);
 
-    //    rt_thread_t net_thead;
-    //    net_thead = rt_thread_create("network",
-    //                                 net_thread_entry, RT_NULL,
-    //                                 3072, NET_THREAD_PRIO, 20); // 初始化进程
+    rt_thread_t net_thead;
+    net_thead = rt_thread_create("network",
+                                 net_thread_entry, RT_NULL,
+                                 3072, NET_THREAD_PRIO, 20); // 初始化进程
 
-    //    if (net_thead != RT_NULL)
-    //        rt_thread_startup(net_thead);
+    if (net_thead != RT_NULL)
+        rt_thread_startup(net_thead);
     // i2cBleThreadInit();
     return 0;
 }

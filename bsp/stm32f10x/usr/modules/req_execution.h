@@ -1,7 +1,9 @@
 #ifndef __REQ_EXE_H__
 #define __REQ_EXE_H__
 #include "stdint.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 //#define WV_TEST 1	//制冷阀常闭，反向
 //#define BD_COLD 	1	//冰胆制冷
 #define PUMP_TEST 1	//制冷阀常闭，反向
@@ -203,4 +205,7 @@ void req_bitmap_op(uint8_t component_bpos, uint8_t action);
 void Close_DIS_PWR(uint8_t u8Type);
 void UV_req_exe(uint8_t u8Type,uint8_t u8Delay);
 uint8_t Sys_Get_Storage_Signal(void);
+#ifdef __cplusplus
+}
+#endif
 #endif //__REQ_EXE_H__

@@ -6,7 +6,6 @@
  * @date    
  * @version V1.0
  *************************************************
- * @brief   ±Í◊¢œµÕ≥–≈œ¢
  ****************************************************************************
  * @attention 
  * Powered By Xiaowine
@@ -20,6 +19,7 @@
 #include "ble_key.h"
 #include "i2c_utils.h"
 #include "mb_event_cpad.h"
+#include "sys_status.h"
 #define I2C_ADDRESS 0x7e
 
 #ifdef I2C_TOOLS_USE_SW_I2C
@@ -40,10 +40,15 @@ static rt_uint8_t regMap[8 + 22][14] = {0};
 _TKS_FLAGA_type keyState[3];
 volatile _TKS_FLAGA_type keyTrg[3];
 
-#define KEY1 keyTrg[0].bits.b0
-#define KEY2 keyTrg[0].bits.b1
-#define KEY3 keyTrg[0].bits.b2
-#define KEY4 keyTrg[0].bits.b3
+#define I2CKEY1 keyState[0].bits.b0
+#define I2CKEY2 keyState[0].bits.b1
+#define I2CKEY3 keyState[0].bits.b2
+#define I2CKEY4 keyState[0].bits.b3
+
+#define KEY1Trg keyTrg[0].bits.b0
+#define KEY2Trg keyTrg[0].bits.b1
+#define KEY3Trg keyTrg[0].bits.b2
+#define KEY4Trg keyTrg[0].bits.b3
 
 #define KEY1Restain keyTrg[1].bits.b0
 #define KEY2Restain keyTrg[1].bits.b1
@@ -71,6 +76,7 @@ rt_uint8_t getCheckSum(rt_uint8_t *data);
 void keyRecOperation(_TKS_FLAGA_type *keyState);
 void operateRxData(rt_uint8_t *rxData);
 rt_uint8_t *getRegData(void);
+static void caculateWaterLevelLed(void);
 /****************************************************************************/
 
 static void i2c_thread_entry(void *para)
@@ -78,7 +84,7 @@ static void i2c_thread_entry(void *para)
     rt_kprintf("i2c_thread_entry start \n");
     while (1)
     {
-        /* µ˜”√I2C…Ë±∏Ω”ø⁄¥´ ‰ ˝æ› */
+        /* Ë∞ÉÁî®I2CËÆæÂ§áÊé•Âè£‰º†ËæìÊï∞ÊçÆ */
         refreshTxData();
         if (i2c_write(I2C_ADDRESS, tx_buffer, 20) == 1)
         {
@@ -123,9 +129,9 @@ int i2cBleThreadInit(void)
     }
 
 #endif
-    /* ¥¥Ω® i2c œﬂ≥Ã */
+    /* ÂàõÂª∫ i2c Á∫øÁ®ã */
     rt_thread_t thread = rt_thread_create("i2c", i2c_thread_entry, RT_NULL, 1024, 25, 10);
-    /* ¥¥Ω®≥…π¶‘Ú∆Ù∂Øœﬂ≥Ã */
+    /* ÂàõÂª∫ÊàêÂäüÂàôÂêØÂä®Á∫øÁ®ã */
     if (thread != RT_NULL)
     {
         rt_thread_startup(thread);
@@ -160,6 +166,7 @@ void refreshTxData(void)
     {
         tx_buffer[2] = CMD_LED;
         tx_buffer[3] = 5;
+        caculateWaterLevelLed();
         for (rt_uint8_t i = 0; i < tx_buffer[3]; i++)
         {
             tx_buffer[4 + i] = ledState[i].byte;
@@ -206,7 +213,11 @@ rt_uint8_t getCheckSum(rt_uint8_t *data)
     }
     return checkSum;
 }
-
+#include "req_execution.h"
+#include "local_status.h"
+#include "global_var.h"
+extern local_reg_st l_sys;
+extern sys_reg_st g_sys;
 void keyRecOperation(_TKS_FLAGA_type *keyState)
 {
     static rt_uint8_t k_count[3] = {0};
@@ -216,19 +227,33 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
     k_count[1] = (keyState + 1)->byte;
     keyTrg[2].byte = (keyState + 2)->byte & ((keyState + 2)->byte ^ k_count[2]);
     k_count[2] = (keyState + 2)->byte;
-    if (KEY1)
+    if (KEY1Trg) //Âá∫Ê∞¥
     {
+        if (l_sys.OutWater_Key & WATER_NORMAL_ICE)
+            l_sys.OutWater_Key &= ~WATER_NORMAL_ICE;
+        else
+            l_sys.OutWater_Key |= WATER_NORMAL_ICE;
+
         rt_kprintf("key1\n");
     }
-    if (KEY2)
+    if (KEY2Trg)
     {
         rt_kprintf("key2\n");
     }
-    if (KEY3)
+    if (KEY3Trg) //Âà∂ÂÜ∞Ê∞¥
     {
+        if (g_sys.config.ComPara.u16ColdWater_Mode)
+        {
+            g_sys.config.ComPara.u16ColdWater_Mode = ICE_NO;
+        }
+        else
+        {
+            g_sys.config.ComPara.u16ColdWater_Mode = NORMAL_ICE;
+        }
+        RAM_Write_Reg(86, g_sys.config.ComPara.u16ColdWater_Mode, 1);
         rt_kprintf("key3\n");
     }
-    if (KEY4)
+    if (KEY4Trg)
     {
         rt_kprintf("key4\n");
     }
@@ -247,6 +272,9 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
     }
     if (KEY4Restain)
     {
+        l_sys.ChildLock_Cnt[0] = 0;
+        l_sys.ChildLock_Key = 1;
+        l_sys.ChildLock_Cnt[1] = ChildKey_Lose;
         rt_kprintf("KEY4Restain\n");
     }
 
@@ -277,4 +305,35 @@ rt_uint8_t *getRegData(void)
         }
     }
     return RT_NULL;
+}
+
+static void caculateWaterLevelLed(void)
+{
+    rt_uint16_t u16WL = Get_Water_level();
+    if (u16WL & D_L)
+    {
+        levelL = STATE_LED_ON;
+    }
+    else
+    {
+        levelL = STATE_LED_OFF;
+    }
+
+    if (u16WL & D_M)
+    {
+        levelM = STATE_LED_ON;
+    }
+    else
+    {
+        levelM = STATE_LED_OFF;
+    }
+
+    if (u16WL & D_U)
+    {
+        levelH = STATE_LED_ON;
+    }
+    else
+    {
+        levelH = STATE_LED_OFF;
+    }
 }

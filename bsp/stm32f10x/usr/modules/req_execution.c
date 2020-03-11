@@ -1224,6 +1224,7 @@ uint16_t PluseCalc_Water(uint16_t PluseCnt)
 
     return u16Water_Flow;
 }
+#include "ble_key.h"
 //按键出水检测
 void WaterOut_Key(void)
 {
@@ -1231,7 +1232,7 @@ void WaterOut_Key(void)
     extern local_reg_st l_sys;
 
     //冷水 1
-    if ((sys_get_di_sts(DI_Cold_1_BPOS) == 1))
+    if ((sys_get_di_sts(DI_Cold_1_BPOS) == 1) || I2CCold1)
     {
         l_sys.OutWater_Key |= WATER_NORMAL_ICE;
         l_sys.OutWater_Delay[0] = WATER_MAXTIME;
@@ -1274,7 +1275,7 @@ void WaterOut_Key(void)
     if (l_sys.ChildLock_Key)
     {
         //热水
-        if ((sys_get_di_sts(DI_Heat_BPOS) == 1))
+        if ((sys_get_di_sts(DI_Heat_BPOS) == 1) || I2CHeat)
         {
             l_sys.OutWater_Key |= WATER_HEAT;
             l_sys.OutWater_Delay[1] = WATER_MAXTIME;
@@ -1287,7 +1288,7 @@ void WaterOut_Key(void)
     }
     else
     {
-        if ((sys_get_di_sts(DI_Heat_BPOS) == 1)) //无效
+        if ((sys_get_di_sts(DI_Heat_BPOS) == 1) || I2CHeat) //无效
         {
         }
         else
@@ -1301,11 +1302,13 @@ void WaterOut_Key(void)
     if (l_sys.ChildLock_Cnt[1])
     {
         req_bitmap_op(DO_LED_LOCK_BPOS, 1); // LED指示,反向
+        childLockLed = STATE_LED_ON;
     }
     else
     {
         req_bitmap_op(DO_LED_LOCK_BPOS, 0); // LED指示
         l_sys.ChildLock_Key = 0;
+        childLockLed = STATE_LED_OFF;
     }
 
     return;

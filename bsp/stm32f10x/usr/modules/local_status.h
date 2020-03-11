@@ -3,7 +3,9 @@
 
 #include "stdint.h"
 #include "sys_conf.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 enum
 {
     RESET_REQ = 0,
@@ -197,5 +199,7 @@ enum
     WATER_OFF = 0,
     WATER_ON,
 };
-
+#ifdef __cplusplus
+}
+#endif
 #endif //__LOCAL_REG_H__
