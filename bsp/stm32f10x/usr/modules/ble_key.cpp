@@ -69,6 +69,8 @@ _USR_FLAGA_type ledState[5];
 #define led8State ledState[3].s4bits.s1
 
 rt_uint8_t beepCount = 0;
+
+static rt_uint16_t u16WL = 0;
 /****************************************************************************/
 void refreshTxData(void);
 rt_uint8_t getCheckSum(rt_uint8_t *data);
@@ -166,10 +168,13 @@ void refreshTxData(void)
         tx_buffer[2] = CMD_LED;
         tx_buffer[3] = 5;
         caculateLed();
-        for (rt_uint8_t i = 0; i < tx_buffer[3]; i++)
+        for (rt_uint8_t i = 0; i < 4; i++)
         {
             tx_buffer[4 + i] = ledState[i].byte;
         }
+        tx_buffer[8] = beepCount;
+        beepCount = 0;
+        rt_memset(ledState, 0, sizeof(ledState));
     }
     tx_buffer[tx_buffer[3] + 4] = getCheckSum(tx_buffer);
 }
@@ -232,11 +237,27 @@ void keyRecOperation(_TKS_FLAGA_type *keyState)
         //     l_sys.OutWater_Key &= ~WATER_NORMAL_ICE;
         // else
         //     l_sys.OutWater_Key |= WATER_NORMAL_ICE;
-
+        if ((u16WL & D_L) == 0)
+        {
+            beepCount += 1;
+        }
         rt_kprintf("key1\n");
     }
     if (KEY2Trg)
     {
+        if ((u16WL & D_L) == 0)
+        {
+            beepCount += 1;
+        }
+        else
+        {
+            if (l_sys.ChildLock_Key == 0)
+            {
+                beepCount += 1;
+                childLockLed = STATE_LED_FLASH_2_T;
+            }
+        }
+
         rt_kprintf("key2\n");
     }
     if (KEY3Trg) //制冰水
@@ -309,7 +330,7 @@ rt_uint8_t *getRegData(void)
 static void caculateLed(void)
 {
     // WaterLevel
-    rt_uint16_t u16WL = Get_Water_level();
+    u16WL = Get_Water_level();
     if (u16WL & D_L)
     {
         levelL = STATE_LED_ON;
@@ -332,7 +353,8 @@ static void caculateLed(void)
     }
     else
     {
-        normalWaterLed = STATE_LED_OFF;
+        if (normalWaterLed < STATE_LED_FLASH_2_T)
+            normalWaterLed = STATE_LED_OFF;
         hotWaterLed = STATE_LED_OFF;
         levelL = STATE_LED_OFF;
     }
@@ -370,6 +392,15 @@ static void caculateLed(void)
         }
         ColdWaterStateBak = l_sys.ColdWaterState;
     }
+    if (l_sys.ChildLock_Key == 0)
+    {
+        if (childLockLed < STATE_LED_FLASH_2_T)
+            childLockLed = STATE_LED_OFF;
+    }
+    else
+    {
+        childLockLed = STATE_LED_ON;
+    }
 
     if ((g_sys.status.alarm_bitmap[0] == 0) && (g_sys.status.alarm_bitmap[1] == 0))
     {
@@ -380,6 +411,14 @@ static void caculateLed(void)
         warningLed = STATE_LED_ON;
     }
 
+    if (u16WL & D_M)
+    {
+        levelH = STATE_LED_ON;
+    }
+    else
+    {
+        levelH = STATE_LED_OFF;
+    }
     if (u16WL & D_ML)
     {
         levelM = STATE_LED_ON;
@@ -389,12 +428,12 @@ static void caculateLed(void)
         levelM = STATE_LED_OFF;
     }
 
-    if (u16WL & D_M)
+    if (u16WL & D_L)
     {
-        levelH = STATE_LED_ON;
+        levelL = STATE_LED_ON;
     }
     else
     {
-        levelH = STATE_LED_OFF;
+        levelL = STATE_LED_OFF;
     }
 }

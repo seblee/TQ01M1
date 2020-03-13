@@ -63,6 +63,7 @@ enum
     STATE_LED_FLASH_2HZ,
     STATE_LED_FLASH_1HZ,
     STATE_LED_FLASH_0_5HZ,
+    STATE_LED_FLASH_2_T, //闪烁两下
 };
 enum
 {

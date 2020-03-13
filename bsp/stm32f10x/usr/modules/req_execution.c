@@ -1302,13 +1302,11 @@ void WaterOut_Key(void)
     if (l_sys.ChildLock_Cnt[1])
     {
         req_bitmap_op(DO_LED_LOCK_BPOS, 1); // LED指示,反向
-        childLockLed = STATE_LED_ON;
     }
     else
     {
         req_bitmap_op(DO_LED_LOCK_BPOS, 0); // LED指示
         l_sys.ChildLock_Key = 0;
-        childLockLed = STATE_LED_OFF;
     }
 
     return;
