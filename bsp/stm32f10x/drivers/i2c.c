@@ -74,7 +74,7 @@ static const struct rt_i2c_bit_ops stm32_i2c_bit_ops = {
     stm32_get_sda,
     stm32_get_scl,
     stm32_udelay,
-    20,
+    80,
     100,
 };
 

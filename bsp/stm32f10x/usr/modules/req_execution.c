@@ -1232,7 +1232,7 @@ void WaterOut_Key(void)
     extern local_reg_st l_sys;
 
     //冷水 1
-    if ((sys_get_di_sts(DI_Cold_1_BPOS) == 1) || I2CCold1)
+    if (sys_get_di_sts(DI_Cold_1_BPOS) == 1)
     {
         l_sys.OutWater_Key |= WATER_NORMAL_ICE;
         l_sys.OutWater_Delay[0] = WATER_MAXTIME;
@@ -1275,7 +1275,7 @@ void WaterOut_Key(void)
     if (l_sys.ChildLock_Key)
     {
         //热水
-        if ((sys_get_di_sts(DI_Heat_BPOS) == 1) || I2CHeat)
+        if (sys_get_di_sts(DI_Heat_BPOS) == 1)
         {
             l_sys.OutWater_Key |= WATER_HEAT;
             l_sys.OutWater_Delay[1] = WATER_MAXTIME;
@@ -1288,7 +1288,7 @@ void WaterOut_Key(void)
     }
     else
     {
-        if ((sys_get_di_sts(DI_Heat_BPOS) == 1) || I2CHeat) //无效
+        if (sys_get_di_sts(DI_Heat_BPOS) == 1) //无效
         {
         }
         else
@@ -1541,6 +1541,10 @@ void WaterOut_req_exe(void)
     }
     else // HMI出水
     {
+        if (l_sys.ChildLock_Cnt[1] == 0)
+        {
+            l_sys.ChildLock_Key = 0;
+        }
         if ((!(g_sys.config.ComPara.u16Water_Mode) && !(g_sys.config.ComPara.u16Water_Flow)) ||
             (WaterOut_level() == FALSE)) //饮水箱低水位,不允许出水
         {

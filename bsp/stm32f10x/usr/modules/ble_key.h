@@ -67,19 +67,20 @@ enum
 };
 enum
 {
-    CMD_IDEL,
-    CMD_KEY,
-    CMD_LED,
-    CMD_REG,
+    I2C_IDEL,
+    I2C_KEY,
+    I2C_LED,
+    I2C_REG_UP,
+    I2C_REG_DOWN,
 };
 
 extern _TKS_FLAGA_type keyState[3];
 extern volatile _TKS_FLAGA_type keyTrg[3];
 
-#define I2CCold1 keyState[0].bits.b0
-#define I2CHeat keyState[0].bits.b1
-#define I2CKEY3 keyState[0].bits.b2
-#define I2CKEY4 keyState[0].bits.b3
+// #define I2CCold1 keyState[0].bits.b0
+// #define I2CHeat keyState[0].bits.b1
+// #define I2CKEY3 keyState[0].bits.b2
+// #define I2CKEY4 keyState[0].bits.b3
 
 extern _USR_FLAGA_type ledState[5];
 #define normalWaterLed ledState[0].s4bits.s0
