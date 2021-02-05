@@ -524,6 +524,11 @@
               <FilePath>.\drivers\cpad_bsp.c</FilePath>
             </File>
             <File>
+              <FileName>usart_bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\drivers\usart_bsp.c</FilePath>
+            </File>
+            <File>
               <FileName>pwm_bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\drivers\pwm_bsp.c</FilePath>
@@ -1348,11 +1353,6 @@
         <Group>
           <GroupName>libc</GroupName>
           <Files>
-            <File>
-              <FileName>usart_bsp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\drivers\usart_bsp.c</FilePath>
-            </File>
             <File>
               <FileName>libc.c</FileName>
               <FileType>1</FileType>
